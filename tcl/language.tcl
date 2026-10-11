@@ -299,7 +299,7 @@ proc tr {tag {lang ""}} {
 #   language; missing files are ignored so untranslated languages simply keep
 #   using the English help pages.
 ################################################################################
-array set ::helpLangFile { P helpPL.tcl D helpD.tcl J helpJ.tcl b helpb.tcl g helpg.tcl K helpK.tcl M helpM.tcl C helpC.tcl F helpF.tcl G helpG.tcl V helpV.tcl h helph.tcl H helpH.tcl I helpI.tcl A helpA.tcl k helpk.tcl N helpN.tcl O helpO.tcl B helpB.tcl L helpL.tcl R helpR.tcl S helpS.tcl U helpU.tcl Z helpZ.tcl W helpW.tcl T helpT.tcl Q helpQ.tcl }
+array set ::helpLangFile { P helpPL.tcl D helpD.tcl J helpJ.tcl b helpBN.tcl g helpBG.tcl K helpK.tcl M helpM.tcl C helpC.tcl F helpF.tcl G helpG.tcl V helpV.tcl h helpHI.tcl H helpH.tcl I helpI.tcl A helpA.tcl k helpKO.tcl N helpN.tcl O helpO.tcl B helpB.tcl L helpL.tcl R helpR.tcl S helpS.tcl U helpU.tcl Z helpZ.tcl W helpW.tcl T helpT.tcl Q helpQ.tcl }
 array set ::helpLangLoaded {}
 
 proc loadTranslatedHelp {lang} {
