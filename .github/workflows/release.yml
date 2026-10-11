@@ -180,15 +180,25 @@ jobs:
         run: |
           # scidCommunity shells out to curl for HTTPS API requests (Lichess,
           # Chess.com, TWIC, ...). Windows only ships curl.exe from 10 1803
-          # onwards, so bundle an official standalone build for older systems.
-          $rel = Invoke-RestMethod -Uri 'https://api.github.com/repos/curl/curl-for-win/releases/latest' -Headers @{ 'User-Agent' = 'scidCommunity-CI' }
-          $asset = $rel.assets | Where-Object { $_.name -like 'curl-*-win64-mingw.zip' } | Select-Object -First 1
-          if (-not $asset) { throw 'No win64 curl-for-win asset found in latest release' }
-          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile curl-win.zip
+          # onwards, so bundle the official curl build for older systems.
+          # curl.se exposes stable "latest" download URLs, so no GitHub API
+          # (and no rate limit) is involved.
+          $ProgressPreference = 'SilentlyContinue'
+          $url = 'https://curl.se/windows/latest.cgi?p=win64-mingw.zip'
+          Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile curl-win.zip
+
+          # Verify the archive against the published SHA-256 digest
+          $txt = (Invoke-WebRequest -UseBasicParsing -Uri "$url.txt").Content
+          $expected = ($txt -split '=')[-1].Trim().ToLower()
+          $actual = (Get-FileHash curl-win.zip -Algorithm SHA256).Hash.ToLower()
+          if ($actual -ne $expected) { throw "curl archive checksum mismatch: $actual != $expected" }
+
           Expand-Archive -Path curl-win.zip -DestinationPath curl-win -Force
+          $curlExe = Get-ChildItem curl-win -Recurse -Filter curl.exe | Select-Object -First 1
+          if (-not $curlExe) { throw 'curl.exe not found in downloaded archive' }
           New-Item -ItemType Directory -Force -Path install\bin | Out-Null
-          # curl.exe is standalone, but copy the whole bin/ (incl. any DLLs) to be safe
-          Copy-Item curl-win\bin\* install\bin\ -Recurse -Force
+          # Copy the whole bin/ (curl.exe, its DLLs and the CA bundle)
+          Copy-Item (Join-Path $curlExe.Directory.FullName '*') install\bin\ -Recurse -Force
 
       - name: Package for distribution
         shell: cmd
