@@ -175,6 +175,21 @@ jobs:
             curl -o install/bin/$nnue https://data.stockfishchess.org/nn/$nnue
           done
 
+      - name: Bundle standalone curl for Windows
+        shell: powershell
+        run: |
+          # scidCommunity shells out to curl for HTTPS API requests (Lichess,
+          # Chess.com, TWIC, ...). Windows only ships curl.exe from 10 1803
+          # onwards, so bundle an official standalone build for older systems.
+          $rel = Invoke-RestMethod -Uri 'https://api.github.com/repos/curl/curl-for-win/releases/latest' -Headers @{ 'User-Agent' = 'scidCommunity-CI' }
+          $asset = $rel.assets | Where-Object { $_.name -like 'curl-*-win64-mingw.zip' } | Select-Object -First 1
+          if (-not $asset) { throw 'No win64 curl-for-win asset found in latest release' }
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile curl-win.zip
+          Expand-Archive -Path curl-win.zip -DestinationPath curl-win -Force
+          New-Item -ItemType Directory -Force -Path install\bin | Out-Null
+          # curl.exe is standalone, but copy the whole bin/ (incl. any DLLs) to be safe
+          Copy-Item curl-win\bin\* install\bin\ -Recurse -Force
+
       - name: Package for distribution
         shell: cmd
         run: |
@@ -274,7 +289,7 @@ jobs:
                 -DCPACK_PACKAGE_NAME=scidcommunity \
                 -DCPACK_PACKAGE_VERSION=${{ steps.get_version.outputs.version }} \
                 -DCPACK_DEBIAN_PACKAGE_MAINTAINER="Hugh Whelan" \
-                -DCPACK_DEBIAN_PACKAGE_DEPENDS="tk8.6 (>= 8.6.0), libtcl8.6 (>= 8.6.0), libtk8.6 (>= 8.6.0)" \
+                -DCPACK_DEBIAN_PACKAGE_DEPENDS="tk8.6 (>= 8.6.0), libtcl8.6 (>= 8.6.0), libtk8.6 (>= 8.6.0), curl" \
                 -DCPACK_DEBIAN_PACKAGE_LICENSE=GPL2 \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DCMAKE_CXX_FLAGS="-fno-exceptions -fno-rtti" \
@@ -403,6 +418,7 @@ jobs:
                 -D CPACK_PACKAGE_NAME=scidcommunity \
                 -D CPACK_PACKAGE_VERSION=${{ steps.get_version.outputs.version }} \
                 -D CPACK_RPM_PACKAGE_LICENSE=GPL2 \
+                -D CPACK_RPM_PACKAGE_REQUIRES="curl" \
                 -D CPACK_INSTALL_CMAKE_PROJECTS="" \
                 -D CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION="/opt;/opt/scidcommunity;/usr;/usr/local;/usr/local/bin" \
                 -D CPACK_INSTALLED_DIRECTORIES="${{ github.workspace }}/rpm-root/opt/scidcommunity;/opt/scidcommunity;${{ github.workspace }}/rpm-root/usr;/usr"
@@ -470,6 +486,16 @@ jobs:
           cp -rL /usr/share/tcltk/tcl8.6 ${{ github.workspace }}/AppDir/usr/lib/
           cp -rL /usr/share/tcltk/tk8.6 ${{ github.workspace }}/AppDir/usr/lib/
 
+      - name: Bundle a static curl (HTTPS client)
+        run: |
+          # scidCommunity shells out to curl for HTTPS API requests (Lichess,
+          # Chess.com, TWIC, ...). Ship a fully static curl so the AppImage
+          # works even on hosts without curl installed.
+          mkdir -p ${{ github.workspace }}/AppDir/usr/bin
+          curl -L --fail -o ${{ github.workspace }}/AppDir/usr/bin/curl \
+            https://github.com/moparisthebest/static-curl/releases/latest/download/curl-amd64
+          chmod +x ${{ github.workspace }}/AppDir/usr/bin/curl
+
       - name: Create AppImage symlink structure and wrapper
         run: |
           # Create symlink structure for Tcl hardcoded paths
@@ -494,6 +520,8 @@ jobs:
           #!/bin/bash
           APPDIR="${APPDIR:-$(dirname $(dirname $(readlink -f "$0")))}"
           export LD_LIBRARY_PATH="${APPDIR}/usr/lib:${LD_LIBRARY_PATH}"
+          # Put our bundled curl (and other tools) on PATH
+          export PATH="${APPDIR}/usr/bin:${PATH}"
           # Point Tcl to bundled location via symlinks  
           export TCL_LIBRARY="${APPDIR}/usr/share/tcltk/tcl8.6"
           export TK_LIBRARY="${APPDIR}/usr/share/tcltk/tk8.6"

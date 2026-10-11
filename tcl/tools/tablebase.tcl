@@ -40,6 +40,98 @@ proc ::tablebase::countPieces {fen} {
     return $count
 }
 
+# ::tablebase::findCurl
+#   Locate a usable curl executable. Prefers one on PATH, then a copy bundled
+#   with scidCommunity next to the application binary (see the release
+#   packaging), and finally a system curl (e.g. Windows' System32).
+#   Returns the executable path, or "" when none is found.
+#
+proc ::tablebase::findCurl {} {
+    set exe [auto_execok curl]
+    if {$exe ne ""} { return $exe }
+
+    set exeDir ""
+    catch {set exeDir [file dirname [info nameofexecutable]]}
+    set dirs {}
+    if {$exeDir ne ""} {
+        lappend dirs $exeDir
+        lappend dirs [file join $exeDir .. bin]
+        lappend dirs [file join $exeDir .. engines]
+    }
+    if {[info exists ::env(SystemRoot)] && $::env(SystemRoot) ne ""} {
+        lappend dirs [file join $::env(SystemRoot) System32]
+    }
+    foreach dir $dirs {
+        foreach name {curl curl.exe} {
+            set candidate [file join $dir $name]
+            if {[file executable $candidate]} { return $candidate }
+        }
+    }
+    return ""
+}
+
+# ::tablebase::httpQuery
+#   Fetch $url and return a list {ok result err}.
+#   Tries, in order: a curl executable, wget, Windows PowerShell, and finally
+#   Tcl's built-in http package (with TLS registered for HTTPS). The reasons
+#   from the methods that were attempted are collected in $err so the caller
+#   can report why the lookup failed.
+#
+proc ::tablebase::httpQuery {url} {
+    set result ""
+    set err ""
+
+    # 1) curl (preferred)
+    set curlExe [::tablebase::findCurl]
+    if {$curlExe ne ""} {
+        if {![catch {exec $curlExe -s --max-time 10 $url} result]} {
+            return [list 1 $result ""]
+        }
+        set err "curl: $result"
+    } else {
+        set err "curl not found"
+    }
+
+    # 2) wget
+    if {[auto_execok wget] ne ""} {
+        set out ""
+        if {![catch {exec wget -q -O - $url} out]} {
+            return [list 1 $out ""]
+        }
+        append err "; wget: $out"
+    }
+
+    # 3) Windows PowerShell (present on every supported Windows release)
+    if {[info exists ::windowsOS] && $::windowsOS && [auto_execok powershell] ne ""} {
+        set ::env(SAFE_TB_URL) $url
+        set out ""
+        if {![catch {
+            exec powershell -NoLogo -NoProfile -Command \
+                "(Invoke-WebRequest -UseBasicParsing -Uri \$env:SAFE_TB_URL).Content" 2>@1
+        } out]} {
+            return [list 1 $out ""]
+        }
+        append err "; powershell: $out"
+    }
+
+    # 4) Tcl's built-in http package (register TLS for HTTPS)
+    if {![catch {package require http}]} {
+        catch {package require tls}
+        catch {::http::register https 443 ::tls::socket}
+        set token ""
+        if {![catch {set token [::http::geturl $url -timeout 10000]} httpErr]} {
+            set result [::http::data $token]
+            ::http::cleanup $token
+            return [list 1 $result ""]
+        }
+        append err "; http: $httpErr"
+    } else {
+        append err "; Tcl http package unavailable"
+    }
+
+    return [list 0 "" $err]
+}
+
 # ::tablebase::queryTablebaseResult
 #   Queries the tablebase and returns a simplified result string
 #   Returns: "winning", "losing", "draw", or "error: <message>"
@@ -47,35 +139,11 @@ proc ::tablebase::countPieces {fen} {
 proc ::tablebase::queryTablebaseResult {fen} {
     # Construct the API URL (variant-aware)
     set url [::tablebase::buildUrl $fen]
-    
-    # Try to query the tablebase
-    set result ""
-    set err ""
-    set ok 0
 
-    # Try curl first (preferred)
-    set cmd [list curl -s --max-time 10 $url]
-    if {![catch {exec {*}$cmd} result]} {
-        set ok 1
-    } else {
-        set err $result
-        # Fallback: Tcl's built-in http package (register TLS for HTTPS)
-        if {![catch {package require http}]} {
-            catch {package require tls}
-            catch {::http::register https 443 ::tls::socket}
-            set token ""
-            if {![catch {set token [::http::geturl $url -timeout 10000]} httpErr]} {
-                set result [::http::data $token]
-                ::http::cleanup $token
-                set ok 1
-            } else {
-                set err $httpErr
-            }
-        }
-    }
+    lassign [::tablebase::httpQuery $url] ok result err
 
     if {!$ok} {
-        return "error: Failed to query tablebase"
+        return "error: Failed to query tablebase ($err)"
     }
     
     if {[string match "*not found*" $result] || [string match "*error*" $result]} {
@@ -141,29 +209,8 @@ proc ::tablebase::lookupPosition {} {
     ttk::label $w.content.loading -text "Querying Lichess tablebase..." -font font_Bold
     pack $w.content.loading -pady 10
     
-    # Make the HTTP request (prefer curl, fallback to Tcl http)
-    set result ""
-    set err ""
-    set ok 0
-
-    # Try curl first (fast, keeps existing behavior)
-    set cmd [list curl -s --max-time 10 $url]
-    if {![catch {exec {*}$cmd} result]} {
-        set ok 1
-    } else {
-        set err $result
-        # Fallback: Tcl's built-in http package (works if curl is missing)
-        if {![catch {package require http}]} {
-            set token ""
-            if {![catch {set token [::http::geturl $url -timeout 10000]} httpErr]} {
-                set result [::http::data $token]
-                ::http::cleanup $token
-                set ok 1
-            } else {
-                set err $httpErr
-            }
-        }
-    }
+    # Make the HTTP request (curl/wget/PowerShell, then Tcl http with TLS)
+    lassign [::tablebase::httpQuery $url] ok result err
 
     if {!$ok} {
         destroy $w.content.loading
@@ -489,8 +536,17 @@ proc ::tablebase::window::results {} {
     set currentReq $::tablebase::window::requestCount
     set ::tablebase::window::buffer($currentReq) ""
 
+    set curlExe [::tablebase::findCurl]
+    if {$curlExe eq ""} {
+        $t configure -state normal
+        $t delete 1.0 end
+        $t insert end "\n [tr TBError]\n"
+        $t configure -state disabled
+        return
+    }
+
     # Use list-form open to avoid shell injection
-    if {![catch {open "|[list curl -s --max-time 10 $url]" r} fd]} {
+    if {![catch {open "|[list $curlExe -s --max-time 10 $url]" r} fd]} {
         fconfigure $fd -blocking 0
         fileevent $fd readable [list ::tablebase::window::curlCallback $fd $fen $currentReq]
     } else {
