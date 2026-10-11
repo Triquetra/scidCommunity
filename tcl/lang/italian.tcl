@@ -330,7 +330,7 @@ menuText I HelpHints "Suggerimenti" 0 {Mostra la pagina dei suggerimenti}
 menuText I HelpContact "Informazioni di contatto" 17 {Mostra la pagina delle informazioni di contatto}
 menuText I HelpTip "Suggerimento del giorno" 1 {Mostra utili suggerimenti riguardo Scid}
 menuText I HelpStartup "Finestra di avvio" 0 {Mostra la finestra di avvio}
-menuText I HelpAbout "Informazioni su Scid" 1 {Informazioni su Scid}
+menuText I HelpAbout "Informazioni su scidCommunity" 1 {Informazioni su scidCommunity}
 
 # Toolbar tooltips:
 menuText I RotateBoard "Ruota la scheda" 0 {Ruota la scheda}

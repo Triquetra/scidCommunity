@@ -326,7 +326,7 @@ menuText C HelpHints "Rady" 0 {Zobrazit strnku npovdy s radami}
 menuText C HelpContact "Kontakt" 0 {Zobrazit strnku npovdy s kontaktnmi informacemi}
 menuText C HelpTip "Tip dne" 4 {Zobrazit uiten tip Scidu}
 menuText C HelpStartup "Startovac okno" 0 {Zobrazit startovac okno}
-menuText C HelpAbout "O aplikaci Scid" 2 {Informace o aplikaci Scid}
+menuText C HelpAbout "O aplikaci scidCommunity" 2 {Informace o aplikaci scidCommunity}
 
 # Toolbar tooltips:
 menuText C RotateBoard "Otote desku" 0 {Otote desku}

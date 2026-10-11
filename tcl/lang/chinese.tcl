@@ -298,7 +298,7 @@ menuText M HelpHints "提示" 0 {显示提示帮助页面}
 menuText M HelpContact "联系信息" 0 {显示联系信息帮助页面}
 menuText M HelpTip "每日提示" 0 {显示有用的Scid提示}
 menuText M HelpStartup "启动窗口" 0 {显示启动窗口}
-menuText M HelpAbout "关于Scid" 0 {关于Scid的信息}
+menuText M HelpAbout "关于scidCommunity" 0 {关于scidCommunity的信息}
 
 # Toolbar tooltips:
 menuText M RotateBoard "旋转棋盘" 0 {旋转棋盘}

@@ -332,7 +332,7 @@ menuText O HelpHints "Hint" 0 {Vis hint}
 menuText O HelpContact "Kontaktinformasjon" 0 {Vis kontaktinformasjon}
 menuText O HelpTip "Dagens tips" 0 {Vis et nyttig Scid-tips}
 menuText O HelpStartup "Oppstartsvindu" 0 {Vis oppstartsvindu}
-menuText O HelpAbout "Om Scid" 0 {Informasjon om Scid}
+menuText O HelpAbout "Om scidCommunity" 0 {Informasjon om scidCommunity}
 
 # Toolbar tooltips:
 menuText O RotateBoard "Roter brettet" 0 {Roter brettet}

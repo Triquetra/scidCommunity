@@ -361,7 +361,7 @@ menuText U HelpHints "Vinkit" 0 {Näytä sivu, jolla Scidin käyttöä helpottav
 menuText U HelpContact "Yhteystietoja" 0 {Näytä yhteystiedot}
 menuText U HelpTip "Päivän vinkki" 1 {Näytä vihje}
 menuText U HelpStartup "Käynnistys-popup" 2 {Näytä ohjelman käynnistys-popup}
-menuText U HelpAbout "Tietoja Scidistä" 9 {Tietoja ohjelmasta}
+menuText U HelpAbout "Tietoja scidCommunitysta" 8 {Tietoja ohjelmasta}
 
 # Toolbar tooltips:
 menuText U RotateBoard "Pyöritä lautaa" 0 {Pyöritä lautaa}

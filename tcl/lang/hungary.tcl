@@ -330,7 +330,7 @@ menuText H HelpHints "Kérdés-felelet" 0 {Néhány hasznos tanács}
 menuText H HelpContact "Címek" 0 {Fontosabb internetcímek}
 menuText H HelpTip "A nap tippje" 2 {Hasznos tipp SCID használatához}
 menuText H HelpStartup "Induló ablak" 0 {A program indításakor megjelenõ ablak}
-menuText H HelpAbout "SCID-rõl" 0 {Tájékoztatás SCID-rõl}
+menuText H HelpAbout "scidCommunity-rõl" 0 {Tájékoztatás scidCommunity-rõl}
 
 # Toolbar tooltips:
 menuText H RotateBoard "Forgassa a táblát" 0 {Forgassa a táblát}

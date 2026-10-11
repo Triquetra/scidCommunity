@@ -354,7 +354,7 @@ menuText G HelpHints "Υποδείξεις" 0 {Εμφανήστε την σελ�
 menuText G HelpContact "Πληροφορίες επικοινωνίας" 1 {Εμφανίζει την σελίδα της βοήθειας με τις πληροφορίες επικοινωνίας}
 menuText G HelpTip "Συμβουλή της ημέρας" 0 {Εμφάνιση χρήσιμων συμβουλών για το Scid}
 menuText G HelpStartup "Παράθυρο έναρξης" 0 {Εμφανίζει το παράθυρο έναρξης}
-menuText G HelpAbout "Για το Scid" 0 {Πληροφορίες για το Scid}
+menuText G HelpAbout "Για το scidCommunity" 0 {Πληροφορίες για το scidCommunity}
 
 # Toolbar tooltips:
 menuText G RotateBoard "Περιστρέψτε τον πίνακα" 0 {Περιστρέψτε τον πίνακα}

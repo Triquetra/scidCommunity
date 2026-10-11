@@ -329,7 +329,7 @@ menuText R HelpHints "Советы" 1 {Показать страницу сов�
 menuText R HelpContact "Контактная информация" 0 {Показать контактную информацию}
 menuText R HelpTip "Подсказка дня" 0 {Показать полезную подсказку}
 menuText R HelpStartup "Окно запуска" 2 {Показать окно запуска}
-menuText R HelpAbout "О Scid" 2 {Информация о Scid}
+menuText R HelpAbout "О scidCommunity" 2 {Информация о scidCommunity}
 
 # Toolbar tooltips:
 menuText R RotateBoard "Поворот доски" 0 {Поворот доски}

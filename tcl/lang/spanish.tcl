@@ -363,7 +363,7 @@ menuText S HelpContact "Información de contacto" 15 \
   {Muestra la página de la ayuda de la información de contacto}
 menuText S HelpTip "Sugerencia del día" 0 {Muestra una útil sugerencia para Scid}
 menuText S HelpStartup "Ventana de inicio" 0 {Muestra la ventana de inicio}
-menuText S HelpAbout "Acerca de Scid" 10 {Información acerca de Scid}
+menuText S HelpAbout "Acerca de scidCommunity" 10 {Información acerca de scidCommunity}
 
 # Toolbar tooltips:
 menuText S RotateBoard "rotar tablero" 0 {rotar tablero}

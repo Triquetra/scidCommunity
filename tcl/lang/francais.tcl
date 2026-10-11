@@ -338,7 +338,7 @@ menuText F HelpHints "Astuces" 0 {Afficher les trucs et astuces}
 menuText F HelpContact "Contact" 1 {Afficher les noms des contacts}
 menuText F HelpTip "Astuce du jour" 1 {Afficher une astuce Scid}
 menuText F HelpStartup "Fenêtre de démarrage" 0 {Afficher la fenêtre de démarrage}
-menuText F HelpAbout "A propos de Scid" 2 {Information au sujet de Scid}
+menuText F HelpAbout "A propos de scidCommunity" 2 {Information au sujet de scidCommunity}
 
 # Toolbar tooltips:
 menuText F RotateBoard "Faire pivoter le tableau" 0 {Faire pivoter le tableau}

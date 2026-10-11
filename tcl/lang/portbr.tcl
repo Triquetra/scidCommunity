@@ -331,7 +331,7 @@ menuText B HelpHints "Dicas" 0 {Mostra a página de dicas}
 menuText B HelpContact "Informações para contato" 0 {Mostra a página com informações para contato}
 menuText B HelpTip "Dica do dia" 0 {Mostra uma dica útil do Scid}
 menuText B HelpStartup "Janela de Inicialização" 0 {Mostra a janela de inicialização}
-menuText B HelpAbout "Sobre Scid" 0 {Informações sobre o Scid}
+menuText B HelpAbout "Sobre scidCommunity" 0 {Informações sobre o scidCommunity}
 
 # Toolbar tooltips:
 menuText B RotateBoard "Girar tabuleiro" 0 {Girar tabuleiro}

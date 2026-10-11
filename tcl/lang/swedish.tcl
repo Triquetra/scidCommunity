@@ -333,7 +333,7 @@ menuText W HelpHints "Tips" 0 {Visa tips}
 menuText W HelpContact "Kontaktinformation" 0 {Visa kontaktinformation}
 menuText W HelpTip "Dagens tips" 0 {Användbara Scid tips}
 menuText W HelpStartup "Startfönster" 5 {Visa startfönstret}
-menuText W HelpAbout "Om Scid" 0 {Information om Scid}
+menuText W HelpAbout "Om scidCommunity" 0 {Information om scidCommunity}
 
 # Toolbar tooltips:
 menuText W RotateBoard "Vrid brädet" 0 {Vrid brädet}

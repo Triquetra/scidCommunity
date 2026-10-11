@@ -351,7 +351,7 @@ menuText N HelpHints "Hints" 0 {Laat de hints-hulp pagina zien}
 menuText N HelpContact "Contact-info" 0 {Laat de contact-infopagina zien}
 menuText N HelpTip "Tip van de dag" 0 {Laat een handige Scid tip zien}
 menuText N HelpStartup "Startvenster" 5 {Laat het startvenster zien}
-menuText N HelpAbout "Over Scid" 0 {Informatie over Scid}
+menuText N HelpAbout "Over scidCommunity" 0 {Informatie over scidCommunity}
 
 # Toolbar tooltips:
 menuText N RotateBoard "Draai het bord" 0 {Draai het bord}

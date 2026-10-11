@@ -345,7 +345,7 @@ menuText K HelpContact "Informació de contacte" 15 \
   {Mostra la pàgina d'informació de contacte del fitxer d'ajuda}
 menuText K HelpTip "Suggeriment del dia" 0 {Mostra un pràctic suggerimentent de Scid}
 menuText K HelpStartup "Finestra d'inici" 0 {Mostra la finestra d'inici}
-menuText K HelpAbout "Sobre l'Scid" 10 {Informació al voltant de Scid}
+menuText K HelpAbout "Sobre l'scidCommunity" 8 {Informació al voltant de scidCommunity}
 
 # Toolbar tooltips:
 menuText K RotateBoard "Gira el tauler" 0 {Gira el tauler}
