@@ -20,6 +20,8 @@ BuildRequires:  libappstream-glib
 
 Requires:       tcl >= 8.6
 Requires:       tk >= 8.6
+# curl is used for HTTPS requests to the Lichess/Chess.com APIs
+Requires:       curl
 
 %description
 ScidCommunity is a chess database application based on Scid (Shane's Chess

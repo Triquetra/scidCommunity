@@ -40,6 +40,119 @@ proc ::tablebase::countPieces {fen} {
     return $count
 }
 
+# ::tablebase::findCurl
+#   Locate a usable curl executable. Prefers one on PATH, then a copy bundled
+#   with scidCommunity next to the application binary (see the release
+#   packaging), and finally a system curl (e.g. Windows' System32).
+#   Returns the executable path, or "" when none is found.
+#
+proc ::tablebase::findCurl {} {
+    set exe [auto_execok curl]
+    if {$exe ne ""} { return $exe }
+
+    set exeDir ""
+    catch {set exeDir [file dirname [info nameofexecutable]]}
+    set dirs {}
+    if {$exeDir ne ""} {
+        lappend dirs $exeDir
+        lappend dirs [file join $exeDir .. bin]
+        lappend dirs [file join $exeDir .. engines]
+    }
+    if {[info exists ::env(SystemRoot)] && $::env(SystemRoot) ne ""} {
+        lappend dirs [file join $::env(SystemRoot) System32]
+    }
+    foreach dir $dirs {
+        foreach name {curl curl.exe} {
+            set candidate [file join $dir $name]
+            if {[file executable $candidate]} { return $candidate }
+        }
+    }
+    return ""
+}
+
+# ::tablebase::httpQuery
+#   Fetch $url and return a list {ok result err}.
+#   Tries, in order: a curl executable, wget, Windows PowerShell, and finally
+#   Tcl's built-in http package (with TLS registered for HTTPS). The reasons
+#   from the methods that were attempted are collected in $err so the caller
+#   can report why the lookup failed.
+#
+proc ::tablebase::httpQuery {url} {
+    set result ""
+    set err ""
+
+    # 1) curl (preferred). -sS stays silent on success but prints errors, which
+    #    the exec error handling below captures as diagnostics.
+    set curlExe [::tablebase::findCurl]
+    if {$curlExe ne ""} {
+        if {![catch {exec $curlExe -sS --connect-timeout 10 --max-time 10 $url} result]} {
+            return [list 1 $result ""]
+        }
+        set err "curl: $result"
+    } else {
+        set err "curl not found"
+    }
+
+    # 2) wget. Write the body to a temp file so stderr diagnostics can be kept
+    #    without corrupting the response (exec treats stderr output as an error).
+    if {[auto_execok wget] ne ""} {
+        set tmpChan [file tempfile tmpPath]
+        close $tmpChan
+        set out ""
+        if {![catch {
+            exec wget --no-verbose --timeout=10 --tries=1 -O $tmpPath $url 2>@1
+        } out]} {
+            set body ""
+            catch {
+                set f [open $tmpPath r]
+                set body [read $f]
+                close $f
+            }
+            file delete -force $tmpPath
+            return [list 1 $body ""]
+        }
+        file delete -force $tmpPath
+        append err "; wget: $out"
+    }
+
+    # 3) Windows PowerShell (present on every supported Windows release)
+    if {[info exists ::windowsOS] && $::windowsOS && [auto_execok powershell] ne ""} {
+        set ::env(SAFE_TB_URL) $url
+        set out ""
+        if {![catch {
+            exec powershell -NoLogo -NoProfile -Command \
+                "(Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 -Uri \$env:SAFE_TB_URL).Content" 2>@1
+        } out]} {
+            return [list 1 $out ""]
+        }
+        append err "; powershell: $out"
+    }
+
+    # 4) Tcl's built-in http package. Register TLS (with SNI, matching the
+    #    other online modules) and only accept a completed 200 response.
+    if {![catch {package require http}]} {
+        catch {package require tls}
+        catch {::http::register https 443 [list ::tls::socket -autoservername true]}
+        set token ""
+        if {![catch {set token [::http::geturl $url -timeout 10000]} httpErr]} {
+            set status [::http::status $token]
+            set code [::http::ncode $token]
+            set data [::http::data $token]
+            ::http::cleanup $token
+            if {$status eq "ok" && $code == 200} {
+                return [list 1 $data ""]
+            }
+            append err "; http: $status HTTP $code $data"
+        } else {
+            append err "; http: $httpErr"
+        }
+    } else {
+        append err "; Tcl http package unavailable"
+    }
+
+    return [list 0 "" $err]
+}
+
 # ::tablebase::queryTablebaseResult
 #   Queries the tablebase and returns a simplified result string
 #   Returns: "winning", "losing", "draw", or "error: <message>"
@@ -47,35 +160,11 @@ proc ::tablebase::countPieces {fen} {
 proc ::tablebase::queryTablebaseResult {fen} {
     # Construct the API URL (variant-aware)
     set url [::tablebase::buildUrl $fen]
-    
-    # Try to query the tablebase
-    set result ""
-    set err ""
-    set ok 0
 
-    # Try curl first (preferred)
-    set cmd [list curl -s --max-time 10 $url]
-    if {![catch {exec {*}$cmd} result]} {
-        set ok 1
-    } else {
-        set err $result
-        # Fallback: Tcl's built-in http package (register TLS for HTTPS)
-        if {![catch {package require http}]} {
-            catch {package require tls}
-            catch {::http::register https 443 ::tls::socket}
-            set token ""
-            if {![catch {set token [::http::geturl $url -timeout 10000]} httpErr]} {
-                set result [::http::data $token]
-                ::http::cleanup $token
-                set ok 1
-            } else {
-                set err $httpErr
-            }
-        }
-    }
+    lassign [::tablebase::httpQuery $url] ok result err
 
     if {!$ok} {
-        return "error: Failed to query tablebase"
+        return "error: Failed to query tablebase ($err)"
     }
     
     if {[string match "*not found*" $result] || [string match "*error*" $result]} {
@@ -141,29 +230,8 @@ proc ::tablebase::lookupPosition {} {
     ttk::label $w.content.loading -text "Querying Lichess tablebase..." -font font_Bold
     pack $w.content.loading -pady 10
     
-    # Make the HTTP request (prefer curl, fallback to Tcl http)
-    set result ""
-    set err ""
-    set ok 0
-
-    # Try curl first (fast, keeps existing behavior)
-    set cmd [list curl -s --max-time 10 $url]
-    if {![catch {exec {*}$cmd} result]} {
-        set ok 1
-    } else {
-        set err $result
-        # Fallback: Tcl's built-in http package (works if curl is missing)
-        if {![catch {package require http}]} {
-            set token ""
-            if {![catch {set token [::http::geturl $url -timeout 10000]} httpErr]} {
-                set result [::http::data $token]
-                ::http::cleanup $token
-                set ok 1
-            } else {
-                set err $httpErr
-            }
-        }
-    }
+    # Make the HTTP request (curl/wget/PowerShell, then Tcl http with TLS)
+    lassign [::tablebase::httpQuery $url] ok result err
 
     if {!$ok} {
         destroy $w.content.loading
@@ -489,15 +557,62 @@ proc ::tablebase::window::results {} {
     set currentReq $::tablebase::window::requestCount
     set ::tablebase::window::buffer($currentReq) ""
 
-    # Use list-form open to avoid shell injection
-    if {![catch {open "|[list curl -s --max-time 10 $url]" r} fd]} {
-        fconfigure $fd -blocking 0
-        fileevent $fd readable [list ::tablebase::window::curlCallback $fd $fen $currentReq]
-    } else {
-        $t configure -state normal
-        $t delete 1.0 end
-        $t insert end "\n [tr TBError]\n"
-        $t configure -state disabled
+    # Pick an asynchronous transport: curl or wget through a pipe, falling back
+    # to Tcl's http package (asynchronous -command callback) when neither is
+    # available. Never block the UI thread on a synchronous request.
+    set curlExe [::tablebase::findCurl]
+    set wgetExe ""
+    if {$curlExe eq ""} { set wgetExe [auto_execok wget] }
+
+    if {$curlExe ne "" || $wgetExe ne ""} {
+        if {$curlExe ne ""} {
+            set cmd [list $curlExe -sS --connect-timeout 10 --max-time 10 $url]
+        } else {
+            set cmd [list $wgetExe --no-verbose --timeout=10 --tries=1 -O - $url]
+        }
+        # Use list-form open to avoid shell injection
+        if {![catch {open "|$cmd" r} fd]} {
+            fconfigure $fd -blocking 0
+            fileevent $fd readable [list ::tablebase::window::curlCallback $fd $fen $currentReq]
+            return
+        }
+    } elseif {![catch {package require http}]} {
+        catch {package require tls}
+        catch {::http::register https 443 [list ::tls::socket -autoservername true]}
+        if {![catch {
+            ::http::geturl $url -timeout 10000 \
+                -command [list ::tablebase::window::httpCallback $fen $currentReq]
+        }]} {
+            return
+        }
+    }
+
+    $t configure -state normal
+    $t delete 1.0 end
+    $t insert end "\n [tr TBError]\n"
+    $t configure -state disabled
+}
+
+# ::tablebase::window::httpCallback
+#   Asynchronous completion handler for the Tcl http fallback.
+#
+proc ::tablebase::window::httpCallback {fen reqId token} {
+    set w .tbWin
+    set status ""
+    set code ""
+    set data ""
+    catch {
+        set status [::http::status $token]
+        set code [::http::ncode $token]
+        set data [::http::data $token]
+    }
+    catch {::http::cleanup $token}
+
+    # Only pass the response through when the request completed with a 200.
+    if {$status ne "ok" || $code != 200} { set data "" }
+
+    if {[winfo exists $w] && $reqId == $::tablebase::window::requestCount} {
+        ::tablebase::window::displayResults $data $fen
     }
 }
 
