@@ -96,6 +96,43 @@ if {[tk windowingsystem] == "aqua"} {
   set windowsOS 1
 }
 
+# Replace the old engines directory with the new one in the Cmd and Dir
+# fields of the content of an engines.dat file.
+# Values are re-quoted with [list] so that paths containing spaces (e.g.
+# "Application Support") stay valid. The content is parsed as plain lists and
+# is never evaluated; anything that is not an engine entry is kept unchanged.
+proc migrateEnginePaths {content oldDir newDir} {
+  set result ""
+  set chunk ""
+  foreach line [split $content "\n"] {
+    append chunk $line "\n"
+    if {![info complete $chunk]} { continue }
+    set cmd [string trim $chunk]
+    if {[string index $cmd 0] ne "#" && ![catch {llength $cmd} n] && $n == 2 &&
+        [lindex $cmd 0] eq "engine" && ![catch {dict size [lindex $cmd 1]}]} {
+      set attrs [lindex $cmd 1]
+      foreach key {Cmd Dir} {
+        if {![dict exists $attrs $key]} { continue }
+        set value [dict get $attrs $key]
+        if {$value eq $oldDir || [string first "$oldDir[file separator]" $value] == 0} {
+          dict set attrs $key "$newDir[string range $value [string length $oldDir] end]"
+        }
+      }
+      append result "engine {\n"
+      dict for {key value} $attrs {
+        append result "  $key [list $value]\n"
+      }
+      append result "}\n"
+    } else {
+      append result $chunk
+    }
+    set chunk ""
+  }
+  append result $chunk
+  # Drop the newline added after the last element of the split.
+  return [string range $result 0 end-1]
+}
+
 proc InitDirs {} {
   global scidExeDir scidUserDir scidConfigDir scidDataDir scidLogDir scidShareDir scidImgDir scidTclDir
   global scidBooksDir scidBasesDir ecoFile
@@ -114,10 +151,13 @@ proc InitDirs {} {
   }
 
   # scidUserDir: location of user-specific Scid files.
-  # This is "~/.scid" on Unix, and "%APPDATA%\scidCommunity" on Windows.
+  # This is "~/.scid" on Unix, "%APPDATA%\scidCommunity" on Windows and
+  # "~/Library/Application Support/scidCommunity" on macOS.
   # Windows user files must live somewhere the current user can write to;
   # the executable directory is read-only for standard users when installed
   # machine-wide under "Program Files".
+  # legacyUserDir: the old location, used to migrate existing user files.
+  regexp {(\d+\.\d+).*} $::scidVersion -> version
   if {$::windowsOS} {
     if {[info exists ::env(APPDATA)]} {
       set scidUserDir [file join $::env(APPDATA) "scidCommunity"]
@@ -126,8 +166,12 @@ proc InitDirs {} {
     } else {
       set scidUserDir $scidExeDir
     }
+    set legacyUserDir $scidExeDir
+  } elseif {$::macOS} {
+    # A separate directory avoids sharing "~/.scidX.Y" with the original Scid.
+    set scidUserDir [file join $::env(HOME) "Library" "Application Support" "scidCommunity"]
+    set legacyUserDir [file join $::env(HOME) ".scid$version"]
   } else {
-    regexp {(\d+\.\d+).*} $::scidVersion -> version
     set scidUserDir [file join $::env(HOME) ".scid$version"]
   }
 
@@ -168,14 +212,16 @@ proc InitDirs {} {
   }
   makeScidDir $scidUserDir
 
-  # Migrate user-specific files from the old Windows layout (stored next to
-  # the executable, e.g. "C:\Program Files\scidCommunity\bin") to the new
-  # per-user location so existing users keep their settings after updating.
+  # Migrate user-specific files from the old layout to the new per-user
+  # location so existing users keep their settings after updating:
+  #  - Windows: next to the executable, e.g. "C:\Program Files\scidCommunity\bin"
+  #  - macOS: "~/.scidX.Y", which was shared with the original Scid
   # Each subdirectory is copied only if it exists in the old location and does
   # not already exist in the new one, so we never overwrite newer data.
-  if {$::windowsOS && $scidUserDir ne $scidExeDir} {
+  # The old directory is left untouched.
+  if {[info exists legacyUserDir] && $scidUserDir ne $legacyUserDir} {
     foreach subdir {config data log engines} {
-      set oldDir [file nativename [file join $scidExeDir $subdir]]
+      set oldDir [file nativename [file join $legacyUserDir $subdir]]
       set newDir [file nativename [file join $scidUserDir $subdir]]
       if {[file isdirectory $oldDir] && ![file isdirectory $newDir]} {
         # Copy into a temporary sibling and rename it into place so a failed
@@ -193,7 +239,7 @@ proc InitDirs {} {
 
     # Rewrite engine paths stored in the migrated engines.dat so they keep
     # pointing at the user's own engines after they move to the new location.
-    set oldEnginesDir [file nativename [file join $scidExeDir "engines"]]
+    set oldEnginesDir [file nativename [file join $legacyUserDir "engines"]]
     set newEnginesDir [file nativename [file join $scidUserDir "engines"]]
     if {$oldEnginesDir ne $newEnginesDir && [file isdirectory $newEnginesDir]} {
       set enginesFile [file join $scidConfigDir "engines.dat"]
@@ -203,7 +249,7 @@ proc InitDirs {} {
         close $fd
         if {[string first $oldEnginesDir $content] >= 0} {
           set fd [open $enginesFile w]
-          puts -nonewline $fd [string map [list $oldEnginesDir $newEnginesDir] $content]
+          puts -nonewline $fd [migrateEnginePaths $content $oldEnginesDir $newEnginesDir]
           close $fd
         }
       }
