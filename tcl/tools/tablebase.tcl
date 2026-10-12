@@ -81,22 +81,27 @@ proc ::tablebase::httpQuery {url} {
     set result ""
     set err ""
 
-    # 1) curl (preferred). -sS stays silent on success but prints errors, which
-    #    the exec error handling below captures as diagnostics.
+    # 1) curl (preferred). -q ignores any user _curlrc; -sS stays silent on
+    #    success but prints errors, which the exec error handling captures.
+    #    An empty body is treated as a failure so the next transport is tried.
     set curlExe [::tablebase::findCurl]
     if {$curlExe ne ""} {
-        if {![catch {exec $curlExe -sS --connect-timeout 10 --max-time 10 $url} result]} {
-            return [list 1 $result ""]
+        if {![catch {exec $curlExe -q -sS --connect-timeout 10 --max-time 10 $url} result]} {
+            if {[string trim $result] ne ""} {
+                return [list 1 $result ""]
+            }
+            set err "curl: empty response"
+        } else {
+            set err "curl: $result"
         }
-        set err "curl: $result"
     } else {
         set err "curl not found"
     }
 
     # 2) wget. Write the body to a temp file so stderr diagnostics can be kept
     #    without corrupting the response (exec treats stderr output as an error).
-    if {[auto_execok wget] ne ""} {
-        set tmpChan [file tempfile tmpPath]
+    set wgetExe [auto_execok wget]
+    if {$wgetExe ne "" && ![catch {set tmpChan [file tempfile tmpPath]} tmpErr]} {
         close $tmpChan
         set out ""
         if {![catch {
@@ -109,23 +114,49 @@ proc ::tablebase::httpQuery {url} {
                 close $f
             }
             file delete -force $tmpPath
-            return [list 1 $body ""]
+            if {[string trim $body] ne ""} {
+                return [list 1 $body ""]
+            }
+            append err "; wget: empty response"
+        } else {
+            file delete -force $tmpPath
+            append err "; wget: $out"
         }
-        file delete -force $tmpPath
-        append err "; wget: $out"
+    } elseif {$wgetExe ne ""} {
+        append err "; wget: cannot create temp file: $tmpErr"
     }
 
-    # 3) Windows PowerShell (present on every supported Windows release)
-    if {[info exists ::windowsOS] && $::windowsOS && [auto_execok powershell] ne ""} {
+    # 3) Windows PowerShell (present on every supported Windows release).
+    #    Download to a temp file so the raw response is read back exactly,
+    #    regardless of how PowerShell formats objects on stdout.
+    set psExe ""
+    if {[info exists ::windowsOS] && $::windowsOS} { set psExe [auto_execok powershell] }
+    if {$psExe ne "" && ![catch {set tmpChan [file tempfile tmpPath]} tmpErr]} {
+        close $tmpChan
         set ::env(SAFE_TB_URL) $url
+        set ::env(SAFE_TB_FILE) $tmpPath
         set out ""
         if {![catch {
             exec powershell -NoLogo -NoProfile -Command \
-                "(Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 -Uri \$env:SAFE_TB_URL).Content" 2>@1
+                "Invoke-WebRequest -UseBasicParsing -TimeoutSec 10 -Uri \$env:SAFE_TB_URL -OutFile \$env:SAFE_TB_FILE" 2>@1
         } out]} {
-            return [list 1 $out ""]
+            set body ""
+            catch {
+                set f [open $tmpPath r]
+                set body [read $f]
+                close $f
+            }
+            file delete -force $tmpPath
+            if {[string trim $body] ne ""} {
+                return [list 1 $body ""]
+            }
+            append err "; powershell: empty response"
+        } else {
+            file delete -force $tmpPath
+            append err "; powershell: $out"
         }
-        append err "; powershell: $out"
+    } elseif {$psExe ne ""} {
+        append err "; powershell: cannot create temp file: $tmpErr"
     }
 
     # 4) Tcl's built-in http package. Register TLS (with SNI, matching the
@@ -139,7 +170,7 @@ proc ::tablebase::httpQuery {url} {
             set code [::http::ncode $token]
             set data [::http::data $token]
             ::http::cleanup $token
-            if {$status eq "ok" && $code == 200} {
+            if {$status eq "ok" && $code == 200 && [string trim $data] ne ""} {
                 return [list 1 $data ""]
             }
             append err "; http: $status HTTP $code $data"
@@ -166,14 +197,22 @@ proc ::tablebase::queryTablebaseResult {fen} {
     if {!$ok} {
         return "error: Failed to query tablebase ($err)"
     }
-    
+
+    set result [string trim $result]
+    if {$result eq ""} {
+        return "error: Empty tablebase response"
+    }
+    if {![string match "\{*" $result]} {
+        return "error: Unexpected tablebase response: [string range $result 0 200]"
+    }
+
     if {[string match "*not found*" $result] || [string match "*error*" $result]} {
         return "error: Position not found in tablebase"
     }
-    
-    # Extract category from JSON
+
+    # Extract category from JSON (tolerate optional whitespace after the colon)
     set category ""
-    if {[regexp {"category":"([^"]+)"} $result -> category]} {
+    if {[regexp {"category"[ \t]*:[ \t]*"([^"]+)"} $result -> category]} {
         # Determine side to move for clear messaging
         set color [lindex [split $fen] 1]
         set sideToMove [expr {$color eq "w" ? "White" : "Black"}]
@@ -193,7 +232,7 @@ proc ::tablebase::queryTablebaseResult {fen} {
         }
     }
     
-    return "error: Unable to parse tablebase result"
+    return "error: Unable to parse tablebase result: [string range $result 0 200]"
 }
 
 # ::tablebase::uciToSan
@@ -255,45 +294,63 @@ proc ::tablebase::lookupPosition {} {
 proc ::tablebase::displayResult {w jsonData fen} {
     # Simple JSON parsing (for basic structure)
     # This handles the typical Lichess tablebase response
-    
+    set jsonData [string trim $jsonData]
+
+    # Guard against empty or non-JSON responses (blocked request, proxy/AV
+    # interstitial page, or a plain-text API error) and surface what came back
+    # instead of the unhelpful "Unable to evaluate this position".
+    if {$jsonData eq ""} {
+        ::tablebase::showError $w "The tablebase returned an empty response.\n\nThis usually means the request was blocked (proxy, firewall or antivirus) or the network connection failed. Please try again."
+        return
+    }
+    if {![string match "\{*" $jsonData]} {
+        ::tablebase::showError $w "Unexpected response from the tablebase:\n\n[string range $jsonData 0 500]"
+        return
+    }
+
     if {[string match "*not found*" $jsonData] || [string match "*error*" $jsonData]} {
         ::tablebase::showError $w "Position not found in tablebase."
         return
     }
-    
+
     # Try to extract key information from JSON
     set category ""
     set dtm ""
     set dtz ""
     set bestmove ""
     set outcome ""
-    
-    # Extract category (win, loss, draw, etc.)
-    if {[regexp {"category":"([^"]+)"} $jsonData -> category]} {
+
+    # Extract category (win, loss, draw, etc.), tolerating optional whitespace
+    if {[regexp {"category"[ \t]*:[ \t]*"([^"]+)"} $jsonData -> category]} {
         # Category found
     }
-    
+
+    if {$category eq ""} {
+        ::tablebase::showError $w "Could not read the tablebase response (no category field):\n\n[string range $jsonData 0 500]"
+        return
+    }
+
     # Extract DTZ (distance to zeroing - halfmoves until capture/pawn move)
-    if {[regexp {"dtz":(-?\d+)} $jsonData -> dtz]} {
+    if {[regexp {"dtz"[ \t]*:[ \t]*(-?\d+)} $jsonData -> dtz]} {
         # DTZ found
     }
     
     # Extract DTM (distance to mate) if available
-    if {[regexp {"dtm":(-?\d+)} $jsonData -> dtm]} {
+    if {[regexp {"dtm"[ \t]*:[ \t]*(-?\d+)} $jsonData -> dtm]} {
         # DTM found
     }
     
     # Extract DTC (distance to conversion) for 8-man positions
     set dtc ""
-    if {[regexp {"dtc":(-?\d+)} $jsonData -> dtc]} {
+    if {[regexp {"dtc"[ \t]*:[ \t]*(-?\d+)} $jsonData -> dtc]} {
         # DTC found (used in partial 8-man tablebase results)
     }
     
     # Extract best move from moves array (use SAN if available)
     set uciMove ""
     set bestmove ""
-    if {[regexp {\{"uci":"([^"]+)","san":"([^"]+)"} $jsonData -> uciMove bestmove]} {
-    } elseif {[regexp {"uci":"([^"]+)"} $jsonData -> uciMove]} {
+    if {[regexp {\{"uci"[ \t]*:[ \t]*"([^"]+)"[^\}]*"san"[ \t]*:[ \t]*"([^"]+)"} $jsonData -> uciMove bestmove]} {
+    } elseif {[regexp {"uci"[ \t]*:[ \t]*"([^"]+)"} $jsonData -> uciMove]} {
         set bestmove [::tablebase::uciToSan $uciMove $fen]
     }
     
@@ -566,7 +623,7 @@ proc ::tablebase::window::results {} {
 
     if {$curlExe ne "" || $wgetExe ne ""} {
         if {$curlExe ne ""} {
-            set cmd [list $curlExe -sS --connect-timeout 10 --max-time 10 $url]
+            set cmd [list $curlExe -q -sS --connect-timeout 10 --max-time 10 $url]
         } else {
             set cmd [list $wgetExe --no-verbose --timeout=10 --tries=1 -O - $url]
         }
@@ -665,6 +722,7 @@ proc ::tablebase::window::displayResults {jsonData fen} {
     $t configure -state normal
     $t delete 1.0 end
     
+    set jsonData [string trim $jsonData]
     if {[string match "*not found*" $jsonData] || [string match "*error*" $jsonData]} {
         $t insert end "\n [tr TBNotFound]\n"
         $t configure -state disabled
@@ -679,13 +737,13 @@ proc ::tablebase::window::displayResults {jsonData fen} {
     }
     
     set category ""
-    regexp {"category":"([^"]+)"} $jsonData -> category
+    regexp {"category"[ \t]*:[ \t]*"([^"]+)"} $jsonData -> category
     
     $t insert end "\n [tr TBCategory] $category\n\n"
     
     # Extract the moves array
     set movesJson ""
-    if {[regexp {"moves":\[(.*?)\]} $jsonData -> movesJson]} {
+    if {[regexp {"moves"[ \t]*:[ \t]*\[(.*?)\]} $jsonData -> movesJson]} {
         # Parse individual moves manually using regex
         set moveMatches [regexp -all -inline {\{[^\}]+\}} $movesJson]
         
@@ -700,11 +758,11 @@ proc ::tablebase::window::displayResults {jsonData fen} {
             set dtz ""
             set dtm ""
             
-            regexp {"uci":"([^"]+)"} $moveObj -> uci
-            regexp {"san":"([^"]+)"} $moveObj -> san
-            regexp {"category":"([^"]+)"} $moveObj -> mcat
-            regexp {"dtz":(-?\d+)} $moveObj -> dtz
-            regexp {"dtm":(-?\d+)} $moveObj -> dtm
+            regexp {"uci"[ \t]*:[ \t]*"([^"]+)"} $moveObj -> uci
+            regexp {"san"[ \t]*:[ \t]*"([^"]+)"} $moveObj -> san
+            regexp {"category"[ \t]*:[ \t]*"([^"]+)"} $moveObj -> mcat
+            regexp {"dtz"[ \t]*:[ \t]*(-?\d+)} $moveObj -> dtz
+            regexp {"dtm"[ \t]*:[ \t]*(-?\d+)} $moveObj -> dtm
             
             if {$san eq ""} { set san [::tablebase::uciToSan $uci $fen] }
             
