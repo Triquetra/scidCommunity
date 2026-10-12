@@ -140,17 +140,17 @@ namespace eval pgn {
     ::utils::tooltip::Set $w.bottompanel.tb "Tablebase Lookup on Lichess"
     pack $w.bottompanel.tb -side left -padx 2
 
-    ttk::button $w.bottompanel.chesscom -image ::icon::tb_web_board -style Toolbutton -command ::pgn::openInChessCom
-    ::utils::tooltip::Set $w.bottompanel.chesscom "Open game in Chess.com analysis board"
-    pack $w.bottompanel.chesscom -side left -padx 2
-
     ttk::button $w.bottompanel.lichesseval -image ::icon::tb_web_eval -style Toolbutton -command ::lichess_eval::lookupPosition
     ::utils::tooltip::Set $w.bottompanel.lichesseval "Lichess cloud evaluation for current position"
     pack $w.bottompanel.lichesseval -side left -padx 2
 
-    ttk::button $w.bottompanel.lichess -image ::icon::tb_web_upload -style Toolbutton -command ::pgn::openInLichess
+    ttk::button $w.bottompanel.lichess -image ::icon::tb_web_lichess -style Toolbutton -command ::pgn::openInLichess
     ::utils::tooltip::Set $w.bottompanel.lichess "Upload game to Lichess.org"
     pack $w.bottompanel.lichess -side left -padx 2
+
+    ttk::button $w.bottompanel.chesscom -image ::icon::tb_web_chesscom -style Toolbutton -command ::pgn::openInChessCom
+    ::utils::tooltip::Set $w.bottompanel.chesscom "Open game in Chess.com analysis board"
+    pack $w.bottompanel.chesscom -side left -padx 2
 
     ttk::button $w.bottompanel.chessdb -image ::icon::tb_web_tree -style Toolbutton -command ::pgn::openInChessDB
     ::utils::tooltip::Set $w.bottompanel.chessdb "Open current position in ChessDB.cn"
