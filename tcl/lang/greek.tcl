@@ -906,6 +906,15 @@ menuText G PgnHelpPgn "Βοήθεια για PGN" 0
 menuText G PgnHelpIndex "Κατάλογος" 0
 translate G PgnWindowTitle {Σημείωση - παρτίδα %u}
 
+# Notation pane (PGN window) button tooltips:
+translate G TBLookupTooltip {Αναζήτηση στο Tablebase στο Lichess}
+translate G LichessEvalTooltip {Αξιολόγηση Lichess cloud για την τρέχουσα θέση}
+translate G LichessUploadTooltip {Ανεβάστε το παιχνίδι στο Lichess.org}
+translate G ChessComTooltip {Ανοιχτό παιχνίδι στον πίνακα ανάλυσης Chess.com}
+translate G ChessDBTooltip {Ανοίξτε την τρέχουσα θέση στο ChessDB.cn}
+translate G LichessOpenExTooltip {Lichess Opening Explorer για την τρέχουσα θέση}
+translate G LichessMonitorTooltip {Παύση/Συνέχιση ζωντανών ενημερώσεων}
+
 # Crosstable window menus:
 menuText G CrosstabFile "Αρχείο" 0
 menuText G CrosstabFileText "Εκτύπωση κειμένου σε αρχείο..." 9

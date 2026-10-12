@@ -879,6 +879,15 @@ menuText C PgnHelpPgn "Npovda - Okno PGN " 16
 menuText C PgnHelpIndex "Index npovdy" 0
 translate C PgnWindowTitle {Zpis partie - partie %u}
 
+# Notation pane (PGN window) button tooltips:
+translate C TBLookupTooltip {Tablebase Lookup na Lichess}
+translate C LichessEvalTooltip {Vyhodnocení lichess cloud pro aktuální pozici}
+translate C LichessUploadTooltip {Nahrajte hru na Lichess.org}
+translate C ChessComTooltip {Otevřete hru v analytickém panelu Chess.com}
+translate C ChessDBTooltip {Otevřete aktuální pozici v ChessDB.cn}
+translate C LichessOpenExTooltip {Lichess Otevření Průzkumníka pro aktuální pozici}
+translate C LichessMonitorTooltip {Pozastavit/obnovit živé aktualizace}
+
 # Crosstable window menus:
 menuText C CrosstabFile "Soubor" 0
 menuText C CrosstabFileText "Vytisknout do textovho souboru..." 14

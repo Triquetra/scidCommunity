@@ -875,6 +875,15 @@ menuText V PgnHelpPgn "עזרה של PGN" 0
 menuText V PgnHelpIndex "מַדָד" 0
 translate V PgnWindowTitle {סימון - משחק %u}
 
+# Notation pane (PGN window) button tooltips:
+translate V TBLookupTooltip {בדיקת טבלה ב-Lichess}
+translate V LichessEvalTooltip {הערכת ענן ליצ'ס לתפקיד הנוכחי}
+translate V LichessUploadTooltip {העלה משחק ל-Lichess.org}
+translate V ChessComTooltip {פתח משחק בלוח הניתוח של Chess.com}
+translate V ChessDBTooltip {פתח את העמדה הנוכחית ב-ChessDB.cn}
+translate V LichessOpenExTooltip {ליצ'ס פתיחת סייר לתפקיד הנוכחי}
+translate V LichessMonitorTooltip {השהה/המשך עדכונים חיים}
+
 # Crosstable window menus:
 menuText V CrosstabFile "קוֹבֶץ" 0
 menuText V CrosstabFileText "הדפס לקובץ טקסט..." 9

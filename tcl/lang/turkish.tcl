@@ -878,6 +878,15 @@ menuText T PgnHelpPgn "PGN Yardımı" 0
 menuText T PgnHelpIndex "Dizin" 0
 translate T PgnWindowTitle {Gösterim - oyun %u}
 
+# Notation pane (PGN window) button tooltips:
+translate T TBLookupTooltip {Lichess'te Tablo Tabanı Araması}
+translate T LichessEvalTooltip {Mevcut konum için Lichess bulut değerlendirmesi}
+translate T LichessUploadTooltip {Oyunu Lichess.org'a yükleyin}
+translate T ChessComTooltip {Oyunu Chess.com analiz panosunda açın}
+translate T ChessDBTooltip {ChessDB.cn'de mevcut pozisyonu aç}
+translate T LichessOpenExTooltip {Geçerli konum için Lichess Açılış Gezgini}
+translate T LichessMonitorTooltip {Canlı güncellemeleri duraklatın/devam ettirin}
+
 # Crosstable window menus:
 menuText T CrosstabFile "Dosya" 0
 menuText T CrosstabFileText "Metin Dosyasına Yazdır..." 9

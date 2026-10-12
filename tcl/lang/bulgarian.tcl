@@ -915,6 +915,15 @@ menuText g PgnHelpPgn "Помощ за PGN" 0
 menuText g PgnHelpIndex "Индекс" 0
 translate g PgnWindowTitle {Нотация - игра %u}
 
+# Notation pane (PGN window) button tooltips:
+translate g TBLookupTooltip {Търсене в таблична база на Lichess}
+translate g LichessEvalTooltip {Lichess облачна оценка за текущата позиция}
+translate g LichessUploadTooltip {Качете играта на Lichess.org}
+translate g ChessComTooltip {Отворете играта в таблото за анализ на Chess.com}
+translate g ChessDBTooltip {Отворете текущата позиция в ChessDB.cn}
+translate g LichessOpenExTooltip {Lichess Opening Explorer за текущата позиция}
+translate g LichessMonitorTooltip {Поставяне на пауза/възобновяване на актуализациите на живо}
+
 # Crosstable window menus:
 menuText g CrosstabFile "Файл" 0
 menuText g CrosstabFileText "Печат в текстов файл..." 9

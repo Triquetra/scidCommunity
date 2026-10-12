@@ -915,6 +915,15 @@ menuText k PgnHelpPgn "PGN 도움말" 0
 menuText k PgnHelpIndex "색깔" 0
 translate k PgnWindowTitle {표법 - 게임%u}
 
+# Notation pane (PGN window) button tooltips:
+translate k TBLookupTooltip {Lichess에 대한 테이블베이스 조회}
+translate k LichessEvalTooltip {현재 위치에 대한 Lichess 클라우드 평가}
+translate k LichessUploadTooltip {Lichess.org에 게임 업로드}
+translate k ChessComTooltip {Chess.com 분석 게시판에서 게임 열기}
+translate k ChessDBTooltip {ChessDB.cn에서 현재 위치 열기}
+translate k LichessOpenExTooltip {Lichess 현재 위치에 대한 탐색기 열기}
+translate k LichessMonitorTooltip {실시간 업데이트 일시중지/재개}
+
 # Crosstable window menus:
 menuText k CrosstabFile "파일" 0
 menuText k CrosstabFileText "텍스트 파일로 인쇄..." 9

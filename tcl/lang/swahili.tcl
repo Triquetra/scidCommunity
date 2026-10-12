@@ -874,6 +874,15 @@ menuText Z PgnHelpPgn "Msaada wa PGN" 0
 menuText Z PgnHelpIndex "Kielezo" 0
 translate Z PgnWindowTitle {Nukuu - mchezo %u}
 
+# Notation pane (PGN window) button tooltips:
+translate Z TBLookupTooltip {Utaftaji wa Jedwali kwenye Lichess}
+translate Z LichessEvalTooltip {Tathmini ya wingu ya Lichess kwa nafasi ya sasa}
+translate Z LichessUploadTooltip {Pakia mchezo kwa Lichess.org}
+translate Z ChessComTooltip {Fungua mchezo katika bodi ya uchanganuzi ya Chess.com}
+translate Z ChessDBTooltip {Fungua nafasi ya sasa katika ChessDB.cn}
+translate Z LichessOpenExTooltip {Lichess Ufunguzi Explorer kwa nafasi ya sasa}
+translate Z LichessMonitorTooltip {Sitisha/Rejesha masasisho ya moja kwa moja}
+
 # Crosstable window menus:
 menuText Z CrosstabFile "Faili" 0
 menuText Z CrosstabFileText "Chapisha hadi Faili ya Maandishi..." 9

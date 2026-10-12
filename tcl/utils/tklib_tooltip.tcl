@@ -319,12 +319,11 @@ proc ::tooltip::createToplevel {} {
     if {[winfo exists $b]} { return }
 
     toplevel $b -class Tooltip -borderwidth 0
-    if {[tk windowingsystem] eq "aqua"} {
-        ::tk::unsupported::MacWindowStyle style $b help none
-    } else {
+    if {[tk windowingsystem] ne "aqua"} {
         wm overrideredirect $b 1
     }
     catch {wm attributes $b -topmost 1}
+    catch {wm attributes $b -type tooltip}
     # avoid the blink issue with 1 to <1 alpha on Windows
     catch {wm attributes $b -alpha 0.99}
     wm positionfrom $b program
@@ -452,7 +451,12 @@ proc ::tooltip::show {w msg {i {}}} {
     }
 
     lassign $msg text image infotext
-    $b.f.label configure -text $text -image $image
+    set screenw [winfo screenwidth $w]
+    set screenh [winfo screenheight $w]
+    # Word-wrap long messages so a translation of any length stays on screen
+    # instead of being clipped.
+    $b.f.label configure -text $text -image $image \
+	-wraplength [expr {$screenw / 2}]
     if {$infotext eq {}} {
 	grid remove $b.f.info
     } else {
@@ -464,8 +468,6 @@ proc ::tooltip::show {w msg {i {}}} {
     # Bail out if the widget went way during the idletasks
     if {![winfo exists $w]} return
 
-    set screenw [winfo screenwidth $w]
-    set screenh [winfo screenheight $w]
     set reqw [winfo reqwidth $b]
     set reqh [winfo reqheight $b]
     # When adjusting for being on the screen boundary, check that we are
@@ -511,12 +513,25 @@ proc ::tooltip::show {w msg {i {}}} {
     catch {wm attributes $b -alpha 0.99}
     # put toplevel placed outside the screen back into it, just a little below the top border.
     if {$y < 0} { set y 10 }
-    wm geometry $b +$x+$y
+    # Set the size explicitly (not just the position): a reused tooltip window
+    # does not reliably grow to fit a longer message, so without this a longer
+    # (e.g. translated) tooltip is clipped to the size of the first one shown.
+    wm geometry $b ${reqw}x${reqh}+$x+$y
     wm deiconify $b
     raise $b
-    if {[tk windowingsystem] eq "aqua" && $focus ne ""} {
-	# Aqua's help window steals focus on display
-	after idle [list focus -force $focus]
+    if {[tk windowingsystem] eq "aqua"} {
+	# On Aqua, clear the window style mask so the tooltip is a plain window
+	# rather than the legacy, non-resizable "help" window.
+	if {[catch {wm attributes $b -stylemask {}}] == 0} {
+	    wm geometry $b ${reqw}x${reqh}+$x+$y
+	} else {
+	    ::tk::unsupported::MacWindowStyle style $b help none
+	    wm geometry $b ${reqw}x${reqh}+$x+$y
+	}
+	if {$focus ne ""} {
+	    # Aqua's help window steals focus on display
+	    after idle [list focus -force $focus]
+	}
     }
 }
 

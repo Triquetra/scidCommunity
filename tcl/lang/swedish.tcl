@@ -885,6 +885,15 @@ menuText W PgnHelpPgn "PGN-hjälp" 0
 menuText W PgnHelpIndex "Index" 0
 translate W PgnWindowTitle {PGN-version av partiet %u} 
 
+# Notation pane (PGN window) button tooltips:
+translate W TBLookupTooltip {Tablebase Lookup på Lichess}
+translate W LichessEvalTooltip {Lichess molnutvärdering för aktuell position}
+translate W LichessUploadTooltip {Ladda upp spelet till Lichess.org}
+translate W ChessComTooltip {Öppna spel i Chess.com analystavla}
+translate W ChessDBTooltip {Öppna aktuell position i ChessDB.cn}
+translate W LichessOpenExTooltip {Lichess Öppna Explorer för aktuell position}
+translate W LichessMonitorTooltip {Pausa/återuppta liveuppdateringar}
+
 # Crosstable window menus:
 menuText W CrosstabFile "Fil" 0
 menuText W CrosstabFileText "Skriv ut till textfil..." 9

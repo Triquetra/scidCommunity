@@ -882,6 +882,15 @@ menuText H PgnHelpPgn "Segítség PGN-hez" 9
 menuText H PgnHelpIndex "Tartalom" 0
 translate H PgnWindowTitle {Játszmajegyzés - %u. játszma}
 
+# Notation pane (PGN window) button tooltips:
+translate H TBLookupTooltip {Táblázatbázis keresés a Lichess-en}
+translate H LichessEvalTooltip {Lichess felhő értékelése a jelenlegi pozícióhoz}
+translate H LichessUploadTooltip {Töltsd fel a játékot a Lichess.org oldalra}
+translate H ChessComTooltip {Nyissa meg a játékot a Chess.com elemzőtáblán}
+translate H ChessDBTooltip {Nyissa meg az aktuális pozíciót a ChessDB.cn oldalon}
+translate H LichessOpenExTooltip {Lichess Intéző megnyitása az aktuális pozícióhoz}
+translate H LichessMonitorTooltip {Élő frissítések szüneteltetése/folytatása}
+
 # Crosstable window menus:
 menuText H CrosstabFile "Fájl" 0
 menuText H CrosstabFileText "Nyomtatás szövegfájlba..." 10

@@ -900,6 +900,15 @@ menuText K PgnHelpPgn "Ajut de PGN" 9
 menuText K PgnHelpIndex "Índex de l'ajut" 0
 translate K PgnWindowTitle {Planilla - partida %u}
 
+# Notation pane (PGN window) button tooltips:
+translate K TBLookupTooltip {Cerca de base de taula a Lichess}
+translate K LichessEvalTooltip {Avaluació del núvol Lichess per a la posició actual}
+translate K LichessUploadTooltip {Carregueu el joc a Lichess.org}
+translate K ChessComTooltip {Joc obert al tauler d'anàlisi de Chess.com}
+translate K ChessDBTooltip {Obre la posició actual a ChessDB.cn}
+translate K LichessOpenExTooltip {Lichess Opening Explorer per a la posició actual}
+translate K LichessMonitorTooltip {Posa en pausa/reprèn les actualitzacions en directe}
+
 # Crosstable window menus:
 menuText K CrosstabFile "Arxiu" 0
 menuText K CrosstabFileText "Imprimir a arxiu text..." 20

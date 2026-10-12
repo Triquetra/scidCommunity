@@ -913,6 +913,15 @@ menuText U PgnHelpPgn "PGN-ohje" 0
 menuText U PgnHelpIndex "Aakkosellinen" 0
 translate U PgnWindowTitle {Siirrot - peli %u}
 
+# Notation pane (PGN window) button tooltips:
+translate U TBLookupTooltip {Tablebase-haku Lichessissä}
+translate U LichessEvalTooltip {Lichess-pilviarvio nykyiselle asemalle}
+translate U LichessUploadTooltip {Lataa peli Lichess.org-sivustolle}
+translate U ChessComTooltip {Avaa peli Chess.com-analyysitaululla}
+translate U ChessDBTooltip {Avaa nykyinen sijainti ChessDB.cn:ssä}
+translate U LichessOpenExTooltip {Lichess Avaus Explorer nykyiselle sijainnille}
+translate U LichessMonitorTooltip {Keskeytä/Jatka live-päivitykset}
+
 # Crosstable window menus:
 menuText U CrosstabFile "Tiedosto" 0
 menuText U CrosstabFileText "Tulosta tekstitiedostoon..." 9

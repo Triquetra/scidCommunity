@@ -881,6 +881,15 @@ menuText R PgnHelpPgn "Помощь по PGN" 0
 menuText R PgnHelpIndex "Индекс" 0
 translate R PgnWindowTitle {Нотация - партия %u}
 
+# Notation pane (PGN window) button tooltips:
+translate R TBLookupTooltip {Поиск в базе таблиц на Lichess}
+translate R LichessEvalTooltip {Оценка облака Lichess для текущей позиции}
+translate R LichessUploadTooltip {Загрузите игру на Lichess.org.}
+translate R ChessComTooltip {Открытая партия на доске анализа Chess.com}
+translate R ChessDBTooltip {Открыть текущую позицию в ChessDB.cn}
+translate R LichessOpenExTooltip {Lichess Opening Explorer для текущей позиции}
+translate R LichessMonitorTooltip {Пауза/возобновление текущих обновлений}
+
 # Crosstable window menus:
 menuText R CrosstabFile "Файл" 0
 menuText R CrosstabFileText "Печатать в текстовый файл..." 11
