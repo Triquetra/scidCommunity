@@ -100,8 +100,8 @@ proc ::tablebase::httpQuery {url} {
 
     # 2) wget. Write the body to a temp file so stderr diagnostics can be kept
     #    without corrupting the response (exec treats stderr output as an error).
-    if {[auto_execok wget] ne ""} {
-        set tmpChan [file tempfile tmpPath]
+    set wgetExe [auto_execok wget]
+    if {$wgetExe ne "" && ![catch {set tmpChan [file tempfile tmpPath]} tmpErr]} {
         close $tmpChan
         set out ""
         if {![catch {
@@ -122,13 +122,16 @@ proc ::tablebase::httpQuery {url} {
             file delete -force $tmpPath
             append err "; wget: $out"
         }
+    } elseif {$wgetExe ne ""} {
+        append err "; wget: cannot create temp file: $tmpErr"
     }
 
     # 3) Windows PowerShell (present on every supported Windows release).
     #    Download to a temp file so the raw response is read back exactly,
     #    regardless of how PowerShell formats objects on stdout.
-    if {[info exists ::windowsOS] && $::windowsOS && [auto_execok powershell] ne ""} {
-        set tmpChan [file tempfile tmpPath]
+    set psExe ""
+    if {[info exists ::windowsOS] && $::windowsOS} { set psExe [auto_execok powershell] }
+    if {$psExe ne "" && ![catch {set tmpChan [file tempfile tmpPath]} tmpErr]} {
         close $tmpChan
         set ::env(SAFE_TB_URL) $url
         set ::env(SAFE_TB_FILE) $tmpPath
@@ -152,6 +155,8 @@ proc ::tablebase::httpQuery {url} {
             file delete -force $tmpPath
             append err "; powershell: $out"
         }
+    } elseif {$psExe ne ""} {
+        append err "; powershell: cannot create temp file: $tmpErr"
     }
 
     # 4) Tcl's built-in http package. Register TLS (with SNI, matching the
