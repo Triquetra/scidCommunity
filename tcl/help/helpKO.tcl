@@ -1,4 +1,4 @@
-### helpk.tcl: Korean (k) help pages for ScidCommunity.
+### helpKO.tcl: Korean (k) help pages for ScidCommunity.
 ### This file uses UTF-8
 ### Loaded on demand by setLanguage when the user selects Korean.
 ### Entries use the language-prefixed keys helpText(k,...) / helpTitle(k,...)

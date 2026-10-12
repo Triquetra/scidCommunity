@@ -1,4 +1,4 @@
-### helpb.tcl: Bengali (b) help pages for ScidCommunity.
+### helpBN.tcl: Bengali (b) help pages for ScidCommunity.
 ### This file uses UTF-8
 ### Loaded on demand by setLanguage when the user selects Bengali.
 ### Entries use the language-prefixed keys helpText(b,...) / helpTitle(b,...)

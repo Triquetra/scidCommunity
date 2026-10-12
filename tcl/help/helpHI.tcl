@@ -1,4 +1,4 @@
-### helph.tcl: Hindi (h) help pages for ScidCommunity.
+### helpHI.tcl: Hindi (h) help pages for ScidCommunity.
 ### This file uses UTF-8
 ### Loaded on demand by setLanguage when the user selects Hindi.
 ### Entries use the language-prefixed keys helpText(h,...) / helpTitle(h,...)

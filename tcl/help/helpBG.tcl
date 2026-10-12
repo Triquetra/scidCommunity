@@ -1,4 +1,4 @@
-### helpg.tcl: Bulgarian (g) help pages for ScidCommunity.
+### helpBG.tcl: Bulgarian (g) help pages for ScidCommunity.
 ### This file uses UTF-8
 ### Loaded on demand by setLanguage when the user selects Bulgarian.
 ### Entries use the language-prefixed keys helpText(g,...) / helpTitle(g,...)

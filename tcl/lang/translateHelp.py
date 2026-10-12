@@ -17,6 +17,8 @@ This script:
      targets and formatting are preserved verbatim and only the visible prose /
      link text is translated.
   3. Writes a help<LETTER>.tcl scaffold to ../help/ for each language.
+     A few letters use a two-letter file name instead, to avoid file names
+     that differ only by case; see HELP_FILE_OVERRIDES below.
   4. Registers the new file in the ::helpLangFile array in ../language.tcl.
 
 The single-letter language codes and file list are read from ../language.tcl
@@ -334,8 +336,8 @@ def build_help_file(letter, lang_name, translated_entries):
         {'topic': str, 'title': str, 'body': str, 'fallback': bool}
     """
     lines = []
-    lines.append('### help%s.tcl: %s (%s) help pages for ScidCommunity.' %
-                 (letter, lang_name, letter))
+    lines.append('### %s: %s (%s) help pages for ScidCommunity.' %
+                 (help_filename_for(letter), lang_name, letter))
     lines.append('### This file uses UTF-8')
     lines.append('### Loaded on demand by setLanguage when the user selects %s.' % lang_name)
     lines.append('### Entries use the language-prefixed keys helpText(%s,...) / helpTitle(%s,...)' %
@@ -426,9 +428,32 @@ def script_dir():
     return os.path.dirname(os.path.abspath(__file__))
 
 
+# ---------------------------------------------------------------------------
+# Language letter -> help file name overrides.
+# Most languages use help<letter>.tcl, but a few do not.  Four letters would
+# produce file names that differ from another language's file only by case
+# (b/B, g/G, h/H, k/K); such a pair cannot coexist on case-insensitive file
+# systems (macOS APFS, Windows NTFS), so those languages use a two-letter name.
+# Polish predates this scheme and uses helpPL.tcl.  This mapping must stay in
+# sync with the ::helpLangFile array in ../language.tcl.
+# ---------------------------------------------------------------------------
+HELP_FILE_OVERRIDES = {
+    'P': 'helpPL.tcl',   # Polish    (pre-existing custom name)
+    'b': 'helpBN.tcl',   # Bengali   (would clash with helpB.tcl, Portuguese)
+    'g': 'helpBG.tcl',   # Bulgarian (would clash with helpG.tcl, Greek)
+    'h': 'helpHI.tcl',   # Hindi     (would clash with helpH.tcl, Hungarian)
+    'k': 'helpKO.tcl',   # Korean    (would clash with helpK.tcl, Catalan)
+}
+
+
 def help_filename_for(letter):
-    """Return the output filename for a given language letter, e.g. 'D' -> 'helpD.tcl'."""
-    return 'help%s.tcl' % letter
+    """Return the output filename for a language letter.
+
+    Normally 'help<letter>.tcl' (e.g. 'D' -> 'helpD.tcl'), but some letters
+    map to a two-letter name to avoid case-only path collisions; see
+    HELP_FILE_OVERRIDES.
+    """
+    return HELP_FILE_OVERRIDES.get(letter, 'help%s.tcl' % letter)
 
 
 def already_has_help_file(help_dir, letter):
