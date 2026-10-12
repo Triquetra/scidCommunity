@@ -18,11 +18,27 @@ jobs:
 
       - name: Detect paths that differ only by case
         run: |
-          dupes=$(git ls-files | tr 'A-Z' 'a-z' | sort | uniq -d)
-          if [ -n "$dupes" ]; then
-            echo "::error::These paths differ only by case and cannot coexist on case-insensitive file systems (macOS APFS, Windows NTFS):"
-            printf '%s\n' "$dupes"
-            echo "Rename one file in each pair. See HELP_FILE_OVERRIDES in tcl/lang/translateHelp.py."
-            exit 1
-          fi
-          echo "No case-only path collisions found."
+          python3 - <<'PY'
+          import collections, subprocess, sys
+
+          # -z emits raw paths: without it git octal-quotes non-ASCII names,
+          # which would hide collisions such as "Ä.txt" vs "ä.txt". casefold()
+          # gives Unicode-aware folding that tr 'A-Z' 'a-z' does not.
+          out = subprocess.check_output(["git", "ls-files", "-z"])
+          paths = out.decode("utf-8", "surrogateescape").split("\0")
+
+          groups = collections.defaultdict(list)
+          for path in filter(None, paths):
+              groups[path.casefold()].append(path)
+
+          dupes = [g for g in groups.values() if len(g) > 1]
+          if dupes:
+              print("::error::These paths differ only by case and cannot coexist on "
+                    "case-insensitive file systems (macOS APFS, Windows NTFS):")
+              for group in dupes:
+                  print("  " + ", ".join(group))
+              print("Rename one file in each pair. See HELP_FILE_OVERRIDES in "
+                    "tcl/lang/translateHelp.py.")
+              sys.exit(1)
+          print("No case-only path collisions found.")
+          PY
