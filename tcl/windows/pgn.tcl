@@ -136,29 +136,29 @@ namespace eval pgn {
 
     # Create bottom panel with tablebase and chess.com buttons
     ttk::frame $w.bottompanel
-    ttk::button $w.bottompanel.tb -text "Table Base" -command ::tablebase::lookupPosition
+    ttk::button $w.bottompanel.tb -image ::icon::tb_web_tablebase -style Toolbutton -command ::tablebase::lookupPosition
     ::utils::tooltip::Set $w.bottompanel.tb "Tablebase Lookup on Lichess"
-    pack $w.bottompanel.tb -side left -padx 2 -pady 2
+    pack $w.bottompanel.tb -side left -padx 2
 
-    ttk::button $w.bottompanel.chesscom -text "chess.com" -command ::pgn::openInChessCom
-    ::utils::tooltip::Set $w.bottompanel.chesscom "Upload game to Chess.com"
-    pack $w.bottompanel.chesscom -side left -padx 2 -pady 2
+    ttk::button $w.bottompanel.chesscom -image ::icon::tb_web_board -style Toolbutton -command ::pgn::openInChessCom
+    ::utils::tooltip::Set $w.bottompanel.chesscom "Open game in Chess.com analysis board"
+    pack $w.bottompanel.chesscom -side left -padx 2
 
-    ttk::button $w.bottompanel.lichesseval -text "Lichess Eval" -command ::lichess_eval::lookupPosition
+    ttk::button $w.bottompanel.lichesseval -image ::icon::tb_web_eval -style Toolbutton -command ::lichess_eval::lookupPosition
     ::utils::tooltip::Set $w.bottompanel.lichesseval "Lichess cloud evaluation for current position"
-    pack $w.bottompanel.lichesseval -side left -padx 2 -pady 2
+    pack $w.bottompanel.lichesseval -side left -padx 2
 
-    ttk::button $w.bottompanel.lichess -text "lichess.org" -command ::pgn::openInLichess
+    ttk::button $w.bottompanel.lichess -image ::icon::tb_web_upload -style Toolbutton -command ::pgn::openInLichess
     ::utils::tooltip::Set $w.bottompanel.lichess "Upload game to Lichess.org"
-    pack $w.bottompanel.lichess -side left -padx 2 -pady 2
+    pack $w.bottompanel.lichess -side left -padx 2
 
-    ttk::button $w.bottompanel.chessdb -text "chessdb Engine Tree" -command ::pgn::openInChessDB
+    ttk::button $w.bottompanel.chessdb -image ::icon::tb_web_tree -style Toolbutton -command ::pgn::openInChessDB
     ::utils::tooltip::Set $w.bottompanel.chessdb "Open current position in ChessDB.cn"
-    pack $w.bottompanel.chessdb -side left -padx 2 -pady 2
+    pack $w.bottompanel.chessdb -side left -padx 2
 
-    ttk::button $w.bottompanel.lichessopenex -text [tr LichessOpenExplore] -command ::lichess_openex::openDialog
+    ttk::button $w.bottompanel.lichessopenex -image ::icon::tb_web_explorer -style Toolbutton -command ::lichess_openex::openDialog
     ::utils::tooltip::Set $w.bottompanel.lichessopenex "Lichess Opening Explorer for current position"
-    pack $w.bottompanel.lichessopenex -side left -padx 2 -pady 2
+    pack $w.bottompanel.lichessopenex -side left -padx 2
 
 
     # Pause/Run button for Lichess tournament monitoring (initially hidden)
