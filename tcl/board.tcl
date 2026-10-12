@@ -1403,7 +1403,7 @@ proc ::board::mark::DrawDisk {pathName square color} {
 #
 proc ::board::mark::DrawSquare {pathName square color} {
   # Inner (enclosing) box size within the square and outline width.
-  set size  0.86 ;# 0.0 < $size < 1.0
+  set size  0.94 ;# 0.0 < $size < 1.0
   set width 0.06 ;# outline thickness, 0.0 < $width < 1.0
 
   set box [GetBox $pathName $square $size]
