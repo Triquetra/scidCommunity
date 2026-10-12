@@ -79,6 +79,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+ <release version="5.1.4.34" date="2026-10-12">
+      <description>
+        <p>Minor fixes/enhancements</p>
+      </description>
+    </release>
  <release version="5.1.4.32" date="2026-10-11">
       <description>
         <p>Minor fixes</p>
