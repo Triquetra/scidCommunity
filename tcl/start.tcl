@@ -120,7 +120,7 @@ proc migrateEnginePaths {content oldDir newDir} {
       }
       append result "engine {\n"
       dict for {key value} $attrs {
-        append result "  $key [list $value]\n"
+        append result "  [list $key] [list $value]\n"
       }
       append result "}\n"
     } else {
