@@ -406,15 +406,15 @@ if { $unixOS } {
 }
 
 # Reversed mouse buttons in mac (::MB2 and ::MB3 are middle and right mouse buttons respectively.):
-if { $macOS } {
+# Tk 8.7+ on macOS reports the right button as 3, like other platforms.
+if { $macOS && ![package vsatisfies [package provide Tk] 8.7-] } {
   set ::MB2 3
   set ::MB3 2
-  set ::COMMAND Command
 } else {
   set ::MB2 2
   set ::MB3 3
-  set ::COMMAND Control
 }
+set ::COMMAND [expr {$macOS ? "Command" : "Control"}]
 
 
 ####################################################
