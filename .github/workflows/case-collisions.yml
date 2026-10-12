@@ -1,0 +1,28 @@
+name: Case-Only Path Collisions
+
+on:
+  push:
+    branches: [github]
+  pull_request:
+    branches: [github]
+
+permissions:
+  contents: read
+
+jobs:
+  case-collisions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Detect paths that differ only by case
+        run: |
+          dupes=$(git ls-files | tr 'A-Z' 'a-z' | sort | uniq -d)
+          if [ -n "$dupes" ]; then
+            echo "::error::These paths differ only by case and cannot coexist on case-insensitive file systems (macOS APFS, Windows NTFS):"
+            printf '%s\n' "$dupes"
+            echo "Rename one file in each pair. See HELP_FILE_OVERRIDES in tcl/lang/translateHelp.py."
+            exit 1
+          fi
+          echo "No case-only path collisions found."
