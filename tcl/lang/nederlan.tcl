@@ -904,6 +904,15 @@ menuText N PgnHelpPgn "PGN help" 0
 menuText N PgnHelpIndex "Inhoud" 0
 translate N PgnWindowTitle {Partij Notatie - partij %u} ;
 
+# Notation pane (PGN window) button tooltips:
+translate N TBLookupTooltip {Tablebase opzoeken op Lichess}
+translate N LichessEvalTooltip {Lichess-wolkevaluatie voor huidige positie}
+translate N LichessUploadTooltip {Upload het spel naar Lichess.org}
+translate N ChessComTooltip {Open het spel op het Chess.com-analysebord}
+translate N ChessDBTooltip {Open huidige positie in ChessDB.cn}
+translate N LichessOpenExTooltip {Lichess Opening Explorer voor huidige positie}
+translate N LichessMonitorTooltip {Pauzeer/hervat live updates}
+
 # Crosstable window menus:
 menuText N CrosstabFile "Bestand" 0
 menuText N CrosstabFileText "Bewaren in tekstformaat..." 13

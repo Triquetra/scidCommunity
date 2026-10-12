@@ -874,6 +874,15 @@ menuText b PgnHelpPgn "PGN সাহায্য" 0
 menuText b PgnHelpIndex "সূচক" 0
 translate b PgnWindowTitle {স্বরলিপি - খেলা %u}
 
+# Notation pane (PGN window) button tooltips:
+translate b TBLookupTooltip {লিচেসে টেবিলবেস লুকআপ}
+translate b LichessEvalTooltip {বর্তমান অবস্থানের জন্য লিচেস ক্লাউড মূল্যায়ন}
+translate b LichessUploadTooltip {Lichess.org এ গেম আপলোড করুন}
+translate b ChessComTooltip {Chess.com বিশ্লেষণ বোর্ডে খেলা খুলুন}
+translate b ChessDBTooltip {ChessDB.cn এ বর্তমান অবস্থান খুলুন}
+translate b LichessOpenExTooltip {বর্তমান অবস্থানের জন্য লিচেস ওপেনিং এক্সপ্লোরার}
+translate b LichessMonitorTooltip {লাইভ আপডেটগুলি বিরতি/পুনরায় শুরু করুন}
+
 # Crosstable window menus:
 menuText b CrosstabFile "ফাইল" 0
 menuText b CrosstabFileText "টেক্সট ফাইলে প্রিন্ট করুন..." 9

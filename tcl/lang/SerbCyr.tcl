@@ -915,6 +915,15 @@ menuText J PgnHelpPgn "ПГН Хелп" 0
 menuText J PgnHelpIndex "Индекс" 0
 translate J PgnWindowTitle {Нотација - игра %u}
 
+# Notation pane (PGN window) button tooltips:
+translate J TBLookupTooltip {Тражење базе таблица на Лицхесс-у}
+translate J LichessEvalTooltip {Лицхесс процена облака за тренутну позицију}
+translate J LichessUploadTooltip {Отпремите игру на Лицхесс.орг}
+translate J ChessComTooltip {Отворите игру на Цхесс.цом табли за анализу}
+translate J ChessDBTooltip {Отворите тренутну позицију у ЦхессДБ.цн}
+translate J LichessOpenExTooltip {Лицхесс Отварање Истраживача за тренутну позицију}
+translate J LichessMonitorTooltip {Паузирај/настави ажурирања уживо}
+
 # Crosstable window menus:
 menuText J CrosstabFile "Филе" 0
 menuText J CrosstabFileText "Штампај у текстуалну датотеку..." 9

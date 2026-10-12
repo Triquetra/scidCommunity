@@ -915,6 +915,15 @@ menuText A PgnHelpPgn "PGN ヘルプ" 0
 menuText A PgnHelpIndex "索引" 0
 translate A PgnWindowTitle {表記 - ゲーム %u}
 
+# Notation pane (PGN window) button tooltips:
+translate A TBLookupTooltip {Lichess でのテーブルベース ルックアップ}
+translate A LichessEvalTooltip {現在位置のLiches Cloud評価}
+translate A LichessUploadTooltip {ゲームを Lichess.org にアップロードする}
+translate A ChessComTooltip {Chess.com 分析ボードでゲームを開く}
+translate A ChessDBTooltip {ChessDB.cn で現在位置を開く}
+translate A LichessOpenExTooltip {Liches 現在位置のエクスプローラーを開く}
+translate A LichessMonitorTooltip {ライブアップデートの一時停止/再開}
+
 # Crosstable window menus:
 menuText A CrosstabFile "ファイル" 0
 menuText A CrosstabFileText "テキスト ファイルに出力..." 9

@@ -850,6 +850,15 @@ menuText M PgnHelpPgn "PGN Help" 0
 menuText M PgnHelpIndex "索引" 0
 translate M PgnWindowTitle {Notation - game %u}
 
+# Notation pane (PGN window) button tooltips:
+translate M TBLookupTooltip {Lichess 上的表库查找}
+translate M LichessEvalTooltip {Lichess云对当前职位的评价}
+translate M LichessUploadTooltip {将游戏上传到 Lichess.org}
+translate M ChessComTooltip {在 Chess.com 分析板中打开游戏}
+translate M ChessDBTooltip {在ChessDB.cn开设当前仓位}
+translate M LichessOpenExTooltip {Lichess 打开当前位置的资源管理器}
+translate M LichessMonitorTooltip {暂停/恢复实时更新}
+
 # Crosstable window menus:
 menuText M CrosstabFile "直线" 0
 menuText M CrosstabFileText "Print to Text File..." 9

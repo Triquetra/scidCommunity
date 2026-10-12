@@ -874,6 +874,15 @@ menuText h PgnHelpPgn "पीजीएन सहायता" 0
 menuText h PgnHelpIndex "अनुक्रमणिका" 0
 translate h PgnWindowTitle {संकेतन - खेल %u}
 
+# Notation pane (PGN window) button tooltips:
+translate h TBLookupTooltip {लाइकेस पर टेबलबेस लुकअप}
+translate h LichessEvalTooltip {वर्तमान स्थिति के लिए लाइकेस क्लाउड मूल्यांकन}
+translate h LichessUploadTooltip {गेम को Lichess.org पर अपलोड करें}
+translate h ChessComTooltip {Chess.com विश्लेषण बोर्ड में खुला खेल}
+translate h ChessDBTooltip {ChessDB.cn में वर्तमान स्थिति खोलें}
+translate h LichessOpenExTooltip {वर्तमान स्थिति के लिए लाइकेस ओपनिंग एक्सप्लोरर}
+translate h LichessMonitorTooltip {लाइव अपडेट रोकें/फिर से शुरू करें}
+
 # Crosstable window menus:
 menuText h CrosstabFile "फ़ाइल" 0
 menuText h CrosstabFileText "टेक्स्ट फ़ाइल पर प्रिंट करें..." 9

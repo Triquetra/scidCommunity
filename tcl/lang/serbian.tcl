@@ -1412,6 +1412,20 @@ menuText Y PgnHelpIndex "Index" 0
 # ====== TODO To be translated ======
 translate Y PgnWindowTitle {Notation - game %u}
 # ====== TODO To be translated ======
+translate Y TBLookupTooltip {Tablebase Lookup on Lichess}
+# ====== TODO To be translated ======
+translate Y LichessEvalTooltip {Lichess cloud evaluation for current position}
+# ====== TODO To be translated ======
+translate Y LichessUploadTooltip {Upload game to Lichess.org}
+# ====== TODO To be translated ======
+translate Y ChessComTooltip {Open game in Chess.com analysis board}
+# ====== TODO To be translated ======
+translate Y ChessDBTooltip {Open current position in ChessDB.cn}
+# ====== TODO To be translated ======
+translate Y LichessOpenExTooltip {Lichess Opening Explorer for current position}
+# ====== TODO To be translated ======
+translate Y LichessMonitorTooltip {Pause/Resume live updates}
+# ====== TODO To be translated ======
 menuText Y CrosstabFile "File" 0
 # ====== TODO To be translated ======
 menuText Y CrosstabFileText "Print to Text File..." 9

@@ -931,6 +931,15 @@ menuText S PgnHelpPgn "Ayuda de PGN" 9
 menuText S PgnHelpIndex "Índice de la ayuda" 0
 translate S PgnWindowTitle {Planilla - partida %u}
 
+# Notation pane (PGN window) button tooltips:
+translate S TBLookupTooltip {Búsqueda de bases de datos en Lichess}
+translate S LichessEvalTooltip {Evaluación de la nube de Lichess para la posición actual}
+translate S LichessUploadTooltip {Sube el juego a Lichess.org}
+translate S ChessComTooltip {Abrir partida en el tablero de análisis de Chess.com}
+translate S ChessDBTooltip {Abrir posición actual en ChessDB.cn}
+translate S LichessOpenExTooltip {Explorador de aperturas de Lichess para la posición actual}
+translate S LichessMonitorTooltip {Pausar/reanudar actualizaciones en vivo}
+
 # Crosstable window menus:
 menuText S CrosstabFile "Archivo" 0
 menuText S CrosstabFileText "Imprimir en archivo texto..." 20
