@@ -510,13 +510,11 @@ namespace eval sergame {
     ttk::frame $w.fthreshold
     ttk::frame $w.finformations
     ttk::frame $w.fclocks
-    if {$::sergame::activeColor == "white"} {
-      ttk::labelframe $w.fclockw -text "$::tr(Time) $::tr(White)"
-      ttk::labelframe $w.fclockb -text "$::tr(Time) $::tr(Black)"
-    } else {
-      ttk::labelframe $w.fclockw -text "$::tr(Time) $::tr(Black)"
-      ttk::labelframe $w.fclockb -text "$::tr(Time) $::tr(White)"
-    }
+    # fclockw always holds the white clock (gameclock 1);
+    # fclockb always holds the black clock (gameclock 2).
+    # Labels show the actual colours of the clocks they contain.
+    ttk::labelframe $w.fclockw -text "$::tr(Time) $::tr(White)"
+    ttk::labelframe $w.fclockb -text "$::tr(Time) $::tr(Black)"
     ttk::frame $w.fbuttons
     pack $w.fdisplay -side top -fill both -pady 5 -padx 10
     pack [ttk::separator $w.line1 -orient horizontal] -side top -fill x -padx 10 -pady 5
@@ -524,7 +522,15 @@ namespace eval sergame {
     pack [ttk::separator $w.line2 -orient horizontal] -side top -fill x -padx 10 -pady 5
     pack $w.finformations -side top -fill both -pady 5 -padx 10
     pack $w.fclocks -side top -fill both -pady 5 -padx 10
-    pack $w.fclockb $w.fclockw -side left -padx 10 -pady 5 -expand 1
+    # Stack the clocks vertically: the engine's clock goes above the player's
+    # clock. The engine plays the opposite colour to the player, so choose the
+    # top frame accordingly (engine is black when the player is white, and
+    # engine is white when the player is black).
+    if {$::sergame::activeColor == "white"} {
+      pack $w.fclockb $w.fclockw -side top -fill x -padx 10 -pady 5
+    } else {
+      pack $w.fclockw $w.fclockb -side top -fill x -padx 10 -pady 5
+    }
     pack $w.fbuttons -side top -pady "10 15"
 
     ttk::checkbutton $w.fdisplay.b1 -text $::tr(showblunderexists) -variable ::sergame::showblunder
