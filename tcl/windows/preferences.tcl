@@ -12,8 +12,11 @@ namespace eval ::preferences {}
 
 # Fixed font for the numbers combobox popdown in ::preferences::internationalization.
 # The popdown is a Listbox, or a Menu on macOS with Tk 9.
-option add *preferences*n.number*Listbox.font font_Fixed
-option add *preferences*n.number*Menu.font font_Fixed
+# Priority 100 (above the default "interactive") keeps these specific rules from
+# being overridden by the broad *Menu*Font rule that configure_menus re-adds when
+# the theme changes.
+option add *preferences*n.number*Listbox.font font_Fixed 100
+option add *preferences*n.number*Menu.font font_Fixed 100
 
 ### Switch to a new selected preferences dialog from the list
 proc ::preferences::replaceConfig { nr w } {
