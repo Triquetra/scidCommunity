@@ -514,7 +514,10 @@ set helpText(MainWindow) {<h1>scidCommunity main window</h1>
   <b> ; </b> (ie. space semicolon space). To resolve the bibliographic
   reference, scidCommunity first searches a .bib-file named like the database
   in the database directory. If it can not find such a file it resorts
-  to <b>~/.scid/data/Bookshelf.bib</b>.
+  to <b>Bookshelf.bib</b> in the <b>data</b> subdirectory of the scidCommunity
+  user directory (<b>~/.scidX.Y/data/</b> on Linux,
+  <b>~/Library/Application Support/scidCommunity/data/</b> on macOS,
+  <b>%APPDATA%\scidCommunity\data\</b> on Windows).
   </p>
   <p>
   The fifth line shows the <a ECO>ECO</a> (Encyclopedia of Chess
@@ -522,7 +525,8 @@ set helpText(MainWindow) {<h1>scidCommunity main window</h1>
   the ECO file being used.
   </p>
   <p>
-  If scidCommunity can find a suitable photo file (either in ~/.scid or scidCommunity's
+  If scidCommunity can find a suitable photo file (either in the scidCommunity
+  user directory or scidCommunity's
   share directory within the photos folder) and photos for the players
   exist, also these photos show up in the information area. (Suitable
   photo files can be downloaded from the <url
@@ -810,9 +814,11 @@ set helpText(Menus) {<h1>scidCommunity menus</h1>
   <li><menu>Restore Layout</menu>: Restores a saved window layout.</li>
   <br>
   <li><menu>Save Options</menu>: Saves the current options to the
-  file "<b>~/.scid/config/options.dat</b>" (or "<b>options.dat</b>" in the
-  sub directory "<b>config</b>" of the scidCommunity executable programs for Windows
-  users); this file is loaded each time you start up scidCommunity.</li>
+  file "<b>options.dat</b>" in the "<b>config</b>" subdirectory of the
+  scidCommunity user directory (<b>~/.scidX.Y/config/</b> on Linux,
+  <b>~/Library/Application Support/scidCommunity/config/</b> on macOS,
+  <b>%APPDATA%\scidCommunity\config\</b> on Windows); this file is loaded
+  each time you start up scidCommunity.</li>
   <li><menu>Auto Save</menu>: Toggles automatic saving of options on exit.</li>
   </ul>
   
@@ -4146,10 +4152,10 @@ set helpText(Options) {<h1>Options and preferences</h1>
   The options file is loaded whenever you start scidCommunity.
   </p>
   <p>
-  If you use Windows, the options file is <b>scid.opt</b> in the directory
-  where the scidCommunity program file <b>scid.exe</b> is located. For users of Unix
-  operating systems (such as Solaris or Linux) the file
-  is <b>~/.scid/scidrc</b>.
+  The scidCommunity user directory is <b>~/.scidX.Y</b> on Linux,
+  <b>~/Library/Application Support/scidCommunity</b> on macOS and
+  <b>%APPDATA%\scidCommunity</b> on Windows; the options file is
+  <b>config/options.dat</b> inside it.
   </p>
   
   <h3><name MyPlayerNames>Setting your player names</name></h3>

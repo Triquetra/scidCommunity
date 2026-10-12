@@ -151,13 +151,12 @@ proc InitDirs {} {
   }
 
   # scidUserDir: location of user-specific Scid files.
-  # This is "~/.scid" on Unix, "%APPDATA%\scidCommunity" on Windows and
+  # This is "~/.scidX.Y" on Unix, "%APPDATA%\scidCommunity" on Windows and
   # "~/Library/Application Support/scidCommunity" on macOS.
   # Windows user files must live somewhere the current user can write to;
   # the executable directory is read-only for standard users when installed
   # machine-wide under "Program Files".
   # legacyUserDir: the old location, used to migrate existing user files.
-  regexp {(\d+\.\d+).*} $::scidVersion -> version
   if {$::windowsOS} {
     if {[info exists ::env(APPDATA)]} {
       set scidUserDir [file join $::env(APPDATA) "scidCommunity"]
@@ -170,9 +169,9 @@ proc InitDirs {} {
   } elseif {$::macOS} {
     # A separate directory avoids sharing "~/.scidX.Y" with the original Scid.
     set scidUserDir [file join $::env(HOME) "Library" "Application Support" "scidCommunity"]
-    set legacyUserDir [file join $::env(HOME) ".scid$version"]
+    set legacyUserDir [file join $::env(HOME) ".scid$::scidVersionShort"]
   } else {
-    set scidUserDir [file join $::env(HOME) ".scid$version"]
+    set scidUserDir [file join $::env(HOME) ".scid$::scidVersionShort"]
   }
 
   # scidConfigDir, scidDataDir, scidLogDir:
@@ -249,7 +248,14 @@ proc InitDirs {} {
         close $fd
         if {[string first $oldEnginesDir $content] >= 0} {
           set fd [open $enginesFile w]
-          puts -nonewline $fd [migrateEnginePaths $content $oldEnginesDir $newEnginesDir]
+          if {$::macOS} {
+            # macOS paths may contain spaces (e.g. "Application Support"),
+            # which a plain text replace would split; parse and re-quote the
+            # engine entries instead. Windows keeps the previous behaviour.
+            puts -nonewline $fd [migrateEnginePaths $content $oldEnginesDir $newEnginesDir]
+          } else {
+            puts -nonewline $fd [string map [list $oldEnginesDir $newEnginesDir] $content]
+          }
           close $fd
         }
       }
