@@ -38,7 +38,18 @@ proc ::search::Open {ref_base ref_filter title create_subwnd} {
 	trace add variable ::search::dbase_($w) write ::search::use_dbfilter_
 	set ::search::filter_($w) $ref_filter
 
-	grid [ttk::frame $w.options] -sticky news
+	# Put the search options on a vertically scrollable canvas. Some search
+	# windows (notably Header Search with its "Find Games With" flags grid)
+	# can grow taller than the screen; scrolling keeps the bottom buttons
+	# reachable instead of having them pushed off-screen.
+	grid [ttk::frame $w.optbox] -sticky news
+	grid rowconfigure $w 1 -weight 1
+	autoscrollBars y $w.optbox [canvas $w.optbox.canvas -highlightthickness 0 -borderwidth 0]
+	::applyThemeColor_background $w.optbox.canvas
+	ttk::frame $w.options
+	$w.optbox.canvas create window 0 0 -window $w.options -anchor nw -tags optwin
+	bind $w.options <Configure> [list ::search::updateScroll_ $w]
+	bind $w.optbox.canvas <Configure> [list ::search::updateScroll_ $w]
 	set options_cmd [$create_subwnd $w.options]
 
 	grid [ttk::labelframe $w.filterOp] -sticky news -pady 8
@@ -104,6 +115,46 @@ proc ::search::Open {ref_base ref_filter title create_subwnd} {
 	}} $w]
 
 	::search::refresh_ $w
+	::search::updateScroll_ $w
+}
+
+# ::search::updateScroll_
+#
+#   Keeps the scrollable search-options canvas in sync with its content. The
+#   canvas is sized to the options' natural width and, when it fits, to their
+#   natural height. If the dialog would be taller than the screen the canvas is
+#   capped so the whole dialog (including the buttons below it) stays visible
+#   and the excess options are reached by scrolling.
+proc ::search::updateScroll_ {w} {
+	if {![winfo exists $w.options] || ![winfo exists $w.optbox.canvas]} { return }
+	set c $w.optbox.canvas
+	set cw [winfo reqwidth $w.options]
+	set ch [winfo reqheight $w.options]
+	if {$cw < 1} { set cw 1 }
+	if {$ch < 1} { set ch 1 }
+	$c configure -scrollregion [list 0 0 $cw $ch]
+
+	# The screen-fit calculation needs every fixed widget to be laid out; the
+	# configuration callbacks during construction may fire before that.
+	foreach part {refdb filterOp buttons} {
+		if {![winfo exists $w.$part]} { return }
+	}
+
+	# Height taken up by everything that is not the scrollable canvas
+	# (including the toplevel padding and the inter-row spacing).
+	set non_canvas [expr {[winfo reqheight $w] - [winfo reqheight $c]}]
+	if {$non_canvas < 40} {
+		# The toplevel's requested size has not been recomputed yet; fall
+		# back to measuring the fixed widgets directly.
+		set non_canvas 60
+		foreach part {refdb filterOp buttons} {
+			incr non_canvas [winfo reqheight $w.$part]
+		}
+	}
+	set avail [expr {[winfo vrootheight $w] - $non_canvas - 40}]
+	if {$avail < 120} { set avail 120 }
+	if {$ch > $avail} { set ch $avail }
+	$c configure -width $cw -height $ch
 }
 
 proc ::search::CloseAll {} {
