@@ -743,7 +743,7 @@ proc ::tablebase::window::displayResults {jsonData fen} {
     
     # Extract the moves array
     set movesJson ""
-    if {[regexp {"moves":\[(.*?)\]} $jsonData -> movesJson]} {
+    if {[regexp {"moves"[ \t]*:[ \t]*\[(.*?)\]} $jsonData -> movesJson]} {
         # Parse individual moves manually using regex
         set moveMatches [regexp -all -inline {\{[^\}]+\}} $movesJson]
         
