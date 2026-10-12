@@ -553,8 +553,12 @@ namespace eval sergame {
     ttk::button $w.fbuttons.close -textvar ::tr(Abort) -command "destroy .coachWin"
     pack $w.fbuttons.close -expand yes -fill both -padx 20 -pady 2
 
-    ::gameclock::new $w.fclockb 2 80
-    ::gameclock::new $w.fclockw 1 80
+    ::gameclock::new $w.fclockb 2 88
+    ::gameclock::new $w.fclockw 1 88
+    # Colour each clock face to match its side: white clock = white face with
+    # black markings, black clock = black face with white markings.
+    ::gameclock::setColor 1 white
+    ::gameclock::setColor 2 black
     ::gameclock::reset 1
     ::gameclock::reset 2
 
