@@ -319,7 +319,12 @@ proc ::tooltip::createToplevel {} {
     if {[winfo exists $b]} { return }
 
     toplevel $b -class Tooltip -borderwidth 0
-    if {[tk windowingsystem] ne "aqua"} {
+    if {[tk windowingsystem] eq "aqua"} {
+        # Keep the "help" style: a plain window becomes the active window
+        # when shown, which switches the menu bar and sends the widget a
+        # false <Leave> that hides the tooltip at once.
+        catch {::tk::unsupported::MacWindowStyle style $b help none}
+    } else {
         wm overrideredirect $b 1
     }
     catch {wm attributes $b -topmost 1}
@@ -519,19 +524,9 @@ proc ::tooltip::show {w msg {i {}}} {
     wm geometry $b ${reqw}x${reqh}+$x+$y
     wm deiconify $b
     raise $b
-    if {[tk windowingsystem] eq "aqua"} {
-	# On Aqua, clear the window style mask so the tooltip is a plain window
-	# rather than the legacy, non-resizable "help" window.
-	if {[catch {wm attributes $b -stylemask {}}] == 0} {
-	    wm geometry $b ${reqw}x${reqh}+$x+$y
-	} else {
-	    ::tk::unsupported::MacWindowStyle style $b help none
-	    wm geometry $b ${reqw}x${reqh}+$x+$y
-	}
-	if {$focus ne ""} {
-	    # Aqua's help window steals focus on display
-	    after idle [list focus -force $focus]
-	}
+    if {[tk windowingsystem] eq "aqua" && $focus ne ""} {
+	# Aqua's help window steals focus on display
+	after idle [list focus -force $focus]
     }
 }
 

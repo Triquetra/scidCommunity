@@ -140,6 +140,11 @@ make -j$(nproc)
 sudo make install
 ```
 
+## Contributors
+
+- **[whelanh](https://github.com/whelanh)** — maintainer
+- **[Venkat Krishnamurthy](https://github.com/kayvee42)** — focuses on the macOS version (build, packaging and platform fixes) and redesigned the PGN Window buttons
+
 
 
 
