@@ -239,6 +239,11 @@ proc ::enginelist::choose {} {
         ::enginelist::delete [lindex [.enginelist.list.list selection] 0]
     }
     dialogbutton $f.lucaschess -text "Lucas Chess" -command { ::lucaschess::choose }
+    if {$::macOS} {
+        # Lucas Chess R provides no macOS engine binaries
+        $f.lucaschess state disabled
+        ::utils::tooltip::Set $f.lucaschess [tr LucasChessNoMacOS]
+    }
     ttk::label $f.sep -text "   "
     dialogbutton $f.open -text [tr EngineOpenAnalysis] -command {
         ::enginelist::openSelected 1

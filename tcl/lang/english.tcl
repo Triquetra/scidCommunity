@@ -922,6 +922,7 @@ translate E ChessComTooltip {Open game in Chess.com analysis board}
 translate E ChessDBTooltip {Open current position in ChessDB.cn}
 translate E LichessOpenExTooltip {Lichess Opening Explorer for current position}
 translate E LichessMonitorTooltip {Pause/Resume live updates}
+translate E LucasChessNoMacOS {Lucas Chess engines are not available for macOS}
 
 # Crosstable window menus:
 menuText E CrosstabFile "File" 0
