@@ -1166,5 +1166,18 @@ foreach f $tcl_files {
   source -encoding utf-8 [file nativename [file join $::scidTclDir "$f"]]
 }
 
+# User plugins: every *.tcl file in <user folder>/plugins, loaded in name order
+# after Scid's own files and before any database is opened.
+# A plugin that fails to load is reported and skipped.
+set _pluginDir [file join $::scidUserDir plugins]
+foreach f [lsort [glob -nocomplain -types f -directory $_pluginDir *.tcl]] {
+  if {[catch {source -encoding utf-8 $f} _err]} {
+    catch { puts stderr "Warning: plugin [file tail $f] failed to load - $_err" }
+    after idle [list tk_messageBox -icon warning -type ok -title "scidCommunity" \
+        -message "Plugin [file tail $f] failed to load:\n\n$_err"]
+  }
+}
+unset -nocomplain _pluginDir _err
+
 ###
 ### End of file: start.tcl
