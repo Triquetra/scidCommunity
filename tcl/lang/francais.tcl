@@ -895,6 +895,7 @@ translate F ChessComTooltip {Partie ouverte dans le tableau d'analyse Chess.com}
 translate F ChessDBTooltip {Poste actuel ouvert dans ChessDB.cn}
 translate F LichessOpenExTooltip {Explorateur d'ouverture Lichess pour la position actuelle}
 translate F LichessMonitorTooltip {Pause/Reprise des mises à jour en direct}
+translate F LucasChessNoMacOS {Les moteurs Lucas Chess ne sont pas disponibles pour macOS}
 
 # Crosstable window menus:
 menuText F CrosstabFile "Fichier" 0

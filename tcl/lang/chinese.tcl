@@ -858,6 +858,7 @@ translate M ChessComTooltip {在 Chess.com 分析板中打开游戏}
 translate M ChessDBTooltip {在ChessDB.cn开设当前仓位}
 translate M LichessOpenExTooltip {Lichess 打开当前位置的资源管理器}
 translate M LichessMonitorTooltip {暂停/恢复实时更新}
+translate M LucasChessNoMacOS {Lucas Chess 引擎不适用于 macOS}
 
 # Crosstable window menus:
 menuText M CrosstabFile "直线" 0

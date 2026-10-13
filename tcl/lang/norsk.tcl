@@ -892,6 +892,7 @@ translate O ChessComTooltip {Åpent spill i Chess.com analysebrett}
 translate O ChessDBTooltip {Åpne nåværende stilling i ChessDB.cn}
 translate O LichessOpenExTooltip {Lichess Åpner Explorer for gjeldende posisjon}
 translate O LichessMonitorTooltip {Pause/gjenoppta liveoppdateringer}
+translate O LucasChessNoMacOS {Lucas Chess-motorer er ikke tilgjengelige for macOS}
 
 # Crosstable window menus:
 menuText O CrosstabFile "Fil" 0

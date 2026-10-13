@@ -886,6 +886,7 @@ translate T ChessComTooltip {Oyunu Chess.com analiz panosunda açın}
 translate T ChessDBTooltip {ChessDB.cn'de mevcut pozisyonu aç}
 translate T LichessOpenExTooltip {Geçerli konum için Lichess Açılış Gezgini}
 translate T LichessMonitorTooltip {Canlı güncellemeleri duraklatın/devam ettirin}
+translate T LucasChessNoMacOS {Lucas Satranç motorları macOS'ta mevcut değil}
 
 # Crosstable window menus:
 menuText T CrosstabFile "Dosya" 0

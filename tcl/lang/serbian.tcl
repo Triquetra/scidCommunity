@@ -1426,6 +1426,8 @@ translate Y LichessOpenExTooltip {Lichess Opening Explorer for current position}
 # ====== TODO To be translated ======
 translate Y LichessMonitorTooltip {Pause/Resume live updates}
 # ====== TODO To be translated ======
+translate Y LucasChessNoMacOS {Lucas Chess engines are not available for macOS}
+# ====== TODO To be translated ======
 menuText Y CrosstabFile "File" 0
 # ====== TODO To be translated ======
 menuText Y CrosstabFileText "Print to Text File..." 9

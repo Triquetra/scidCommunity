@@ -923,6 +923,7 @@ translate k ChessComTooltip {Chess.com 분석 게시판에서 게임 열기}
 translate k ChessDBTooltip {ChessDB.cn에서 현재 위치 열기}
 translate k LichessOpenExTooltip {Lichess 현재 위치에 대한 탐색기 열기}
 translate k LichessMonitorTooltip {실시간 업데이트 일시중지/재개}
+translate k LucasChessNoMacOS {Lucas Chess 엔진은 macOS에서 사용할 수 없습니다}
 
 # Crosstable window menus:
 menuText k CrosstabFile "파일" 0

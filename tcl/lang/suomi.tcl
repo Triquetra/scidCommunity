@@ -921,6 +921,7 @@ translate U ChessComTooltip {Avaa peli Chess.com-analyysitaululla}
 translate U ChessDBTooltip {Avaa nykyinen sijainti ChessDB.cn:ssä}
 translate U LichessOpenExTooltip {Lichess Avaus Explorer nykyiselle sijainnille}
 translate U LichessMonitorTooltip {Keskeytä/Jatka live-päivitykset}
+translate U LucasChessNoMacOS {Lucas Chess -moottorit eivät ole saatavilla macOS:lle}
 
 # Crosstable window menus:
 menuText U CrosstabFile "Tiedosto" 0

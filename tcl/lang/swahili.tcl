@@ -882,6 +882,7 @@ translate Z ChessComTooltip {Fungua mchezo katika bodi ya uchanganuzi ya Chess.c
 translate Z ChessDBTooltip {Fungua nafasi ya sasa katika ChessDB.cn}
 translate Z LichessOpenExTooltip {Lichess Ufunguzi Explorer kwa nafasi ya sasa}
 translate Z LichessMonitorTooltip {Sitisha/Rejesha masasisho ya moja kwa moja}
+translate Z LucasChessNoMacOS {Injini za Lucas Chess hazipatikani kwa macOS}
 
 # Crosstable window menus:
 menuText Z CrosstabFile "Faili" 0

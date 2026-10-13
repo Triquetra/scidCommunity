@@ -923,6 +923,7 @@ translate L ChessComTooltip {Deschideți jocul pe tabla de analiză Chess.com}
 translate L ChessDBTooltip {Deschideți poziția curentă în ChessDB.cn}
 translate L LichessOpenExTooltip {Lichess Opening Explorer pentru poziția curentă}
 translate L LichessMonitorTooltip {Întrerupeți/Reluați actualizările live}
+translate L LucasChessNoMacOS {Motoarele Lucas Chess nu sunt disponibile pentru macOS}
 
 # Crosstable window menus:
 menuText L CrosstabFile "Fişier" 0

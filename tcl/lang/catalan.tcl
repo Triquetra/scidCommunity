@@ -908,6 +908,7 @@ translate K ChessComTooltip {Joc obert al tauler d'anàlisi de Chess.com}
 translate K ChessDBTooltip {Obre la posició actual a ChessDB.cn}
 translate K LichessOpenExTooltip {Lichess Opening Explorer per a la posició actual}
 translate K LichessMonitorTooltip {Posa en pausa/reprèn les actualitzacions en directe}
+translate K LucasChessNoMacOS {Els motors de Lucas Chess no estan disponibles per a macOS}
 
 # Crosstable window menus:
 menuText K CrosstabFile "Arxiu" 0

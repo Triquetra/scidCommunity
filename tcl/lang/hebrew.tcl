@@ -883,6 +883,7 @@ translate V ChessComTooltip {פתח משחק בלוח הניתוח של Chess.co
 translate V ChessDBTooltip {פתח את העמדה הנוכחית ב-ChessDB.cn}
 translate V LichessOpenExTooltip {ליצ'ס פתיחת סייר לתפקיד הנוכחי}
 translate V LichessMonitorTooltip {השהה/המשך עדכונים חיים}
+translate V LucasChessNoMacOS {מנועי Lucas Chess אינם זמינים עבור macOS}
 
 # Crosstable window menus:
 menuText V CrosstabFile "קוֹבֶץ" 0

@@ -890,6 +890,7 @@ translate H ChessComTooltip {Nyissa meg a játékot a Chess.com elemzőtáblán}
 translate H ChessDBTooltip {Nyissa meg az aktuális pozíciót a ChessDB.cn oldalon}
 translate H LichessOpenExTooltip {Lichess Intéző megnyitása az aktuális pozícióhoz}
 translate H LichessMonitorTooltip {Élő frissítések szüneteltetése/folytatása}
+translate H LucasChessNoMacOS {A Lucas Chess motorok nem állnak rendelkezésre macOS rendszerhez}
 
 # Crosstable window menus:
 menuText H CrosstabFile "Fájl" 0

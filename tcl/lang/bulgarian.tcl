@@ -923,6 +923,7 @@ translate g ChessComTooltip {Отворете играта в таблото з�
 translate g ChessDBTooltip {Отворете текущата позиция в ChessDB.cn}
 translate g LichessOpenExTooltip {Lichess Opening Explorer за текущата позиция}
 translate g LichessMonitorTooltip {Поставяне на пауза/възобновяване на актуализациите на живо}
+translate g LucasChessNoMacOS {Lucas Chess двигателите не са налични за macOS}
 
 # Crosstable window menus:
 menuText g CrosstabFile "Файл" 0
