@@ -161,8 +161,8 @@ set ::lucaschess::enginesWindows {
     {eguzkilore      {Eguzkilore 1.0}          1000 {eguzkilore.exe}      eguzkilore  0 {}   {}   {}}
 }
 
-# Select the table matching the current platform (macOS shows the Linux
-# list, but installation is blocked in ::lucaschess::installEngine).
+# Select the table matching the current platform (on macOS the Lucas Chess
+# button is disabled, and installation is also blocked in installEngine).
 if {$::windowsOS} {
     set ::lucaschess::engines $::lucaschess::enginesWindows
 } else {
