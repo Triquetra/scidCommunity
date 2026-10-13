@@ -1,10 +1,10 @@
 Name:           scidcommunity
-Version:        5.1.4.34
+Version:        5.1.4.35
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
 # Commit hash from github branch
-%global commit e1e66879bfe5533a3f6f89d95f5e8bb9dc8b23e0   
+%global commit 4cafe78453856bbabe60f0904ff6f5c486b481eb   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 License:        GPL-2.0-or-later
@@ -64,6 +64,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Tue Oct 13, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-35
+- "Change icons in PGN Window; add vertical scrollbars to Header Search window"
 * Mon Oct 12, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-34
 - "Minor fixes/enhancements"
 * Sun Oct 11, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-32
