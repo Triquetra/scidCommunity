@@ -893,6 +893,7 @@ translate W ChessComTooltip {Öppna spel i Chess.com analystavla}
 translate W ChessDBTooltip {Öppna aktuell position i ChessDB.cn}
 translate W LichessOpenExTooltip {Lichess Öppna Explorer för aktuell position}
 translate W LichessMonitorTooltip {Pausa/återuppta liveuppdateringar}
+translate W LucasChessNoMacOS {Lucas Chess-motorer är inte tillgängliga för macOS}
 
 # Crosstable window menus:
 menuText W CrosstabFile "Fil" 0

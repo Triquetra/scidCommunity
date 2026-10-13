@@ -912,6 +912,7 @@ translate N ChessComTooltip {Open het spel op het Chess.com-analysebord}
 translate N ChessDBTooltip {Open huidige positie in ChessDB.cn}
 translate N LichessOpenExTooltip {Lichess Opening Explorer voor huidige positie}
 translate N LichessMonitorTooltip {Pauzeer/hervat live updates}
+translate N LucasChessNoMacOS {Lucas Chess-engines zijn niet beschikbaar voor macOS}
 
 # Crosstable window menus:
 menuText N CrosstabFile "Bestand" 0

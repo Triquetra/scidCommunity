@@ -883,6 +883,7 @@ translate Q ChessComTooltip {Відкрийте гру на дошці анал�
 translate Q ChessDBTooltip {Відкрити поточну позицію в ChessDB.cn}
 translate Q LichessOpenExTooltip {Lichess Відкриття провідника поточної позиції}
 translate Q LichessMonitorTooltip {Призупинити/відновити живі оновлення}
+translate Q LucasChessNoMacOS {Механізми Lucas Chess недоступні для macOS}
 
 # Crosstable window menus:
 menuText Q CrosstabFile "Файл" 0

@@ -923,6 +923,7 @@ translate J ChessComTooltip {Отворите игру на Цхесс.цом т
 translate J ChessDBTooltip {Отворите тренутну позицију у ЦхессДБ.цн}
 translate J LichessOpenExTooltip {Лицхесс Отварање Истраживача за тренутну позицију}
 translate J LichessMonitorTooltip {Паузирај/настави ажурирања уживо}
+translate J LucasChessNoMacOS {Луцас Цхесс мотори нису доступни за мацОС}
 
 # Crosstable window menus:
 menuText J CrosstabFile "Филе" 0

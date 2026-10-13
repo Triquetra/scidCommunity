@@ -889,6 +889,7 @@ translate R ChessComTooltip {Открытая партия на доске ан�
 translate R ChessDBTooltip {Открыть текущую позицию в ChessDB.cn}
 translate R LichessOpenExTooltip {Lichess Opening Explorer для текущей позиции}
 translate R LichessMonitorTooltip {Пауза/возобновление текущих обновлений}
+translate R LucasChessNoMacOS {Движки Lucas Chess недоступны для macOS}
 
 # Crosstable window menus:
 menuText R CrosstabFile "Файл" 0

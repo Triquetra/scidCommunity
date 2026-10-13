@@ -895,6 +895,7 @@ translate B ChessComTooltip {Jogo aberto no tabuleiro de análise do Chess.com}
 translate B ChessDBTooltip {Abra a posição atual no ChessDB.cn}
 translate B LichessOpenExTooltip {Lichess Opening Explorer para a posição atual}
 translate B LichessMonitorTooltip {Pausar/retomar atualizações ao vivo}
+translate B LucasChessNoMacOS {Os motores Lucas Chess não estão disponíveis para macOS}
 
 # Crosstable window menus:
 menuText B CrosstabFile "Arquivo" 0

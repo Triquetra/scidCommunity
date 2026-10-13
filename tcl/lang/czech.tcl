@@ -887,6 +887,7 @@ translate C ChessComTooltip {Otevřete hru v analytickém panelu Chess.com}
 translate C ChessDBTooltip {Otevřete aktuální pozici v ChessDB.cn}
 translate C LichessOpenExTooltip {Lichess Otevření Průzkumníka pro aktuální pozici}
 translate C LichessMonitorTooltip {Pozastavit/obnovit živé aktualizace}
+translate C LucasChessNoMacOS {Motory Lucas Chess nejsou k dispozici pro macOS}
 
 # Crosstable window menus:
 menuText C CrosstabFile "Soubor" 0

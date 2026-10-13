@@ -882,6 +882,7 @@ translate h ChessComTooltip {Chess.com विश्लेषण बोर्ड 
 translate h ChessDBTooltip {ChessDB.cn में वर्तमान स्थिति खोलें}
 translate h LichessOpenExTooltip {वर्तमान स्थिति के लिए लाइकेस ओपनिंग एक्सप्लोरर}
 translate h LichessMonitorTooltip {लाइव अपडेट रोकें/फिर से शुरू करें}
+translate h LucasChessNoMacOS {लुकास शतरंज इंजन macOS के लिए उपलब्ध नहीं हैं}
 
 # Crosstable window menus:
 menuText h CrosstabFile "फ़ाइल" 0

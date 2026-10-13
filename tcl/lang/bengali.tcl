@@ -882,6 +882,7 @@ translate b ChessComTooltip {Chess.com বিশ্লেষণ বোর্ড�
 translate b ChessDBTooltip {ChessDB.cn এ বর্তমান অবস্থান খুলুন}
 translate b LichessOpenExTooltip {বর্তমান অবস্থানের জন্য লিচেস ওপেনিং এক্সপ্লোরার}
 translate b LichessMonitorTooltip {লাইভ আপডেটগুলি বিরতি/পুনরায় শুরু করুন}
+translate b LucasChessNoMacOS {লুকাস দাবা ইঞ্জিন ম্যাকওএসের জন্য উপলব্ধ নয়}
 
 # Crosstable window menus:
 menuText b CrosstabFile "ফাইল" 0

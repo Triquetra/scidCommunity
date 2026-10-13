@@ -923,6 +923,7 @@ translate A ChessComTooltip {Chess.com 分析ボードでゲームを開く}
 translate A ChessDBTooltip {ChessDB.cn で現在位置を開く}
 translate A LichessOpenExTooltip {Liches 現在位置のエクスプローラーを開く}
 translate A LichessMonitorTooltip {ライブアップデートの一時停止/再開}
+translate A LucasChessNoMacOS {Lucas Chess エンジンは macOS では利用できません}
 
 # Crosstable window menus:
 menuText A CrosstabFile "ファイル" 0

@@ -914,6 +914,7 @@ translate G ChessComTooltip {Ανοιχτό παιχνίδι στον πίνακ
 translate G ChessDBTooltip {Ανοίξτε την τρέχουσα θέση στο ChessDB.cn}
 translate G LichessOpenExTooltip {Lichess Opening Explorer για την τρέχουσα θέση}
 translate G LichessMonitorTooltip {Παύση/Συνέχιση ζωντανών ενημερώσεων}
+translate G LucasChessNoMacOS {Οι μηχανές Lucas Chess δεν είναι διαθέσιμες για macOS}
 
 # Crosstable window menus:
 menuText G CrosstabFile "Αρχείο" 0
