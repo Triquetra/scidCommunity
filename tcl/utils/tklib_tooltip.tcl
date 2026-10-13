@@ -323,7 +323,7 @@ proc ::tooltip::createToplevel {} {
         # Keep the "help" style: a plain window becomes the active window
         # when shown, which switches the menu bar and sends the widget a
         # false <Leave> that hides the tooltip at once.
-        ::tk::unsupported::MacWindowStyle style $b help none
+        catch {::tk::unsupported::MacWindowStyle style $b help none}
     } else {
         wm overrideredirect $b 1
     }
