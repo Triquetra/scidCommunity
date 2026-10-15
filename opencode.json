@@ -69,5 +69,15 @@
       "Testing/**": "deny",
       "winpackage/**": "deny"
     }
+  },
+  "mcp": {
+    "xerj": {
+      "type": "local",
+      "command": ["/home/hugh/.local/bin/xerj", "mcp"],
+      "environment": {
+        "XERJ_URL": "http://localhost:9200"
+      },
+      "enabled": true
+    }
   }
 }
