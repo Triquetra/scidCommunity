@@ -79,6 +79,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+ <release version="5.1.4.37" date="2026-10-16">
+      <description>
+        <p>Keyboard focus and marker persistence enhancements</p>
+      </description>
+    </release>
  <release version="5.1.4.35" date="2026-10-13">
       <description>
         <p>Change icons in PGN Window; add vertical scrollbar to Header Search window</p>

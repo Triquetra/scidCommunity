@@ -1,10 +1,10 @@
 Name:           scidcommunity
-Version:        5.1.4.35
+Version:        5.1.4.37
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
 # Commit hash from github branch
-%global commit 4cafe78453856bbabe60f0904ff6f5c486b481eb   
+%global commit a9ea54cdf2b27e4b4b97f8ccfe921171025cb9f7   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 License:        GPL-2.0-or-later
@@ -64,6 +64,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Fri Oct 16, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-37
+- "Keyboard focus and marker persistence enhancements"
 * Tue Oct 13, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-35
 - "Change icons in PGN Window; add vertical scrollbars to Header Search window"
 * Mon Oct 12, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-34
