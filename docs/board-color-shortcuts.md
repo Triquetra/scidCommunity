@@ -13,7 +13,7 @@ Mouse shortcuts for coloring board squares and drawing arrows, comparing
 
 | Shortcut                         | scidCommunity   | Lichess | chess.com   | ChessBase |
 | -------------------------------- | --------------- | ------- | ----------- | --------- |
-| Right-click                      | Green           | Green   | Orange      | —         |
+| Right-click                      | Palette (green) | Green   | Orange      | —         |
 | Alt + right-click                | Blue            | Blue    | Cyan / blue | Blue      |
 | Ctrl + right-click               | Red             | Red     | Red         | —         |
 | Shift + right-click              | Yellow          | —       | Green       | —         |
@@ -33,7 +33,8 @@ Mouse shortcuts for coloring board squares and drawing arrows, comparing
 ## Notes
 
 - **scidCommunity**, unmodified right-click uses the color selected in the marker
-  palette, which is green by default.
+  palette, which is green by default and is remembered across restarts (it is
+  saved with the other options).
 - **scidCommunity** intentionally leaves `Ctrl + Shift + right-click` and
   `Ctrl + Shift + Alt + right-click` unassigned. Tk would otherwise fall back to
   a less specific binding (producing yellow and orange respectively), so both
