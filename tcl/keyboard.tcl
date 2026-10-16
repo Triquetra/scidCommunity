@@ -141,12 +141,17 @@ proc excludeTextWidget {w} {
 		# HACK: enable binding for .pgnWin
 		# TODO: replace this using the new %M (available since Tk 8.6.4)
 		if {$w eq ".pgnWin.text"} {
-			return
+			return 0
 		}
 		if {[catch {$w cget -state} state] == 0 && $state eq "normal"} {
 			return -code continue
 		}
 	}
+
+	# Return an explicit boolean when the key is not excluded: the <Control-x>
+	# binding (keyboard.tcl) tests the result with "if {![excludeTextWidget %W]}",
+	# and an empty string would raise "expected boolean value but got """.
+	return 0
 }
 
 # spaceTriggersEngineMove:
