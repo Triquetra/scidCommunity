@@ -901,7 +901,7 @@ set helpText(Moves) {<h1>Entering chess moves</h1>
   <li>Shift + Alt + right-click: cyan</li>
   <li>Alt + left-click: green</li>
   <li>Ctrl + Alt + left-click: yellow</li>
-  <li>Shift + Ctrl + Alt + left-click: red</li>
+  <li>Shift + Alt + left-click: red</li>
   </ul>
   <p>
   Right-click combined with Ctrl+Shift or Ctrl+Shift+Alt is intentionally
@@ -1463,7 +1463,7 @@ set helpText(Comment) {<h1>The Comment Editor window</h1>
   <li>Shift + Alt + right-click: cyan</li>
   <li>Alt + left-click: green</li>
   <li>Ctrl + Alt + left-click: yellow</li>
-  <li>Shift + Ctrl + Alt + left-click: red</li>
+  <li>Shift + Alt + left-click: red</li>
   </ul>
   <p>
   Right-click combined with Ctrl+Shift or Ctrl+Shift+Alt is intentionally

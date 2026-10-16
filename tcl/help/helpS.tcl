@@ -878,14 +878,27 @@ set helpText(S,Moves) {<h1>Introducir movimientos de ajedrez</h1>
 
   <h4>Marcar campos e indicaciones</h4>
   <p>
-  Se pueden ingresar cuadrados y flechas de colores directamente en el tablero.
-  sin el uso del <a Comment>editor de comentarios</a> usando el mouse
-  botones. Para cuadrados de colores, se puede presionar Mayús y hacer clic en el cuadrado en
-  pregunta. El botón Shift-Izquierda marca el cuadrado en verde, el medio
-  botón en amarillo, el botón derecho en rojo. Para dibujar flechas se puede
-  Ctrl-clic en los cuadrados de origen y destino. El botón izquierdo del ratón
-  nuevamente resulta en verde, el del medio en amarillo y el botón derecho del mouse
-  botón en una flecha roja.
+  Se pueden ingresar cuadrados y flechas de colores directamente en el tablero,
+  sin necesidad de usar el <a Comment>editor de comentarios</a>.
+  Haz clic con el botón derecho en una casilla para marcarla, o mantén pulsado
+  y arrastra de una casilla a otra para dibujar una flecha. El color se toma de
+  la paleta de marcadores; como alternativa, mantén una tecla modificadora
+  mientras haces clic:
+  </p>
+  <ul>
+  <li>Clic derecho: el color de la paleta (verde por defecto)</li>
+  <li>Ctrl + clic derecho: rojo</li>
+  <li>Mayús + clic derecho: amarillo</li>
+  <li>Alt + clic derecho: azul</li>
+  <li>Ctrl + Alt + clic derecho: naranja</li>
+  <li>Mayús + Alt + clic derecho: cian</li>
+  <li>Alt + clic izquierdo: verde</li>
+  <li>Ctrl + Alt + clic izquierdo: amarillo</li>
+  <li>Mayús + Alt + clic izquierdo: rojo</li>
+  </ul>
+  <p>
+  La combinación de clic derecho con Ctrl+Mayús o Ctrl+Mayús+Alt queda
+  intencionadamente sin asignar.
   </p>
   
   <h4><name Trial>Modo de prueba</name></h4>
@@ -1423,14 +1436,27 @@ set helpText(S,Comment) {<h1>La ventana del editor de comentarios</h1>
 
   <p>
   <b>Nota</b>
-  Se pueden ingresar cuadrados y flechas de colores directamente en el tablero.
-  sin el uso del editor de comentarios usando el mouse
-  botones. Para cuadrados de colores, se puede presionar Mayús y hacer clic en el cuadrado en
-  pregunta. El botón Shift-Izquierda marca el cuadrado en verde, el medio
-  botón en amarillo, el botón derecho en rojo. Para dibujar flechas se puede
-  Ctrl-clic en los cuadrados de origen y destino. El botón izquierdo del ratón
-  nuevamente resulta en verde, el del medio en amarillo y el botón derecho del mouse
-  botón en una flecha roja.
+  Se pueden ingresar cuadrados y flechas de colores directamente en el tablero,
+  sin necesidad de usar el editor de comentarios.
+  Haz clic con el botón derecho en una casilla para marcarla, o mantén pulsado
+  y arrastra de una casilla a otra para dibujar una flecha. El color se toma de
+  la paleta de marcadores; como alternativa, mantén una tecla modificadora
+  mientras haces clic:
+  </p>
+  <ul>
+  <li>Clic derecho: el color de la paleta (verde por defecto)</li>
+  <li>Ctrl + clic derecho: rojo</li>
+  <li>Mayús + clic derecho: amarillo</li>
+  <li>Alt + clic derecho: azul</li>
+  <li>Ctrl + Alt + clic derecho: naranja</li>
+  <li>Mayús + Alt + clic derecho: cian</li>
+  <li>Alt + clic izquierdo: verde</li>
+  <li>Ctrl + Alt + clic izquierdo: amarillo</li>
+  <li>Mayús + Alt + clic izquierdo: rojo</li>
+  </ul>
+  <p>
+  La combinación de clic derecho con Ctrl+Mayús o Ctrl+Mayús+Alt queda
+  intencionadamente sin asignar.
   </p>
   
   <p><footer>(Actualizado: scidCommunity, abril de 2026)</footer></p>

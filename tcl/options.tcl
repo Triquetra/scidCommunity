@@ -175,7 +175,9 @@ set bestcolor   "\#bebebe"
 set buttoncolor "\#b0c0d0"
 set borderwidth 0
 
-# Square markers color and type
+# Square markers color and type. The defaults are set here, before the options
+# file is loaded; ::options.store (which makes them persist) is called further
+# down, after the file has been loaded, so a saved value is not clobbered.
 set ::markColor green
 set ::markType square
 
@@ -619,6 +621,11 @@ if {[file exists $optionsFile] && [catch {safeLoadConfig $optionsFile}]} {
 #   flipped each time a game is loaded, to show the board from that
 #   player's perspective.
 options.store ::myPlayerNames {}
+
+# Marker palette color and type (defaults set above, before the options file
+# was loaded). Registered here so the user's choice survives a restart.
+options.store ::markColor green
+options.store ::markType square
 
 # Migrate the single-book setting without overwriting a newer slot-1 choice.
 if {[info exists ::book::lastBook] && $::book::lastBook ne "" && $::book::lastBook1 eq ""} {
