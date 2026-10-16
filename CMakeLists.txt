@@ -155,10 +155,13 @@ install(DIRECTORY scripts DESTINATION share/scid)
 install(DIRECTORY sounds DESTINATION share/scid)
 install(DIRECTORY tcl DESTINATION share/scid)
 
-# Install desktop file, appdata, and icon
+# Install desktop file, appdata, and icons
+# Rasterised PNG icons are installed instead of the scalable SVG. flatpak-builder
+# runs appstreamcli compose at the end of every build, and it cannot read this
+# SVG (it fails with "icon-file-read-error"); the PNGs compose cleanly.
 install(FILES data/io.github.whelanh.scidCommunity.desktop DESTINATION share/applications)
 install(FILES data/io.github.whelanh.scidCommunity.appdata.xml DESTINATION share/metainfo)
-install(FILES data/io.github.whelanh.scidCommunity.svg DESTINATION share/icons/hicolor/scalable/apps)
+install(DIRECTORY data/icons/hicolor DESTINATION share/icons)
 
 # engine phalanx
 if(NOT WIN32)
