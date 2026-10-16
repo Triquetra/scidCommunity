@@ -125,10 +125,25 @@ proc keyboardShortcuts {w} {
 }
 
 proc excludeTextWidget {w} {
-	if { [regexp ".*(Entry|Text|Combobox|Spinbox)" [winfo class $w] ] } {
+	set cls [winfo class $w]
+
+	# Editable single-line / value widgets keep the key for themselves, so that
+	# typing (and value selection) is not disturbed.
+	if {[regexp {Entry$|Combobox$|Spinbox$} $cls]} {
+		return -code continue
+	}
+
+	# A Text widget keeps the key only while it is editable (e.g. the comment
+	# editor, the import window). Read-only display panes (the engine and
+	# analysis output, the PGN window, ...) let the key through so the game
+	# still navigates without having to click the moves pane first.
+	if {[regexp {Text$} $cls]} {
 		# HACK: enable binding for .pgnWin
 		# TODO: replace this using the new %M (available since Tk 8.6.4)
-		if {$w ne ".pgnWin.text"} {
+		if {$w eq ".pgnWin.text"} {
+			return
+		}
+		if {[catch {$w cget -state} state] == 0 && $state eq "normal"} {
 			return -code continue
 		}
 	}
@@ -157,18 +172,19 @@ proc spaceTriggersEngineMove {w} {
 # Global fallback for the Lichess-style spacebar shortcut. The window-specific
 # bind tags only fire when the keyboard focus happens to be on one of their
 # widgets; right after opening a window (or when the focus is empty) the event
-# reaches the toplevel instead. This plays the move of the board / engine
-# window / analysis window the mouse pointer is over.
+# reaches the toplevel instead. This plays the move of the board's engine, or
+# of the engine window the mouse pointer is over.
 bind all <space> { if {[::spacePlayGlobal]} { break } }
 
-# Editable fields keep the spacebar for typing, EXCEPT when the mouse pointer
-# is over the board / an engine window / an analysis window, in which case
-# <space> plays that engine's move. These specific bindings replace the
-# generic <Key> class binding for <space>; the "break" prevents a space from
-# also being inserted when a move was played.
-bind TEntry <space> { if {[::spacePlayPointer]} { break } else { ttk::entry::Insert %W " "; break } }
-bind Entry  <space> { if {[::spacePlayPointer]} { break } else { tk::EntryInsert %W " "; break } }
-bind Text   <space> { if {[::spacePlayPointer]} { break } else { tk::TextInsert %W " "; break } }
+# Editable fields keep the spacebar for typing; in every other case <space>
+# plays the engine move (see ::spacePlayGlobal). Read-only displays count as
+# play areas, so the mouse pointer only chooses which engine to use - it no
+# longer decides whether the key is handled. These specific bindings replace
+# the generic <Key> class binding for <space>; the "break" prevents a space
+# from also being inserted when a move was played.
+bind TEntry <space> { if {[::spacePlayGlobal]} { break } else { ttk::entry::Insert %W " "; break } }
+bind Entry  <space> { if {[::spacePlayGlobal]} { break } else { tk::EntryInsert %W " "; break } }
+bind Text   <space> { if {[::spacePlayGlobal]} { break } else { tk::TextInsert %W " "; break } }
 
 # addBindtagToTree:
 #   Add $tag to the bind tags of $w and every descendant widget.

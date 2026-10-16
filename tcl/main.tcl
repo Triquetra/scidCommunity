@@ -470,17 +470,15 @@ proc ::spacePlayPointer {} {
 }
 
 # Global handler for the Lichess-style spacebar shortcut.
-# It plays the move of the window under the mouse pointer, or otherwise the
-# engine driving the board. It does not depend on where the keyboard focus
-# happens to be.
+# Unless the keyboard focus is an editable field (which keeps the spacebar for
+# typing), it plays the move of the engine window under the mouse pointer, or
+# otherwise the engine driving the board.
 # Return true if the key was handled.
 proc ::spacePlayGlobal {} {
-    # 1. Window under the mouse pointer. Preferring this over the keyboard
-    #    focus means it still works when the focus was left, for example, on a
-    #    search field in a different window.
-    if {[::spacePlayPointer]} { return true }
-    # 2. Otherwise play the engine driving the board, unless the focus is an
-    #    editable field that needs the spacebar itself.
+    # 1. Editable fields keep the spacebar for typing. Read-only displays count
+    #    as play areas, so the shortcut also works from the engine/analysis
+    #    output and the PGN window. Checking the focus before the pointer means
+    #    a field being edited is never disturbed by a stray engine move.
     set fw [focus]
     if {$fw ne "" && ![::spaceIsPlayArea $fw]} { return false }
     # Complete an in-progress keyboard move entry first.
@@ -488,6 +486,9 @@ proc ::spacePlayGlobal {} {
         moveEntry_Complete
         return true
     }
+    # 2. Prefer the engine window under the mouse pointer; otherwise play the
+    #    engine driving the board.
+    if {[::spacePlayPointer]} { return true }
     return [::playMainEngineBestMove]
 }
 
