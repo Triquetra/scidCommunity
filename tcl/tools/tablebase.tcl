@@ -47,8 +47,11 @@ proc ::tablebase::countPieces {fen} {
 #   Returns the executable path, or "" when none is found.
 #
 proc ::tablebase::findCurl {} {
+    # auto_execok returns a *list* (so callers can append arguments). Take the
+    # path element out of it: otherwise a path containing spaces stringifies
+    # as {C:\Program Files\...\curl.exe} and exec looks for the braces too.
     set exe [auto_execok curl]
-    if {$exe ne ""} { return $exe }
+    if {$exe ne ""} { return [lindex $exe 0] }
 
     set exeDir ""
     catch {set exeDir [file dirname [info nameofexecutable]]}
