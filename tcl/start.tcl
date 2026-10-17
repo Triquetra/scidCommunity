@@ -936,6 +936,10 @@ if {[info commands ::omarchyTheme::ensure] ne ""} {
   }
 }
 
+if {$::lookTheme eq "omarchy"} {
+  set ::lookTheme "Omarchy"
+}
+
 catch { ttk::style theme use $::lookTheme }
 configure_style
 configure_menus

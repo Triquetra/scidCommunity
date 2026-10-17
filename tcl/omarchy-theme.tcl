@@ -13,7 +13,7 @@
 
 namespace eval ::omarchyTheme {
 
-  variable themeName "omarchy"
+  variable themeName "Omarchy"
 
   # --- Detection -----------------------------------------------------------
   proc isOmarchy {} {
@@ -77,13 +77,21 @@ namespace eval ::omarchyTheme {
 
   proc cacheValid {file fp} {
     if {$fp eq "" || ![file readable $file]} { return 0 }
-    if {[catch {set fd [open $file r]; set line [gets $fd]; close $fd}]} {
+    if {[catch {set fd [open $file r]; set content [read $fd]; close $fd}]} {
       return 0
     }
+    set line [lindex [split $content "\n"] 0]
     if {![regexp {^#\s*OmarchyTheme\s+([0-9a-fA-F]{8})} $line -> stored]} {
       return 0
     }
-    return [expr {[string tolower $stored] eq [string tolower $fp]}]
+    if {[string tolower $stored] ne [string tolower $fp]} {
+      return 0
+    }
+    variable themeName
+    if {[string first "ttk::style theme create $themeName" $content] == -1} {
+      return 0
+    }
+    return 1
   }
 
   # --- colors.toml parsing -------------------------------------------------
@@ -124,7 +132,7 @@ namespace eval ::omarchyTheme {
     if {[dict exists $colors mode]} {
       if {[string tolower [dict get $colors mode]] eq "light"} { set dark 0 }
     }
-    set darkReg {registerDarkTheme "omarchy"}
+    set darkReg {registerDarkTheme "Omarchy"}
     if {!$dark} { set darkReg "" }
 
     # Button/surface backgrounds use lighter_background (a surface color) rather
@@ -133,8 +141,8 @@ namespace eval ::omarchyTheme {
     # configured explicitly so they don't fall back to the parent's gray.
     set template {# OmarchyTheme @FP@
 @DARKREG@
-if {[lsearch -exact [ttk::style theme names] omarchy] == -1} {
-  ttk::style theme create omarchy -parent classic -settings {
+if {[lsearch -exact [ttk::style theme names] Omarchy] == -1} {
+  ttk::style theme create Omarchy -parent classic -settings {
     ttk::style configure . -background @BG@ -fieldbackground @LBR@ -foreground @FG@ -selectbackground @ACC@ -selectforeground @BG@ -insertcolor @FG@ -insertbackground @FG@ -troughcolor @DBR@
     ttk::style configure TFrame -background @BG@
     ttk::style configure TLabel -background @BG@ -foreground @FG@
@@ -197,7 +205,7 @@ if {[lsearch -exact [ttk::style theme names] omarchy] == -1} {
   }
 
   # --- Entry point ---------------------------------------------------------
-  # Ensures the "omarchy" ttk theme exists, rebuilding it from colors.toml only
+  # Ensures the "Omarchy" ttk theme exists, rebuilding it from colors.toml only
   # when necessary. Returns the theme name, or "" if this is not an Omarchy
   # system or the palette could not be read.
   proc ensure {} {

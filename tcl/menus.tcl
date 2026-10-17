@@ -571,7 +571,9 @@ proc menuUpdateThemes {} {
   foreach i [lsort $allThemes] {
       # Skip alt and clam themes as they are essentially duplicates of classic
       if {$i eq "alt" || $i eq "clam"} { continue }
-      $m add radiobutton -label "$i" -value $i -variable ::lookTheme \
+      if {$i eq "omarchy" && "Omarchy" in $allThemes} { continue }
+      set themeLabel [expr {$i eq "omarchy" ? "Omarchy" : $i}]
+      $m add radiobutton -label $themeLabel -value $i -variable ::lookTheme \
       -command {::loadDeferredTheme $::lookTheme; set ::omarchyAutoTheme 0; ttk::style theme use $::lookTheme; configure_menus}
   }
 
