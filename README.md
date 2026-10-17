@@ -147,7 +147,9 @@ sudo make install
 - **[Venkat Krishnamurthy](https://github.com/kayvee42)** — focuses on the macOS version (build, packaging and platform fixes) and redesigned the PGN Window buttons
 
 
+### Acknowledgements
 
+Thanks to [Uwe Klimmek](https://codeberg.org/scid/scid) for the [scid](https://codeberg.org/scid/scid) source code from his fork which is responsible for the enhanced look of the buttons below the Chessboard, the engine settings dialog, and PGN Viewer.  Thanks also to [@steveannus](https://github.com/steveannus) and the *Scid vs. PC* codebase for features adopted like *My Player Names* and the ability to view multiple books in the **Book Window**.
 
 
 
