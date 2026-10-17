@@ -2172,9 +2172,6 @@ set tips(S) {
     <a Flags>Banderas</a> son útiles para marcar juegos en la base de datos con características que quizás quieras buscar más adelante, como estructura de peones, tácticas, etc. Puedes buscar por banderas con un <a Searches Header>búsqueda de encabezado</a>.
   }
   {
-    Si estás jugando un juego y quieres probar algunos movimientos sin alterar el juego, simplemente activa el modo de prueba (con el atajo <b>Ctrl+espacio</b> o desde el ícono de la barra de herramientas), luego apágalo nuevamente para volver al juego original cuando hayas terminado.
-  }
-  {
     Para encontrar los juegos más destacados (con oponentes de alto rating) que alcanzan una posición particular, abra el <a Tree>árbol</a> ventana y desde allí, abre la lista de mejores juegos. Incluso puedes restringir la lista de mejores juegos para mostrar solo juegos con un resultado particular.
   }
   {

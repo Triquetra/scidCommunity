@@ -45,7 +45,7 @@ proc keyboardShortcuts {w} {
 	bind $w <Control-o> { ::file::Open }
 
 	# Open the file finder
-	bind $w <Control-slash> { ::file::finder::Open }
+	bind $w <Control-slash> { excludeTextWidget %W; ::file::finder::Open }
 
 	# Close the current database
 	# TODO: is better to use control-w to close the focused window?

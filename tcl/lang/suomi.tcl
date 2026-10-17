@@ -2150,9 +2150,6 @@ set tips(U) {
     <a Flags>Liput </a> ovat hyödyllisiä tietokantapelien merkitsemiseen ominaisuuksilla, joita saatat haluta etsiä myöhemmin, kuten pelinappulan rakennetta, taktiikoita jne. Voit etsiä lippujen perusteella <a Searches Header> otsikkohaulla </a>.
   }
   {
-    Jos pelaat peliä ja haluat kokeilla joitain liikkeitä muuttamatta peliä, ota vain kokeilutila käyttöön (<b>Ctrl+välilyönti</b>-pikanäppäimellä tai työkalupalkin kuvakkeesta) ja sammuta se sitten uudelleen palataksesi alkuperäiseen peliin, kun olet valmis.
-  }
-  {
     Löytääksesi näkyvimmät pelit (joissa on korkealuokkaisia ​​vastustajia), jotka saavuttavat tietyn paikan, avaa <a Tree>tree</a> -ikkuna ja sieltä parhaiden pelien luettelo. Voit jopa rajoittaa parhaiden pelien luetteloa näyttämään vain tietyn tuloksen saaneet pelit.
   }
   {

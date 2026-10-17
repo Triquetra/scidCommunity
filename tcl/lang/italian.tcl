@@ -2121,9 +2121,6 @@ set tips(I) {
     <a Flags>Le bandiere</a> sono utili per contrassegnare le partite del database con caratteristiche che potresti voler cercare in un secondo momento, come la struttura dei pedoni, le tattiche, ecc. Puoi eseguire la ricerca per bandiere con una <a Searches Header>ricerca di intestazione</a>.
   }
   {
-    Se stai giocando e desideri provare alcune mosse senza alterare il gioco, attiva semplicemente la modalità di prova (con la scorciatoia <b>Ctrl+spazio</b> o dall'icona della barra degli strumenti), quindi disattivala nuovamente per tornare al gioco originale quando hai finito.
-  }
-  {
     Per trovare i giochi più importanti (con avversari di alto livello) che raggiungono una posizione particolare, apri la finestra <a Tree>albero</a> e da lì apri l'elenco dei migliori giochi. Puoi anche limitare l'elenco dei migliori giochi per mostrare solo i giochi con un risultato particolare.
   }
   {

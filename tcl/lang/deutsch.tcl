@@ -2169,9 +2169,6 @@ set tips(D) {
     <a Flags>Flags</a> sind nützlich, um Datenbankspiele mit Merkmalen zu markieren, nach denen Sie möglicherweise später suchen möchten, wie z. B. Bauernstruktur, Taktik usw. Sie können mit einer <a Searches Header>Header-Suche </a> nach Flaggen suchen.
   }
   {
-    Wenn Sie ein Spiel durchspielen und einige Züge ausprobieren möchten, ohne das Spiel zu verändern, schalten Sie einfach den Testmodus ein (mit der Tastenkombination <b>Strg+Leertaste</b> oder über das Symbol in der Symbolleiste) und schalten Sie ihn dann wieder aus, um zum ursprünglichen Spiel zurückzukehren, wenn Sie fertig sind.
-  }
-  {
     Um die prominentesten Spiele (mit hoch bewerteten Gegnern) zu finden, die eine bestimmte Position erreichen, öffnen Sie das Fenster <a Tree>Baum</a> und öffnen Sie von dort aus die Liste der besten Spiele. Sie können die Liste der besten Spiele sogar einschränken, um nur Spiele mit einem bestimmten Ergebnis anzuzeigen.
   }
   {

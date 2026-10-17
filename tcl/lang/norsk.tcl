@@ -2119,9 +2119,6 @@ set tips(O) {
     <a Flags>Flagg</a> er nyttige for å markere databasespill med egenskaper du kanskje vil søke etter på et senere tidspunkt, som bondestruktur, taktikk osv. Du kan søke etter flagg med et <a Searches Header>hodesøk</a>.
   }
   {
-    Hvis du spiller gjennom et spill og ønsker å prøve noen trekk uten å endre spillet, slår du ganske enkelt på prøvemodus (med <b>Ctrl+mellomrom</b> snarveien eller fra verktøylinjeikonet), og deretter slår du det av igjen for å gå tilbake til det originale spillet når du er ferdig.
-  }
-  {
     For å finne de mest fremtredende spillene (med høyt rangerte motstandere) som når en bestemt posisjon, åpner du <a Tree>treet</a>-vinduet og åpner listen over beste spill derfra. Du kan til og med begrense listen over beste spill til kun å vise spill med et bestemt resultat.
   }
   {

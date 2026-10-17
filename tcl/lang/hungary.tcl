@@ -2120,9 +2120,6 @@ set tips(H) {
     <a Flags> A zászlók </a> hasznosak az adatbázisjátékok olyan jellemzőkkel való megjelölésére, amelyekre később érdemes lehet keresni, mint például a gyalogszerkezet, taktika stb. A <a Searches Header> fejléckereséssel </a> kereshet zászlók alapján.
   }
   {
-    Ha végigjátszod a játékot, és szeretnél kipróbálni néhány mozdulatot a játék megváltoztatása nélkül, egyszerűen kapcsold be a Próba módot (a <b>Ctrl+szóköz</b> parancsikonnal vagy az eszköztár ikonjáról), majd kapcsold ki ismét, hogy visszatérj az eredeti játékhoz, ha végzett.
-  }
-  {
     Ha meg szeretné keresni a legjelentősebb játékokat (magasan értékelt ellenfelekkel), amelyek elértek egy adott pozíciót, nyissa meg a <a Tree>tree</a> ablakot, és onnan nyissa meg a legjobb játékok listáját. Még a legjobb játékok listáját is korlátozhatja, hogy csak az adott eredménnyel rendelkező játékok jelenjenek meg.
   }
   {

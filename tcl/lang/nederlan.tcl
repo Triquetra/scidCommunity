@@ -2144,9 +2144,6 @@ set tips(N) {
     <a Flags>Vlaggen</a> zijn handig voor het markeren van databasepartijen met kenmerken waarnaar u later misschien wilt zoeken, zoals pionnenstructuur, tactieken, enz. U kunt zoeken op vlaggen met een <a Searches Header>koptekstzoekopdracht</a>.
   }
   {
-    Als u een spel speelt en enkele zetten wilt uitproberen zonder het spel te wijzigen, schakelt u eenvoudigweg de proefmodus in (met de sneltoets <b>Ctrl+spatiebalk</b> of via het werkbalkpictogram) en schakelt u deze vervolgens weer uit om terug te keren naar het originele spel als u klaar bent.
-  }
-  {
     Om de meest prominente spellen (met hoog gewaardeerde tegenstanders) te vinden die een bepaalde positie bereiken, opent u het <a Tree>boom</a>-venster en opent u van daaruit de lijst met beste spellen. Je kunt zelfs de lijst met beste games beperken, zodat alleen games met een bepaald resultaat worden weergegeven.
   }
   {

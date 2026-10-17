@@ -2125,9 +2125,6 @@ set tips(F) {
     <a Flags>Drapeaux</a> sont utiles pour marquer les jeux de base de données avec des caractéristiques que vous souhaiterez peut-être rechercher ultérieurement, telles que la structure des pions, les tactiques, etc. Vous pouvez effectuer une recherche par drapeaux avec un <a Searches Header>recherche d'en-tête</a>.
   }
   {
-    Si vous jouez à un jeu et souhaitez essayer quelques mouvements sans altérer le jeu, activez simplement le mode Essai (avec le raccourci <b>Ctrl+espace</b> ou depuis l'icône de la barre d'outils), puis désactivez-le à nouveau pour revenir au jeu d'origine lorsque vous avez terminé.
-  }
-  {
     Pour trouver les jeux les plus importants (avec des adversaires de haut niveau) atteignant une position particulière, ouvrez la fenêtre <a Tree>tree </a> et à partir de là, ouvrez la liste des meilleurs jeux. Vous pouvez même restreindre la liste des meilleurs jeux pour afficher uniquement les jeux avec un résultat particulier.
   }
   {

@@ -2101,9 +2101,6 @@ set tips(T) {
     <a Flags>Bayraklar</a>, piyon yapısı, taktikler vb. gibi daha sonra aramak isteyebileceğiniz özellikleri içeren veritabanı oyunlarını işaretlemek için kullanışlıdır. <a Searches Header>başlık araması</a> ile bayraklara göre arama yapabilirsiniz.
   }
   {
-    Bir oyun oynuyorsanız ve oyunu değiştirmeden bazı hareketleri denemek istiyorsanız, Deneme modunu açın (<b>Ctrl+boşluk</b> kısayoluyla veya araç çubuğu simgesinden), ardından işiniz bittiğinde orijinal oyuna dönmek için tekrar kapatın.
-  }
-  {
     Belirli bir konuma ulaşan en öne çıkan oyunları (yüksek reytingli rakiplerle) bulmak için <a Tree>ağaç</a> penceresini açın ve oradan en iyi oyunlar listesini açın. Hatta en iyi oyunlar listesini yalnızca belirli bir sonuca sahip oyunları gösterecek şekilde kısıtlayabilirsiniz.
   }
   {

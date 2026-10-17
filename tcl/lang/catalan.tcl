@@ -2141,9 +2141,6 @@ set tips(K) {
     <a Flags>Banderes</a> són útils per marcar jocs de base de dades amb característiques que potser voldreu cercar més endavant, com ara l'estructura de peons, tàctiques, etc. Podeu cercar per banderes amb un <a Searches Header>cerca de capçalera</a>.
   }
   {
-    Si esteu jugant a un joc i voleu provar alguns moviments sense alterar el joc, només heu d'activar el mode de prova (amb la drecera <b>Ctrl+espai </b> o des de la icona de la barra d'eines) i, a continuació, desactiveu-lo de nou per tornar al joc original quan hàgiu acabat.
-  }
-  {
     Per trobar els jocs més destacats (amb oponents ben valorats) que arriben a una posició determinada, obriu el <a Tree>arbre</a> finestra i des d'allà, obriu la llista de millors jocs. Fins i tot podeu restringir la llista de millors jocs per mostrar només els jocs amb un resultat determinat.
   }
   {
