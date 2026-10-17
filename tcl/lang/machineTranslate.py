@@ -7,8 +7,7 @@ The script will automatically detect encoding or you can specify it with -e flag
   utf-8         - English, French, Greek, Italian, Russian, Chinese, Hebrew, Swahili,
                   Japanese, Romanian, Turkish, Hindi, Ukrainian, Bengali
                   Catalan, German, Dutch, Norwegian, Portuguese, Spanish, Finnish, Swedish,
-                  Czech, Hungarian, Polish, Korean, Bulgarian
-iso8859-2         Serbian
+                  Czech, Hungarian, Polish, Korean, Bulgarian, Serbian
 
 Supported Language Codes (use with -l flag):
 ==================================================
@@ -166,7 +165,7 @@ def get_encoding_for_file(input_file):
         'polish.tcl': 'utf-8',
         'portbr.tcl': 'utf-8',
         'russian.tcl': 'utf-8',
-        'serbian.tcl': 'iso8859-2',
+        'serbian.tcl': 'utf-8',
         'spanish.tcl': 'utf-8',
         'suomi.tcl': 'utf-8',
         'swedish.tcl': 'utf-8',

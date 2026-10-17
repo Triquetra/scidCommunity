@@ -2172,9 +2172,6 @@ set tips(S) {
     <a Flags>Banderas</a> son útiles para marcar juegos en la base de datos con características que quizás quieras buscar más adelante, como estructura de peones, tácticas, etc. Puedes buscar por banderas con un <a Searches Header>búsqueda de encabezado</a>.
   }
   {
-    Si estás jugando un juego y quieres probar algunos movimientos sin alterar el juego, simplemente activa el modo de prueba (con el atajo <b>Ctrl+espacio</b> o desde el ícono de la barra de herramientas), luego apágalo nuevamente para volver al juego original cuando hayas terminado.
-  }
-  {
     Para encontrar los juegos más destacados (con oponentes de alto rating) que alcanzan una posición particular, abra el <a Tree>árbol</a> ventana y desde allí, abre la lista de mejores juegos. Incluso puedes restringir la lista de mejores juegos para mostrar solo juegos con un resultado particular.
   }
   {
@@ -2227,9 +2224,6 @@ set tips(S) {
   }
   {
     Si está explorando vacantes en una base de datos con el <a Tree>árbol</a>, puedes ver una descripción general útil de qué tan bien está puntuando la apertura actual recientemente y entre los jugadores mejor calificados abriendo la ventana Estadísticas (atajo: Ctrl+I).
-  }
-  {
-    En la ventana <b>Game Browser</b>, puedes cambiar el tamaño del tablero manteniendo presionadas las teclas <b>Ctrl</b> y <b>Shift</b>, y presionando la tecla de flecha <b>Izquierda</b> o <b>Derecha</b>.
   }
   {
     Después de un <a Searches>buscar</a>, puedes navegar fácilmente a través de todos los juegos coincidentes manteniendo presionado <b>Control</b> y presionando el <b>Arriba</b> o <b>Abajo</b> tecla para cargar el anterior o el siguiente <a Searches Filter>filtrar</a> juego.

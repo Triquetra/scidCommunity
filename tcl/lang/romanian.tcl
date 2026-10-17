@@ -2138,9 +2138,6 @@ set tips(L) {
     <a Flags>Steaguri</a> sunt utile pentru marcarea jocurilor de baze de date cu caracteristici pe care poate doriți să le căutați mai târziu, cum ar fi structura pionilor, tactici etc. Puteți căuta după steaguri cu un <a Searches Header>căutarea antetului</a>.
   }
   {
-    Dacă jucați un joc și doriți să încercați unele mișcări fără a modifica jocul, pur și simplu porniți modul de încercare (cu comanda rapidă <b>Ctrl+spațiu </b> sau din pictograma barei de instrumente), apoi dezactivați-l din nou pentru a reveni la jocul original când ați terminat.
-  }
-  {
     Pentru a găsi cele mai proeminente jocuri (cu adversarii cu cotații ridicate) care ajung într-o anumită poziție, deschideți fereastra <a Tree>arborele</a> și de acolo deschideți lista celor mai bune jocuri. Puteți chiar să restricționați lista de cele mai bune jocuri pentru a afișa numai jocurile cu un anumit rezultat.
   }
   {
@@ -2193,9 +2190,6 @@ set tips(L) {
   }
   {
     Dacă răsfoiți deschideri într-o bază de date cu <a Tree>copac</a>, puteți vedea o imagine de ansamblu utilă a cât de bine a punctat deschiderea curentă recent și între jucătorii cu rating ridicat, deschizând fereastra Statistici (comandă rapidă: Ctrl+I).
-  }
-  {
-    În <b>Browser de jocuri</b> fereastra, puteți modifica dimensiunea plăcii ținând apăsată tasta <b>Ctrl</b> şi <b>Schimbare</b> tastele și apăsând tasta <b>Stânga</b> sau <b>Corect</b> tasta săgeată.
   }
   {
     După o <a Searches>căutare</a>, puteți răsfoi cu ușurință prin toate jocurile potrivite ținând apăsat <b>Ctrl</b> și apăsând butonul <b>Sus</b> sau <b>Jos</b> tasta pentru a încărca precedentul sau următorul <a Searches Filter>filtra</a> joc.

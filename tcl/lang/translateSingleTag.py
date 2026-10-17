@@ -99,9 +99,7 @@ DEFAULT_ENGLISH_TEXTS = {
 
 
 def get_encoding_for_file(filepath):
-    filename = os.path.basename(filepath)
-    if filename == 'serbian.tcl':
-        return 'iso8859-2'
+    # All language files, including serbian.tcl, are UTF-8.
     return 'utf-8'
 
 

@@ -2163,11 +2163,6 @@ set tips(P) {
     Możesz przeszukiwać według flag za pomocą <a Searches Header>Wyszukiwania nagłówków</a>.
   }
   {
-    Jeśli przeglądasz partię i chcesz wypróbować kilka posunięć bez zmieniania partii,
-    włącz tryb próbny (skrótem <b>Ctrl+spacja</b> lub ikoną na pasku narzędzi),
-    a po zakończeniu wyłącz go, aby wrócić do oryginalnej partii.
-  }
-  {
     Aby znaleźć najważniejsze partie (z wysoko ocenianymi przeciwnikami)
     osiągające daną pozycję, otwórz okno <a Tree>Drzewo wariantów</a>
     i stamtąd otwórz listę najlepszych partii. Możesz nawet ograniczyć
@@ -2266,11 +2261,6 @@ set tips(P) {
     możesz uzyskać przydatny przegląd ostatnich wyników bieżącego debiutu
     oraz statystyki wśród wysoko ocenianych zawodników, otwierając
     okno statystyk (skrót: Ctrl+I).
-  }
-  {
-    W oknie <b>Przeglądarka partii</b> możesz zmienić rozmiar szachownicy
-    przytrzymując klawisze <b>Ctrl</b> i <b>Shift</b> oraz naciskając
-    klawisz strzałki <b>W lewo</b> lub <b>W prawo</b>.
   }
   {
     Po wykonaniu <a Searches>Wyszukiwania</a> możesz łatwo przeglądać wszystkie

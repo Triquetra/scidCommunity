@@ -57,7 +57,7 @@ def get_encoding_for_file(filepath):
         'polish.tcl': 'utf-8',
         'portbr.tcl': 'utf-8',
         'russian.tcl': 'utf-8',
-        'serbian.tcl': 'iso-8859-2',
+        'serbian.tcl': 'utf-8',
         'spanish.tcl': 'utf-8',
         'suomi.tcl': 'utf-8',
         'swedish.tcl': 'utf-8',

@@ -39,7 +39,7 @@ array set encodings {
   polish utf-8
   portbr utf-8
   russian utf-8
-  serbian iso8859-2
+  serbian utf-8
   spanish utf-8
   swedish utf-8
   catalan utf-8
@@ -89,10 +89,9 @@ array set codes {
   bulgarian g
 }
 
-# "serbian" (Latin script) is kept out of sync on purpose: it is
-# iso8859-2 encoded and cannot be machine-translated in the usual workflow,
-# so it is skipped by default. It can still be processed by naming it
-# explicitly, e.g. "tclsh removedeadlang.tcl serbian".
+# "serbian" (Latin script) is kept out of sync on purpose and is skipped by
+# the default list below. It can still be processed by naming it explicitly,
+# e.g. "tclsh removedeadlang.tcl serbian".
 set languages {czech deutsch francais hungary italian chinese nederlan norsk
   polish portbr spanish swedish russian catalan suomi greek turkish
   SerbCyr japanese romanian hebrew swahili hindi ukrainian bengali korean

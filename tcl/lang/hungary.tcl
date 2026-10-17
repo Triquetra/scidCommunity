@@ -2120,9 +2120,6 @@ set tips(H) {
     <a Flags> A zászlók </a> hasznosak az adatbázisjátékok olyan jellemzőkkel való megjelölésére, amelyekre később érdemes lehet keresni, mint például a gyalogszerkezet, taktika stb. A <a Searches Header> fejléckereséssel </a> kereshet zászlók alapján.
   }
   {
-    Ha végigjátszod a játékot, és szeretnél kipróbálni néhány mozdulatot a játék megváltoztatása nélkül, egyszerűen kapcsold be a Próba módot (a <b>Ctrl+szóköz</b> parancsikonnal vagy az eszköztár ikonjáról), majd kapcsold ki ismét, hogy visszatérj az eredeti játékhoz, ha végzett.
-  }
-  {
     Ha meg szeretné keresni a legjelentősebb játékokat (magasan értékelt ellenfelekkel), amelyek elértek egy adott pozíciót, nyissa meg a <a Tree>tree</a> ablakot, és onnan nyissa meg a legjobb játékok listáját. Még a legjobb játékok listáját is korlátozhatja, hogy csak az adott eredménnyel rendelkező játékok jelenjenek meg.
   }
   {
@@ -2175,9 +2172,6 @@ set tips(H) {
   }
   {
     Ha egy adatbázisban a <a Tree>fával </a> böngészik a megnyitások között, akkor a Statisztika ablak megnyitásával hasznos áttekintést kaphat arról, hogy az aktuális nyitás milyen jól teljesít a közelmúltban, illetve a magasan értékelt játékosok között.
-  }
-  {
-    A <b>Game Browser</b> ablakban a <b>Ctrl</b> és <b>Shift</b> billentyűk lenyomva tartásával, valamint a <b>Bal</b> vagy <b>Jobbra</b> nyílbillentyű megnyomásával módosíthatja a tábla méretét.
   }
   {
     Egy <a Searches> keresés </a> után könnyedén böngészhet az összes megfelelő játék között, ha lenyomva tartja a <b>Ctrl</b> és a <b>Fel</b> vagy <b>Down</b> billentyűt az előző vagy a következő <a Searches Filter>játék</a> szűrő betöltéséhez.

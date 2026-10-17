@@ -23,7 +23,7 @@ This script:
 
 The single-letter language codes and file list are read from ../language.tcl
 (the addLanguage commands).  serbian.tcl is skipped (Google Translate has no
-Serbian-Latin target and the file uses iso8859-2); polish.tcl is also skipped
+Serbian-Latin target); polish.tcl is also skipped
 because helpPL.tcl already exists.
 
 All target files are written UTF-8.  The result is a MACHINE-TRANSLATED SCAFFOLD

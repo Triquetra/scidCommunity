@@ -158,12 +158,6 @@ set tips(E) {
     <a Searches Header>header search</a>.
   }
   {
-    If you are playing through a game and want to try out some moves
-    without altering the game, simply turn on Trial mode (with the
-    <b>Ctrl+space</b> shortcut or from the toolbar icon), then turn it off
-    again to return to the original game when you are done.
-  }
-  {
     To find the most prominent games (with high-rated opponents)
     reaching a particular position, open the <a Tree>tree</a> window
     and from there, open the best games list. You can even restrict
@@ -263,11 +257,6 @@ set tips(E) {
     you can see a useful overview of how well the current opening is
     scoring recently and between high-rated players by opening the
     Statistics window (shortcut: Ctrl+I).
-  }
-  {
-    In the <b>Game Browser</b> window, you can change the board size by
-    holding down the <b>Ctrl</b> and <b>Shift</b> keys, and pressing
-    the <b>Left</b> or <b>Right</b> arrow key.
   }
   {
     After a <a Searches>search</a>, you can easily browse through all

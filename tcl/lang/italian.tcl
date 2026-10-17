@@ -2121,9 +2121,6 @@ set tips(I) {
     <a Flags>Le bandiere</a> sono utili per contrassegnare le partite del database con caratteristiche che potresti voler cercare in un secondo momento, come la struttura dei pedoni, le tattiche, ecc. Puoi eseguire la ricerca per bandiere con una <a Searches Header>ricerca di intestazione</a>.
   }
   {
-    Se stai giocando e desideri provare alcune mosse senza alterare il gioco, attiva semplicemente la modalità di prova (con la scorciatoia <b>Ctrl+spazio</b> o dall'icona della barra degli strumenti), quindi disattivala nuovamente per tornare al gioco originale quando hai finito.
-  }
-  {
     Per trovare i giochi più importanti (con avversari di alto livello) che raggiungono una posizione particolare, apri la finestra <a Tree>albero</a> e da lì apri l'elenco dei migliori giochi. Puoi anche limitare l'elenco dei migliori giochi per mostrare solo i giochi con un risultato particolare.
   }
   {
@@ -2176,9 +2173,6 @@ set tips(I) {
   }
   {
     Se stai esplorando le aperture in un database con il file <a Tree>albero</a>, puoi vedere un'utile panoramica di quanto bene l'apertura attuale sta segnando recentemente e tra i giocatori di alto punteggio aprendo la finestra Statistiche (scorciatoia: Ctrl+I).
-  }
-  {
-    Nella finestra <b>Browser gioco</b>, puoi modificare le dimensioni del tabellone tenendo premuti i tasti <b>Ctrl</b> e <b>Maiusc</b> e premendo il tasto freccia <b>Sinistra</b> o <b>Destra</b>.
   }
   {
     Dopo un <a Searches>ricerca</a>, puoi sfogliare facilmente tutti i giochi corrispondenti tenendo premuto <b>Ctrl</b> e premendo il <b>Su</b> O <b>Giù</b> tasto per caricare il precedente o il successivo <a Searches Filter>filtro</a> gioco.

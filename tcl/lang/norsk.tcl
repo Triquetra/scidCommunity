@@ -2119,9 +2119,6 @@ set tips(O) {
     <a Flags>Flagg</a> er nyttige for å markere databasespill med egenskaper du kanskje vil søke etter på et senere tidspunkt, som bondestruktur, taktikk osv. Du kan søke etter flagg med et <a Searches Header>hodesøk</a>.
   }
   {
-    Hvis du spiller gjennom et spill og ønsker å prøve noen trekk uten å endre spillet, slår du ganske enkelt på prøvemodus (med <b>Ctrl+mellomrom</b> snarveien eller fra verktøylinjeikonet), og deretter slår du det av igjen for å gå tilbake til det originale spillet når du er ferdig.
-  }
-  {
     For å finne de mest fremtredende spillene (med høyt rangerte motstandere) som når en bestemt posisjon, åpner du <a Tree>treet</a>-vinduet og åpner listen over beste spill derfra. Du kan til og med begrense listen over beste spill til kun å vise spill med et bestemt resultat.
   }
   {
@@ -2174,9 +2171,6 @@ set tips(O) {
   }
   {
     Hvis du blar gjennom åpninger i en database med <a Tree>treet</a>, kan du se en nyttig oversikt over hvor godt den nåværende åpningen scorer nylig og mellom høyt rangerte spillere ved å åpne statistikkvinduet (snarvei: Ctrl+I).
-  }
-  {
-    I <b>Game Browser</b>-vinduet kan du endre brettstørrelsen ved å holde nede <b>Ctrl</b> og <b>Shift</b>-tastene, og trykke på <b>Venstre</b> eller <b>Høyre</b>-piltasten.
   }
   {
     Etter et <a Searches>søk</a>, kan du enkelt bla gjennom alle matchende spill ved å holde nede <b>Ctrl</b> og trykke på <b>Opp</b> eller <b>Ned</b>-tasten for å laste forrige eller neste <a Searches Filter>filter</a>spill.

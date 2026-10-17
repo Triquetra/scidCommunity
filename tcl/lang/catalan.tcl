@@ -2141,9 +2141,6 @@ set tips(K) {
     <a Flags>Banderes</a> són útils per marcar jocs de base de dades amb característiques que potser voldreu cercar més endavant, com ara l'estructura de peons, tàctiques, etc. Podeu cercar per banderes amb un <a Searches Header>cerca de capçalera</a>.
   }
   {
-    Si esteu jugant a un joc i voleu provar alguns moviments sense alterar el joc, només heu d'activar el mode de prova (amb la drecera <b>Ctrl+espai </b> o des de la icona de la barra d'eines) i, a continuació, desactiveu-lo de nou per tornar al joc original quan hàgiu acabat.
-  }
-  {
     Per trobar els jocs més destacats (amb oponents ben valorats) que arriben a una posició determinada, obriu el <a Tree>arbre</a> finestra i des d'allà, obriu la llista de millors jocs. Fins i tot podeu restringir la llista de millors jocs per mostrar només els jocs amb un resultat determinat.
   }
   {
@@ -2196,9 +2193,6 @@ set tips(K) {
   }
   {
     Si esteu navegant per les obertures en una base de dades amb el <a Tree>arbre</a>, podeu veure una visió general útil de la puntuació de l'obertura actual recentment i entre jugadors ben valorats obrint la finestra Estadístiques (drecera: Ctrl+I).
-  }
-  {
-    A la finestra <b>Navegador de jocs </b>, podeu canviar la mida del tauler mantenint premudes les tecles <b>Ctrl</b> i <b>Maj </b> i prement la fletxa <b>Esquerra </b> o <b>Dreta </b>.
   }
   {
     Després d'a <a Searches>cerca</a>, podeu navegar fàcilment per tots els jocs coincidents mantenint premut <b>Ctrl</b> i prement el <b>Amunt</b> o <b>Avall</b> tecla per carregar l'anterior o el següent <a Searches Filter>filtre</a> joc.

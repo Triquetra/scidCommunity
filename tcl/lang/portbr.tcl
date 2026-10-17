@@ -2127,9 +2127,6 @@ set tips(B) {
     <a Flags>Flags</a> são úteis para marcar jogos de banco de dados com características que você pode querer pesquisar posteriormente, como estrutura de peões, táticas, etc. Você pode pesquisar por flags com uma <a Searches Header>pesquisa de cabeçalho </a>.
   }
   {
-    Se você estiver jogando e quiser experimentar alguns movimentos sem alterar o jogo, basta ativar o modo de teste (com o atalho <b>Ctrl+espaço</b> ou no ícone da barra de ferramentas) e desligá-lo novamente para retornar ao jogo original quando terminar.
-  }
-  {
     Para encontrar os jogos mais proeminentes (com adversários de alto nível) alcançando uma determinada posição, abra a janela <a Tree>árvore</a> e a partir daí, abra a lista dos melhores jogos. Você pode até restringir a lista dos melhores jogos para mostrar apenas jogos com um determinado resultado.
   }
   {
@@ -2182,9 +2179,6 @@ set tips(B) {
   }
   {
     Se você estiver navegando por vagas em um banco de dados com o <a Tree>árvore</a>, você pode ter uma visão geral útil de quão bem a abertura atual está pontuando recentemente e entre jogadores de alto rating abrindo a janela Estatísticas (atalho: Ctrl+I).
-  }
-  {
-    Na janela <b>Game Browser</b>, você pode alterar o tamanho do tabuleiro mantendo pressionadas as teclas <b>Ctrl</b> e <b>Shift</b> e pressionando as teclas de seta <b>Esquerda</b> ou <b>Direita</b>.
   }
   {
     Depois de um <a Searches>procurar</a>, você pode navegar facilmente por todos os jogos correspondentes mantendo pressionado <b>Ctrl</b> e pressionando o <b>Acima</b> ou <b>Abaixo</b> tecla para carregar o anterior ou o próximo <a Searches Filter>filtro</a> jogo.

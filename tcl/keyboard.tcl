@@ -12,6 +12,13 @@
 # in order to best suit your preferences.
 # It is not necessary to recompile scid after changing this file.
 
+# Quit the application. The File menu advertises Ctrl+Q; a Tk menu accelerator
+# is display-only, so the key must be bound explicitly. The binding is on the
+# "all" tag rather than on the main window so that it also works from undocked
+# windows (e.g. an undocked board) and from dialog boxes, whose bindtags do not
+# include ".". Ctrl+Q is not used for text editing.
+bind all <Control-q> { ::file::Exit }
+
 proc keyboardShortcuts {w} {
 	# Go back/forward
 	bind $w <Left>  { excludeTextWidget %W; ::move::Back }
@@ -22,9 +29,11 @@ proc keyboardShortcuts {w} {
 	bind $w <End>   { excludeTextWidget %W; ::move::End }
 
 	# Load game
-	bind $w <Control-Up>   { excludeTextWidget %W; ::game::LoadNextPrev previous }
-	bind $w <Control-Down> { excludeTextWidget %W; ::game::LoadNextPrev next }
-	bind $w <Control-question> { excludeTextWidget %W; ::game::LoadRandom }
+	bind $w <Control-Shift-Up>   { excludeTextWidget %W; ::game::LoadNextPrev first }
+	bind $w <Control-Up>         { excludeTextWidget %W; ::game::LoadNextPrev previous }
+	bind $w <Control-Down>       { excludeTextWidget %W; ::game::LoadNextPrev next }
+	bind $w <Control-Shift-Down> { excludeTextWidget %W; ::game::LoadNextPrev last }
+	bind $w <Control-question>   { excludeTextWidget %W; ::game::LoadRandom }
 
 	# Rotate the chess board
 	bind $w <period> { excludeTextWidget %W; toggleRotateBoard }
@@ -34,6 +43,9 @@ proc keyboardShortcuts {w} {
 
 	# Open a database
 	bind $w <Control-o> { ::file::Open }
+
+	# Open the file finder
+	bind $w <Control-slash> { excludeTextWidget %W; ::file::finder::Open }
 
 	# Close the current database
 	# TODO: is better to use control-w to close the focused window?
@@ -82,7 +94,7 @@ proc keyboardShortcuts {w} {
 
 	#TODO: to be checked
 	bind $w <F6>	::book::open
-	bind $w <Control-Key-3> ::windows::game3d::toggle
+	bind $w <F12> ::windows::game3d::toggle
 	bind $w <Control-d> ::windows::switcher::Open
 	bind $w <Control-e> "::makeCommentWin toggle"
 	bind $w <Control-i> ::windows::stats::Open
@@ -111,7 +123,6 @@ proc keyboardShortcuts {w} {
 	bind $w <Control-B> ::search::board
 	bind $w <Control-H> ::search::header
 	bind $w <Control-M> ::search::material
-	bind $w <Control-KeyPress-U> ::search:::usefile
 
 	bind $w <Control-C> ::copyFEN
 	bind $w <Control-V> ::pasteFEN

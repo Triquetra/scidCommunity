@@ -564,7 +564,7 @@ translate Y LichessPuzzlesSolve {Your turn! Find the best move.}
 # ====== TODO To be translated ======
 translate Y LichessPuzzlesCorrect {Good move!}
 # ====== TODO To be translated ======
-translate Y LichessPuzzlesWrong {That's not the move 
+translate Y LichessPuzzlesWrong {That's not the move -- try something else.}
 # ====== TODO To be translated ======
 translate Y LichessPuzzlesBestMove {Best move!  Keep going...}
 # ====== TODO To be translated ======
@@ -2924,11 +2924,11 @@ translate Y QGDwithBg5 {QGD with Bg5}
 # ====== TODO To be translated ======
 translate Y QGDOrthodox {QGD Orthodox}
 # ====== TODO To be translated ======
-translate Y Grunfeld {Gr�nfeld}
+translate Y Grunfeld {Grünfeld}
 # ====== TODO To be translated ======
-translate Y GrunfeldExchange {Gr�nfeld Exchange}
+translate Y GrunfeldExchange {Grünfeld Exchange}
 # ====== TODO To be translated ======
-translate Y GrunfeldRussian {Gr�nfeld Russian}
+translate Y GrunfeldRussian {Grünfeld Russian}
 # ====== TODO To be translated ======
 translate Y Catalan {Catalan}
 # ====== TODO To be translated ======
@@ -2946,7 +2946,7 @@ translate Y NimzoIndianRubinstein {Nimzo-Indian Rubinstein}
 # ====== TODO To be translated ======
 translate Y KingsIndian {King's Indian}
 # ====== TODO To be translated ======
-translate Y KingsIndianSamisch {King's Indian S�misch}
+translate Y KingsIndianSamisch {King's Indian Sämisch}
 # ====== TODO To be translated ======
 translate Y KingsIndianMainLine {King's Indian Main Line}
 # ====== TODO To be translated ======
@@ -3447,4 +3447,6 @@ translate Y RtfNotScidFile {This file was not exported by scidCommunity with com
 translate Y RtfImportSuccess {Game imported into clipboard database successfully.}
 # ====== TODO To be translated ======
 translate Y RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+}
+# end of serbian.tcl
 

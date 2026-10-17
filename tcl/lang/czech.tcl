@@ -2119,9 +2119,6 @@ set tips(C) {
     <a Flags>Flags</a> jsou užitečné pro označování databázových her charakteristikami, které budete chtít později vyhledat, jako je struktura pěšce, taktika atd. Můžete vyhledávat podle vlajek pomocí <a Searches Header>header search </a>.
   }
   {
-    Pokud hrajete hru a chcete si vyzkoušet některé pohyby, aniž byste hru změnili, jednoduše zapněte zkušební režim (pomocí zkratky <b>Ctrl+mezera </b> nebo pomocí ikony na panelu nástrojů), poté jej opět vypněte, abyste se po dokončení vrátili k původní hře.
-  }
-  {
     Chcete-li najít nejprominentnější hry (s vysoce hodnocenými protivníky), které dosahují konkrétní pozice, otevřete okno <a Tree>tree</a> a odtud otevřete seznam nejlepších her. Můžete dokonce omezit seznam nejlepších her tak, aby se zobrazovaly pouze hry s konkrétním výsledkem.
   }
   {
@@ -2174,9 +2171,6 @@ set tips(C) {
   }
   {
     Pokud prohlížíte otvory v databázi pomocí <a Tree>strom</a>, můžete zobrazit užitečný přehled o tom, jak dobře se daří aktuálnímu otevření v poslední době a mezi vysoce hodnocenými hráči, otevřením okna Statistiky (zkratka: Ctrl+I).
-  }
-  {
-    V okně <b>Game Browser</b> můžete změnit velikost hrací desky podržením kláves <b>Ctrl</b> a <b>Shift</b> a stisknutím klávesy se šipkou <b>Left</b> nebo <b>Right</b>.
   }
   {
     Po a <a Searches>vyhledávání</a>, můžete snadno procházet všechny odpovídající hry přidržením <b>Ctrl</b> a stisknutím tlačítka <b>Nahoru</b> nebo <b>Dolů</b> tlačítko pro načtení předchozího nebo dalšího <a Searches Filter>filtr</a> hra.

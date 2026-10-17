@@ -62,7 +62,6 @@ proc ::windows::stats::Open {} {
   pack $w.fbuttons -side top -fill x
   pack $w.statsasb -side top -fill both -expand yes
   set ::windows::stats::isOpen 1
-  bind $w <Control-q> "destroy $w"
   bind $w <Escape> "destroy $w"
   bind $w <F1> { helpWindow Index }
   bind $w <Destroy> {

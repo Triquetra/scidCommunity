@@ -2101,9 +2101,6 @@ set tips(T) {
     <a Flags>Bayraklar</a>, piyon yapısı, taktikler vb. gibi daha sonra aramak isteyebileceğiniz özellikleri içeren veritabanı oyunlarını işaretlemek için kullanışlıdır. <a Searches Header>başlık araması</a> ile bayraklara göre arama yapabilirsiniz.
   }
   {
-    Bir oyun oynuyorsanız ve oyunu değiştirmeden bazı hareketleri denemek istiyorsanız, Deneme modunu açın (<b>Ctrl+boşluk</b> kısayoluyla veya araç çubuğu simgesinden), ardından işiniz bittiğinde orijinal oyuna dönmek için tekrar kapatın.
-  }
-  {
     Belirli bir konuma ulaşan en öne çıkan oyunları (yüksek reytingli rakiplerle) bulmak için <a Tree>ağaç</a> penceresini açın ve oradan en iyi oyunlar listesini açın. Hatta en iyi oyunlar listesini yalnızca belirli bir sonuca sahip oyunları gösterecek şekilde kısıtlayabilirsiniz.
   }
   {
@@ -2156,9 +2153,6 @@ set tips(T) {
   }
   {
     <a Tree>ağacı</a> ile bir veri tabanındaki açılışlara göz atıyorsanız, İstatistikler penceresini (kısayol: Ctrl+I) açarak mevcut açılışın son zamanlarda ve yüksek puan alan oyuncular arasında ne kadar iyi puan aldığına dair yararlı bir genel bakış görebilirsiniz.
-  }
-  {
-    <b>Oyun Tarayıcısı</b> penceresinde, <b>Ctrl</b> ve <b>Shift</b> tuşlarını basılı tutup <b>Sol</b> veya <b>Sağ</b> ok tuşuna basarak tahta boyutunu değiştirebilirsiniz.
   }
   {
     bir süre sonra <a Searches>aramak</a>tuşunu basılı tutarak eşleşen tüm oyunlara kolayca göz atabilirsiniz. <b>Ctrl</b> ve tuşuna basmak <b>Yukarı</b> veya <b>Aşağı</b> önceki veya sonrakini yükleme tuşu <a Searches Filter>filtre</a> oyun.

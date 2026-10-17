@@ -3,6 +3,18 @@
 #    Prompt for confirmation then exit.
 #
 proc ::file::Exit {}  {
+  # Guard against re-entry: Ctrl+Q is a global binding, so a second press while
+  # the unsaved-games confirmation is open would stack another dialog on top.
+  if {[info exists ::file::exitInProgress]} { return }
+  set ::file::exitInProgress 1
+  try {
+    ::file::Exit_
+  } finally {
+    unset -nocomplain ::file::exitInProgress
+  }
+}
+
+proc ::file::Exit_ {}  {
   # Check for altered game in all bases except the clipbase:
   set unsavedCount 0
   set savedBase [sc_base current]

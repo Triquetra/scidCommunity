@@ -2125,9 +2125,6 @@ set tips(F) {
     <a Flags>Drapeaux</a> sont utiles pour marquer les jeux de base de données avec des caractéristiques que vous souhaiterez peut-être rechercher ultérieurement, telles que la structure des pions, les tactiques, etc. Vous pouvez effectuer une recherche par drapeaux avec un <a Searches Header>recherche d'en-tête</a>.
   }
   {
-    Si vous jouez à un jeu et souhaitez essayer quelques mouvements sans altérer le jeu, activez simplement le mode Essai (avec le raccourci <b>Ctrl+espace</b> ou depuis l'icône de la barre d'outils), puis désactivez-le à nouveau pour revenir au jeu d'origine lorsque vous avez terminé.
-  }
-  {
     Pour trouver les jeux les plus importants (avec des adversaires de haut niveau) atteignant une position particulière, ouvrez la fenêtre <a Tree>tree </a> et à partir de là, ouvrez la liste des meilleurs jeux. Vous pouvez même restreindre la liste des meilleurs jeux pour afficher uniquement les jeux avec un résultat particulier.
   }
   {
@@ -2180,9 +2177,6 @@ set tips(F) {
   }
   {
     Si vous parcourez les ouvertures dans une base de données avec le <a Tree>arbre</a>, vous pouvez avoir un aperçu utile des scores récents de l'ouverture en cours et des joueurs les mieux notés en ouvrant la fenêtre Statistiques (raccourci : Ctrl+I).
-  }
-  {
-    Dans la fenêtre <b>Game Browser</b>, vous pouvez modifier la taille du plateau en maintenant enfoncées les touches <b>Ctrl</b> et <b>Shift</b> et en appuyant sur la touche fléchée <b>Gauche</b> ou <b>Droite</b>.
   }
   {
     Après un <a Searches>recherche</a>, vous pouvez facilement parcourir tous les jeux correspondants en maintenant enfoncé <b>Ctrl</b> et en appuyant sur le <b>En haut</b> ou <b>Vers le bas</b> touche pour charger le précédent ou le suivant <a Searches Filter>filtre</a> jeu.

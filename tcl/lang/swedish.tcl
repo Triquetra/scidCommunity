@@ -2125,9 +2125,6 @@ set tips(W) {
     <a Flags>Flaggor</a> är användbara för att markera databasspel med egenskaper som du kanske vill söka efter vid ett senare tillfälle, såsom bondstruktur, taktik, etc. Du kan söka efter flaggor med en <a Searches Header>header search</a>.
   }
   {
-    Om du spelar genom ett spel och vill prova några drag utan att ändra spelet, aktiverar du bara provläget (med genvägen <b>Ctrl+mellanslag</b> eller från verktygsfältsikonen), och stänger sedan av det igen för att återgå till det ursprungliga spelet när du är klar.
-  }
-  {
     För att hitta de mest framträdande spelen (med högt rankade motståndare) som når en viss position, öppna <a Tree>trädet</a>-fönstret och därifrån, öppna listan med bästa spel. Du kan till och med begränsa listan över bästa spel till att endast visa spel med ett visst resultat.
   }
   {
@@ -2180,9 +2177,6 @@ set tips(W) {
   }
   {
     Om du bläddrar i öppningar i en databas med <a Tree>trädet</a>, kan du se en användbar översikt över hur bra den aktuella öppningen har gjort poäng nyligen och mellan högt rankade spelare genom att öppna statistikfönstret (genväg: Ctrl+I).
-  }
-  {
-    I fönstret <b>Game Browser</b> kan du ändra brädets storlek genom att hålla ner <b>Ctrl</b> och <b>Shift</b>-tangenterna och trycka på <b>Vänster</b> eller <b>Höger</b>-piltangenten.
   }
   {
     Efter a <a Searches>söka</a>, kan du enkelt bläddra igenom alla matchande spel genom att hålla nere <b>Ctrl</b> och trycker på <b>Upp</b> eller <b>Ner</b> för att ladda föregående eller nästa <a Searches Filter>filtrera</a> spel.

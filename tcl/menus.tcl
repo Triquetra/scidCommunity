@@ -244,12 +244,12 @@ $m add separator
 $m add command -label WindowsGList -command ::windows::gamelist::Open  -accelerator "Ctrl+L"
 $m add checkbutton -label WindowsSwitcher -variable baseWin -accelerator "Ctrl+D" -command ::windows::switcher::Open
 $m add command -label ToolsCross -accelerator "Ctrl+Shift+X" -command ::crosstab::Open
-$m add checkbutton -label WindowsECO -accelerator "Ctrl+Y" -variable ::windows::eco::isOpen -command {::windows::eco::OpenClose}
+$m add checkbutton -label WindowsECO -accelerator "Ctrl+Shift+E" -variable ::windows::eco::isOpen -command {::windows::eco::OpenClose}
 $m add checkbutton -label WindowsStats -variable ::windows::stats::isOpen -accelerator "Ctrl+I" -command ::windows::stats::Open
 $m add checkbutton -label WindowsTree -variable treeWin -command ::tree::make -accelerator "Ctrl+T"
 $m add checkbutton -label WindowsBook -variable ::book::isOpen -command ::book::open -accelerator "F6"
 $m add checkbutton -label [tr TablebaseWindow] -variable ::tablebase::window::isOpen -command ::tablebase::window::Open -accelerator "Ctrl+="
-$m add checkbutton -label [tr Board3D] -variable ::windows::game3d::isOpen -command ::windows::game3d::toggle -accelerator "Ctrl+3"
+$m add checkbutton -label [tr Board3D] -variable ::windows::game3d::isOpen -command ::windows::game3d::toggle -accelerator "F12"
 $m add command -label WindowsGraph -command ::tools::graphs::time::Open
 $m add separator
 $m add command -label WindowsEPD -command {::epd::newEpdWin open}

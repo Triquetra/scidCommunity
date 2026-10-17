@@ -2150,9 +2150,6 @@ set tips(U) {
     <a Flags>Liput </a> ovat hyödyllisiä tietokantapelien merkitsemiseen ominaisuuksilla, joita saatat haluta etsiä myöhemmin, kuten pelinappulan rakennetta, taktiikoita jne. Voit etsiä lippujen perusteella <a Searches Header> otsikkohaulla </a>.
   }
   {
-    Jos pelaat peliä ja haluat kokeilla joitain liikkeitä muuttamatta peliä, ota vain kokeilutila käyttöön (<b>Ctrl+välilyönti</b>-pikanäppäimellä tai työkalupalkin kuvakkeesta) ja sammuta se sitten uudelleen palataksesi alkuperäiseen peliin, kun olet valmis.
-  }
-  {
     Löytääksesi näkyvimmät pelit (joissa on korkealuokkaisia ​​vastustajia), jotka saavuttavat tietyn paikan, avaa <a Tree>tree</a> -ikkuna ja sieltä parhaiden pelien luettelo. Voit jopa rajoittaa parhaiden pelien luetteloa näyttämään vain tietyn tuloksen saaneet pelit.
   }
   {
@@ -2205,9 +2202,6 @@ set tips(U) {
   }
   {
     Jos selaat tietokannan aukkoja <a Tree>-puulla </a>, voit nähdä hyödyllisen yleiskatsauksen nykyisen avauksen pisteytyksen viime aikoina ja korkealuokkaisten pelaajien välillä avaamalla Tilastot-ikkunan (pikanäppäin: Ctrl+I).
-  }
-  {
-    <b>Game Browser</b> -ikkunassa voit muuttaa pelilaudan kokoa pitämällä <b>Ctrl</b>- ja <b>Shift</b>-näppäimiä alhaalla ja painamalla <b>Left</b> tai <b>Oikea</b>-nuolinäppäintä.
   }
   {
     <a Searches>haun</a> jälkeen voit helposti selata kaikkia vastaavia pelejä pitämällä <b>Ctrl</b> painettuna ja painamalla <b>Up</b>- tai <b>Down</b>-näppäintä ladataksesi edellisen tai seuraavan <a Searches Filter>-suodattimen</a>.
