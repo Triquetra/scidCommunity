@@ -1378,6 +1378,13 @@ proc makeAnalysisWin { {n 1} {index -1} {autostart 1}} {
     # Set up the  analysis window:
     #
     ::createToplevel $w
+    # This window is an embedded toplevel (::createToplevel). Unlike windows
+    # built with ::win::createWindow, its widgets do not inherit the main
+    # window's "." bind tag, so the shortcuts bound by keyboardShortcuts (arrow
+    # keys, F2/F3, ...) would not fire while it has focus. Bind them on this
+    # toplevel as well; the window-specific <F1> binding below overrides the
+    # generic one.
+    keyboardShortcuts $w
     set analysisWin$n 1
     if {$n == 1} {
         ::setTitle $w "Analysis: $analysisName"
