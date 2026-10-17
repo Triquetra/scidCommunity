@@ -126,18 +126,12 @@ Other desktops: make sure 'gdbus' (KDE/GNOME), ImageMagick (X11) or\n\
 PowerShell (Windows) is available, then try again."
     }
 
-    # Hide scidCommunity while picking so it does not cover the target.
-    set hidden {}
-    set tops [list [winfo toplevel $widget]]
-    if {[lsearch -exact $tops .] < 0} { lappend tops . }
-    foreach top $tops {
-      if {[winfo exists $top] && [wm state $top] in {normal zoomed}} {
-        lappend hidden [list $top [wm state $top]]
-        catch { wm withdraw $top }
-      }
-    }
-    catch { update }
-    if {[llength $hidden]} { _sleep 80 }
+    # scidCommunity is deliberately left visible while picking, so a color can
+    # be sampled from its own board (or from any other window). Every backend
+    # reads the pixel under the pointer, so a click on scidCommunity is treated
+    # like a click on any other part of the screen. Withdrawing the window was
+    # also racy on compositors that animate window closes: the frozen picker
+    # could still show the window while it faded out.
 
     # A backend returns a color on success, "" on user cancellation, and
     # raises on tool failure. Only a normal return settles the chain ("" = the
@@ -154,13 +148,6 @@ PowerShell (Windows) is available, then try again."
       set settled 1
       break
     }
-
-    foreach entry $hidden {
-      lassign $entry top state
-      catch { wm deiconify $top }
-      if {$state eq "zoomed"} { catch { wm state $top zoomed } }
-    }
-    catch { update }
 
     if {! $settled && $lastError ne ""} { error $lastError }
     return $result
@@ -323,11 +310,11 @@ PowerShell (Windows) is available, then try again."
   }
 
   proc _pick_windows {} {
-    # scidCommunity is already hidden, so the desktop is visible. PowerShell
-    # waits for the user's click, then reads the pixel under the cursor with GDI
-    # GetPixel (CopyFromScreen returned black in a VM). It is launched hidden
-    # through a WScript.Shell wrapper, because a bare .bat/cmd launch popped up
-    # a console window that covered the screen.
+    # scidCommunity stays visible, so a color can also be sampled from its own
+    # board. PowerShell waits for the user's click, then reads the pixel under
+    # the cursor with GDI GetPixel (CopyFromScreen returned black in a VM). It
+    # is launched hidden through a WScript.Shell wrapper, because a bare
+    # .bat/cmd launch popped up a console window that covered the screen.
     set psFile  [_tempFile ps1]
     set vbsFile [_tempFile vbs]
     set batFile [_tempFile bat]
@@ -574,12 +561,5 @@ public class ScidPick {
     }
     if {!$::windowsOS && [file isdirectory /tmp]} { return /tmp }
     return [pwd]
-  }
-
-  # Pump the event loop for ms milliseconds.
-  proc _sleep { ms } {
-    set ::colorPicker::_sleepDone 0
-    after $ms [list set ::colorPicker::_sleepDone 1]
-    catch { vwait ::colorPicker::_sleepDone }
   }
 }
