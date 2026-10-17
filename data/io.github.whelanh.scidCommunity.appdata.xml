@@ -79,6 +79,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+ <release version="5.1.4.38" date="2026-10-17">
+      <description>
+        <p>Fix broken hotkey assignments; don't hide scidCommunity when using eyedropper color chooser</p>
+      </description>
+    </release>
  <release version="5.1.4.37" date="2026-10-16">
       <description>
         <p>Keyboard focus and marker persistence enhancements</p>

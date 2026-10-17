@@ -1,10 +1,10 @@
 Name:           scidcommunity
-Version:        5.1.4.37
+Version:        5.1.4.38
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
 # Commit hash from github branch
-%global commit a9ea54cdf2b27e4b4b97f8ccfe921171025cb9f7   
+%global commit 3e23ea9071a6350981c12fcdc62b3cf0ae5ce01f   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 License:        GPL-2.0-or-later
@@ -64,6 +64,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Sat Oct 17, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-38
+- "Fix broken hot key assignments; don't hide scidCommunity when using the eyedropper color choosers"
 * Fri Oct 16, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-37
 - "Keyboard focus and marker persistence enhancements"
 * Tue Oct 13, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-35
