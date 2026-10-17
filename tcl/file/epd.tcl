@@ -202,16 +202,16 @@ namespace eval epd {
     $m add command -label [tr Close] -accelerator "Ctrl+W" -underline 0 -command "after idle {::epd::closeEpdWin $id}"
 
     set m $w.menu.tools
-    $m add command -label [tr EpdPasteAnal] -accelerator "Ctrl+P" -underline 0 -command "::epd::pasteAnalysis $id"
+    $m add command -label [tr EpdPasteAnal] -accelerator "Ctrl+Shift+P" -underline 0 -command "::epd::pasteAnalysis $id"
     $m add command -label [tr EpdSortOpcodes] -accelerator "Ctrl+Shift+S" -underline 0 -command "::epd::sortEpdText $id"
-    $m add command -label [tr EpdAddPosition] -accelerator "Ctrl+A" -underline 0 -command "::epd::addPosition $id"
+    $m add command -label [tr EpdAddPosition] -accelerator "Ctrl+Shift+A" -underline 0 -command "::epd::addPosition $id"
     $m add command -label [tr EpdDeletePosition] -command "::epd::deleteEpdRow $id"
     $m add command -label [tr EpdCopyRecord] -command "::epd::copyEpdRecord $id"
     $m add command -label [tr EpdPasteRecord] -command "::epd::pasteEpdRecord $id"
     $m add command -label [tr EpdFindPos] -command "::epd::moveToDeepestMatch $id"
     $m add separator
     $m add command -label [tr EpdAnalPosition] -command "::epd::configAnnotateEpd $id"
-    $m add command -label [tr EpdStripOpcodes] -accelerator "Ctrl+O" -command "::epd::chooseStripField $id"
+    $m add command -label [tr EpdStripOpcodes] -accelerator "Ctrl+Shift+O" -command "::epd::chooseStripField $id"
 
     $w.menu.help add command -label "EPD [tr Help]" -underline 0 -accelerator "F1" -command "helpWindow EPD"
     $w.menu.help add command -label [tr HelpIndex] -underline 0 -command "helpWindow Index"
@@ -249,12 +249,12 @@ namespace eval epd {
     bind $w <Control-P> "::epd::pasteAnalysis $id ; break"
     bind $w <Control-A> "::epd::addPosition $id"
     bind $w <Control-O> "::epd::chooseStripField $id"
-    bind $w <Control-q> "::epd::closeEpdWin $id"
     bind $w <Control-w> "::epd::closeEpdWin $id"
     bind $w.lb <space> {toggleEngineAnalysis}
     bind $w <Control-s> "
       if {\[$w.text edit modified\]} {::epd::storeEpdText $id}
       ::epd::saveEpdWin $id"
+    bind $w <Control-S> "::epd::sortEpdText $id"
 
     # 'break's stop identical/conflicting binds being handled by parent widgets.
     bind $w.text <Control-a> "$w.text tag add sel 0.0 end-1c; break;"

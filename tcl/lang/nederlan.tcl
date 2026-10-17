@@ -2201,9 +2201,6 @@ set tips(N) {
     Als u door openingen in een database bladert met de <a Tree>boom</a>, kunt u een handig overzicht zien van hoe goed de huidige opening recentelijk scoort en tussen spelers met een hoge rating door het venster Statistieken te openen (sneltoets: Ctrl+I).
   }
   {
-    In het venster <b>Gamebrowser</b> kunt u de bordgrootte wijzigen door de toetsen <b>Ctrl</b> en <b>Shift</b> ingedrukt te houden en op de pijltjestoets <b>Links</b> of <b>Rechts</b> te drukken.
-  }
-  {
     Na een <a Searches>zoekopdracht</a> kunt u eenvoudig door alle overeenkomende spellen bladeren door <b>Ctrl</b> ingedrukt te houden en op de toets <b>Omhoog</b> of <b>Omlaag</b> te drukken om het vorige of volgende <a Searches Filter>filter</a> spel te laden.
   }
   {

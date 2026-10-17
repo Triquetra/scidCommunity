@@ -2226,9 +2226,6 @@ set tips(D) {
     Wenn Sie Eröffnungen in einer Datenbank mit dem <a Tree>-Baum </a> durchsuchen, können Sie einen nützlichen Überblick darüber sehen, wie gut die aktuelle Eröffnung in letzter Zeit und zwischen hoch bewerteten Spielern gepunktet hat, indem Sie das Statistikfenster öffnen (Tastenkürzel: Strg+I).
   }
   {
-    Im <b>Spielbrowser</b>-Fenster können Sie die Spielbrettgröße ändern, indem Sie die Tasten <b>Strg</b> und <b>Umschalt</b> gedrückt halten und die Pfeiltaste <b>Links</b> oder <b>Rechts</b> drücken.
-  }
-  {
     Nach einer <a Searches>Suche</a> können Sie ganz einfach alle passenden Spiele durchsuchen, indem Sie <b>Strg</b> gedrückt halten und die Taste <b>Nach oben </b> oder <b>Nach unten </b> drücken, um das vorherige oder nächste <a Searches Filter>Filter</a>-Spiel zu laden.
   }
   {

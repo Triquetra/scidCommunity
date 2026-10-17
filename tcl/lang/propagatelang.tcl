@@ -25,7 +25,7 @@ array set encodings {
   polish utf-8
   portbr utf-8
   russian utf-8
-  serbian iso8859-2
+  serbian utf-8
   spanish utf-8
   swedish utf-8
   catalan utf-8

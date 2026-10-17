@@ -475,7 +475,7 @@ addLanguage O Norsk 1 utf-8 norsk.tcl
 addLanguage P Polski 0 utf-8 polish.tcl
 addLanguage B Português 0 utf-8 portbr.tcl
 addLanguage R Русский 1 utf-8 russian.tcl
-addLanguage Y Srpski 2 iso8859-2 serbian.tcl
+addLanguage Y Srpski 2 utf-8 serbian.tcl
 addLanguage S Español 1 utf-8 spanish.tcl
 addLanguage U Suomi 1 utf-8 suomi.tcl
 addLanguage W Svenska 1 utf-8 swedish.tcl

@@ -2097,9 +2097,6 @@ set tips(Z) {
     <a Flags>Alamisho</a> ni muhimu kwa kuashiria michezo ya hifadhidata yenye sifa ambazo unaweza kutaka kuzitafuta baadaye, kama vile muundo wa pawn, mbinu, n.k. Unaweza kutafuta kwa kutumia bendera kwa utafutaji wa <a Searches Header>kichwa </a>.
   }
   {
-    Ikiwa unacheza mchezo na unataka kujaribu hatua kadhaa bila kubadilisha mchezo, washa modi ya Jaribio (kwa njia ya mkato ya <b>Ctrl+space</b> au kutoka kwenye aikoni ya upau wa vidhibiti), kisha uizime tena ili urejee kwenye mchezo wa awali ukimaliza.
-  }
-  {
     Ili kupata michezo maarufu zaidi (iliyo na wapinzani wa viwango vya juu) kufikia nafasi fulani, fungua dirisha la <a Tree>mti</a> na kutoka hapo, fungua orodha ya michezo bora zaidi. Unaweza hata kuzuia orodha bora ya michezo ili kuonyesha michezo iliyo na matokeo mahususi pekee.
   }
   {
@@ -2152,9 +2149,6 @@ set tips(Z) {
   }
   {
     Ikiwa unavinjari fursa katika hifadhidata kwa <a Tree>mti</a>, unaweza kuona muhtasari muhimu wa jinsi nafasi ya sasa inavyopata bao hivi majuzi na kati ya wachezaji walio na viwango vya juu kwa kufungua dirisha la Takwimu (njia ya mkato: Ctrl+I).
-  }
-  {
-    Katika dirisha la <b>Kivinjari cha Mchezo</b>, unaweza kubadilisha ukubwa wa ubao kwa kushikilia vitufe vya <b>Ctrl</b> na <b>Shift</b> na kubofya vishale <b>Kushoto</b> au <b>Kulia</b>
   }
   {
     Baada ya a <a Searches>tafuta</a>, unaweza kuvinjari kwa urahisi michezo yote inayolingana kwa kushikilia chini <b>Ctrl</b> na kushinikiza <b>Juu</b> au <b>Chini</b> ufunguo wa kupakia uliopita au ujao <a Searches Filter>chujio</a> mchezo.

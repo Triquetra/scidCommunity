@@ -20,7 +20,7 @@ This script:
 
 The single-letter language code and the file list are read from
 ../language.tcl (the addLanguage commands).  serbian.tcl is skipped (Google
-Translate has no Serbian-Latin target and the file is iso8859-2); the Serbian
+Translate has no Serbian-Latin target); the Serbian
 Cyrillic file (SerbCyr.tcl, code J) is handled normally.
 
 All target files are UTF-8 and are read/written as UTF-8 to preserve

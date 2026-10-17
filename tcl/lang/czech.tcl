@@ -2176,9 +2176,6 @@ set tips(C) {
     Pokud prohlížíte otvory v databázi pomocí <a Tree>strom</a>, můžete zobrazit užitečný přehled o tom, jak dobře se daří aktuálnímu otevření v poslední době a mezi vysoce hodnocenými hráči, otevřením okna Statistiky (zkratka: Ctrl+I).
   }
   {
-    V okně <b>Game Browser</b> můžete změnit velikost hrací desky podržením kláves <b>Ctrl</b> a <b>Shift</b> a stisknutím klávesy se šipkou <b>Left</b> nebo <b>Right</b>.
-  }
-  {
     Po a <a Searches>vyhledávání</a>, můžete snadno procházet všechny odpovídající hry přidržením <b>Ctrl</b> a stisknutím tlačítka <b>Nahoru</b> nebo <b>Dolů</b> tlačítko pro načtení předchozího nebo dalšího <a Searches Filter>filtr</a> hra.
   }
   {

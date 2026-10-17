@@ -2158,9 +2158,6 @@ set tips(T) {
     <a Tree>ağacı</a> ile bir veri tabanındaki açılışlara göz atıyorsanız, İstatistikler penceresini (kısayol: Ctrl+I) açarak mevcut açılışın son zamanlarda ve yüksek puan alan oyuncular arasında ne kadar iyi puan aldığına dair yararlı bir genel bakış görebilirsiniz.
   }
   {
-    <b>Oyun Tarayıcısı</b> penceresinde, <b>Ctrl</b> ve <b>Shift</b> tuşlarını basılı tutup <b>Sol</b> veya <b>Sağ</b> ok tuşuna basarak tahta boyutunu değiştirebilirsiniz.
-  }
-  {
     bir süre sonra <a Searches>aramak</a>tuşunu basılı tutarak eşleşen tüm oyunlara kolayca göz atabilirsiniz. <b>Ctrl</b> ve tuşuna basmak <b>Yukarı</b> veya <b>Aşağı</b> önceki veya sonrakini yükleme tuşu <a Searches Filter>filtre</a> oyun.
   }
   {

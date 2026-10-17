@@ -2195,9 +2195,6 @@ set tips(L) {
     Dacă răsfoiți deschideri într-o bază de date cu <a Tree>copac</a>, puteți vedea o imagine de ansamblu utilă a cât de bine a punctat deschiderea curentă recent și între jucătorii cu rating ridicat, deschizând fereastra Statistici (comandă rapidă: Ctrl+I).
   }
   {
-    În <b>Browser de jocuri</b> fereastra, puteți modifica dimensiunea plăcii ținând apăsată tasta <b>Ctrl</b> şi <b>Schimbare</b> tastele și apăsând tasta <b>Stânga</b> sau <b>Corect</b> tasta săgeată.
-  }
-  {
     După o <a Searches>căutare</a>, puteți răsfoi cu ușurință prin toate jocurile potrivite ținând apăsat <b>Ctrl</b> și apăsând butonul <b>Sus</b> sau <b>Jos</b> tasta pentru a încărca precedentul sau următorul <a Searches Filter>filtra</a> joc.
   }
   {

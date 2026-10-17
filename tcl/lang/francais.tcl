@@ -2182,9 +2182,6 @@ set tips(F) {
     Si vous parcourez les ouvertures dans une base de données avec le <a Tree>arbre</a>, vous pouvez avoir un aperçu utile des scores récents de l'ouverture en cours et des joueurs les mieux notés en ouvrant la fenêtre Statistiques (raccourci : Ctrl+I).
   }
   {
-    Dans la fenêtre <b>Game Browser</b>, vous pouvez modifier la taille du plateau en maintenant enfoncées les touches <b>Ctrl</b> et <b>Shift</b> et en appuyant sur la touche fléchée <b>Gauche</b> ou <b>Droite</b>.
-  }
-  {
     Après un <a Searches>recherche</a>, vous pouvez facilement parcourir tous les jeux correspondants en maintenant enfoncé <b>Ctrl</b> et en appuyant sur le <b>En haut</b> ou <b>Vers le bas</b> touche pour charger le précédent ou le suivant <a Searches Filter>filtre</a> jeu.
   }
   {

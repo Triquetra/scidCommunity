@@ -2207,9 +2207,6 @@ set tips(U) {
     Jos selaat tietokannan aukkoja <a Tree>-puulla </a>, voit nähdä hyödyllisen yleiskatsauksen nykyisen avauksen pisteytyksen viime aikoina ja korkealuokkaisten pelaajien välillä avaamalla Tilastot-ikkunan (pikanäppäin: Ctrl+I).
   }
   {
-    <b>Game Browser</b> -ikkunassa voit muuttaa pelilaudan kokoa pitämällä <b>Ctrl</b>- ja <b>Shift</b>-näppäimiä alhaalla ja painamalla <b>Left</b> tai <b>Oikea</b>-nuolinäppäintä.
-  }
-  {
     <a Searches>haun</a> jälkeen voit helposti selata kaikkia vastaavia pelejä pitämällä <b>Ctrl</b> painettuna ja painamalla <b>Up</b>- tai <b>Down</b>-näppäintä ladataksesi edellisen tai seuraavan <a Searches Filter>-suodattimen</a>.
   }
   {

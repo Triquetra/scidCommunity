@@ -2176,9 +2176,6 @@ set tips(O) {
     Hvis du blar gjennom åpninger i en database med <a Tree>treet</a>, kan du se en nyttig oversikt over hvor godt den nåværende åpningen scorer nylig og mellom høyt rangerte spillere ved å åpne statistikkvinduet (snarvei: Ctrl+I).
   }
   {
-    I <b>Game Browser</b>-vinduet kan du endre brettstørrelsen ved å holde nede <b>Ctrl</b> og <b>Shift</b>-tastene, og trykke på <b>Venstre</b> eller <b>Høyre</b>-piltasten.
-  }
-  {
     Etter et <a Searches>søk</a>, kan du enkelt bla gjennom alle matchende spill ved å holde nede <b>Ctrl</b> og trykke på <b>Opp</b> eller <b>Ned</b>-tasten for å laste forrige eller neste <a Searches Filter>filter</a>spill.
   }
   {

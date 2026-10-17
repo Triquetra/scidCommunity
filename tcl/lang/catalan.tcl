@@ -2198,9 +2198,6 @@ set tips(K) {
     Si esteu navegant per les obertures en una base de dades amb el <a Tree>arbre</a>, podeu veure una visió general útil de la puntuació de l'obertura actual recentment i entre jugadors ben valorats obrint la finestra Estadístiques (drecera: Ctrl+I).
   }
   {
-    A la finestra <b>Navegador de jocs </b>, podeu canviar la mida del tauler mantenint premudes les tecles <b>Ctrl</b> i <b>Maj </b> i prement la fletxa <b>Esquerra </b> o <b>Dreta </b>.
-  }
-  {
     Després d'a <a Searches>cerca</a>, podeu navegar fàcilment per tots els jocs coincidents mantenint premut <b>Ctrl</b> i prement el <b>Amunt</b> o <b>Avall</b> tecla per carregar l'anterior o el següent <a Searches Filter>filtre</a> joc.
   }
   {

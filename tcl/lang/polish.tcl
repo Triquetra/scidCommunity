@@ -2268,11 +2268,6 @@ set tips(P) {
     okno statystyk (skrót: Ctrl+I).
   }
   {
-    W oknie <b>Przeglądarka partii</b> możesz zmienić rozmiar szachownicy
-    przytrzymując klawisze <b>Ctrl</b> i <b>Shift</b> oraz naciskając
-    klawisz strzałki <b>W lewo</b> lub <b>W prawo</b>.
-  }
-  {
     Po wykonaniu <a Searches>Wyszukiwania</a> możesz łatwo przeglądać wszystkie
     pasujące partie przytrzymując <b>Ctrl</b> i naciskając klawisz strzałki
     <b>W górę</b> lub <b>W dół</b>, aby załadować poprzednią lub następną

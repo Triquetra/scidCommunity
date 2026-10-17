@@ -2178,9 +2178,6 @@ set tips(I) {
     Se stai esplorando le aperture in un database con il file <a Tree>albero</a>, puoi vedere un'utile panoramica di quanto bene l'apertura attuale sta segnando recentemente e tra i giocatori di alto punteggio aprendo la finestra Statistiche (scorciatoia: Ctrl+I).
   }
   {
-    Nella finestra <b>Browser gioco</b>, puoi modificare le dimensioni del tabellone tenendo premuti i tasti <b>Ctrl</b> e <b>Maiusc</b> e premendo il tasto freccia <b>Sinistra</b> o <b>Destra</b>.
-  }
-  {
     Dopo un <a Searches>ricerca</a>, puoi sfogliare facilmente tutti i giochi corrispondenti tenendo premuto <b>Ctrl</b> e premendo il <b>Su</b> O <b>Giù</b> tasto per caricare il precedente o il successivo <a Searches Filter>filtro</a> gioco.
   }
   {

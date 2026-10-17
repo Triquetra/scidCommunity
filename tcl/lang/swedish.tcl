@@ -2182,9 +2182,6 @@ set tips(W) {
     Om du bläddrar i öppningar i en databas med <a Tree>trädet</a>, kan du se en användbar översikt över hur bra den aktuella öppningen har gjort poäng nyligen och mellan högt rankade spelare genom att öppna statistikfönstret (genväg: Ctrl+I).
   }
   {
-    I fönstret <b>Game Browser</b> kan du ändra brädets storlek genom att hålla ner <b>Ctrl</b> och <b>Shift</b>-tangenterna och trycka på <b>Vänster</b> eller <b>Höger</b>-piltangenten.
-  }
-  {
     Efter a <a Searches>söka</a>, kan du enkelt bläddra igenom alla matchande spel genom att hålla nere <b>Ctrl</b> och trycker på <b>Upp</b> eller <b>Ner</b> för att ladda föregående eller nästa <a Searches Filter>filtrera</a> spel.
   }
   {
