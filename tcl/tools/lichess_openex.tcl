@@ -10,6 +10,10 @@
 namespace eval ::lichess_openex {
     variable baseUrl "https://explorer.lichess.ovh"
 
+    # Size/position of the results window, remembered across queries (the
+    # window is destroyed and recreated for every lookup).
+    variable lastResultGeometry ""
+
     # Persisted options (saved via Options > Save Options)
     options.store ::lichess_openex::apiToken ""
     options.store ::lichess_openex::database "masters"
@@ -606,8 +610,10 @@ proc ::lichess_openex::queryExplorer {} {
     toplevel $w
     wm title $w [tr LichessTitle]
     wm resizable $w 1 1
-    wm minsize $w 850 500
-    if {[winfo exists .]} { wm transient $w . }
+    # Let the window be narrowed; the tables scroll horizontally and the
+    # summary wraps. Keep it a normal top-level (not transient) so the window
+    # manager gives it a minimise button on every platform.
+    wm minsize $w 360 300
 
     ttk::frame $w.content -padding 10
     pack $w.content -fill both -expand 1
@@ -630,29 +636,55 @@ proc ::lichess_openex::queryExplorer {} {
 
     if {!$ok} {
         ::lichess_openex::showError $w [format [tr LichessFailedQuery] $result]
-        return
+    } elseif {([string match "*\"error\"*" $result] || [string match "*Not Found*" $result]) && ![regexp {"moves"} $result]} {
+        ::lichess_openex::showError $w [format [tr LichessPositionNotFound] $::lichess_openex::database [string range $result 0 300]]
+    } else {
+        # Parse and display results
+        ::lichess_openex::displayResults $w $result $fen
     }
 
-    # Check for error responses
-    if {[string match "*\"error\"*" $result] || [string match "*Not Found*" $result]} {
-        if {![regexp {"moves"} $result]} {
-            ::lichess_openex::showError $w [format [tr LichessPositionNotFound] $::lichess_openex::database [string range $result 0 300]]
-            return
+    # Restore the previous size/position (the window is destroyed and recreated
+    # for every query), or center it on first use.
+    update idletasks
+    if {$::lichess_openex::lastResultGeometry ne ""} {
+        catch {wm geometry $w $::lichess_openex::lastResultGeometry}
+    } else {
+        set winWidth [winfo width $w]
+        set winHeight [winfo height $w]
+        if {$winWidth < 100} { set winWidth 850 }
+        if {$winHeight < 100} { set winHeight 500 }
+        set x [expr {([winfo screenwidth $w] - $winWidth) / 2}]
+        set y [expr {([winfo screenheight $w] - $winHeight) / 2}]
+        wm geometry $w "+$x+$y"
+    }
+    update idletasks
+    set ::lichess_openex::lastResultGeometry [wm geometry $w]
+
+    # Track later moves/resizes; this also keeps the summary label wrapped to
+    # the window width.
+    bind $w <Configure> [list ::lichess_openex::onResultConfigure $w %W]
+    ::lichess_openex::onResultConfigure $w $w
+}
+
+# ::lichess_openex::onResultConfigure
+#   Remember the results window size/position and wrap the summary label to the
+#   current width. Configure events from child widgets are ignored.
+#
+proc ::lichess_openex::onResultConfigure {w eventW} {
+    if {$eventW ne $w || ![winfo exists $w]} { return }
+
+    if {[winfo width $w] >= 100 && [winfo height $w] >= 100} {
+        set ::lichess_openex::lastResultGeometry [wm geometry $w]
+    }
+
+    set wrap [expr {[winfo width $w] - 30}]
+    if {$wrap > 100} {
+        foreach label [list $w.top.wdl.info $w.error.msg] {
+            if {[winfo exists $label]} {
+                $label configure -wraplength $wrap
+            }
         }
     }
-
-    # Parse and display results
-    ::lichess_openex::displayResults $w $result $fen
-
-    # Center the window
-    update idletasks
-    set winWidth [winfo width $w]
-    set winHeight [winfo height $w]
-    if {$winWidth < 100} { set winWidth 850 }
-    if {$winHeight < 100} { set winHeight 500 }
-    set x [expr {([winfo screenwidth $w] - $winWidth) / 2}]
-    set y [expr {([winfo screenheight $w] - $winHeight) / 2}]
-    wm geometry $w "+$x+$y"
 }
 
 # ::lichess_openex::displayResults
@@ -688,10 +720,10 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
         set fmtWhite [::lichess_openex::formatNumber $totalWhite]
         set fmtDraws [::lichess_openex::formatNumber $totalDraws]
         set fmtBlack [::lichess_openex::formatNumber $totalBlack]
-        ttk::label $w.top.wdl.info -text \
+        ttk::label $w.top.wdl.info -justify left -wraplength 700 -text \
             [format [tr LichessSummaryInfo] $fmtTotal $fmtWhite $wPct $fmtDraws $dPct $fmtBlack $bPct]
     } else {
-        ttk::label $w.top.wdl.info -text [tr LichessNoGamesFound]
+        ttk::label $w.top.wdl.info -justify left -wraplength 700 -text [tr LichessNoGamesFound]
     }
     pack $w.top.wdl.info -side left
 
@@ -708,21 +740,25 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
     ttk::treeview $w.top.movesframe.tree -columns $cols -show headings -height 12 \
         -selectmode browse
     ttk::scrollbar $w.top.movesframe.sb -orient vertical -command "$w.top.movesframe.tree yview"
-    $w.top.movesframe.tree configure -yscrollcommand "$w.top.movesframe.sb set"
+    ttk::scrollbar $w.top.movesframe.xsb -orient horizontal -command "$w.top.movesframe.tree xview"
+    $w.top.movesframe.tree configure \
+        -yscrollcommand "$w.top.movesframe.sb set" \
+        -xscrollcommand "$w.top.movesframe.xsb set"
 
     foreach c $cols n $colNames {
         $w.top.movesframe.tree heading $c -text $n
     }
-    $w.top.movesframe.tree column san       -width 60  -anchor center
-    $w.top.movesframe.tree column white     -width 65  -anchor e
-    $w.top.movesframe.tree column draws     -width 65  -anchor e
-    $w.top.movesframe.tree column black     -width 65  -anchor e
-    $w.top.movesframe.tree column total     -width 70  -anchor e
-    $w.top.movesframe.tree column pct       -width 55  -anchor e
-    $w.top.movesframe.tree column avgRating -width 75  -anchor e
-    $w.top.movesframe.tree column eco       -width 50  -anchor center
-    $w.top.movesframe.tree column opening   -width 200 -anchor w
+    $w.top.movesframe.tree column san       -width 60  -minwidth 60  -anchor center
+    $w.top.movesframe.tree column white     -width 65  -minwidth 65  -anchor e
+    $w.top.movesframe.tree column draws     -width 65  -minwidth 65  -anchor e
+    $w.top.movesframe.tree column black     -width 65  -minwidth 65  -anchor e
+    $w.top.movesframe.tree column total     -width 70  -minwidth 70  -anchor e
+    $w.top.movesframe.tree column pct       -width 55  -minwidth 55  -anchor e
+    $w.top.movesframe.tree column avgRating -width 75  -minwidth 75  -anchor e
+    $w.top.movesframe.tree column eco       -width 50  -minwidth 50  -anchor center
+    $w.top.movesframe.tree column opening   -width 200 -minwidth 200 -anchor w
 
+    pack $w.top.movesframe.xsb -side bottom -fill x
     pack $w.top.movesframe.tree -side left -fill both -expand 1
     pack $w.top.movesframe.sb -side right -fill y
 
@@ -749,20 +785,24 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
         ttk::treeview $w.bottom.topgframe.tree -columns $gameCols -show headings -height 6 \
             -selectmode browse
         ttk::scrollbar $w.bottom.topgframe.sb -orient vertical -command "$w.bottom.topgframe.tree yview"
-        $w.bottom.topgframe.tree configure -yscrollcommand "$w.bottom.topgframe.sb set"
+        ttk::scrollbar $w.bottom.topgframe.xsb -orient horizontal -command "$w.bottom.topgframe.tree xview"
+        $w.bottom.topgframe.tree configure \
+            -yscrollcommand "$w.bottom.topgframe.sb set" \
+            -xscrollcommand "$w.bottom.topgframe.xsb set"
 
         foreach c $gameCols n $gameColNames {
             $w.bottom.topgframe.tree heading $c -text $n \
                 -command [list ::lichess_openex::sortByColumn $w.bottom.topgframe.tree $c 1]
         }
-        $w.bottom.topgframe.tree column san         -width 55  -anchor center
-        $w.bottom.topgframe.tree column winner      -width 55  -anchor center
-        $w.bottom.topgframe.tree column whiteName   -width 150 -anchor w
-        $w.bottom.topgframe.tree column whiteRating -width 65  -anchor e
-        $w.bottom.topgframe.tree column blackName   -width 150 -anchor w
-        $w.bottom.topgframe.tree column blackRating -width 65  -anchor e
-        $w.bottom.topgframe.tree column date        -width 80  -anchor center
+        $w.bottom.topgframe.tree column san         -width 55  -minwidth 55  -anchor center
+        $w.bottom.topgframe.tree column winner      -width 55  -minwidth 55  -anchor center
+        $w.bottom.topgframe.tree column whiteName   -width 150 -minwidth 150 -anchor w
+        $w.bottom.topgframe.tree column whiteRating -width 65  -minwidth 65  -anchor e
+        $w.bottom.topgframe.tree column blackName   -width 150 -minwidth 150 -anchor w
+        $w.bottom.topgframe.tree column blackRating -width 65  -minwidth 65  -anchor e
+        $w.bottom.topgframe.tree column date        -width 80  -minwidth 80  -anchor center
 
+        pack $w.bottom.topgframe.xsb -side bottom -fill x
         pack $w.bottom.topgframe.tree -side left -fill both -expand 1
         pack $w.bottom.topgframe.sb -side right -fill y
 
@@ -783,20 +823,24 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
     ttk::treeview $w.bottom.recgframe.tree -columns $gameCols -show headings -height 5 \
         -selectmode browse
     ttk::scrollbar $w.bottom.recgframe.sb -orient vertical -command "$w.bottom.recgframe.tree yview"
-    $w.bottom.recgframe.tree configure -yscrollcommand "$w.bottom.recgframe.sb set"
+    ttk::scrollbar $w.bottom.recgframe.xsb -orient horizontal -command "$w.bottom.recgframe.tree xview"
+    $w.bottom.recgframe.tree configure \
+        -yscrollcommand "$w.bottom.recgframe.sb set" \
+        -xscrollcommand "$w.bottom.recgframe.xsb set"
 
     foreach c $gameCols n $gameColNames {
         $w.bottom.recgframe.tree heading $c -text $n \
             -command [list ::lichess_openex::sortByColumn $w.bottom.recgframe.tree $c 1]
     }
-    $w.bottom.recgframe.tree column san         -width 55  -anchor center
-    $w.bottom.recgframe.tree column winner      -width 55  -anchor center
-    $w.bottom.recgframe.tree column whiteName   -width 150 -anchor w
-    $w.bottom.recgframe.tree column whiteRating -width 65  -anchor e
-    $w.bottom.recgframe.tree column blackName   -width 150 -anchor w
-    $w.bottom.recgframe.tree column blackRating -width 65  -anchor e
-    $w.bottom.recgframe.tree column date        -width 80  -anchor center
+    $w.bottom.recgframe.tree column san         -width 55  -minwidth 55  -anchor center
+    $w.bottom.recgframe.tree column winner      -width 55  -minwidth 55  -anchor center
+    $w.bottom.recgframe.tree column whiteName   -width 150 -minwidth 150 -anchor w
+    $w.bottom.recgframe.tree column whiteRating -width 65  -minwidth 65  -anchor e
+    $w.bottom.recgframe.tree column blackName   -width 150 -minwidth 150 -anchor w
+    $w.bottom.recgframe.tree column blackRating -width 65  -minwidth 65  -anchor e
+    $w.bottom.recgframe.tree column date        -width 80  -minwidth 80  -anchor center
 
+    pack $w.bottom.recgframe.xsb -side bottom -fill x
     pack $w.bottom.recgframe.tree -side left -fill both -expand 1
     pack $w.bottom.recgframe.sb -side right -fill y
 
@@ -805,7 +849,9 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
 
     # --- Close button ---
     ttk::frame $w.btnbar
-    pack $w.btnbar -fill x -pady {5 0}
+    # Keep the Close button visible when the window is made short: reserve the
+    # bottom strip before the expanding panels take their space.
+    pack $w.btnbar -side bottom -fill x -pady {5 0} -before $w.top
     ttk::button $w.btnbar.close -text [tr Close] -command "destroy $w"
     pack $w.btnbar.close -side right -padx 5
 
