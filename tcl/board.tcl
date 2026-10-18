@@ -502,6 +502,7 @@ proc ::board::new {w {psize 40} } {
   set ::board::_flip($w) 0
   set ::board::_data($w) [sc_pos board]
   set ::board::_showMarks($w) 0
+  set ::board::_hideMarks($w) 0
   set ::board::_mark($w) {}
   set ::board::_drag($w) -1
   set ::board::_showmat($w) 0
@@ -1072,6 +1073,17 @@ proc ::board::getSquare {w x y} {
 #
 proc ::board::showMarks {w value} {
   set ::board::_showMarks($w) $value
+  # Explicitly turning marks on also clears a temporary Shift+click hide.
+  if {$value} { set ::board::_hideMarks($w) 0 }
+}
+
+# ::board::toggleHideMarks
+#   Transiently hide/show this board's arrows and square marks without changing
+#   the PGN. Used by Shift+left-click on an empty square.
+#
+proc ::board::toggleHideMarks {w} {
+  set ::board::_hideMarks($w) [expr {!$::board::_hideMarks($w)}]
+  ::board::update $w
 }
 
 # ::board::colorSquare
@@ -1947,7 +1959,7 @@ proc ::board::update {w {board ""} {animate 0}} {
   }
 
   # Redraw marks and arrows if required:
-  if {$::board::_showMarks($w)} {
+  if {$::board::_showMarks($w) && !$::board::_hideMarks($w)} {
     foreach mark $::board::_mark($w) {
       set type  [lindex $mark 0]
       if {$type == "full"}    {

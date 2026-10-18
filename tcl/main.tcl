@@ -1566,6 +1566,31 @@ proc leaveSquare { square } {
     }
 }
 
+# shiftClickSquare:
+#   Shift+left-click on an empty square, with no piece selected, toggles the
+#   display of the current position's arrows and square marks. This only hides
+#   them from view; the annotations stored in the PGN are left untouched, so a
+#   second Shift+click brings them back. Any other Shift+click behaves
+#   exactly like a normal left-click.
+#
+proc shiftClickSquare { square } {
+    global selectedSq
+
+    # Preserve the calculation-training click handling.
+    if {[winfo exists .calvarWin]} {
+        pressSquare $square
+        return
+    }
+
+    if {$selectedSq == -1 &&
+        [string index [::board::piece .main.board $square] 0] eq "e" &&
+        [llength $::board::_mark(.main.board)] > 0} {
+        ::board::toggleHideMarks .main.board
+        return
+    }
+    pressSquare $square
+}
+
 # pressSquare:
 #    Called when the left mouse button is pressed on a square. Sets
 #    that square to be the selected square.
@@ -1697,6 +1722,8 @@ proc addMarker {w x y {color ""}} {
     }
 
     sc_pos setComment $newComment
+    # Drawing a mark should make marks visible again after a temporary hide.
+    set ::board::_hideMarks($w) 0
     ::notify::PosChanged pgnonly
 }
 
@@ -1925,6 +1952,7 @@ proc CreateMainBoard { {w} } {
     ::board::bind $w.board $i <Enter> "enterSquare $i"
     ::board::bind $w.board $i <Leave> "leaveSquare $i"
     ::board::bind $w.board $i <ButtonPress-1> "pressSquare $i"
+    ::board::bind $w.board $i <Shift-ButtonPress-1> "shiftClickSquare $i"
     ::board::bind $w.board $i <Control-ButtonPress-1> "addMarker $w.board %X %Y"
     ::board::bind $w.board $i <Control-ButtonRelease-1> "addMarker $w.board %X %Y"
     foreach {mods color} $markerColorShortcuts {
