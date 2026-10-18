@@ -916,11 +916,11 @@ translate D PgnWindowTitle {Partienotation - Partie %u}
 
 # Notation pane (PGN window) button tooltips:
 translate D TBLookupTooltip {Tablebase-Suche auf Lichess}
-translate D LichessEvalTooltip {Leichte Wolkenauswertung für aktuelle Position}
-translate D LichessUploadTooltip {Spiel auf Lichess.org hochladen}
-translate D ChessComTooltip {Öffnen Sie die Partie im Chess.com-Analyseforum}
-translate D ChessDBTooltip {Aktuelle Position in ChessDB.cn öffnen}
-translate D LichessOpenExTooltip {Lichess öffnet den Explorer für die aktuelle Position}
+translate D LichessEvalTooltip {Lichess.org Bewertung für die aktuelle Stellung}
+translate D LichessUploadTooltip {Partie auf Lichess.org hochladen}
+translate D ChessComTooltip {Partie im Analyseforum von Chess.com öffnen}
+translate D ChessDBTooltip {Aktuelle Stellung in ChessDB.cn öffnen}
+translate D LichessOpenExTooltip {Lichess-Eröffnungs-Datenbank für die aktuelle Stellung}
 translate D LichessMonitorTooltip {Live-Updates anhalten/fortsetzen}
 translate D LucasChessNoMacOS {Lucas Chess-Engines sind für macOS nicht verfügbar}
 
