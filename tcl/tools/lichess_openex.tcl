@@ -636,19 +636,12 @@ proc ::lichess_openex::queryExplorer {} {
 
     if {!$ok} {
         ::lichess_openex::showError $w [format [tr LichessFailedQuery] $result]
-        return
+    } elseif {([string match "*\"error\"*" $result] || [string match "*Not Found*" $result]) && ![regexp {"moves"} $result]} {
+        ::lichess_openex::showError $w [format [tr LichessPositionNotFound] $::lichess_openex::database [string range $result 0 300]]
+    } else {
+        # Parse and display results
+        ::lichess_openex::displayResults $w $result $fen
     }
-
-    # Check for error responses
-    if {[string match "*\"error\"*" $result] || [string match "*Not Found*" $result]} {
-        if {![regexp {"moves"} $result]} {
-            ::lichess_openex::showError $w [format [tr LichessPositionNotFound] $::lichess_openex::database [string range $result 0 300]]
-            return
-        }
-    }
-
-    # Parse and display results
-    ::lichess_openex::displayResults $w $result $fen
 
     # Restore the previous size/position (the window is destroyed and recreated
     # for every query), or center it on first use.
@@ -684,10 +677,12 @@ proc ::lichess_openex::onResultConfigure {w eventW} {
         set ::lichess_openex::lastResultGeometry [wm geometry $w]
     }
 
-    if {[winfo exists $w.top.wdl.info]} {
-        set wrap [expr {[winfo width $w] - 30}]
-        if {$wrap > 100} {
-            $w.top.wdl.info configure -wraplength $wrap
+    set wrap [expr {[winfo width $w] - 30}]
+    if {$wrap > 100} {
+        foreach label [list $w.top.wdl.info $w.error.msg] {
+            if {[winfo exists $label]} {
+                $label configure -wraplength $wrap
+            }
         }
     }
 }
@@ -753,15 +748,15 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
     foreach c $cols n $colNames {
         $w.top.movesframe.tree heading $c -text $n
     }
-    $w.top.movesframe.tree column san       -width 60  -anchor center
-    $w.top.movesframe.tree column white     -width 65  -anchor e
-    $w.top.movesframe.tree column draws     -width 65  -anchor e
-    $w.top.movesframe.tree column black     -width 65  -anchor e
-    $w.top.movesframe.tree column total     -width 70  -anchor e
-    $w.top.movesframe.tree column pct       -width 55  -anchor e
-    $w.top.movesframe.tree column avgRating -width 75  -anchor e
-    $w.top.movesframe.tree column eco       -width 50  -anchor center
-    $w.top.movesframe.tree column opening   -width 200 -anchor w
+    $w.top.movesframe.tree column san       -width 60  -minwidth 60  -anchor center
+    $w.top.movesframe.tree column white     -width 65  -minwidth 65  -anchor e
+    $w.top.movesframe.tree column draws     -width 65  -minwidth 65  -anchor e
+    $w.top.movesframe.tree column black     -width 65  -minwidth 65  -anchor e
+    $w.top.movesframe.tree column total     -width 70  -minwidth 70  -anchor e
+    $w.top.movesframe.tree column pct       -width 55  -minwidth 55  -anchor e
+    $w.top.movesframe.tree column avgRating -width 75  -minwidth 75  -anchor e
+    $w.top.movesframe.tree column eco       -width 50  -minwidth 50  -anchor center
+    $w.top.movesframe.tree column opening   -width 200 -minwidth 200 -anchor w
 
     pack $w.top.movesframe.xsb -side bottom -fill x
     pack $w.top.movesframe.tree -side left -fill both -expand 1
@@ -799,13 +794,13 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
             $w.bottom.topgframe.tree heading $c -text $n \
                 -command [list ::lichess_openex::sortByColumn $w.bottom.topgframe.tree $c 1]
         }
-        $w.bottom.topgframe.tree column san         -width 55  -anchor center
-        $w.bottom.topgframe.tree column winner      -width 55  -anchor center
-        $w.bottom.topgframe.tree column whiteName   -width 150 -anchor w
-        $w.bottom.topgframe.tree column whiteRating -width 65  -anchor e
-        $w.bottom.topgframe.tree column blackName   -width 150 -anchor w
-        $w.bottom.topgframe.tree column blackRating -width 65  -anchor e
-        $w.bottom.topgframe.tree column date        -width 80  -anchor center
+        $w.bottom.topgframe.tree column san         -width 55  -minwidth 55  -anchor center
+        $w.bottom.topgframe.tree column winner      -width 55  -minwidth 55  -anchor center
+        $w.bottom.topgframe.tree column whiteName   -width 150 -minwidth 150 -anchor w
+        $w.bottom.topgframe.tree column whiteRating -width 65  -minwidth 65  -anchor e
+        $w.bottom.topgframe.tree column blackName   -width 150 -minwidth 150 -anchor w
+        $w.bottom.topgframe.tree column blackRating -width 65  -minwidth 65  -anchor e
+        $w.bottom.topgframe.tree column date        -width 80  -minwidth 80  -anchor center
 
         pack $w.bottom.topgframe.xsb -side bottom -fill x
         pack $w.bottom.topgframe.tree -side left -fill both -expand 1
@@ -837,13 +832,13 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
         $w.bottom.recgframe.tree heading $c -text $n \
             -command [list ::lichess_openex::sortByColumn $w.bottom.recgframe.tree $c 1]
     }
-    $w.bottom.recgframe.tree column san         -width 55  -anchor center
-    $w.bottom.recgframe.tree column winner      -width 55  -anchor center
-    $w.bottom.recgframe.tree column whiteName   -width 150 -anchor w
-    $w.bottom.recgframe.tree column whiteRating -width 65  -anchor e
-    $w.bottom.recgframe.tree column blackName   -width 150 -anchor w
-    $w.bottom.recgframe.tree column blackRating -width 65  -anchor e
-    $w.bottom.recgframe.tree column date        -width 80  -anchor center
+    $w.bottom.recgframe.tree column san         -width 55  -minwidth 55  -anchor center
+    $w.bottom.recgframe.tree column winner      -width 55  -minwidth 55  -anchor center
+    $w.bottom.recgframe.tree column whiteName   -width 150 -minwidth 150 -anchor w
+    $w.bottom.recgframe.tree column whiteRating -width 65  -minwidth 65  -anchor e
+    $w.bottom.recgframe.tree column blackName   -width 150 -minwidth 150 -anchor w
+    $w.bottom.recgframe.tree column blackRating -width 65  -minwidth 65  -anchor e
+    $w.bottom.recgframe.tree column date        -width 80  -minwidth 80  -anchor center
 
     pack $w.bottom.recgframe.xsb -side bottom -fill x
     pack $w.bottom.recgframe.tree -side left -fill both -expand 1
