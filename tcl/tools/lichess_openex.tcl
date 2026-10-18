@@ -854,7 +854,9 @@ proc ::lichess_openex::displayResults {w jsonData fen} {
 
     # --- Close button ---
     ttk::frame $w.btnbar
-    pack $w.btnbar -fill x -pady {5 0}
+    # Keep the Close button visible when the window is made short: reserve the
+    # bottom strip before the expanding panels take their space.
+    pack $w.btnbar -side bottom -fill x -pady {5 0} -before $w.top
     ttk::button $w.btnbar.close -text [tr Close] -command "destroy $w"
     pack $w.btnbar.close -side right -padx 5
 
