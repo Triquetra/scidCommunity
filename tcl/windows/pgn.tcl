@@ -428,8 +428,12 @@ proc ::pgn::openInLichess {} {
     return
   }
 
-    # Generate PGN text (keep newlines; encoder will percent-encode)
-    set pgnStr [sc_game pgn -width 75 -indentComments $::pgn::indentComments \
+    # Generate PGN text for the upload only. Strip comments and annotations
+    # (NAGs, arrows/square marks): they are not shown by Lichess, can make the
+    # PGN unnecessarily long, and are the most common cause of the import
+    # endpoint rejecting a game. The stored game is not modified.
+    set pgnStr [sc_game pgn -width 75 -comments 0 \
+      -indentComments $::pgn::indentComments \
       -indentVariations $::pgn::indentVars -space $::pgn::moveNumberSpaces]
 
     # URL-encode form body
