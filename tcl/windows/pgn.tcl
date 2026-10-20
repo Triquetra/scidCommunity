@@ -438,6 +438,20 @@ proc ::pgn::openInLichess {} {
     # URL-encode form body
     set query [::http::formatQuery pgn [string trim $pgnStr]]
 
+    # Extract the encoded PGN for the analysis-board URL.
+    set encoded ""
+    if {[regexp {^pgn=(.*)$} $query -> encodedVal]} { set encoded $encodedVal }
+    set analysisUrl "https://lichess.org/analysis/pgn/$encoded"
+
+    # Short games: open the analysis board directly. Unlike /api/import, it
+    # preserves variations (Lichess's import endpoint stores only the main
+    # line). Lichess rejects analysis URLs longer than ~2 KB with "Sorry, the
+    # request could not be processed", so longer games use the import endpoint.
+    if {$encoded ne "" && [string length $analysisUrl] <= 2000} {
+        openURL $analysisUrl
+        return
+    }
+
   set url "https://lichess.org/api/import"
   set result ""
   set err ""
@@ -487,13 +501,8 @@ proc ::pgn::openInLichess {} {
   }
 
   if {$gameUrl eq ""} {
-    # Fallback: open analysis board with PGN in path
-    set encoded ""
-    if {[regexp {^pgn=(.*)$} $query -> encodedVal]} {
-      set encoded $encodedVal
-    }
-    if {$encoded ne ""} {
-      set analysisUrl "https://lichess.org/analysis/pgn/$encoded"
+    # Last resort: the analysis board, if its URL is short enough.
+    if {$encoded ne "" && [string length $analysisUrl] <= 2000} {
       openURL $analysisUrl
       return
     }
