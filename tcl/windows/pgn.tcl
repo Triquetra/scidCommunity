@@ -428,26 +428,49 @@ proc ::pgn::openInLichess {} {
     return
   }
 
-    # Generate PGN text (keep newlines; encoder will percent-encode)
-    set pgnStr [sc_game pgn -width 75 -indentComments $::pgn::indentComments \
+    # Generate PGN text for the upload only. Strip comments and annotations
+    # (NAGs, arrows/square marks) to keep the upload small; the stored game is
+    # not modified.
+    set pgnStr [sc_game pgn -width 75 -comments 0 \
+      -indentComments $::pgn::indentComments \
       -indentVariations $::pgn::indentVars -space $::pgn::moveNumberSpaces]
 
     # URL-encode form body
     set query [::http::formatQuery pgn [string trim $pgnStr]]
+
+    # Extract the encoded PGN for the analysis-board URL.
+    set encoded ""
+    if {[regexp {^pgn=(.*)$} $query -> encodedVal]} { set encoded $encodedVal }
+    set analysisUrl "https://lichess.org/analysis/pgn/$encoded"
+
+    # Short games: open the analysis board directly. Unlike /api/import, it
+    # preserves variations (Lichess's import endpoint stores only the main
+    # line). Lichess rejects analysis URLs longer than ~2 KB with "Sorry, the
+    # request could not be processed", so longer games use the import endpoint.
+    if {$encoded ne "" && [string length $analysisUrl] <= 2000} {
+        openURL $analysisUrl
+        return
+    }
 
   set url "https://lichess.org/api/import"
   set result ""
   set err ""
   set ok 0
 
+  # Ask for JSON explicitly: without this header Lichess answers the import
+  # with a 303 redirect and an empty body, so no game URL can be extracted.
   # Try curl first
-  if {![catch {exec curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" --data-binary $query $url} result]} {
+  if {![catch {exec curl -s -X POST -H "Accept: application/json" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        --data-binary $query $url} result]} {
     set ok 1
   } else {
     set err $result
     # Fallback to Tcl http
     set token ""
-    if {![catch {set token [::http::geturl $url -method POST -type "application/x-www-form-urlencoded" -query $query -timeout 10000]} httpErr]} {
+    if {![catch {set token [::http::geturl $url -method POST \
+          -headers [list Accept application/json] \
+          -type "application/x-www-form-urlencoded" -query $query -timeout 10000]} httpErr]} {
         set result [::http::data $token]
         ::http::cleanup $token
         set ok 1
@@ -461,6 +484,14 @@ proc ::pgn::openInLichess {} {
     return
   }
 
+  # Lichess reports import problems as {"error":"..."} (e.g. rate limiting).
+  # Show that instead of falling back to a potentially too-long analysis URL.
+  if {[regexp {"error"\s*:\s*"([^"]+)"} $result -> apiError]} {
+    tk_messageBox -icon warning -type ok -title "scidCommunity" \
+        -message "Lichess could not import this game: $apiError" -parent .
+    return
+  }
+
   # Extract returned game URL
   set gameUrl ""
   if {[regexp {"url":"([^\"]+)"} $result -> gameUrl]} {
@@ -470,13 +501,8 @@ proc ::pgn::openInLichess {} {
   }
 
   if {$gameUrl eq ""} {
-    # Fallback: open analysis board with PGN in path
-    set encoded ""
-    if {[regexp {^pgn=(.*)$} $query -> encodedVal]} {
-      set encoded $encodedVal
-    }
-    if {$encoded ne ""} {
-      set analysisUrl "https://lichess.org/analysis/pgn/$encoded"
+    # Last resort: the analysis board, if its URL is short enough.
+    if {$encoded ne "" && [string length $analysisUrl] <= 2000} {
       openURL $analysisUrl
       return
     }
