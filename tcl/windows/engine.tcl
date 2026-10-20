@@ -316,6 +316,13 @@ proc ::enginewin::Open { {id ""} {enginename ""} {pgnviewer 0} } {
     if {$enginename eq ""} {
         set enginename $::enginewin_lastengine($id)
     }
+    # A slot that has never been used (or whose last engine was renamed or
+    # deleted) has no remembered engine. Start the most recently used
+    # configured engine instead of opening an empty engine window; if none are
+    # configured, leave the config pane visible so the user can add one.
+    if {$enginename eq "" || [::enginecfg::get $enginename] eq ""} {
+        set enginename [lindex [::enginecfg::names] 0]
+    }
     catch { ::enginewin::connectEngine $id $enginename }
     if {$enginename ne ""} {
         ::enginewin::toggleConfigPane $id hide
