@@ -429,9 +429,8 @@ proc ::pgn::openInLichess {} {
   }
 
     # Generate PGN text for the upload only. Strip comments and annotations
-    # (NAGs, arrows/square marks): they are not shown by Lichess, can make the
-    # PGN unnecessarily long, and are the most common cause of the import
-    # endpoint rejecting a game. The stored game is not modified.
+    # (NAGs, arrows/square marks) to keep the upload small; the stored game is
+    # not modified.
     set pgnStr [sc_game pgn -width 75 -comments 0 \
       -indentComments $::pgn::indentComments \
       -indentVariations $::pgn::indentVars -space $::pgn::moveNumberSpaces]
@@ -444,14 +443,20 @@ proc ::pgn::openInLichess {} {
   set err ""
   set ok 0
 
+  # Ask for JSON explicitly: without this header Lichess answers the import
+  # with a 303 redirect and an empty body, so no game URL can be extracted.
   # Try curl first
-  if {![catch {exec curl -s -X POST -H "Content-Type: application/x-www-form-urlencoded" --data-binary $query $url} result]} {
+  if {![catch {exec curl -s -X POST -H "Accept: application/json" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        --data-binary $query $url} result]} {
     set ok 1
   } else {
     set err $result
     # Fallback to Tcl http
     set token ""
-    if {![catch {set token [::http::geturl $url -method POST -type "application/x-www-form-urlencoded" -query $query -timeout 10000]} httpErr]} {
+    if {![catch {set token [::http::geturl $url -method POST \
+          -headers [list Accept application/json] \
+          -type "application/x-www-form-urlencoded" -query $query -timeout 10000]} httpErr]} {
         set result [::http::data $token]
         ::http::cleanup $token
         set ok 1
@@ -462,6 +467,14 @@ proc ::pgn::openInLichess {} {
 
   if {!$ok} {
     tk_messageBox -icon warning -type ok -title "scidCommunity" -message "Failed to upload PGN to Lichess: $err" -parent .
+    return
+  }
+
+  # Lichess reports import problems as {"error":"..."} (e.g. rate limiting).
+  # Show that instead of falling back to a potentially too-long analysis URL.
+  if {[regexp {"error"\s*:\s*"([^"]+)"} $result -> apiError]} {
+    tk_messageBox -icon warning -type ok -title "scidCommunity" \
+        -message "Lichess could not import this game: $apiError" -parent .
     return
   }
 
