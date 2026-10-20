@@ -1,10 +1,10 @@
 Name:           scidcommunity
-Version:        5.1.4.40
+Version:        5.1.4.41
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
 # Commit hash from github branch
-%global commit dfc8cc2a4d6ab492ccc0e63c9edae6a20ae6e08e   
+%global commit 8dfb2377a4ab1dd56e8f96be5200a204ac2c4ddf   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 License:        GPL-2.0-or-later
@@ -64,6 +64,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Tue Oct 20, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-41
+- "Fix Lichess upload bug for long games"
 * Sun Oct 18, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-40
 - "More options to resize Lichess Opening Explorer; Shift+click to toggle drawn arrows/square highlights"
 * Sat Oct 17, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-38
