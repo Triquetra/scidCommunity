@@ -12,58 +12,60 @@ While it maintains compatibility with the original Scid database formats, **scid
 
 *Most recent changes:*
 
-1. Based on user reports, several keyboard issues have been fixed: the **arrow keys** and the **spacebar** now work while the keyboard focus is in the **Engine** or **Analysis** output, or the **PGN Window** (previously they only responded after clicking the moves list, and <space> played a move only when the mouse pointer happened to be over a board or engine window). The **marker palette** colour and type are now remembered across restarts instead of reverting to green, and the Spanish help file now documents the current marker shortcuts.
-2. Lichess-style hot keys have been implemented that allow users to quickly change arrow colors and square marker colors on the chessboard. This was an excellent user suggestion. [See Discussions](https://github.com/whelanh/scidCommunity/discussions/312) In the same spirit, pressing the **spacebar** now plays the engine's best move (the first line when MultiPV is active) in the **Engine** and **Analysis** windows, and on the main board when an engine is running.
-3. "Color picker" buttons have been added to **Options/Preferences/Chessboard** Light and Dark Squares so users can easily replicate chessboard colors they find on-line or in other programs. This user-requested feature is described in  [Discussions/Announcements](https://github.com/whelanh/scidCommunity/discussions/304)
-4. A [user requested](https://github.com/whelanh/scidCommunity/discussions/283) the ability to change comment colors, font, size etc. This is now possible with a new *Format* button in the **Comment Editor** window. Along with that, users can now export formatted PGNs to .rtf files (and import them as well).
-5. Based on a [user requst](https://github.com/whelanh/scidCommunity/discussions/282), the **Player Name** setup from Scid vs. PC has been adopted and is available under the **Options** menu.
+1. Ctrl + Shift + A from an **Engine Window** instantly adds all the scores and annotations that were already generated from the score graph to the PGN.  Ctrl + Z undoes the same action.
+2. The **marker palette** colour and type are now remembered across restarts instead of reverting to green.
+3. Lichess-style hot keys have been implemented that allow users to quickly change arrow colors and square marker colors on the chessboard. This was an excellent user suggestion. [See Discussions](https://github.com/whelanh/scidCommunity/discussions/312) In the same spirit, pressing the **spacebar** now plays the engine's best move (the first line when MultiPV is active) in the **Engine** and **Analysis** windows, and on the main board when an engine is running.
+4. "Color picker" buttons have been added to **Options/Preferences/Chessboard** Light and Dark Squares so users can easily replicate chessboard colors they find on-line or in other programs. This user-requested feature is described in  [Discussions/Announcements](https://github.com/whelanh/scidCommunity/discussions/304)
+5. A [user requested](https://github.com/whelanh/scidCommunity/discussions/283) the ability to change comment colors, font, size etc. This is now possible with a new *Format* button in the **Comment Editor** window. Along with that, users can now export formatted PGNs to .rtf files (and import them as well).
+
 
 <details>
 <summary><b>Show more (older changes) — click to expand</b></summary>
 
 <br>
 
-6. Thanks to a [user request](https://github.com/whelanh/scidCommunity/discussions/264), you can now choose to view multiple opening books (up to 3) in the Book Window.
-7. New [feature](https://github.com/whelanh/scidCommunity/discussions/231)  added under the Play menu that integrates playing on the Lechenicher SchachServer (LSS) and on the ICCF server.
-8. Based on a [user request](https://github.com/whelanh/scidCommunity/discussions/225), NAG annotations present in your database can be shown in the Tree View if you click the "Annotations" check box. If you right-click a move in the Tree View with an annotation symbol, you can populate a new Game List with just games with a NAG symbol for that move.
-9. Drag and drop of database, PGN, and .epd files is [now available](https://github.com/whelanh/scidCommunity/discussions/209). Drag files to either the Board display window or the PGN Window.
-10. A long list of chess engines provided by [Lucas Chess](https://github.com/lukasmonk/lucaschessR6) can now be installed with a button click in the **Tools/Configure Engines** window by pressing the new "Lucas Chess" button.
-11. Based on a [user request](https://github.com/whelanh/scidCommunity/discussions/188), a dedicated **.epd analysis window** is now [available](https://github.com/whelanh/scidCommunity/discussions/192) (and opens automatically when you open an .epd file).
-12. Based on a [user request](https://github.com/whelanh/scidCommunity/discussions/176), it is now possible to open an arbitrarily large number of **Analysis Windows** by double clicking the engines in the **Configure Engines** or **Analysis Window..** pop up dialogs.
-13. Daily chess puzzle and more puzzles from Lichess with the new [**Lichess Puzzles**](https://github.com/whelanh/scidCommunity/discussions/167) feature under the **Play** menu.
-14. New [engine vs. engine tournament feature](https://github.com/whelanh/scidCommunity/discussions/162) and [PGN Viewer](https://github.com/whelanh/scidCommunity/discussions/161) adopted from [Uwe Klimmek](https://codeberg.org/scid/scid) 
-15. Thanks to a [user suggestion](https://github.com/whelanh/scidCommunity/discussions/123), a new **Lichess OpenExplorer** button has been added to the **PGN Window** that provides access to the Lichess Opening Explorer data from the Masters, Lichess, and Player databases.
-16. For games with `[%clk ]` time comments, a new **Tools/Time Analysis** [feature](https://github.com/whelanh/scidCommunity/discussions/59) charts clock time remaining and time used per move.
-17. Lichess-based calculation of White and Black's "Game Accuracy" [included](https://github.com/whelanh/scidCommunity/discussions/49) in the upper left of the engine score graph in the **Engine Window**.
-18. Thanks to a well thought out and detailed [user proposal](https://github.com/whelanh/scidCommunity/discussions/32), developers can now access Scid databases directly in their code using scidCommunity's new headless API.  More documentation can be found in the /docs folder.
-19. Users can now see up to 4 half-move sequences in the **Tree Window**   The user's preferred Tree Window move depth can be saved under **Options/Preferences/Moves**
-20. Updated language translations in **Options/Language** and added Chinese, Turkish, Serbian Cyrillic, Japanese and Romanian translation files.
-21. Based on [user request](https://github.com/whelanh/scidCommunity/discussions/26), now down-arrow enters a variation in the PGN Window, up-arrow returns to main line.  Right-arrow moves forward in both main line and variation.
-22. Based on user request, adopted Lichess/ChessBase format for arrows and symbols as the default. User can revert to old Scid format in Options/Preferences/Moves if they want.
-23. Add multi-colored arrows for engine analysis in Engine and Analysis windows. Top 3+ engine moves with color-coded arrows: green (Best), yellow (2nd), red (3rd+)
-24. Add 2 fold and 3 fold repetition detection to the PGN Window (including when new moves are added).
-25. Eliminated the dependence on the old Phalanx/Toga engines formerly needed to use the "Play/Tactical Game" feature.
-26. Improved "Best Games" button in the Tree View to honor the state of the all_games checkbox
-27. Connected the new Lichess 7-man table base lookup to the **Finish Game** feature in the **Analysis Engine** window so auto-play doesn't go on longer than necessary. Also **Finish Game** now allows simultaneous time and depth limits on the engines used.
-28. Implemented [user request](https://github.com/whelanh/scidCommunity/discussions/9) to allow opening Lichess broadcast tournament games.  If a game is ongoing, it will be updated every minute.
-29. Based on [user request](https://github.com/whelanh/scidCommunity/discussions/12), user can now limit the length of variations in the Analysis Engine annotation function.
-30. Implemented [user request](https://github.com/whelanh/scidCommunity/discussions/13) to allow users to easily import their Lichess and chess.com games.
-31. Implemented [user request](https://github.com/whelanh/scidCommunity/discussions/10) for better handling of long comments in the Game Info window.
-32. New light colored buttons added for use in the Engine and Analysis windows when using "dark" and "cobalt2" themes. 
-33. New (optional) "Sand" and "cobalt2" themes. Additionally, 13 polished TTK themes (6 dark, 7 light) with custom widget styling by [Uwe Klimmek](https://codeberg.org/scid/ttk-themes) are bundled, along with matching dark toolbar icons.
-34. New buttons in the **PGN Window**:
+6. Based on a [user requst](https://github.com/whelanh/scidCommunity/discussions/282), the **Player Name** setup from Scid vs. PC has been adopted and is available under the **Options** menu.
+7. Thanks to a [user request](https://github.com/whelanh/scidCommunity/discussions/264), you can now choose to view multiple opening books (up to 3) in the Book Window.
+8. New [feature](https://github.com/whelanh/scidCommunity/discussions/231)  added under the Play menu that integrates playing on the Lechenicher SchachServer (LSS) and on the ICCF server.
+9. Based on a [user request](https://github.com/whelanh/scidCommunity/discussions/225), NAG annotations present in your database can be shown in the Tree View if you click the "Annotations" check box. If you right-click a move in the Tree View with an annotation symbol, you can populate a new Game List with just games with a NAG symbol for that move.
+10. Drag and drop of database, PGN, and .epd files is [now available](https://github.com/whelanh/scidCommunity/discussions/209). Drag files to either the Board display window or the PGN Window.
+11. A long list of chess engines provided by [Lucas Chess](https://github.com/lukasmonk/lucaschessR6) can now be installed with a button click in the **Tools/Configure Engines** window by pressing the new "Lucas Chess" button.
+12. Based on a [user request](https://github.com/whelanh/scidCommunity/discussions/188), a dedicated **.epd analysis window** is now [available](https://github.com/whelanh/scidCommunity/discussions/192) (and opens automatically when you open an .epd file).
+13. Based on a [user request](https://github.com/whelanh/scidCommunity/discussions/176), it is now possible to open an arbitrarily large number of **Analysis Windows** by double clicking the engines in the **Configure Engines** or **Analysis Window..** pop up dialogs.
+14. Daily chess puzzle and more puzzles from Lichess with the new [**Lichess Puzzles**](https://github.com/whelanh/scidCommunity/discussions/167) feature under the **Play** menu.
+15. New [engine vs. engine tournament feature](https://github.com/whelanh/scidCommunity/discussions/162) and [PGN Viewer](https://github.com/whelanh/scidCommunity/discussions/161) adopted from [Uwe Klimmek](https://codeberg.org/scid/scid) 
+16. Thanks to a [user suggestion](https://github.com/whelanh/scidCommunity/discussions/123), a new **Lichess OpenExplorer** button has been added to the **PGN Window** that provides access to the Lichess Opening Explorer data from the Masters, Lichess, and Player databases.
+17. For games with `[%clk ]` time comments, a new **Tools/Time Analysis** [feature](https://github.com/whelanh/scidCommunity/discussions/59) charts clock time remaining and time used per move.
+18. Lichess-based calculation of White and Black's "Game Accuracy" [included](https://github.com/whelanh/scidCommunity/discussions/49) in the upper left of the engine score graph in the **Engine Window**.
+19. Thanks to a well thought out and detailed [user proposal](https://github.com/whelanh/scidCommunity/discussions/32), developers can now access Scid databases directly in their code using scidCommunity's new headless API.  More documentation can be found in the /docs folder.
+20. Users can now see up to 4 half-move sequences in the **Tree Window**   The user's preferred Tree Window move depth can be saved under **Options/Preferences/Moves**
+21. Updated language translations in **Options/Language** and added Chinese, Turkish, Serbian Cyrillic, Japanese and Romanian translation files.
+22. Based on [user request](https://github.com/whelanh/scidCommunity/discussions/26), now down-arrow enters a variation in the PGN Window, up-arrow returns to main line.  Right-arrow moves forward in both main line and variation.
+23. Based on user request, adopted Lichess/ChessBase format for arrows and symbols as the default. User can revert to old Scid format in Options/Preferences/Moves if they want.
+24. Add multi-colored arrows for engine analysis in Engine and Analysis windows. Top 3+ engine moves with color-coded arrows: green (Best), yellow (2nd), red (3rd+)
+25. Add 2 fold and 3 fold repetition detection to the PGN Window (including when new moves are added).
+26. Eliminated the dependence on the old Phalanx/Toga engines formerly needed to use the "Play/Tactical Game" feature.
+27. Improved "Best Games" button in the Tree View to honor the state of the all_games checkbox
+28. Connected the new Lichess 7-man table base lookup to the **Finish Game** feature in the **Analysis Engine** window so auto-play doesn't go on longer than necessary. Also **Finish Game** now allows simultaneous time and depth limits on the engines used.
+29. Implemented [user request](https://github.com/whelanh/scidCommunity/discussions/9) to allow opening Lichess broadcast tournament games.  If a game is ongoing, it will be updated every minute.
+30. Based on [user request](https://github.com/whelanh/scidCommunity/discussions/12), user can now limit the length of variations in the Analysis Engine annotation function.
+31. Implemented [user request](https://github.com/whelanh/scidCommunity/discussions/13) to allow users to easily import their Lichess and chess.com games.
+32. Implemented [user request](https://github.com/whelanh/scidCommunity/discussions/10) for better handling of long comments in the Game Info window.
+33. New light colored buttons added for use in the Engine and Analysis windows when using "dark" and "cobalt2" themes. 
+34. New (optional) "Sand" and "cobalt2" themes. Additionally, 13 polished TTK themes (6 dark, 7 light) with custom widget styling by [Uwe Klimmek](https://codeberg.org/scid/ttk-themes) are bundled, along with matching dark toolbar icons.
+35. New buttons in the **PGN Window**:
       - *Table Base* looks up current position in the Lichess endgame table base
       - *chess.com* uploads the current game to Chess.com
       - *lichess.org* uploads the current game to Lichess.org
       - *chessdb Engine Tree* opens the current position in chessdb.cn's tree of engine evaluaitons
       - *Lichess Eval* gets any engine evaluations stored on Lichess for the current position (see the Lichess API for more detail)
       - *Lichess OpenExplore* retrieves data from Lichess's Opening Explorer for the current position  
-35. A new **`Download TWIC Games`** option under the **`Tools`** menu that downloads' the most recent weekly games from [TWIC](https://theweekinchess.com/twic) and brings them into scidCommunity for filtering, merging with your database etc.
-36. The **Engine** windows have been enhanced:
+36. A new **`Download TWIC Games`** option under the **`Tools`** menu that downloads' the most recent weekly games from [TWIC](https://theweekinchess.com/twic) and brings them into scidCommunity for filtering, merging with your database etc.
+37. The **Engine** windows have been enhanced:
       - New depth and move time input windows for limiting an engine's calculations. If users choose to use Scid's **Save Options**, the inputs will be saved as the defaults for future use.
       - Thanks to a [user suggestion](https://github.com/whelanh/scidCommunity/discussions/38), the Engine Window upper panel now pre-populates with stored evaluations from Lichess if they are available and it caches local engine results if they get to a deeper level than the pre-populated PVs.
       - New *Auto Comment* button attempts to inject a meaningful comment for the current move from AI, while *Game Comment* button will provide comments for moves that have annotations and a game summary.
-37. The **Header Search** dialogue has been improved with the addition of a new "Layouts" button at the lower left. This button replaces a "Save" button that has been disabled for years. The new button allows users to name, save and load sets of search parameters they use frequently.
+38. The **Header Search** dialogue has been improved with the addition of a new "Layouts" button at the lower left. This button replaces a "Save" button that has been disabled for years. The new button allows users to name, save and load sets of search parameters they use frequently.
       - The hotkey Alt + s has been added to invoke the Search button.
       - An "Invert Search" button has been added that allows you to filter OUT all games that DO meet the criteria entered (see more [here](https://github.com/whelanh/scidCommunity/discussions/67)).
 
