@@ -179,6 +179,10 @@ menuText G WindowsTree "Παράθυρο δένδρου" 0 {Άνοιγμα/κλ�
 menuText G WindowsBook "Παράθυρο βιβλίου" 0 {Άνοιγμα/κλείσιμο του παραθύρου του βιβλίου}
 menuText G WindowsCorrChess "Παράθυρο αλληλογραφίας" 0 {Άνοιγμα/κλείσιμο του παραθύρου αλληλογραφίας}
 menuText G WindowsGraph "Γράφημα ανάλυσης" 0 {Ανοίξτε το παράθυρο Γράφημα με τους χρόνους και τις αξιολογήσεις των κινήσεων}
+menuText G WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText G WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate G PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText G WindowsEPD "Παράθυρο EPD..." 0 {Ανοίξτε ένα παράθυρο επεξεργασίας EPD (αρχείο θέσης).}
 
 # EPD window:

@@ -36,6 +36,7 @@ set helpText(Contents) {<h1>scidCommunity Help Contents</h1>
   <li><a PList><b>Player Finder</b> window</a></li>
   <li><a PInfo><b>Player Info</b> window</a></li>
   <li><a PlayVsEngine><b>Play vs Engine</b> window</a></li>
+  <li><a Presentation><b>Presentation Board</b> window</a></li>
   <li><a Tmt><b>Tournament Finder</b> window</a></li>
   <li><a Tree><b>Tree</b> window</a></li>
   <li><a Graphs><b>Graph</b> windows</a></li>
@@ -746,6 +747,12 @@ set helpText(Menus) {<h1>scidCommunity menus</h1>
   of the games in the <a Searches Filter>filter</a>.</li>
   <li><menu>Tree window</menu>: Opens/closes the <a Tree>tree window</a>.</li>
   <li><menu>Book window</menu>: Opens/closes the <a Book>opening book</a> window.</li>
+  <li><menu>Presentation Board</menu>: Opens/closes a board-only
+  <a Presentation>window that follows the main board</a>, for a projector or
+  a second screen.</li>
+  <li><menu>Freeze Presentation Board</menu>: Stops/resumes following the
+  main board, so the game can be navigated without revealing the move to the
+  audience.</li>
   <li><menu>Score Graph</menu>: Refreshes the <a Graphs Score>score graph</a>.</li>
   <li><menu>EPD Window...</menu>: Opens an <a EPD>EPD</a> (position file) editor window.</li>
   </ul>
@@ -5573,4 +5580,53 @@ set helpText(Metadata) {<h1>Dublin Core Metadata</h1>
    </p>
 
   <p><footer>(Updated: scidCommunity, April 2026)</footer></p>
+}
+
+set helpTitle(Presentation) "Presentation Board"
+set helpText(Presentation) {<h1>The Presentation Board window</h1>
+  <p>
+  This is a board-only window that follows the main board. It is meant for
+  showing a game to an audience while the notation, the engine window and the
+  database stay on the presenter's screen. Open it with
+  <menu>Windows</menu> &gt; <menu>Presentation Board</menu>, or with
+  <b>Ctrl+Shift+B</b>.
+  </p>
+
+  <h3>Showing it to the audience</h3>
+  <p>
+  A projector or a second monitor shows a <term>screen</term>, not a single
+  window, so the display must be set to <term>extended</term> rather than
+  mirrored. Move this window to that screen, then press <b>F11</b> in it to
+  make it fullscreen. Only this window is then projected; on the presenter's
+  screen the normal scidCommunity window remains visible with all its panels.
+  With mirrored displays both screens show the same content, so nothing can
+  be hidden from the audience.
+  </p>
+  <p>
+  The window remembers its position and size when it is closed, so it can be
+  reopened on the second screen. If that screen is no longer connected, the
+  window is moved back onto the visible area.
+  </p>
+
+  <h3>Freezing the board</h3>
+  <p>
+  Press <b>Ctrl+Shift+F</b> to freeze the presentation board. It then keeps
+  the position it was showing while the game is navigated on the main board,
+  which lets the presenter examine a variation or the solution of a puzzle
+  without revealing it. Press <b>Ctrl+Shift+F</b> again, or click the message
+  on the main board, to resume following. The freeze state is shown only in
+  the presenter's window, never on the presentation board.
+  </p>
+
+  <h3>Keys in the presentation window</h3>
+  <ul>
+  <li><b>f</b>: Flips the board. The presentation board can be oriented
+    independently of the main board.</li>
+  <li><b>F11</b>: Toggles fullscreen.</li>
+  <li><b>Esc</b>: Leaves fullscreen.</li>
+  <li><b>Ctrl+Shift+F</b>: Freezes or resumes following.</li>
+  <li><b>Ctrl+Shift+B</b>: Closes the window.</li>
+  </ul>
+
+  <p><footer>(Updated: scidCommunity, October 2026)</footer></p>
 }

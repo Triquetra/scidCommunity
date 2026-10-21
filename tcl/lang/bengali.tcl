@@ -147,6 +147,10 @@ menuText b WindowsTree "গাছের জানালা" 0 {ট্রি উ�
 menuText b WindowsBook "বইয়ের জানালা" 0 {বইয়ের উইন্ডো খুলুন/বন্ধ করুন}
 menuText b WindowsCorrChess "চিঠিপত্র উইন্ডো" 0 {চিঠিপত্র উইন্ডো খুলুন/বন্ধ করুন}
 menuText b WindowsGraph "বিশ্লেষণ গ্রাফ" 0 {মুভের সময় এবং মূল্যায়ন সহ গ্রাফ উইন্ডোটি খুলুন}
+menuText b WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText b WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate b PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText b WindowsEPD "EPD উইন্ডো..." 0 {একটি EPD (পজিশন ফাইল) সম্পাদক উইন্ডো খুলুন}
 
 # EPD window:

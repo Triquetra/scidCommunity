@@ -150,6 +150,10 @@ menuText H WindowsTree "Faszerkezet" 0 {Kinyitja/becsukja a faszerkezet-ablakot.
 menuText H WindowsBook "Megnyitástárablak" 3 {Kinyitja/becsukja a megnyitástárablakot.}
 menuText H WindowsCorrChess "Levelezési sakk" 14 {Open/close the Correspondence window}
 menuText H WindowsGraph "Elemzési grafikon" 0 {Nyissa meg a Grafikon ablakot a lépések idejével és értékelésével}
+menuText H WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText H WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate H PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText H WindowsEPD "EPD ablak..." 0 {Nyisson meg egy EPD (pozíciófájl) szerkesztő ablakot}
 
 # EPD window:

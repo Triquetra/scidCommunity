@@ -160,6 +160,10 @@ menuText F WindowsTree "Fenêtre d'arbre" 10 \
 menuText F WindowsBook "Bibliothèque d'ouvertures" 0 {Ouvrir/Fermer la bibliothèque d'ouverture}
 menuText F WindowsCorrChess "Jeu par correspondance" 0 {Ouvrir/Fermer la fenêtre de jeu par correspondance}
 menuText F WindowsGraph "Graphique d'analyse" 0 {Ouvre la fenêtre Graphique avec les temps et évaluations des mouvements}
+menuText F WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText F WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate F PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText F WindowsEPD "Fenêtre EPD..." 0 {Ouvrir une fenêtre d'éditeur EPD (fichier de position)}
 
 # EPD window:

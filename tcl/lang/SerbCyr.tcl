@@ -188,6 +188,10 @@ menuText J WindowsTree "Трее Виндов" 0 {Отворите/затвор�
 menuText J WindowsBook "Боок Виндов" 0 {Отворите/затворите прозор књиге}
 menuText J WindowsCorrChess "Прозор за кореспонденцију" 0 {Отворите/затворите прозор Преписка}
 menuText J WindowsGraph "Аналисис Грапх" 0 {Отворите прозор Графикон са временима потеза и проценама}
+menuText J WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText J WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate J PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText J WindowsEPD "ЕПД прозор..." 0 {Отворите прозор уређивача ЕПД (датотеке позиције).}
 
 # EPD window:

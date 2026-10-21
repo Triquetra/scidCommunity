@@ -151,6 +151,10 @@ menuText T WindowsTree "Ağaç Penceresi" 0 {Ağaç penceresini aç/kapat}
 menuText T WindowsBook "Kitap Penceresi" 0 {Kitap penceresini aç/kapat}
 menuText T WindowsCorrChess "Yazışma Penceresi" 0 {Yazışma penceresini aç/kapat}
 menuText T WindowsGraph "Analiz Grafiği" 0 {Hareket sürelerini ve değerlendirmelerini içeren Grafik penceresini açın}
+menuText T WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText T WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate T PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText T WindowsEPD "EPD Penceresi..." 0 {Bir EPD (konum dosyası) düzenleyici penceresi açın}
 
 # EPD window:

@@ -152,6 +152,10 @@ menuText O WindowsTree "Trevindu" 0 {Åpne/lukk trevinduet}
 menuText O WindowsBook "Bokvindu" 0 {Åpne/lukk bokvinduet}
 menuText O WindowsCorrChess "Korrespondansevindu" 0 {Åpne/lukk korrespondansevinduet}
 menuText O WindowsGraph "Analysegraf" 0 {Åpne grafvinduet med trekktider og evalueringer}
+menuText O WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText O WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate O PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText O WindowsEPD "EPD-vindu..." 0 {Åpne et EPD-redigeringsvindu (posisjonsfil).}
 
 # EPD window:

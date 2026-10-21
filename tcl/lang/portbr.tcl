@@ -151,6 +151,10 @@ menuText B WindowsTree "Árvore" 0 {Abre/fecha a janela da árvore de pesquisa}
 menuText B WindowsBook "Janela do Livro de Aberturas" 0 {Abre/Fecha  a janela do livro de aberturas}
 menuText B WindowsCorrChess "Janela de Correspondência" 0 {Abre/Fecha a janela de correspondência}
 menuText B WindowsGraph "Gráfico de análise" 0 {Abra a janela Gráfico com tempos e avaliações dos movimentos}
+menuText B WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText B WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate B PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText B WindowsEPD "Janela EPD..." 0 {Abra uma janela do editor EPD (arquivo de posição)}
 
 # EPD window:

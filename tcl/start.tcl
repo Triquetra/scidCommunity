@@ -1137,6 +1137,7 @@ menus.tcl
 board.tcl
 board3d.tcl
 windows/game3d.tcl
+windows/present.tcl
 move.tcl
 main.tcl
 tools/uci.tcl

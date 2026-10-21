@@ -163,6 +163,10 @@ menuText K WindowsTree "Finestra de l'Arbre d'Obertures" 6 {Obre/tanca la finest
 menuText K WindowsBook "Finestra de Llibres d'Obertures" 0 {Obrir/Tancar la finestra de Llibres d'Obertures (Book)}
 menuText K WindowsCorrChess "Finestra d'Escacs Postal" 0 {Obrir/Tancar la Finestra d'Escacs Postal}
 menuText K WindowsGraph "Gràfic d'anàlisi" 0 {Obriu la finestra Gràfic amb els temps i les avaluacions dels moviments}
+menuText K WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText K WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate K PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText K WindowsEPD "Finestra EPD..." 0 {Obriu una finestra de l'editor d'EPD (fitxer de posició).}
 
 # EPD window:

@@ -188,6 +188,10 @@ menuText g WindowsTree "Прозорец на дърво" 0 {Отворете/з
 menuText g WindowsBook "Прозорец на книгата" 0 {Отворете/затворете прозореца на книгата}
 menuText g WindowsCorrChess "Прозорец за кореспонденция" 0 {Отворете/затворете прозореца за кореспонденция}
 menuText g WindowsGraph "Графика за анализ" 0 {Отворете прозореца Графика с времена на ходове и оценки}
+menuText g WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText g WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate g PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText g WindowsEPD "EPD прозорец..." 0 {Отворете прозорец на редактор на EPD (файл с позиция).}
 
 # EPD window:

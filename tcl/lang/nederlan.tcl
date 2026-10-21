@@ -168,6 +168,10 @@ menuText N WindowsBook "Boek Venster" 0 {Open/sluit het Boek venster}
 menuText N WindowsCorrChess "Correspondentieschaak venster" 0 \
     {Open/sluit het correspondentieschaak venster}
 menuText N WindowsGraph "Analyse grafiek" 0 {Open het grafiekvenster met de zettijden en evaluaties}
+menuText N WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText N WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate N PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText N WindowsEPD "EPD-venster..." 0 {Open een EPD-editor (positiebestand).}
 
 # EPD window:

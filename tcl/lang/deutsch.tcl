@@ -174,6 +174,10 @@ menuText D WindowsTree "Zugbaum" 0 {Zugbaum öffnen/schließen}
 menuText D WindowsBook "Buchfenster" 0 {Buchfenster öffnen/schließen}
 menuText D WindowsCorrChess "Fernschachfenster" 0 {Öffnet/schließt das Fernschachfenster}
 menuText D WindowsGraph "Analysediagramm" 0 {Öffnen Sie das Diagrammfenster mit den Zugzeiten und -bewertungen}
+menuText D WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText D WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate D PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText D WindowsEPD "EPD-Fenster..." 0 {Öffnen Sie ein EPD-Editorfenster (Positionsdatei).}
 
 # EPD window:

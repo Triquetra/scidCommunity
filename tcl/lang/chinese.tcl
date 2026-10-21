@@ -127,6 +127,10 @@ menuText M WindowsTree "棋局树" 0 {显示/隐藏棋局树窗口}
 menuText M WindowsBook "开局库窗口" 0 {打开/关闭开局库窗口}
 menuText M WindowsCorrChess "通讯窗口" 0 {打开/关闭通讯窗口}
 menuText M WindowsGraph "分析图表" 0 {打开显示着法时间和评估的图表窗口}
+menuText M WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText M WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate M PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText M WindowsEPD "EPD窗口..." 0 {打开 EPD（位置文件）编辑器窗口}
 
 # EPD window:

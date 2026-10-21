@@ -188,6 +188,10 @@ menuText A WindowsTree "ツリーウィンドウ" 0 {ツリーウィンドウの
 menuText A WindowsBook "ブックウィンドウ" 0 {ブックウィンドウを開く/閉じる}
 menuText A WindowsCorrChess "通信窓口" 0 {通信ウィンドウの開閉}
 menuText A WindowsGraph "分析グラフ" 0 {グラフウィンドウを開き、移動時間と評価を表示します}
+menuText A WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText A WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate A PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText A WindowsEPD "EPD ウィンドウ..." 0 {EPD（ポジションファイル）エディタウィンドウを開く}
 
 # EPD window:
