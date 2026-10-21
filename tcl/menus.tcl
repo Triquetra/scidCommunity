@@ -250,7 +250,7 @@ $m add checkbutton -label WindowsTree -variable treeWin -command ::tree::make -a
 $m add checkbutton -label WindowsBook -variable ::book::isOpen -command ::book::open -accelerator "F6"
 $m add checkbutton -label [tr TablebaseWindow] -variable ::tablebase::window::isOpen -command ::tablebase::window::Open -accelerator "Ctrl+="
 $m add checkbutton -label [tr Board3D] -variable ::windows::game3d::isOpen -command ::windows::game3d::toggle -accelerator "F12"
-$m add checkbutton -label WindowsPresentationBoard -variable ::windows::present::isOpen -command ::windows::present::toggle -accelerator "Ctrl+Shift+B"
+$m add checkbutton -label WindowsPresentationBoard -variable ::windows::present::isOpen -command ::windows::present::toggle -accelerator "Ctrl+Shift+W"
 $m add checkbutton -label WindowsPresentationFreeze -variable ::windows::present::frozen -command ::windows::present::freeze -accelerator "Ctrl+Shift+F"
 $m add command -label WindowsGraph -command ::tools::graphs::time::Open
 $m add separator

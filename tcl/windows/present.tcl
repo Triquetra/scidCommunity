@@ -96,7 +96,7 @@ proc ::windows::present::open {} {
     bind $win <F11> { ::windows::present::fullscreen }
     bind $win <Escape> { ::windows::present::fullscreen 0 }
     bind $win <Control-Shift-F> { ::windows::present::toggleFreeze }
-    bind $win <Control-Shift-B> { ::windows::present::close }
+    bind $win <Control-Shift-W> { ::windows::present::close }
 
     set isOpen 1
     set frozen 0

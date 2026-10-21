@@ -5589,7 +5589,7 @@ set helpText(Presentation) {<h1>The Presentation Board window</h1>
   showing a game to an audience while the notation, the engine window and the
   database stay on the presenter's screen. Open it with
   <menu>Windows</menu> &gt; <menu>Presentation Board</menu>, or with
-  <b>Ctrl+Shift+B</b>.
+  <b>Ctrl+Shift+W</b>.
   </p>
 
   <h3>Showing it to the audience</h3>
@@ -5629,7 +5629,7 @@ set helpText(Presentation) {<h1>The Presentation Board window</h1>
   <li><b>F11</b>: Toggles fullscreen.</li>
   <li><b>Esc</b>: Leaves fullscreen.</li>
   <li><b>Ctrl+Shift+F</b>: Freezes or resumes following.</li>
-  <li><b>Ctrl+Shift+B</b>: Closes the window.</li>
+  <li><b>Ctrl+Shift+W</b>: Closes the window.</li>
   </ul>
 
   <p><footer>(Updated: scidCommunity, October 2026)</footer></p>
