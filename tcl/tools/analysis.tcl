@@ -2927,7 +2927,17 @@ proc automove {{n 1}} {
 proc automove_go {{n 1}} {
     global analysis
     if {$analysis(automove$n)} {
-        if {[makeAnalysisMove $n]} {
+        # The engine's move is the reply to the user's move, not a new user
+        # move: mark it so that the position notification does not make the
+        # tree training guard reply a second time.
+        set previousTrainingMove $::tree::trainingMove
+        try {
+            set ::tree::trainingMove 1
+            set moved [makeAnalysisMove $n]
+        } finally {
+            set ::tree::trainingMove $previousTrainingMove
+        }
+        if {$moved} {
             set analysis(autoMoveThinking$n) 0
             updateBoard -pgn
             after cancel "automove $n"
