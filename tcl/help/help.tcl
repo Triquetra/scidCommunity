@@ -5596,8 +5596,9 @@ set helpText(Presentation) {<h1>The Presentation Board window</h1>
   <p>
   A projector or a second monitor shows a <term>screen</term>, not a single
   window, so the display must be set to <term>extended</term> rather than
-  mirrored. Move this window to that screen, then press <b>F11</b> in it to
-  make it fullscreen. Only this window is then projected; on the presenter's
+  mirrored. Move this window to that screen, click the board to give the
+  window the keyboard focus, then press <b>F11</b> to make it fullscreen.
+  Only this window is then projected; on the presenter's
   screen the normal scidCommunity window remains visible with all its panels.
   With mirrored displays both screens show the same content, so nothing can
   be hidden from the audience.
@@ -5605,7 +5606,10 @@ set helpText(Presentation) {<h1>The Presentation Board window</h1>
   <p>
   The window remembers its position and size when it is closed, so it can be
   reopened on the second screen. If that screen is no longer connected, the
-  window is moved back onto the visible area.
+  window is moved back onto the visible area. Tiling compositors such as
+  Hyprland place windows themselves: there the window opens where the
+  compositor puts it, and a compositor window rule can keep it on the
+  presentation output.
   </p>
 
   <h3>Freezing the board</h3>
