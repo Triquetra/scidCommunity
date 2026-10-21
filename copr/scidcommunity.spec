@@ -1,10 +1,10 @@
 Name:           scidcommunity
-Version:        5.1.4.42
+Version:        5.1.4.43
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
 # Commit hash from github branch
-%global commit cd102533f25904eaf8c7a587da7ceee3ed04d0cb   
+%global commit 0551482cb69df07494ff200589e9d33c77a9a7e3   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 License:        GPL-2.0-or-later
@@ -64,6 +64,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Wed Oct 21, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-43
+- "Add a Presentation Board that syncs with the main Board Display"
 * Wed Oct 21, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-42
 - "Ctrl+Shift+A instantly annotates game from Engine Windows"
 * Tue Oct 20, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-41
