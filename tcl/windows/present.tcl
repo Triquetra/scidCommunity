@@ -105,6 +105,7 @@ proc ::windows::present::open {} {
     set shownBoard [sc_pos board]
     set shownMove [sc_game info previousMoveUCI]
     set shownNags [sc_pos getNags]
+    ::windows::present::syncFlip
 
     ::windows::present::restoreGeometry
     ::windows::present::update
@@ -190,8 +191,25 @@ proc ::windows::present::resize {} {
     ::windows::present::redraw
 }
 
+# ::windows::present::syncFlip --
+#   Brings the presentation board's orientation in line with the main board.
+#   Called from ::board::flip whenever the main board is flipped (toolbar, the
+#   "." key, the menu, or a game loaded with the FlipB flag). Flipping the
+#   presentation board with "f" is a local override that lasts until the main
+#   board is flipped again.
+#
+proc ::windows::present::syncFlip {} {
+    variable win
+
+    if {![winfo exists $win.board]} { return }
+    set flipped [expr {[::board::isFlipped .main.board] ? 1 : 0}]
+    if {[::board::isFlipped $win.board] == $flipped} { return }
+    ::board::flip $win.board $flipped
+    ::windows::present::redraw
+}
+
 # ::windows::present::flip --
-#   Flips the presentation board, independently of the main board.
+#   Flips the presentation board alone, independently of the main board.
 #
 proc ::windows::present::flip {} {
     variable win

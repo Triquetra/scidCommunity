@@ -2054,6 +2054,11 @@ proc ::board::flip {w {newstate -1}} {
   ::board::coords $w $::board::_coords($w)
   ::board::update $w
   ::board::drawEvalBar_ $w
+  # A presentation board follows the main board's orientation.
+  if {$w eq ".main.board" &&
+      [llength [info commands ::windows::present::syncFlip]]} {
+    ::windows::present::syncFlip
+  }
   return $w
 }
 ################################################################################

@@ -5624,8 +5624,8 @@ set helpText(Presentation) {<h1>The Presentation Board window</h1>
 
   <h3>Keys in the presentation window</h3>
   <ul>
-  <li><b>f</b>: Flips the board. The presentation board can be oriented
-    independently of the main board.</li>
+  <li><b>f</b>: Flips the presentation board alone, for the audience.
+    Flipping the main board also flips the presentation board.</li>
   <li><b>F11</b>: Toggles fullscreen.</li>
   <li><b>Esc</b>: Leaves fullscreen.</li>
   <li><b>Ctrl+Shift+F</b>: Freezes or resumes following.</li>
