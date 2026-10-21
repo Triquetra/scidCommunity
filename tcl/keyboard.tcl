@@ -91,7 +91,9 @@ proc keyboardShortcuts {w} {
 
 	# Write the engine score graph and the annotations it implies into the
 	# current game. Engine windows bind the same key to their own widgets.
-	bind $w <Control-A> { excludeTextWidget %W; ::rapid_annotate::commit }
+	# Shift is named explicitly: <Control-A> also matches Ctrl+A with Caps Lock
+	# on, which belongs to the create-variation binding (<Control-a>).
+	bind $w <Control-Shift-A> { excludeTextWidget %W; ::rapid_annotate::commit }
 
 	# Toggle the active window between docked/undocked
 	bind $w <F9> { ::win::toggleDocked %W }

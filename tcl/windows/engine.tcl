@@ -290,9 +290,13 @@ proc ::enginewin::Open { {id ""} {enginename ""} {pgnviewer 0} } {
     # Ctrl+Shift+A writes the score graph and its annotations into the game
     # (see tools/rapid_annotate.tcl). Same custom-tag technique as <space>, so
     # the key works from any widget of the window, docked or not.
+    # Shift is named explicitly: <Control-A> also matches Ctrl+A with Caps Lock
+    # on. A docked window also reaches the main-window binding through the "."
+    # bind tag, so the unconditional break stops the key being handled twice
+    # (two message boxes) when commit has nothing to do.
     set ::enginewin::rapidTag($id) "EnginewinRapid$id"
-    bind $::enginewin::rapidTag($id) <Control-A> \
-        { excludeTextWidget %W ; if {[::rapid_annotate::commit]} { break } }
+    bind $::enginewin::rapidTag($id) <Control-Shift-A> \
+        { excludeTextWidget %W ; ::rapid_annotate::commit ; break }
     ::addBindtagToTree $w $::enginewin::rapidTag($id)
 
     # The engine should be closed before the debug .text is destroyed

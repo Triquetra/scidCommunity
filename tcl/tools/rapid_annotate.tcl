@@ -25,7 +25,7 @@ namespace eval ::rapid_annotate {
     # Evaluations collected from the engine score graphs.
     # scores($base,$game) is a dict: ply -> entry, where
     #   ply             number of half-moves played in the evaluated position
-    #   entry           {depth score score_fmt score_fmt_depth pv eval}
+    #   entry           {depth score score_fmt score_fmt_depth pv eval position}
     #     depth         search depth reported by the engine
     #     score         pawns from White's side of the board; mate = +/-300.0
     #     score_fmt     "+1.24" / "M3" / "-M3" (the PGN notation used by
@@ -33,6 +33,9 @@ namespace eval ::rapid_annotate {
     #     score_fmt_depth  "18:+1.24", the comment written by Batch Annotate
     #     pv            UCI moves from that position
     #     eval          token for the [%eval] comment: "+1.24" / "#3" / "#-3"
+    #     position      the "position ..." string that was analysed, so an
+    #                   entry can be dropped once the game no longer has
+    #                   that position at that ply
     variable scores
     array set scores {}
 }
@@ -79,8 +82,12 @@ proc ::rapid_annotate::record {id plies depth score score_type pv} {
         set score_fmt [format "%+.2f" $value]
         set evalStr $score_fmt
     }
+    set pos ""
+    if {[info exists ::enginewin::pv_(pos,$id)]} {
+        set pos $::enginewin::pv_(pos,$id)
+    }
     set entry [list $depth $value $score_fmt \
-        [format "%d:%s" $depth $score_fmt] $pv $evalStr]
+        [format "%d:%s" $depth $score_fmt] $pv $evalStr $pos]
 
     set key [::rapid_annotate::key]
     if {![info exists scores($key)]} { set scores($key) [dict create] }
@@ -97,14 +104,28 @@ proc ::rapid_annotate::record {id plies depth score score_type pv} {
     set scores($key) $game
 }
 
-# Called when a new game is loaded. The evaluations are only kept for the
-# game being analysed, so the store stays small.
+# Called when a new game is loaded, and when the current game is reloaded,
+# saved or undone. The evaluations are only a scratch pad for the game being
+# analysed, so nothing of the old game survives: an edit that keeps the same
+# game number (replacing a move, truncating, undoing) is caught later by the
+# position check in ::rapid_annotate::evals.
 proc ::rapid_annotate::onNewGame {} {
     variable scores
-    set keep [::rapid_annotate::key]
-    foreach key [array names scores] {
-        if {$key ne $keep} { unset scores($key) }
+    array unset scores
+}
+
+# Positions of the current game's main line, keyed by ply (ply 1 is the
+# position after the first move), in the "position ..." form the engine uses.
+# Spaces are removed so that the same position compares equal whichever of
+# sc_game UCI_currentPos and sc_game UCI_mainLine produced the string.
+proc ::rapid_annotate::mainLinePositions {} {
+    set mainLine [sc_game UCI_mainLine]
+    set positions [dict create]
+    for {set ply 1} {$ply < [llength $mainLine]} {incr ply} {
+        dict set positions $ply \
+            [string map {" " ""} [join [lrange $mainLine 0 $ply]]]
     }
+    return $positions
 }
 
 # Return the collected evaluations of a game in the format expected by
@@ -113,9 +134,16 @@ proc ::rapid_annotate::evals {{key ""}} {
     variable scores
     if {$key eq ""} { set key [::rapid_annotate::key] }
     if {![info exists scores($key)]} { return {} }
+
+    # An evaluation is only valid for the position it was made in. Editing the
+    # game does not clear the store (the game number does not change), so drop
+    # every entry whose position is no longer the position at that ply.
+    set positions [::rapid_annotate::mainLinePositions]
     set evals [dict create]
     dict for {ply entry} $scores($key) {
-        lassign $entry depth value score_fmt score_fmt_depth pv evalStr
+        lassign $entry depth value score_fmt score_fmt_depth pv evalStr pos
+        if {![dict exists $positions $ply] ||
+            [string map {" " ""} $pos] ne [dict get $positions $ply]} { continue }
         dict set evals $ply [dict create \
             score $value \
             score_fmt $score_fmt \
