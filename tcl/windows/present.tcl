@@ -25,6 +25,12 @@ namespace eval ::windows::present {
     # Last window size handled by "resize" (to ignore pure move events).
     variable lastSize ""
 
+    # Position currently on the presentation board. Kept so a flip or resize
+    # can redraw it, frozen or not, including its last-move highlight.
+    variable shownBoard ""
+    variable shownMove ""
+    variable shownNags ""
+
     # Geometry to restore when leaving fullscreen.
     variable savedGeometry ""
 }
@@ -50,6 +56,9 @@ proc ::windows::present::open {} {
     variable frozen
     variable isFullscreen
     variable lastSize
+    variable shownBoard
+    variable shownMove
+    variable shownNags
 
     if {[winfo exists $win]} {
         raise $win
@@ -93,6 +102,9 @@ proc ::windows::present::open {} {
     set frozen 0
     set isFullscreen 0
     set lastSize ""
+    set shownBoard [sc_pos board]
+    set shownMove [sc_game info previousMoveUCI]
+    set shownNags [sc_pos getNags]
 
     ::windows::present::restoreGeometry
     ::windows::present::update
@@ -122,11 +134,33 @@ proc ::windows::present::close {} {
 proc ::windows::present::update {} {
     variable win
     variable frozen
+    variable shownBoard
+    variable shownMove
+    variable shownNags
 
     if {$frozen} { return }
     if {![winfo exists $win.board]} { return }
+    set shownBoard [sc_pos board]
+    set shownMove [sc_game info previousMoveUCI]
+    set shownNags [sc_pos getNags]
     ::board::setmarks $win.board [sc_pos getComment]
-    ::board::update $win.board [sc_pos board]
+    ::windows::present::redraw
+}
+
+# ::windows::present::redraw --
+#   Draws $shownBoard with the last-move highlight. ::board::update only
+#   draws that highlight for the main board, so a second board has to ask
+#   for it; redrawing it here also keeps it correct after a flip or resize.
+#
+proc ::windows::present::redraw {} {
+    variable win
+    variable shownBoard
+    variable shownMove
+    variable shownNags
+
+    if {![winfo exists $win.board]} { return }
+    ::board::update $win.board $shownBoard
+    ::board::lastMoveHighlight $win.board $shownMove $shownNags
 }
 
 # ::windows::present::resize --
@@ -138,6 +172,7 @@ proc ::windows::present::resize {} {
     variable win
     variable resizing
     variable lastSize
+    variable shownBoard
 
     if {![winfo exists $win.board]} { return }
     # <Configure> also fires when the window only moves.
@@ -152,6 +187,7 @@ proc ::windows::present::resize {} {
     set lastSize $size
     ::update idletasks
     ::board::resizeAuto $win.board "0 0 [winfo width $win] [winfo height $win]"
+    ::windows::present::redraw
 }
 
 # ::windows::present::flip --
@@ -159,7 +195,9 @@ proc ::windows::present::resize {} {
 #
 proc ::windows::present::flip {} {
     variable win
-    if {[winfo exists $win.board]} { ::board::flip $win.board }
+    if {![winfo exists $win.board]} { return }
+    ::board::flip $win.board
+    ::windows::present::redraw
 }
 
 # ::windows::present::fullscreen --
