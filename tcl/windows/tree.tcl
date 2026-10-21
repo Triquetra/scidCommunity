@@ -233,7 +233,6 @@ proc ::tree::toggleTraining { baseNumber } {
   set ::tree::userMovePending 0
   if {$tree(training$baseNumber)} {
     set ::tree::trainingBase $baseNumber
-    set ::tree::trainingColor [expr {[sc_pos side] eq "white" ? "black" : "white"}]
   }
   ::tree::refresh $baseNumber
 }
@@ -471,11 +470,17 @@ proc ::tree::dorefresh { baseNumber {filter "tree"}} {
 
   if {[winfo exists .treeGraph$baseNumber]} { ::tree::graph $baseNumber }
 
-  if {$::tree::trainingBase != 0 && $::tree::trainingColor == [sc_pos side]} {
-    if {$::tree::userMovePending} {
-      set ::tree::userMovePending 0
-      ::tree::doTraining
-    }
+  # Reply to the move the user just made. trainingColor used to be latched
+  # when Training was switched on, so the reply stopped as soon as the next
+  # problem had the other side to move; userMovePending already says the move
+  # was the user's, and training moves do not set it. Only the training base's
+  # refresh may consume it: other tree windows refresh first and would use a
+  # tree filter that still refers to the previous position.
+  if {$::tree::trainingBase != 0
+      && $baseNumber == $::tree::trainingBase
+      && $::tree::userMovePending} {
+    set ::tree::userMovePending 0
+    ::tree::doTraining
   }
 }
 
