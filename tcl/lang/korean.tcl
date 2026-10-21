@@ -188,6 +188,10 @@ menuText k WindowsTree "트리창" 0 {트리 창가/닫기}
 menuText k WindowsBook "책 창" 0 {책 창구/닫기}
 menuText k WindowsCorrChess "대응창구" 0 {서신창고/닫기}
 menuText k WindowsGraph "분석 그래프" 0 {이동 시간 및 평가가 포함된 그래프 창 비교}
+menuText k WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText k WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate k PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText k WindowsEPD "EPD 창..." 0 {EPD(위치 파일) 편집기 창 열기}
 
 # EPD window:

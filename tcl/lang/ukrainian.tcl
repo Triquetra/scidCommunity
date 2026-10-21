@@ -148,6 +148,10 @@ menuText Q WindowsTree "Вікно дерева" 0 {Відкрити/закри�
 menuText Q WindowsBook "Книжкове вікно" 0 {Відкрити/закрити вікно Книги}
 menuText Q WindowsCorrChess "Вікно листування" 0 {Відкрити/закрити вікно Листування}
 menuText Q WindowsGraph "Графік аналізу" 0 {Відкрийте вікно графіка з часом ходів і оцінками}
+menuText Q WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText Q WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate Q PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText Q WindowsEPD "Вікно EPD..." 0 {Відкрийте вікно редактора EPD (файл позиції).}
 
 # EPD window:

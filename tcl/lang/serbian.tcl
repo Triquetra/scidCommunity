@@ -163,6 +163,10 @@ menuText Y WindowsBook "Book Window" 0 {Open/close the Book window}
 menuText Y WindowsCorrChess "Correspondence Window" 0 {Open/close the Correspondence window}
 # ====== TODO To be translated ======
 menuText Y WindowsGraph "Analysis Graph" 0 {Open the Graph window with moves' times and evaluations}
+menuText Y WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText Y WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate Y PresentationFrozen {Frozen - the presentation board is not following}
+
 # ====== TODO To be translated ======
 menuText Y WindowsEPD "EPD Window..." 0 {Open an EPD (position file) editor window}
 # ====== TODO To be translated ======

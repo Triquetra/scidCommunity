@@ -147,6 +147,10 @@ menuText h WindowsTree "पेड़ की खिड़की" 0 {ट्री 
 menuText h WindowsBook "बुक विंडो" 0 {पुस्तक विंडो खोलें/बंद करें}
 menuText h WindowsCorrChess "पत्राचार विंडो" 0 {पत्राचार विंडो खोलें/बंद करें}
 menuText h WindowsGraph "विश्लेषण ग्राफ़" 0 {चाल के समय और मूल्यांकन के साथ ग्राफ़ विंडो खोलें}
+menuText h WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText h WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate h PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText h WindowsEPD "ईपीडी विंडो..." 0 {एक ईपीडी (स्थिति फ़ाइल) संपादक विंडो खोलें}
 
 # EPD window:

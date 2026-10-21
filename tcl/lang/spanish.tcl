@@ -165,6 +165,10 @@ menuText S WindowsTree "Ventana de árbol de aperturas" 6 {Abre/cierra la ventan
 menuText S WindowsBook "Ventana de libros de aperturas (Book)" 0 {Abrir/Cerrar la ventana de libros de aperturas (Book)}
 menuText S WindowsCorrChess "Ventana de Correo" 0 {Abrir/Cerrar la ventra de Correo}
 menuText S WindowsGraph "Gráfico de análisis" 0 {Abra la ventana de Gráfico con tiempos y evaluaciones de movimientos.}
+menuText S WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText S WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate S PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText S WindowsEPD "Ventana EPD..." 0 {Abrir una ventana del editor de EPD (archivo de posición)}
 
 # EPD window:

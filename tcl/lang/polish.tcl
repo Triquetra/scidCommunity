@@ -152,6 +152,10 @@ menuText P WindowsTree "Drzewo wariantów" 0 {Otwórz/zamknij okno drzewa warian
 menuText P WindowsBook "Okno księgi debiutowej" 0 {Otwórz/zamknij okno księgi debiutowej}
 menuText P WindowsCorrChess "Okno gry korespondencyjnej" 0 {Otwórz/zamknij okno partii korespondencyjnych}
 menuText P WindowsGraph "Wykres analizy" 0 {Otwórz okno wykresu czasu posunięć i ocen}
+menuText P WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText P WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate P PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText P WindowsEPD "Okno EPD..." 0 {Otwórz edytor okna EPD (pliku pozycji)}
 
 # EPD window:

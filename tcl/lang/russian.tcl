@@ -154,6 +154,10 @@ menuText R WindowsTree "Окно дерева" 10 {Открыть/закрыть
 menuText R WindowsBook "Окно книги" 0 {Открыть/закрыть окно книги}
 menuText R WindowsCorrChess "Окно переписки" 0 {Открыть/закрыть окно переписки}
 menuText R WindowsGraph "График анализа" 0 {Откройте окно графики со временем ходов и дополнительных возможностей.}
+menuText R WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText R WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate R PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText R WindowsEPD "Окно ЭПД..." 0 {Откройте окно редактора EPD (файла позиции).}
 
 # EPD window:

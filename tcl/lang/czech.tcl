@@ -146,6 +146,10 @@ menuText C WindowsTree "Stromov okno" 4 {Otevt/zavt stromov okno}
 menuText C WindowsBook "Okno knihovny zahjen" 0 {Otevt/zavt okno knihovny zahjen}
 menuText C WindowsCorrChess "Korespondenn okno" 0 {Otevt/zavt okno knihovny zahjen}
 menuText C WindowsGraph "Analza Graf" 0 {Otevete okno Graf s asy tah a vyhodnocenm}
+menuText C WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText C WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate C PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText C WindowsEPD "EPD okno..." 0 {Otevřete okno editoru EPD (soubor pozic).}
 
 # EPD window:

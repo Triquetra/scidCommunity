@@ -153,6 +153,10 @@ menuText W WindowsTree "Trädfönster" 2 {Öppna/ stäng variantträdets fönste
 menuText W WindowsBook "Bokfönster" 0 {Öppna/stäng Bokfönstret}
 menuText W WindowsCorrChess "Korrespondensfönster" 0 {Öppna/stäng Korrespondensfönstret}
 menuText W WindowsGraph "Analysdiagram" 0 {Öppna graffönstret med dragtider och utvärderingar}
+menuText W WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText W WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate W PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText W WindowsEPD "EPD-fönster..." 0 {Öppna ett EPD-redigeringsfönster (positionsfil).}
 
 # EPD window:

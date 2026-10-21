@@ -148,6 +148,10 @@ menuText V WindowsTree "חלון עץ" 0 {פתח/סגור את חלון העץ}
 menuText V WindowsBook "חלון ספרים" 0 {פתח/סגור את חלון הספר}
 menuText V WindowsCorrChess "חלון התכתבות" 0 {פתח/סגור את חלון ההתכתבות}
 menuText V WindowsGraph "גרף ניתוח" 0 {פתח את חלון הגרף עם זמני המהלכים והערכות}
+menuText V WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText V WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate V PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText V WindowsEPD "חלון EPD..." 0 {פתח חלון עורך EPD (קובץ מיקום).}
 
 # EPD window:

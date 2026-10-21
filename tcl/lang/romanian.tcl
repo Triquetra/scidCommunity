@@ -188,6 +188,10 @@ menuText L WindowsTree "Fereastra copacului" 0 {Deschide/închide fereastra Tree
 menuText L WindowsBook "Fereastra de carte" 0 {Deschide/închide fereastra Carte}
 menuText L WindowsCorrChess "Fereastra de corespondență" 0 {Deschide/închide fereastra de corespondență}
 menuText L WindowsGraph "Graficul de analiză" 0 {Deschideți fereastra Grafic cu timpii și evaluările mișcărilor}
+menuText L WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText L WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate L PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText L WindowsEPD "Fereastra EPD..." 0 {Deschideți o fereastră de editor EPD (fișier de poziție).}
 
 # EPD window:

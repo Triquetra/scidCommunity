@@ -101,6 +101,13 @@ proc keyboardShortcuts {w} {
 	#TODO: to be checked
 	bind $w <F6>	::book::open
 	bind $w <F12> ::windows::game3d::toggle
+
+	# Presentation board: a board-only window for a projector or second
+	# screen. Ctrl+Shift+W toggles the window, Ctrl+Shift+F freezes it so the
+	# game can be navigated without revealing the move to the audience.
+	# (Ctrl+Shift+B is Search Current Board and must stay so.)
+	bind $w <Control-Shift-W> ::windows::present::toggle
+	bind $w <Control-Shift-F> ::windows::present::toggleFreeze
 	bind $w <Control-d> ::windows::switcher::Open
 	bind $w <Control-e> "::makeCommentWin toggle"
 	bind $w <Control-i> ::windows::stats::Open

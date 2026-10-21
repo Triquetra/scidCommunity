@@ -187,6 +187,10 @@ menuText E WindowsTree "Tree Window" 0 {Open/close the Tree window}
 menuText E WindowsBook "Book Window" 0 {Open/close the Book window}
 menuText E WindowsCorrChess "Correspondence Window" 0 {Open/close the Correspondence window}
 menuText E WindowsGraph "Analysis Graph" 0 {Open the Graph window with moves' times and evaluations}
+menuText E WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText E WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate E PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText E WindowsEPD "EPD Window..." 0 {Open an EPD (position file) editor window}
 
 # EPD window:

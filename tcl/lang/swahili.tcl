@@ -147,6 +147,10 @@ menuText Z WindowsTree "Dirisha la mti" 0 {Fungua / funga dirisha la Mti}
 menuText Z WindowsBook "Dirisha la Kitabu" 0 {Fungua/funga dirisha la Kitabu}
 menuText Z WindowsCorrChess "Dirisha la Mawasiliano" 0 {Fungua/funga dirisha la Mawasiliano}
 menuText Z WindowsGraph "Grafu ya Uchambuzi" 0 {Fungua dirisha la Grafu na nyakati za hatua na tathmini}
+menuText Z WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText Z WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate Z PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText Z WindowsEPD "Dirisha la EPD..." 0 {Fungua dirisha la mhariri wa EPD (faili ya nafasi).}
 
 # EPD window:

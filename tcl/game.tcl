@@ -471,6 +471,7 @@ namespace eval ::notify {
     ::board::setmarks .main.board [sc_pos getComment]
     ::board::update .main.board [sc_pos board] [expr {$animate ne ""}]
     ::windows::game3d::update
+    ::windows::present::update
 
     after cancel ::notify::privPosChanged
     if {$pgnNeedsUpdate} { after idle ::notify::privGameTextChanged }

@@ -186,6 +186,10 @@ menuText U WindowsTree "Puunäkymä" 3 {Avaa/sulje puunäkymä}
 menuText U WindowsBook "Avauskirja" 8 {Avaa/sulje avauskirja}
 menuText U WindowsCorrChess "Kirjeshakki" 6 {Avaa/sulje kirjeshakki-ikkuna}
 menuText U WindowsGraph "Analyysikaavio" 0 {Avaa Graafi-ikkuna, jossa on siirtoajat ja arvioinnit}
+menuText U WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
+menuText U WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
+translate U PresentationFrozen {Frozen - the presentation board is not following}
+
 menuText U WindowsEPD "EPD-ikkuna..." 0 {Avaa EPD (sijaintitiedosto) -editori-ikkuna}
 
 # EPD window:
