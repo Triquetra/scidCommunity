@@ -79,6 +79,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+ <release version="5.1.4.42" date="2026-10-21">
+      <description>
+        <p>Ctrl+Shift+A instantly annotates game from Engine Windows</p>
+      </description>
+    </release>
  <release version="5.1.4.41" date="2026-10-20">
       <description>
         <p>Fix Lichess Upload bug for long games</p>
