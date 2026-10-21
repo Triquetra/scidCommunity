@@ -195,6 +195,7 @@ menuText h ToolsTrainFics "FICS पर खेलें"  0 {freechess.org पर
 menuText h ToolsEngineTournament "इंजन टूर्नामेंट"  0 {शतरंज इंजनों के बीच एक टूर्नामेंट शुरू करें}
 menuText h ToolsTimeAnalysis "समय विश्लेषण" 0 {वर्तमान गेम के लिए घड़ी का समय ग्राफ़ दिखाएँ}
 menuText h ToolsBookTuning "पुस्तक ट्यूनिंग" 0 {पुस्तक ट्यूनिंग}
+menuText h ToolsRapidAnnotate "स्कोर ग्राफ़ से एनोटेट करें" 0 {वर्तमान गेम में इंजन स्कोर ग्राफ़ के मूल्यांकन और एनोटेशन लिखें (Ctrl+Shift+A)}
 menuText h ToolsDownloadTWIC "TWIC गेम्स डाउनलोड करें" 0 {नवीनतम द वीक इन चेस (TWIC) गेम डाउनलोड करें}
 menuText h ToolsConnectHardware "हार्डवेयर कनेक्ट करें" 8 {बाहरी हार्डवेयर कनेक्ट करें}
 menuText h ToolsConnectHardwareConfigure "कॉन्फ़िगर करें..." 0 {बाहरी हार्डवेयर और कनेक्शन कॉन्फ़िगर करें}

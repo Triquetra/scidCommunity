@@ -174,6 +174,7 @@ menuText M ToolsTrainFics "在FICS上对弈"  0 {在freechess.org上对弈}
 menuText M ToolsEngineTournament "引擎锦标赛"  0 {在国际象棋引擎之间开始锦标赛}
 menuText M ToolsTimeAnalysis "时间分析" 0 {显示当前游戏的时钟时间图}
 menuText M ToolsBookTuning "调整开局库" 0
+menuText M ToolsRapidAnnotate "从分数图注释" 0 {将引擎得分图的评价和注释写入当前游戏（Ctrl+Shift+A）}
 menuText M ToolsDownloadTWIC "下载TWIC对局" 0 {下载最新的《本周国际象棋》(TWIC)对局}
 menuText M ToolsConnectHardware "连接硬件" 0
 menuText M ToolsConnectHardwareConfigure "配置..." 0

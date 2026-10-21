@@ -236,6 +236,7 @@ menuText g ToolsTrainFics "Играйте на FICS"  0 {Играйте на fre
 menuText g ToolsEngineTournament "Турнир по двигателя"  0 {Стартирайте турнир между шахматни машини}
 menuText g ToolsTimeAnalysis "Анализ на времето" 0 {Показване на времева графика на часовника за текущата игра}
 menuText g ToolsBookTuning "Резервирайте тунинг" 0 {Резервирайте тунинг}
+menuText g ToolsRapidAnnotate "Анотирайте от графиката на резултатите" 0 {Напишете оценките и анотациите на графиката на резултатите на двигателя в текущата игра (Ctrl+Shift+A)}
 menuText g ToolsDownloadTWIC "Изтеглете TWIC игри" 0 {Изтеглете най-новите игри The Week In Chess (TWIC).}
 menuText g ToolsConnectHardware "Свързване на хардуер" 8 {Свържете външен хардуер}
 menuText g ToolsConnectHardwareConfigure "Конфигуриране..." 0 {Конфигурирайте външен хардуер и връзка}

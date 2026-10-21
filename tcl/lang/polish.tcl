@@ -200,6 +200,7 @@ menuText P ToolsTrainFics "Graj na FICS"  0 {Graj na freechess.org}
 menuText P ToolsEngineTournament "Turniej silników"  0 {Rozpocznij turniej między silnikami szachowymi}
 menuText P ToolsTimeAnalysis "Analiza czasu" 0 {Pokaż wykres czasu na zegarze dla bieżącej partii}
 menuText P ToolsBookTuning "Dostrajanie księgi debiutowej" 0 {Dostrajanie księgi debiutowej}
+menuText P ToolsRapidAnnotate "Adnotuj na podstawie wykresu wyników" 0 {Zapisz oceny i adnotacje wykresu wyników silnika w bieżącej grze (Ctrl+Shift+A)}
 menuText P ToolsDownloadTWIC "Pobierz partie TWIC" 0 {Pobierz najnowsze partie The Week In Chess (TWIC)}
 menuText P ToolsConnectHardware "Podłącz urządzenia" 8 {Podłącz zewnętrzny sprzęt}
 menuText P ToolsConnectHardwareConfigure "Konfiguruj..." 0 {Skonfiguruj zewnętrzny sprzęt i połączenie}

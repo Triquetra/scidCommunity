@@ -3418,6 +3418,17 @@ set helpText(Engine) {<h1>The Engine windows</h1>
   from centipawn deviations on each move.
   </p>
 
+  <h3>Annotating from the score graph</h3>
+  <p>
+  While the graph is being drawn, its evaluations are kept in memory for the
+  current game. Press <b>Ctrl+Shift+A</b> to write them into the game:
+  every evaluated position receives a <b>[%eval ...]</b> comment, and the
+  annotations the evaluation implies (move-quality NAGs, score comments and
+  best-line variations) are generated with the settings saved in the Batch
+  annotate window. The time per move is not taken from those settings: the
+  scores are the ones the graph has already collected with the time chosen in
+  the engine window's Autorun control.
+  </p>
   <p><footer>(Updated: scidCommunity, April 2026)</footer></p>
 }
 

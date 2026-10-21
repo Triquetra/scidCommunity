@@ -236,6 +236,7 @@ menuText J ToolsTrainFics "Играјте на ФИЦС-у"  0 {Играјте �
 menuText J ToolsEngineTournament "Турнир мотора"  0 {Започните турнир између шаховских машина}
 menuText J ToolsTimeAnalysis "Анализа времена" 0 {Прикажи временски графикон за тренутну игру}
 menuText J ToolsBookTuning "Боок тунинг" 0 {Боок тунинг}
+menuText J ToolsRapidAnnotate "Забележите из графикона резултата" 0 {Упишите процене и напомене графика резултата мотора у тренутну игру (Цтрл+Схифт+А)}
 menuText J ToolsDownloadTWIC "Преузмите ТВИЦ игре" 0 {Преузмите најновије игре Тхе Веек Ин Цхесс (ТВИЦ).}
 menuText J ToolsConnectHardware "Повежите хардвер" 8 {Повежите спољни хардвер}
 menuText J ToolsConnectHardwareConfigure "Конфигуришите..." 0 {Конфигуришите спољни хардвер и везу}

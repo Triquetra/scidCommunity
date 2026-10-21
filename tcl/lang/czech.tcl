@@ -196,6 +196,7 @@ menuText C ToolsTrainFics "Hrt na internetu"  0 {Hrt na freechess.org}
 menuText C ToolsEngineTournament "Motorov turnaj"  0 {Zante turnaj mezi achovmi motory}
 menuText C ToolsTimeAnalysis "asov analza" 0 {Zobrazit graf hodin pro aktuln hru}
 menuText C ToolsBookTuning "Ladn knihovny zahjen" 0 {Ladn knihovny zahjen}
+menuText C ToolsRapidAnnotate "Anotace z grafu skóre" 0 {Zapište hodnocení a anotace grafu skóre motoru do aktuální hry (Ctrl+Shift+A)}
 menuText C ToolsDownloadTWIC "Sthnte si hry TWIC" 0 {Sthnte si nejnovj hry The Week In Chess (TWIC).}
 menuText C ToolsConnectHardware "Pipojit hardware" 0 {Pipojit extern hardware}
 menuText C ToolsConnectHardwareConfigure "Konfigurovat..." 0 {Konfigurovat extern hardware a pipojen}

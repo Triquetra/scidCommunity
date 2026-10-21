@@ -202,6 +202,7 @@ menuText O ToolsTrainFics "Spill på internett"  0 {Spill på freechess.org}
 menuText O ToolsEngineTournament "Motorturnering"  0 {Start en turnering mellom sjakkmotorer}
 menuText O ToolsTimeAnalysis "Tidsanalyse" 0 {Vis klokketidsgraf for gjeldende spill}
 menuText O ToolsBookTuning "Boktuning" 0 {Boktuning}
+menuText O ToolsRapidAnnotate "Kommenter fra poengdiagram" 0 {Skriv motorscore-grafens evalueringer og merknader inn i det gjeldende spillet (Ctrl+Shift+A)}
 menuText N ToolsDownloadTWIC "Last ned TWIC-partier" 0 {Last ned de siste The Week In Chess (TWIC)-partiene}
 menuText O ToolsConnectHardware "Koble til maskinvare" 0 {Koble til ekstern maskinvare}
 menuText O ToolsConnectHardwareConfigure "Konfigurer..." 0 {Konfigurer ekstern maskinvare og tilkobling}

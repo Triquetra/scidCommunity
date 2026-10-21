@@ -199,6 +199,7 @@ menuText T ToolsTrainFics "FICS'te oyna"  0 {freechess.org'da oynayın}
 menuText T ToolsEngineTournament "Motor turnuvası"  0 {Satranç motorları arasında bir turnuva başlatın}
 menuText T ToolsTimeAnalysis "Zaman Analizi" 0 {Mevcut oyunun saat zaman grafiğini göster}
 menuText T ToolsBookTuning "Kitap ayarlama" 0 {Kitap ayarlama}
+menuText T ToolsRapidAnnotate "Puan grafiğinden açıklama ekleyin" 0 {Motor puanı grafiğinin değerlendirmelerini ve açıklamalarını mevcut oyuna yazın (Ctrl+Shift+A)}
 menuText T ToolsDownloadTWIC "TWIC Oyunlarını İndirin" 0 {En yeni The Week In Chess (TWIC) oyunlarını indirin}
 menuText T ToolsConnectHardware "Donanımı Bağlayın" 8 {Harici donanımı bağlayın}
 menuText T ToolsConnectHardwareConfigure "Yapılandır..." 0 {Harici donanımı ve bağlantıyı yapılandırma}

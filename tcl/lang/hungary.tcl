@@ -200,6 +200,7 @@ menuText H ToolsTrainFics "Internetes játszma"  0 {Játék a freechess.org szer
 menuText H ToolsEngineTournament "Motorverseny"  0 {Indítson versenyt a sakkmotorok között}
 menuText H ToolsTimeAnalysis "Idõelemzés" 0 {Az aktuális játék óra-ideje grafikonjának megjelenítése}
 menuText H ToolsBookTuning "Megnyitástár-hangolás" 13 {Megnyitástár-hangolás}
+menuText H ToolsRapidAnnotate "Jegyzet a pontszám grafikonjáról" 0 {Írja be a motor pontszám grafikonjának értékeléseit és megjegyzéseit az aktuális játékba (Ctrl+Shift+A)}
 menuText H ToolsDownloadTWIC "TWIC játékok letöltése" 0 {Töltse le a legújabb The Week In Chess (TWIC) játékokat}
 menuText H ToolsConnectHardware "Hardver csatlakoztatása" 8 {Külsõ hardver csatlakoztatása}
 menuText H ToolsConnectHardwareConfigure "Beállítás" 0 {Külsõ hardver és kapcsolat beállítása}

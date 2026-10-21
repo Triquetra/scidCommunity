@@ -196,6 +196,7 @@ menuText Q ToolsTrainFics "Грайте на FICS"  0 {Грайте на freeche
 menuText Q ToolsEngineTournament "Турнір двигунів"  0 {Розпочніть турнір між шаховими двигунами}
 menuText Q ToolsTimeAnalysis "Аналіз часу" 0 {Показати часовий графік для поточної гри}
 menuText Q ToolsBookTuning "Книга тюнінг" 0 {Книга тюнінг}
+menuText Q ToolsRapidAnnotate "Анотація з графіка балів" 0 {Запишіть оцінки та анотації графіка оцінок двигуна в поточну гру (Ctrl+Shift+A)}
 menuText Q ToolsDownloadTWIC "Завантажити TWIC Games" 0 {Завантажте останні ігри The Week In Chess (TWIC).}
 menuText Q ToolsConnectHardware "Підключити обладнання" 8 {Підключіть зовнішнє обладнання}
 menuText Q ToolsConnectHardwareConfigure "Налаштувати..." 0 {Налаштуйте зовнішнє обладнання та підключення}

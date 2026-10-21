@@ -203,6 +203,7 @@ menuText W ToolsTrainFics "Spela på Internet"  0 {Spela på freechess.org}
 menuText W ToolsEngineTournament "Motorturnering"  0 {Starta en turnering mellan schackmotorer}
 menuText W ToolsTimeAnalysis "Tidsanalys" 0 {Visa klocktidsdiagram för det aktuella spelet}
 menuText W ToolsBookTuning "Bokfininställning" 0 {Bokfininställning}
+menuText W ToolsRapidAnnotate "Annotera från poängdiagram" 0 {Skriv in motorpoängdiagrammets utvärderingar och kommentarer i det aktuella spelet (Ctrl+Skift+A)}
 menuText W ToolsDownloadTWIC "Ladda ner TWIC-spel" 0 {Ladda ner de senaste spelen The Week In Chess (TWIC).}
 menuText W ToolsConnectHardware "Anslut Hårdvara" 0 {Anslut extern hårdvara}
 menuText W ToolsConnectHardwareConfigure  "Konfiguration" 0 {Konfiguration}
