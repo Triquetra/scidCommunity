@@ -19,7 +19,10 @@ permissions:
 
 jobs:
   build-macos-app:
-    runs-on: macos-latest
+    # macos-latest is the macOS 26 arm64 image, which has had long
+    # runner-capacity queues (jobs cancelled after failing to acquire a
+    # runner). Pin the previous arm64 image instead.
+    runs-on: macos-15
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
