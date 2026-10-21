@@ -213,6 +213,7 @@ menuText K ToolsTrainFics "Jugar a Internet"  0 {Jugar a freechess.org}
 menuText K ToolsEngineTournament "Torneig de motors"  0 {Comença un torneig entre motors}
 menuText K ToolsTimeAnalysis "Anàlisi del temps" 0 {Mostra el gràfic del temps del rellotge per al joc actual}
 menuText K ToolsBookTuning "Ajustar Llibre d'obertures" 0 {Ajustar Llibre (Book)}
+menuText K ToolsRapidAnnotate "Anotar a partir del gràfic de puntuació" 0 {Escriu les avaluacions i anotacions del gràfic de puntuació del motor al joc actual (Ctrl+Maj+A)}
 menuText CA ToolsDownloadTWIC "Descarrega partides TWIC" 0 {Descarrega les partides mÃ©s recents The Week In Chess (TWIC)}
 menuText K ToolsConnectHardware "Connectar maquinari" 0 {Connectar maquinari extern}
 menuText K ToolsConnectHardwareConfigure "Configuració" 1 {Configuració}

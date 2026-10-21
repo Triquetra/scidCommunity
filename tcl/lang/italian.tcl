@@ -200,6 +200,7 @@ menuText I ToolsTrainFics "Gioca su internet"  0 {Gioca su freechess.org}
 menuText I ToolsEngineTournament "Torneo fra motori"  0 {Inizia un torneo fra motori scacchistici}
 menuText I ToolsTimeAnalysis "Analisi del tempo" 0 {Mostra il grafico temporale dell'orologio per il gioco corrente}
 menuText I ToolsBookTuning "Raffina il libro delle aperture" 5 {Raffina il libro delle aperture}
+menuText I ToolsRapidAnnotate "Annota dal grafico del punteggio" 0 {Scrivi le valutazioni e le annotazioni del grafico del punteggio del motore nel gioco corrente (Ctrl+Shift+A)}
 menuText I ToolsDownloadTWIC "Scarica partite TWIC" 0 {Scarica le ultime partite The Week In Chess (TWIC)}
 menuText I ToolsConnectHardware "Connetti dispositivo" 0 {Connette un dispositivo esterno}
 menuText I ToolsConnectHardwareConfigure "Configurazione" 0 {Configura un dispositivo esterno}

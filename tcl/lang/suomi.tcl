@@ -234,6 +234,7 @@ menuText U ToolsTrainFics "FICS"  0 {Pelaa palvelimella freechess.org}
 menuText U ToolsEngineTournament "Shakkimoottoriturnaus"  0 {Turnaus shakkimoottorien kesken}
 menuText U ToolsTimeAnalysis "Aika-analyysi" 0 {Näytä nykyisen pelin kelloaikakaavio}
 menuText U ToolsBookTuning "Viritä avaukset" 0 {Muokkaa avauskirjastoasi}
+menuText U ToolsRapidAnnotate "Merkitse tuloskaaviosta" 0 {Kirjoita moottorin tuloskaavion arviot ja huomautukset nykyiseen peliin (Ctrl+Shift+A)}
 menuText U ToolsDownloadTWIC "Lataa TWIC-pelejä" 0 {Lataa uusimmat The Week In Chess (TWIC) -pelit}
 menuText U ToolsConnectHardware "Liitä syöttölaite" 8 {Liitä ulkoinen syöttölaite (elektroninen lauta tms.)}
 menuText U ToolsConnectHardwareConfigure "Asetukset..." 0 {Säädä ulkoisen syöttölaitteen asetuksia}

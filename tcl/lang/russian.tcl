@@ -202,6 +202,7 @@ menuText R ToolsTrainFics "Играть на FICS"  0 {Игра на серве�
 menuText R ToolsEngineTournament "Турнир движков"  0 {Начать турнир между шахматными движками}
 menuText R ToolsTimeAnalysis "Временной анализ" 0 {Показать график времени для текущей игры}
 menuText R ToolsBookTuning "Настройка книги" 0 {Настройка книги}
+menuText R ToolsRapidAnnotate "Аннотация к графику оценок" 0 {Записать оценки и аннотации графика оценки движка в текущую игру (Ctrl+Shift+A).}
 menuText R ToolsDownloadTWIC "Загрузить партии TWIC" 0 {Загрузить последние партии The Week In Chess (TWIC)}
 menuText R ToolsConnectHardware "Подключение к оборудованию" 0 {Подключение к внешнему оборудованию}
 menuText R ToolsConnectHardwareConfigure "Настройка..." 0 {Настройка внешнего оборудования и подключения}

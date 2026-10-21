@@ -236,6 +236,7 @@ menuText A ToolsTrainFics "FICS でプレイする"  0 {freechess.org でプレ�
 menuText A ToolsEngineTournament "エンジントーナメント"  0 {チェス エンジン間でトーナメントを開始する}
 menuText A ToolsTimeAnalysis "時間分析" 0 {現在のゲームの時間グラフを表示します}
 menuText A ToolsBookTuning "ブックチューニング" 0 {ブックチューニング}
+menuText A ToolsRapidAnnotate "スコアグラフから注釈を付ける" 0 {エンジン スコア グラフの評価と注釈を現在のゲームに書き込みます (Ctrl+Shift+A)}
 menuText A ToolsDownloadTWIC "TWIC ゲームをダウンロード" 0 {最新の The Week In Chess (TWIC) ゲームをダウンロード}
 menuText A ToolsConnectHardware "ハードウェアを接続する" 8 {外部ハードウェアを接続する}
 menuText A ToolsConnectHardwareConfigure "設定..." 0 {外部ハードウェアと接続を構成する}

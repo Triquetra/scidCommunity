@@ -195,6 +195,7 @@ menuText Z ToolsTrainFics "Cheza kwenye FICS"  0 {Cheza kwenye freechess.org}
 menuText Z ToolsEngineTournament "Mashindano ya injini"  0 {Anzisha mashindano kati ya injini za chess}
 menuText Z ToolsTimeAnalysis "Uchambuzi wa Wakati" 0 {Onyesha grafu ya saa ya mchezo wa sasa}
 menuText Z ToolsBookTuning "Urekebishaji wa kitabu" 0 {Urekebishaji wa kitabu}
+menuText Z ToolsRapidAnnotate "Dokeza kutoka kwa grafu ya alama" 0 {Andika tathmini na maelezo ya grafu ya alama ya injini kwenye mchezo wa sasa (Ctrl+Shift+A)}
 menuText Z ToolsDownloadTWIC "Pakua Michezo ya TWIC" 0 {Pakua michezo ya hivi punde ya The Week In Chess (TWIC).}
 menuText Z ToolsConnectHardware "Unganisha Vifaa" 8 {Unganisha maunzi ya nje}
 menuText Z ToolsConnectHardwareConfigure "Sanidi..." 0 {Sanidi maunzi ya nje na muunganisho}

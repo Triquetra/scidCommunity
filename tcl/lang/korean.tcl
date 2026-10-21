@@ -236,6 +236,7 @@ menuText k ToolsTrainFics "FICS에서 플레이"  0 {freechess.org에서 플레�
 menuText k ToolsEngineTournament "엔진으로"  0 {체스 엔진 간 토너먼트 시작}
 menuText k ToolsTimeAnalysis "시간분석" 0 {현재 게임의 시계 시간 그래프 표시}
 menuText k ToolsBookTuning "책은" 0 {책은}
+menuText k ToolsRapidAnnotate "점수 그래프에 주석 달기" 0 {엔진 점수 그래프의 평가 및 주석을 현재 게임에 기록합니다(Ctrl+Shift+A).}
 menuText k ToolsDownloadTWIC "TWIC 다운로드" 0 {최신 The Week In Chess(TWIC) 게임을 다운로드하세요.}
 menuText k ToolsConnectHardware "하드웨어 연결" 8 {외부 하드웨어 연결}
 menuText k ToolsConnectHardwareConfigure "구성..." 0 {외부 하드웨어 및 연결 구성}

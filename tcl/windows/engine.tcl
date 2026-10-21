@@ -70,6 +70,7 @@ proc ::enginewin::listEngines {} {
 proc ::enginewin::onNewGame {id} {
     set ::enginewin::m_(newgame,$id) true
     ::stored_eval::clear $id
+    ::rapid_annotate::onNewGame
     set w .engineWin$id
     if { [info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id) } {
         set w .pv$::enginewin::pgnviewer($id).engineWin$id
@@ -286,6 +287,14 @@ proc ::enginewin::Open { {id ""} {enginename ""} {pgnviewer 0} } {
         "if {\[::enginewin::spaceKey $id %W\]} { break }"
     ::addBindtagToTree $w $::enginewin::spaceTag($id)
 
+    # Ctrl+Shift+A writes the score graph and its annotations into the game
+    # (see tools/rapid_annotate.tcl). Same custom-tag technique as <space>, so
+    # the key works from any widget of the window, docked or not.
+    set ::enginewin::rapidTag($id) "EnginewinRapid$id"
+    bind $::enginewin::rapidTag($id) <Control-A> \
+        { excludeTextWidget %W ; if {[::rapid_annotate::commit]} { break } }
+    ::addBindtagToTree $w $::enginewin::rapidTag($id)
+
     # The engine should be closed before the debug .text is destroyed
     bind $w.config <Destroy> [list apply {{id w} {
         if {![info exists ::enginewin::engState($id)]} { return }
@@ -297,6 +306,7 @@ proc ::enginewin::Open { {id ""} {enginename ""} {pgnviewer 0} } {
         array unset ::enginewin::pv_ *,$id
         catch { unset ::enginecfg::engConfig_$id }
         catch { unset ::enginewin::spaceTag($id) }
+        catch { unset ::enginewin::rapidTag($id) }
         unset ::enginewin::pgnviewer($id)
         ::notify::EngineBestMove $id {} {} {}
     }} $id $w]
@@ -732,6 +742,10 @@ proc ::enginewin::updateChart {id {msgData ""}} {
         set elem
     }]
     if {$plies eq ""} { return }
+
+    # Keep the evaluations for ::rapid_annotate (Ctrl+Shift+A) before the
+    # display conversions below rewrite the score.
+    ::rapid_annotate::record $id $plies $depth $score $score_type $pv
 
     if {$::enginewin::m_(scoreside,$id) eq "white" && $::enginewin::pv_(btm,$id)} {
         set score [expr { - $score }]

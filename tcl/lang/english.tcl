@@ -235,6 +235,7 @@ menuText E ToolsTrainFics "Play on FICS"  0 {Play on freechess.org}
 menuText E ToolsEngineTournament "Engine tournament"  0 {Start a tournament between chess engines}
 menuText E ToolsTimeAnalysis "Time Analysis" 0 {Show clock time graph for the current game}
 menuText E ToolsBookTuning "Book tuning" 0 {Book tuning}
+menuText E ToolsRapidAnnotate "Annotate from score graph" 0 {Write the engine score graph's evaluations and annotations into the current game (Ctrl+Shift+A)}
 menuText E ToolsDownloadTWIC "Download TWIC Games" 0 {Download the latest The Week In Chess (TWIC) games}
 menuText E ToolsConnectHardware "Connect Hardware" 8 {Connect external hardware}
 menuText E ToolsConnectHardwareConfigure "Configure..." 0 {Configure external hardware and connection}

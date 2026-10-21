@@ -201,6 +201,7 @@ menuText B ToolsTrainFics "Jogar na internet"  0 {Jogar em  freechess.org}
 menuText B ToolsEngineTournament "Torneio de Engines de Xadrez"  0 {Inicia um torneio entre engines de Xadrez}
 menuText B ToolsTimeAnalysis "Análise de Tempo" 0 {Mostrar gráfico de tempo do relógio para o jogo atual}
 menuText B ToolsBookTuning "Sintonizar Livro" 0 {Sintonizar livro de aberturas}
+menuText B ToolsRapidAnnotate "Anotar no gráfico de pontuação" 0 {Escreva as avaliações e anotações do gráfico de pontuação do motor no jogo atual (Ctrl+Shift+A)}
 menuText B ToolsDownloadTWIC "Baixar Partidas TWIC" 0 {Baixar as partidas mais recentes The Week In Chess (TWIC)}
 menuText B ToolsConnectHardware "Conectar Hardware" 0 {Conectar hardware externo}
 menuText B ToolsConnectHardwareConfigure "Configurar..." 0 {Configurar hardware e conexão externa}

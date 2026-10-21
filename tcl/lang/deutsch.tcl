@@ -226,6 +226,7 @@ menuText D ToolsTrainFics "Internetpartie (FICS)"  0 {Internetpartie auf freeche
 menuText D ToolsEngineTournament "Engine Turnier"  0 {Start a tournament between chess engines}
 menuText D ToolsTimeAnalysis "Zeitanalyse" 0 {Uhrzeitdiagramm für das aktuelle Spiel anzeigen}
 menuText D ToolsBookTuning "Buch abstimmen" 0 {Buch abstimmen}
+menuText D ToolsRapidAnnotate "Kommentieren Sie aus dem Score-Diagramm" 0 {Schreiben Sie die Bewertungen und Anmerkungen des Engine-Score-Diagramms in das aktuelle Spiel (Strg+Umschalt+A).}
 menuText D ToolsDownloadTWIC "Laden Sie TWIC-Spiele herunter" 0 {Laden Sie die neuesten The Week In Chess (TWIC)-Spiele herunter}
 menuText D ToolsConnectHardware "Hardware verbinden" 0 {Externe Hardware mit Scid verbinden}
 menuText D ToolsConnectHardwareConfigure "Konfigurieren..." 0 {Hardware und Verbindung konfigurieren}

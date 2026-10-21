@@ -219,6 +219,7 @@ menuText N ToolsTrainFics "Speel op het internet"  0 {Speel of freechess.org}
 menuText N ToolsEngineTournament "Motor toernooi"  0 {Start een toernooi tussen schaakmotoren}
 menuText N ToolsTimeAnalysis "Tijdanalyse" 0 {Toon de kloktijdgrafiek voor het huidige spel}
 menuText N ToolsBookTuning "Openingenboek afstemming " 0 {Openingenboek afstemming}
+menuText N ToolsRapidAnnotate "Annoteer vanuit de scoregrafiek" 0 {Schrijf de evaluaties en annotaties van de enginescoregrafiek in het huidige spel (Ctrl+Shift+A)}
 menuText NL ToolsDownloadTWIC "Download TWIC-spelletjes" 0 {Download de nieuwste The Week In Chess (TWIC)-partijen}
 menuText N ToolsConnectHardware "Verbind Hardware" 0 {Verbind externe hardware}
 menuText N ToolsConnectHardwareConfigure "Configureer..." 0 {Configureer externe hardware en verbinding}

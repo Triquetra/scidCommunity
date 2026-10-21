@@ -1,0 +1,214 @@
+# Copyright (C) 2025-2026 Hugh Whelan
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+############################################################
+### Rapid annotate
+###
+### The engine windows (F2/F3) already evaluate every move of the current
+### game when Autoscan is on, and draw the results into the score graph.
+### This module keeps those evaluations in memory and, on demand
+### (Ctrl+Shift+A), turns them into PGN data for the current game:
+###   * an [%eval ...] comment for every evaluated position, so the PGN
+###     viewer redraws the same graph when the game is loaded again;
+###   * the annotations that ::batch_annotate::annotate_logic derives from
+###     the same evaluations (move-quality NAGs, position NAGs, score
+###     comments and best-line variations), using the settings saved in
+###     options.dat.
+###
+### The time per move is deliberately NOT the Batch Annotate setting: the
+### scores being annotated are the ones the score graph has already
+### collected, so the Autoscan time chosen in the engine window is the time
+### per move of this feature.
+############################################################
+
+namespace eval ::rapid_annotate {
+    # Evaluations collected from the engine score graphs.
+    # scores($base,$game) is a dict: ply -> entry, where
+    #   ply             number of half-moves played in the evaluated position
+    #   entry           {depth score score_fmt score_fmt_depth pv eval}
+    #     depth         search depth reported by the engine
+    #     score         pawns from White's side of the board; mate = +/-300.0
+    #     score_fmt     "+1.24" / "M3" / "-M3" (the PGN notation used by
+    #                   ::batch_annotate)
+    #     score_fmt_depth  "18:+1.24", the comment written by Batch Annotate
+    #     pv            UCI moves from that position
+    #     eval          token for the [%eval] comment: "+1.24" / "#3" / "#-3"
+    variable scores
+    array set scores {}
+}
+
+# Return the identifier of the game loaded in the main board.
+proc ::rapid_annotate::key {} {
+    return "[sc_base current],[sc_game number]"
+}
+
+# Record the evaluations carried by one engine "InfoPV" message.
+# Called by ::enginewin::updateChart, so the data is exactly what the score
+# graph is drawing.
+#   plies: main-line plies where the evaluated position occurs
+#   score: raw UCI score (centipawns, or moves to mate) from the side to move
+proc ::rapid_annotate::record {id plies depth score score_type pv} {
+    variable scores
+
+    # An engine embedded in a PGN viewer analyses the game shown in that
+    # window, which is not necessarily the game loaded in the main board:
+    # the PGN viewer has its own score-saving path.
+    if {[info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id)} {
+        return
+    }
+    if {$score eq "" || $pv eq ""} { return }
+    # Scores of a fail-soft/fail-high search are not evaluations.
+    if {$score_type ni {cp mate}} { return }
+    if {![string is integer -strict $depth]} { set depth 0 }
+
+    # An unsaved game has no PGN to annotate.
+    if {[sc_game number] < 1} { return }
+
+    # UCI scores are from the point of view of the side to move, while PGN
+    # annotations ([%eval], NAGs, variations) use White's point of view.
+    set btm [expr {$::enginewin::pv_(btm,$id) ? 1 : 0}]
+    if {$btm} { set score [expr {-$score}] }
+
+    if {$score_type eq "mate"} {
+        set value [expr {$score > 0 ? 300.0 : -300.0}]
+        set score_fmt [expr {$score > 0 ? "M$score" : "-M[expr {-$score}]"}]
+        # Lichess-style mate comment, understood by getScorefromComment.
+        set evalStr "#$score"
+    } else {
+        set value [expr {$score / 100.0}]
+        set score_fmt [format "%+.2f" $value]
+        set evalStr $score_fmt
+    }
+    set entry [list $depth $value $score_fmt \
+        [format "%d:%s" $depth $score_fmt] $pv $evalStr]
+
+    set key [::rapid_annotate::key]
+    if {![info exists scores($key)]} { set scores($key) [dict create] }
+    set game $scores($key)
+    foreach ply $plies {
+        # Ply 0 is the initial position: no move has been played there.
+        if {![string is integer -strict $ply] || $ply < 1} { continue }
+        # Engine 1 and Engine 2 can both analyse this game: keep the deeper
+        # evaluation of each position, together with its own PV.
+        if {[dict exists $game $ply] &&
+            $depth <= [lindex [dict get $game $ply] 0]} { continue }
+        dict set game $ply $entry
+    }
+    set scores($key) $game
+}
+
+# Called when a new game is loaded. The evaluations are only kept for the
+# game being analysed, so the store stays small.
+proc ::rapid_annotate::onNewGame {} {
+    variable scores
+    set keep [::rapid_annotate::key]
+    foreach key [array names scores] {
+        if {$key ne $keep} { unset scores($key) }
+    }
+}
+
+# Return the collected evaluations of a game in the format expected by
+# ::batch_annotate::annotate_logic.
+proc ::rapid_annotate::evals {{key ""}} {
+    variable scores
+    if {$key eq ""} { set key [::rapid_annotate::key] }
+    if {![info exists scores($key)]} { return {} }
+    set evals [dict create]
+    dict for {ply entry} $scores($key) {
+        lassign $entry depth value score_fmt score_fmt_depth pv evalStr
+        dict set evals $ply [dict create \
+            score $value \
+            score_fmt $score_fmt \
+            score_fmt_depth $score_fmt_depth \
+            pv $pv \
+            depth $depth \
+            eval $evalStr]
+    }
+    return $evals
+}
+
+# Number of positions collected for the game in the main board.
+proc ::rapid_annotate::pending {} {
+    return [dict size [::rapid_annotate::evals]]
+}
+
+# Write the collected evaluations as [%eval ...] comments: the token the PGN
+# viewer reads back to draw its own score graph. A position that the
+# annotation pass has already annotated with the same score is left alone, so
+# the comment does not repeat the number.
+proc ::rapid_annotate::writeScores {evals} {
+    foreach ply [lsort -integer [dict keys $evals]] {
+        if {$ply < 1} { continue }
+        # sc_move ply is 0-based: ply N is N half-moves played.
+        if {[catch { sc_move ply $ply }]} { continue }
+        # MoveToPly stops at the end of the game: a stored ply that no longer
+        # exists (the game was truncated) must not touch the last comment.
+        if {[sc_pos location] != $ply} { break }
+        if {[string first [dict get $evals $ply score_fmt] [sc_pos getComment]] >= 0} {
+            continue
+        }
+        storeEvalComment [dict get $evals $ply eval]
+    }
+}
+
+# Write the collected evaluations and the annotations they imply into the
+# current game (the PGN). Bound to Ctrl+Shift+A.
+# Return true if the game was modified.
+proc ::rapid_annotate::commit {} {
+    set evals [::rapid_annotate::evals]
+    if {[dict size $evals] == 0} {
+        tk_messageBox -icon info -title "scidCommunity" -parent . -message \
+            "No engine scores have been collected for this game yet.\n\nOpen Engine 1 or Engine 2 (F2/F3) with Autoscan enabled and let the score graph fill."
+        return 0
+    }
+    set gnum [sc_game number]
+    if {$gnum < 1} {
+        tk_messageBox -icon info -title "scidCommunity" -parent . -message \
+            "This game is not in a database yet.\n\nSave it first (Ctrl+S replaces, Ctrl+Shift+S adds) and let the engine analyse it again."
+        return 0
+    }
+    if {[sc_var level]} {
+        tk_messageBox -icon info -title "scidCommunity" -parent . -message \
+            "Annotations are written to the main line.\n\nLeave the variation first (Up)."
+        return 0
+    }
+    set base [sc_base current]
+    if {[sc_base isReadOnly $base]} {
+        tk_messageBox -icon info -title "scidCommunity" -parent . -message \
+            "The current database is read-only: its games cannot be annotated."
+        return 0
+    }
+
+    # Remember the ply, not the PGN offset: annotating changes the game text.
+    set ply [sc_pos location]
+    undoFeature save
+
+    # Same order as ::batch_annotate::finalize_game: optionally drop the old
+    # annotations, then add the new ones. The plain scores go in last, so they
+    # only fill the positions the annotation pass left without a score.
+    if {[catch {
+        if {$::batch_annotate::clear_old} {
+            catch { sc_game strip comments }
+            catch { sc_game strip variations }
+        }
+        ::batch_annotate::annotate_logic $evals
+        ::rapid_annotate::writeScores $evals
+        sc_move ply $ply
+    } err]} {
+        undoFeature undo
+        set ::errorInfo $err
+        ERROR::MessageBox
+        return 0
+    }
+
+    if {[catch { sc_game save $gnum } err]} {
+        undoFeature undo
+        set ::errorInfo $err
+        ERROR::MessageBox
+        return 0
+    }
+    ::notify::DatabaseModified $base
+    ::notify::PosChanged -pgn
+    if {[winfo exists .commentWin]} { ::windows::commenteditor::Refresh }
+    return 1
+}
