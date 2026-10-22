@@ -131,6 +131,7 @@ menuText T SearchNegate "Filtreyi Reddet" 0 {Yalnızca hariç tutulan oyunları 
 menuText T SearchCurrent "Mevcut Yönetim Kurulu..." 0 {Geçerli pano konumunu arayın}
 menuText T SearchHeader "Başlık..." 0 {Başlık (oyuncu, etkinlik vb.) bilgilerine göre arama yapın}
 menuText T SearchMaterial "Malzeme/Desen..." 0 {Malzeme veya tahta desenlerini arayın}
+menuText T SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText T SearchUsing "Arama Dosyası Kullanılıyor..." 0 {SearchOptions dosyasını kullanarak arama yapın}
 
 # Windows menu:

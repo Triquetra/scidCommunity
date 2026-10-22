@@ -108,6 +108,7 @@ menuText M SearchNegate "反转过滤器" 0 {反转过滤器，仅包含被排�
 menuText M SearchCurrent "当前局面..." 0 {搜索当前局面}
 menuText M SearchHeader "标头..." 0 {按标头（棋手、赛事等）搜索}
 menuText M SearchMaterial "子力/局面..." 0 {按子力或局面模式搜索}
+menuText M SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText M SearchUsing "使用搜索选项文件..." 0 {使用SearchOptions文件搜索}
 
 # Windows menu:

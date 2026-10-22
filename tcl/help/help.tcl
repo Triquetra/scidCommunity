@@ -97,6 +97,7 @@ set helpText(Index) {<h1>scidCommunity Help Topic Index</h1>
   <li><a Clipbase>Clipbase</a></li>
   <li><a Cmdline>Command-line options</a></li>
   <li><a Comment>Comment editor</a></li>
+  <li><a CommentsSearch>Comments, searching</a></li>
   <li><a Compact>Compacting a database</a></li>
   <li><a Author>Contact information</a></li>
   <li><a Contents>Contents</a></li>
@@ -716,6 +717,8 @@ set helpText(Menus) {<h1>scidCommunity menus</h1>
   <a Searches Material>material</a> or chessboard patterns. This
   filter is cumulative to a filter eventually set by an open <a
   Tree>tree window</a>.</li>
+  <li><menu>Search Comments...</menu>: Searches the position comments of the
+  games in the current filter. Double-click a result to load its position.</li>
   <br>
   <li><menu>Player List</menu>: Opens/closes the <a PList>Player Finder</a> window.</li>
   <li><menu>Tournament Finder</menu>: Opens/closes the
@@ -1038,7 +1041,8 @@ set helpText(Searches) {<h1>Searches in scidCommunity</h1>
   <ul>
   <li><b>1)</b> for the current board, </li>
   <li><b>2)</b> for specified material and piece patterns, and </li>
-  <li><b>3)</b> by header information such as players, result, date. </li>
+  <li><b>3)</b> by header information such as players, result, date, and </li>
+  <li><b>4)</b> for text in position comments. </li>
   </ul>
   <p>
   In addition to these, there is also an automatic search mode called the
@@ -1123,6 +1127,24 @@ set helpText(Searches) {<h1>Searches in scidCommunity</h1>
   end in under 20 moves can be skipped.
   </p>
   
+  
+  <h3><name CommentsSearch>Search: Comments</name></h3>
+  <p>
+  This search finds games that have a position comment containing the
+  text you enter. It searches the main line of the games in the current
+  filter; comments inside variations are not searched.
+  </p>
+  <p>
+  The results show the game number, players, move and a snippet of the
+  comment. Double-click a result (or select it and press Enter) to load
+  the game and display the matching position, ready to compare with an
+  image or diagram.
+  </p>
+  <p>
+  The matching is case-insensitive for ASCII letters. Accented letters
+  such as German umlauts are compared as they are stored.
+  </p>
+
   <h3><name Header>Search: Header</name></h3>
   <p>
   This search can be used to find aspects of the game that are stored

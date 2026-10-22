@@ -159,6 +159,7 @@ menuText G SearchNegate "Αναίρεση φίλτρου" 0 {Αναιρέστε 
 menuText G SearchCurrent "Τρέχουσα σκακιέρα..." 0 {Αναζητήστε την τρέχουσα θέση της σκακιέρας}
 menuText G SearchHeader "Κεφαλίδα..." 0 {Αναζήτηση βάσει των πληροφοριών κεφαλίδας (παίκτης, διοργάωνση, κλπ)}
 menuText G SearchMaterial "Υλικό/Διάταξη..." 0 {Αναζήτηση για υλικό ή διάταξη σκακιέρας}
+menuText G SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText G SearchUsing "Με χρήση αρχείου αναζήτησης..." 0 {Αναζήτηση με την χρήση ενός αρχείου SearchOptions}
 
 # Windows menu:

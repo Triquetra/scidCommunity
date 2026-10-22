@@ -1114,6 +1114,7 @@ search/search.tcl
 search/board.tcl
 search/header.tcl
 search/material.tcl
+search/comments.tcl
 contrib/ezsmtp/ezsmtp.tcl
 tools/import.tcl
 tools/optable.tcl

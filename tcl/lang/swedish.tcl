@@ -133,6 +133,7 @@ menuText W SearchNegate "Omvänt filter" 0 {Ta med partier som utesluts av filtr
 menuText W SearchCurrent "Aktuell position..." 8 {Sök partier med aktuell position på brädet}
 menuText W SearchHeader "I huvud..." 2 {Använd fast information (spelare, evenemang, plats, mm)}
 menuText W SearchMaterial "Material/ställning..." 0 {Sökning baserad på material eller ställning}
+menuText W SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText W SearchUsing "Använd sökfil..." 10 {Använd en fil med lagrade sökvillkor}
 
 # Windows menu:

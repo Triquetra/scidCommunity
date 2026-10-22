@@ -130,6 +130,7 @@ menuText C SearchNegate "Negace filtru" 0 {Negace filtru -  vybrny budou pouze p
 menuText C SearchCurrent "Aktuln pozice..." 0 {Hledat aktuln pozici}
 menuText C SearchHeader "Hlavika..." 0 {Hledat podle hlaviky partie (hr, turnaj apod.)}
 menuText C SearchMaterial "Materil/Vzor..." 0 {Hledat podle materilu nebo podle vzoru}
+menuText C SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText C SearchUsing "Hledat pomoc souboru voleb..." 14 {Hledat s pouitm voleb zapsanch v souboru}
 
 # Windows menu:

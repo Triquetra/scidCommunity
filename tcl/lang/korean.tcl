@@ -168,6 +168,7 @@ menuText k SearchNegate "낚시 분야" 0 {제외된 게임만을 포함하여 �
 menuText k SearchCurrent "현재 보드..." 0 {현재 보드 위치 검색}
 menuText k SearchHeader "헤더..." 0 {헤더(플레이어, 이벤트 등) 정보로 검색}
 menuText k SearchMaterial "있다/패턴..." 0 {재료 또는 보드 검색}
+menuText k SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText k SearchUsing "파일 검색 사용 중..." 0 {SearchOptions 파일을 사용하여 검색}
 
 # Windows menu:

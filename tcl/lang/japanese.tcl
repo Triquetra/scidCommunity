@@ -168,6 +168,7 @@ menuText A SearchNegate "ネゲートフィルター" 0 {フィルタを無効�
 menuText A SearchCurrent "現在のボード..." 0 {現在のボード位置を検索します}
 menuText A SearchHeader "ヘッダ..." 0 {ヘッダー（選手、イベントなど）情報から検索}
 menuText A SearchMaterial "素材・柄..." 0 {材質や基板パターンを探す}
+menuText A SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText A SearchUsing "ファイル検索を使用しています..." 0 {SearchOptions ファイルを使用して検索する}
 
 # Windows menu:

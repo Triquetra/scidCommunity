@@ -168,6 +168,7 @@ menuText J SearchNegate "Негати филтер" 0 {Негирајте фил
 menuText J SearchCurrent "Тренутни одбор..." 0 {Потражите тренутну позицију на табли}
 menuText J SearchHeader "Заглавље..." 0 {Претражите по информацијама заглавља (играч, догађај, итд.).}
 menuText J SearchMaterial "Материјал/Узорак..." 0 {Потражите узорке материјала или плоча}
+menuText J SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText J SearchUsing "Коришћење датотеке претраге..." 0 {Претражујте помоћу датотеке СеарцхОптионс}
 
 # Windows menu:

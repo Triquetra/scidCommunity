@@ -128,6 +128,7 @@ menuText Q SearchNegate "Скасувати фільтр" 0 {Відмініть 
 menuText Q SearchCurrent "Поточна рада..." 0 {Пошук поточної позиції дошки}
 menuText Q SearchHeader "Заголовок..." 0 {Пошук за інформацією заголовка (гравець, подія тощо).}
 menuText Q SearchMaterial "Матеріал/Візерунок..." 0 {Шукайте шаблони матеріалів або дощок}
+menuText Q SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText Q SearchUsing "Використання файлу пошуку..." 0 {Шукайте за допомогою файлу SearchOptions}
 
 # Windows menu:

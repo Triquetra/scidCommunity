@@ -127,6 +127,7 @@ menuText b SearchNegate "নেগেট ফিল্টার" 0 {শুধু�
 menuText b SearchCurrent "বর্তমান বোর্ড..." 0 {বর্তমান বোর্ড অবস্থানের জন্য অনুসন্ধান করুন}
 menuText b SearchHeader "হেডার..." 0 {হেডার (প্লেয়ার, ইভেন্ট, ইত্যাদি) তথ্য দ্বারা অনুসন্ধান করুন}
 menuText b SearchMaterial "উপাদান/প্যাটার্ন..." 0 {উপাদান বা বোর্ড নিদর্শন জন্য অনুসন্ধান}
+menuText b SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText b SearchUsing "অনুসন্ধান ফাইল ব্যবহার করে..." 0 {একটি SearchOptions ফাইল ব্যবহার করে অনুসন্ধান করুন}
 
 # Windows menu:

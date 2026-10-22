@@ -130,6 +130,7 @@ menuText H SearchNegate "Szûrõ negálása" 6 {Negálja a szûrõt, hogy csak a
 menuText H SearchCurrent "Aktuális állás..." 0 {A táblán lévõ állást keresi.}
 menuText H SearchHeader "Fejléc..." 0 {Keresés fejléc (játékos, esemény, stb.) alapján}
 menuText H SearchMaterial "Anyag/szerkezet..." 6 {Keresés anyag vagy állásszerkezet alapján}
+menuText H SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText H SearchUsing "Keresõfájl használata..." 0 {Keresés SearchOptions fájl használatával}
 
 # Windows menu:

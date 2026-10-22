@@ -8399,12 +8399,94 @@ int sc_tree_nags(ClientData, Tcl_Interp *ti, int argc, const char **argv) {
   }
   return UI_Result(ti, OK, resList);
 }
+
+// Case-insensitive substring search for comments. strContains() is
+// case-sensitive; strIsCasePrefix() folds ASCII letters but leaves UTF-8
+// bytes (e.g. German umlauts) as they are.
+static bool commentContains(const char *comment, const char *text) {
+  while (*comment) {
+    if (strIsCasePrefix(text, comment)) return true;
+    ++comment;
+  }
+  return false;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// sc_search_comments:
+//    Searches the comments of the games in a filter.
+//    Only the main line is searched (comments in variations are ignored).
+//    Usage: sc_search comments <text> ?filter?
+//    Returns a flat Tcl list: game ply white black move comment ...
+int sc_search_comments(Tcl_Interp *ti, scidBaseT *base, int argc,
+                       const char **argv) {
+  if (argc < 3) {
+    return errorResult(ti, "Usage: sc_search comments <text> [filter]");
+  }
+  const char *text = argv[2];
+  HFilter filter = base->getFilter(argc > 3 ? argv[3] : "dbfilter");
+  if (filter == nullptr) {
+    return errorResult(ti, "Invalid filter.");
+  }
+
+  struct Hit {
+    gamenumT game;
+    uint ply;
+    std::string white;
+    std::string black;
+    std::string move;
+    std::string comment;
+  };
+  std::vector<Hit> hits;
+  Game game;
+  Progress progress = UI_CreateProgress(ti);
+  const size_t total = filter.size();
+  size_t done = 0;
+
+  for (auto gnum : filter) {
+    if ((++done % 1024) == 0 && !progress.report(done, total)) {
+      return UI_Result(ti, ERROR_UserCancel);
+    }
+    const IndexEntry *ie = base->getIndexEntry(gnum);
+    if (ie == nullptr || base->getGame(*ie, game) != OK) {
+      continue;
+    }
+
+    game.MoveToStart();
+    uint ply = 0;
+    while (true) {
+      const char *comment = game.GetMoveComment();
+      if (comment != nullptr && comment[0] != '\0' &&
+          commentContains(comment, text)) {
+        char san[10] = "";
+        if (ply > 0) game.GetPrevSAN(san);
+        hits.push_back({gnum + 1, ply, game.GetWhiteStr(), game.GetBlackStr(),
+                        san, comment});
+      }
+      if (game.MoveForward() != OK) break;
+      ++ply;
+    }
+  }
+  if (total > 0) progress.report(total, total);
+
+  UI_List res(hits.size() * 6);
+  for (const auto &hit : hits) {
+    res.push_back(hit.game);
+    res.push_back(hit.ply);
+    res.push_back(hit.white);
+    res.push_back(hit.black);
+    res.push_back(hit.move);
+    res.push_back(hit.comment);
+  }
+  return UI_Result(ti, OK, res);
+}
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // sc_search:
 //    Search function interface.
 int sc_search(ClientData cd, Tcl_Interp *ti, int argc, const char **argv) {
-  static const char *options[] = {"board", "header", "material", nullptr};
-  enum { OPT_BOARD, OPT_HEADER, OPT_MATERIAL };
+  static const char *options[] = {"board", "comments", "header", "material",
+                                  nullptr};
+  enum { OPT_BOARD, OPT_COMMENTS, OPT_HEADER, OPT_MATERIAL };
 
   int index = -1;
   if (argc > 1) {
@@ -8419,6 +8501,10 @@ int sc_search(ClientData cd, Tcl_Interp *ti, int argc, const char **argv) {
   switch (index) {
   case OPT_BOARD:
     ret = sc_search_board(ti, db, db->getFilter("dbfilter"), argc, argv);
+    break;
+
+  case OPT_COMMENTS:
+    ret = sc_search_comments(ti, db, argc, argv);
     break;
 
   case OPT_HEADER: {

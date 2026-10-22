@@ -127,6 +127,7 @@ menuText Z SearchNegate "Punguza Kichujio" 0 {Punguza kichujio ili kujumuisha mi
 menuText Z SearchCurrent "Bodi ya Sasa..." 0 {Tafuta nafasi ya sasa ya bodi}
 menuText Z SearchHeader "Kijajuu..." 0 {Tafuta kwa Kichwa (mchezaji, tukio, nk) habari}
 menuText Z SearchMaterial "Nyenzo/Muundo..." 0 {Tafuta muundo wa nyenzo au ubao}
+menuText Z SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText Z SearchUsing "Kwa kutumia Faili ya Utafutaji..." 0 {Tafuta kwa kutumia faili ya SearchOptions}
 
 # Windows menu:

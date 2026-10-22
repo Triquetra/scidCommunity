@@ -134,6 +134,7 @@ menuText R SearchNegate "Инвертировать фильтр" 0 {Обрат�
 menuText R SearchCurrent "Текущая позиция..." 0 {Поиск текущей позиции}
 menuText R SearchHeader "Заголовок..." 0 {Поиск по заголовку (игрок, турнир, и т. д.)}
 menuText R SearchMaterial "Материал/позиция..." 0 {Поиск по материалу или образцам позиции}
+menuText R SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText R SearchUsing "Использовать файл поиска..." 0 {Поиск с использованием файла с установками поиска}
 
 # Windows menu:

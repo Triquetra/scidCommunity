@@ -131,6 +131,7 @@ menuText B SearchNegate "Inverter Filtragem" 0 {Inverte o critério de pesquisa 
 menuText B SearchCurrent "Posição Atual..." 0 {Pesquisa a posição atual do tabuleiro}
 menuText B SearchHeader "Cabeçalho..." 0 {Pesquisa por cabeçalho (jogador, evento, etc)}
 menuText B SearchMaterial "Material/Padrão..." 0 {Pesquisa por material ou padrão de posição}
+menuText B SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText B SearchUsing "Usar arquivo de opções de filtro..." 0 {Pesquisa usando arquivo com opções de filtro}
 
 # Windows menu:

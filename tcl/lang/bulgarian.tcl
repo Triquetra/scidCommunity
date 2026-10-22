@@ -168,6 +168,7 @@ menuText g SearchNegate "Филтър за отхвърляне" 0 {Отхвър
 menuText g SearchCurrent "Настоящ борд..." 0 {Търсете текущата позиция на борда}
 menuText g SearchHeader "Заглавка..." 0 {Търсене по информация за заглавка (играч, събитие и т.н.).}
 menuText g SearchMaterial "Материал/модел..." 0 {Търсене на материали или шаблони на дъски}
+menuText g SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText g SearchUsing "Използване на файл за търсене..." 0 {Търсете с помощта на SearchOptions файл}
 
 # Windows menu:

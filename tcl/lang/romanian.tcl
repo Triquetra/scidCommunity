@@ -168,6 +168,7 @@ menuText L SearchNegate "Negați filtrul" 0 {Anulați filtrul pentru a include n
 menuText L SearchCurrent "Consiliul actual..." 0 {Căutați poziția curentă a consiliului}
 menuText L SearchHeader "Antet..." 0 {Căutați informații după antet (jucător, eveniment etc.).}
 menuText L SearchMaterial "Material/Model..." 0 {Căutați materiale sau modele de tablă}
+menuText L SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText L SearchUsing "Se utilizează fișierul de căutare..." 0 {Căutați folosind un fișier SearchOptions}
 
 # Windows menu:
