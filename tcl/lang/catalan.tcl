@@ -139,8 +139,8 @@ menuText K SearchCurrent "Posició actual..." 0 \
 menuText K SearchHeader "Metadades..." 0 \
   {Cerca per les metadades de la capçalera (jugador, torneig, etc)}
 menuText K SearchMaterial "Material/Patró..." 0 \
-menuText K SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
   {Cerca posició per material o patró}
+menuText K SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText K SearchUsing "Fer servir arxiu de recerca..." 0 \
   {Cerca fent servir un arxiu d'opcions de recerca}
 

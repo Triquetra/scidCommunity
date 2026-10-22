@@ -143,8 +143,8 @@ menuText N SearchCurrent "Zoek huidige stelling" 5 \
 menuText N SearchHeader "Partijgegevens..." 5 \
   {Zoek op speciale informatie: speler, evenement enz.}
 menuText N SearchMaterial "Materiaal/Kenmerken..." 0 \
-menuText N SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
   {Zoek op patroon: bord, materiaal enz.}
+menuText N SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText N SearchUsing "Zoekopties" 0 \
   {Zoek met gebruikmaking van opgeslagen opties}
 

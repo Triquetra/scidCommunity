@@ -136,8 +136,8 @@ menuText F SearchCurrent "Position..." 0 \
 menuText F SearchHeader "En-tête..." 0 \
   {Rechercher par l'information dans l'en-tête (joueur, tournoi, etc.)}
 menuText F SearchMaterial "Matériel ou motif..." 0 \
-menuText F SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
   {Rechercher un motif ou un matériel particulier sur l'échiquier}
+menuText F SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText F SearchUsing "En utilisant un fichier d'options..." 3 \
   {Rechercher en utilisant un fichier d'options de recherche}
 
