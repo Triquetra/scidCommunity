@@ -97,7 +97,7 @@ set helpText(Index) {<h1>scidCommunity Help Topic Index</h1>
   <li><a Clipbase>Clipbase</a></li>
   <li><a Cmdline>Command-line options</a></li>
   <li><a Comment>Comment editor</a></li>
-  <li><a CommentsSearch>Comments, searching</a></li>
+  <li><a Searches CommentsSearch>Comments, searching</a></li>
   <li><a Compact>Compacting a database</a></li>
   <li><a Author>Contact information</a></li>
   <li><a Contents>Contents</a></li>
@@ -1072,7 +1072,7 @@ set helpText(Searches) {<h1>Searches in scidCommunity</h1>
   </p>
   <p>
   <b>Note</b> that most searches only apply to the main line moves of a game,
-  not to any moves in variations. The <a CommentsSearch>Comments</a> search
+  not to any moves in variations. The <a Searches CommentsSearch>Comments</a> search
   is the exception: it also finds comments inside variations.
   </p>
   

@@ -114,13 +114,15 @@ proc ::search::comments::Search {} {
     set tv $win.results.tv
     $tv delete [$tv children {}]
     set n 0
-    foreach {g offset ply white black move comment} $raw {
+    foreach {g offset ply counter white black move comment} $raw {
         incr n
         if {$ply == 0} {
             set movetxt "start"
         } else {
-            set moveno [expr {($ply + 1) / 2}]
-            set dots [expr {$ply % 2 ? "." : "..."}]
+            # counter is the absolute half-move count, so games with a FEN
+            # start are numbered from the FEN's move number, not from 1.
+            set moveno [expr {($counter + 1) / 2}]
+            set dots [expr {$counter % 2 ? "." : "..."}]
             set movetxt "$moveno$dots $move"
         }
         set snippet [string map {"\n" " " "\r" " "} $comment]

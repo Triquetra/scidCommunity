@@ -8422,6 +8422,9 @@ int sc_search_comments(Tcl_Interp *ti, scidBaseT *base, int argc,
     return errorResult(ti, "Usage: sc_search comments <text> [filter]");
   }
   const char *text = argv[2];
+  if (text[0] == '\0') {
+    return errorResult(ti, "Search text is empty.");
+  }
   HFilter filter = base->getFilter(argc > 3 ? argv[3] : "dbfilter");
   if (filter == nullptr) {
     return errorResult(ti, "Invalid filter.");
@@ -8431,6 +8434,7 @@ int sc_search_comments(Tcl_Interp *ti, scidBaseT *base, int argc,
     gamenumT game;
     unsigned offset;
     uint ply;
+    uint counter;
     std::string white;
     std::string black;
     std::string move;
@@ -8460,18 +8464,22 @@ int sc_search_comments(Tcl_Interp *ti, scidBaseT *base, int argc,
         uint ply = game.GetCurrentPly();
         if (ply > 0) game.GetPrevSAN(san);
         hits.push_back({gnum + 1, game.GetLocationInPGN(), ply,
+                        game.GetCurrentPos()->GetPlyCounter(),
                         game.GetWhiteStr(), game.GetBlackStr(), san, comment});
       }
       if (game.MoveForwardInPGN() != OK) break;
     }
   }
-  if (total > 0) progress.report(total, total);
+  if (total > 0 && !progress.report(total, total)) {
+    return UI_Result(ti, ERROR_UserCancel);
+  }
 
-  UI_List res(hits.size() * 7);
+  UI_List res(hits.size() * 8);
   for (const auto &hit : hits) {
     res.push_back(hit.game);
     res.push_back(hit.offset);
     res.push_back(hit.ply);
+    res.push_back(hit.counter);
     res.push_back(hit.white);
     res.push_back(hit.black);
     res.push_back(hit.move);
