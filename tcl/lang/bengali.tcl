@@ -85,6 +85,7 @@ menuText b EditPaste "শেষ ক্লিপবেস গেমটি আট�
   {সক্রিয় ক্লিপবেস গেমটি এখানে পেস্ট করুন}
 menuText b EditPastePGN "PGN গেম হিসাবে ক্লিপবোর্ড পাঠ্য আটকান..." 18 \
   {PGN স্বরলিপিতে ক্লিপবোর্ড পাঠ্যটিকে একটি গেম হিসাবে ব্যাখ্যা করুন এবং এটি এখানে পেস্ট করুন}
+menuText b EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText b EditSetup "স্টার্ট বোর্ড সেট আপ করুন..." 0 \
   {এই গেমের জন্য শুরুর অবস্থান সেট করুন}
 menuText b EditCopyBoard "কপি অবস্থান" 6 \

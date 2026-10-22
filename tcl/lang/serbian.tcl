@@ -94,6 +94,7 @@ menuText Y EditPaste "Prenesi poslednju clipbase partiju" 0 \
   {Prenesi aktivnu clipbase partiju ovde}
 menuText Y EditPastePGN "Paste Clipboard text as PGN game..." 10 \
   {Interpret the clipboard text as a game in PGN notation and paste it here} ;# ***
+menuText Y EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText Y EditSetup "Namesti poetnu poziciju..." 0 \
   {Namesti poetnu poziciju za ovu partiju}
 menuText Y EditCopyBoard "Copy position" 6 \

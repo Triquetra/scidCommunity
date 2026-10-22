@@ -89,6 +89,7 @@ menuText W EditPaste "Klistra in det senaste Clipbasepartiet" 8 \
   {Klistrar in det senaste tillagda i Clipbase i den aktiva databasen}
 menuText W EditPastePGN "Klistra in Clipbasetext som PGNparti..." 10 \
   {Tolka Clipbasetexten som ett parti i PGN notation och klistra in det här}
+menuText W EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText W EditSetup "Skapa ställning..." 0 \
   {Skapa en utgångsställning för aktuellt parti}
 menuText W EditCopyBoard "Kopiera ställning" 0 \

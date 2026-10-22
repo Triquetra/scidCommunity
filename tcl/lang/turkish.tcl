@@ -89,6 +89,7 @@ menuText T EditPaste "Son Clipbase Oyununu Yapıştır" 0 \
   {Aktif Clipbase oyununu buraya yapıştırın}
 menuText T EditPastePGN "Pano metnini PGN oyunu olarak yapıştırın..." 18 \
   {Pano metnini PGN gösteriminde bir oyun olarak yorumlayın ve buraya yapıştırın}
+menuText T EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText T EditSetup "Başlangıç ​​Panosunu Ayarla..." 0 \
   {Bu oyunun başlangıç ​​pozisyonunu ayarlayın}
 menuText T EditCopyBoard "Konumu Kopyala" 6 \

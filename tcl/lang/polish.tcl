@@ -90,6 +90,7 @@ menuText P EditPaste "Wklej ostatnią partię ze schowka" 0 \
   {Wklej tutaj aktywną partię ze schowka}
 menuText P EditPastePGN "Wklej tekst ze schowka jako partię PGN..." 18 \
   {Zinterpretuj tekst ze schowka jako partię w notacji PGN i wklej ją tutaj}
+menuText P EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText P EditSetup "Ustaw pozycję ..." 0 \
   {Ustaw pozycję początkową dla tej partii}
 menuText P EditCopyBoard "Kopiuj pozycję jako FEN" 6 \

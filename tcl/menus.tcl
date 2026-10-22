@@ -150,6 +150,8 @@ $m add command -label EditPasteBoard -accelerator "Ctrl+Shift+V" -command pasteF
 $m add command -label PgnFileCopy -command ::pgn::PgnClipboardCopy
 $m add command -label EditPastePGN -command importClipboardGame
 $m add separator
+$m add command -label EditNullMove -accelerator "Ctrl+Alt+0" -command { addMoveUCI 0000 }
+$m add separator
 menu $m.strip
   $m.strip add command -label EditStripComments -command {::game::Strip comments}
   $m.strip add command -label EditStripVars -command {::game::Strip variations}

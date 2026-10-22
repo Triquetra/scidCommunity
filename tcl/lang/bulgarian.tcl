@@ -126,6 +126,7 @@ menuText g EditPaste "Поставете последната игра на Clip
   {Поставете активната игра Clipbase тук}
 menuText g EditPastePGN "Поставяне на текст от клипборда като PGN игра..." 18 \
   {Интерпретирайте текста на клипборда като игра в PGN нотация и го поставете тук}
+menuText g EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText g EditSetup "Настройване на начална дъска..." 0 \
   {Задайте началната позиция за тази игра}
 menuText g EditCopyBoard "Копиране на позиция" 6 \

@@ -107,6 +107,7 @@ menuText D EditPaste "Partie aus Ablage einfügen" 19 \
   {Die aktuele Partie aus der Ablagedatenbank hier einfügen}
 menuText D EditPastePGN "PGN-Partie aus Ablage einfügen..." 1 \
   {Interpretiere den Inhalt der Zwischenablage als PGN-Notation und füge ihn hier ein}
+menuText D EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText D EditSetup "Stellungseingabe..." 0 \
   {Neue Stellung eingeben (FEN oder manuell)}
 menuText D EditCopyBoard "Stellung kopieren" 10 \

@@ -87,6 +87,7 @@ menuText C EditPaste "Vloit posledn partii ze schrnky" 24 \
   {Vloit aktivn partii z databze schrnka}
 menuText C EditPastePGN "Vloit text ze schrnky jako PGN..." 10 \
   {Interpretovat text schrnky jako partii v PGN notaci a vloit ji sem}
+menuText C EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText C EditSetup "Nastavit vchoz pozici..." 0 \
   {Nastavit vchoz pozici pro tuto partii}
 menuText C EditCopyBoard "Koprovat pozici" 4 \

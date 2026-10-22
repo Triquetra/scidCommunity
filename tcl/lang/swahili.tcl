@@ -85,6 +85,7 @@ menuText Z EditPaste "Bandika Mchezo wa Clipbase wa Mwisho" 0 \
   {Bandika mchezo unaotumika wa Clipbase hapa}
 menuText Z EditPastePGN "Bandika maandishi ya Ubao wa kunakili kama mchezo wa PGN..." 18 \
   {Tafsiri maandishi ya ubao wa kunakili kama mchezo katika nukuu za PGN na ubandike hapa}
+menuText Z EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText Z EditSetup "Sanidi Bodi ya Kuanza..." 0 \
   {Weka nafasi ya kuanza kwa mchezo huu}
 menuText Z EditCopyBoard "Nakili Nafasi" 6 \

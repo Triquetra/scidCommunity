@@ -86,6 +86,7 @@ menuText V EditPaste "הדבק את משחק ה-Clipbase האחרון" 0 \
   {הדבק את משחק Clipbase הפעיל כאן}
 menuText V EditPastePGN "הדבק את טקסט הלוח כמשחק PGN..." 18 \
   {פרש את טקסט הלוח כמשחק בסימון PGN והדבק אותו כאן}
+menuText V EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText V EditSetup "הגדר לוח התחלה..." 0 \
   {הגדר את עמדת ההתחלה למשחק זה}
 menuText V EditCopyBoard "העתק עמדה" 6 \

@@ -126,6 +126,7 @@ menuText k EditPaste "마지막 Clipbase 게임 코팅 삽입기" 0 \
   {여기 적극적으로 Clipbase 게임을 도입하시기 바랍니다.}
 menuText k EditPastePGN "클립보드 텍스트를 PGN 게임으로 코팅..." 18 \
   {PGN 이름표법으로 클립보드 텍스트를 게임으로 해석해서 여기에 포인트를 넣으세요}
+menuText k EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText k EditSetup "보드 설정 시작..." 0 \
   {이 게임의 시작 위치를 설정하세요}
 menuText k EditCopyBoard "위치 복사" 6 \

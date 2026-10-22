@@ -123,6 +123,7 @@ menuText U EditPaste "Liitä leikekannasta" 0 \
   {Liitä leiketietokannan aktiivinen peli tähän}
 menuText U EditPastePGN "Liitä leikepöydän teksti PGN-pelinä..." 12 \
   {Tulkitse leikepöydällä oleva teksti PGN-muotoiseksi peliksi ja liitä tähän}
+menuText U EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText U EditSetup "Uusi asema..." 0 \
   {Luo uusi alkuasema pelille}
 menuText U EditCopyBoard "Kopioi asema" 0 \

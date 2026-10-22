@@ -38,6 +38,9 @@ proc keyboardShortcuts {w} {
 	# Rotate the chess board
 	bind $w <period> { excludeTextWidget %W; toggleRotateBoard }
 
+	# Insert a null move (pass), the same shortcut as ChessBase
+	bind $w <Control-Alt-Key-0> { excludeTextWidget %W; addMoveUCI 0000 }
+
 	# Open "Setup Board" dialog
 	bind $w <s> { excludeTextWidget %W; ::setupBoard }
 

@@ -94,6 +94,7 @@ menuText S EditPaste "Pegar la última partida de la base de trabajo" 2 \
   {Pega en la base actual la partida activa en la base de trabajo (clipbase)}
 menuText S EditPastePGN "Pegar el texto del portapapeles como partida PGN..." 10 \
   {Interpreta el texto de la base de trabajo (clipbase) como una partida en notación PGN y la pega aquí}
+menuText S EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText S EditSetup "Iniciar tablero de posición..." 26 \
   {Inicia el tablero de posición con la posición de la partida}
 menuText S EditCopyBoard "Copiar posición" 8 \
