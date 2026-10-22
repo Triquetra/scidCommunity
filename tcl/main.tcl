@@ -1311,6 +1311,11 @@ proc updatePlayerPhotos {{force ""}} {
 set selectedSq -1
 set bestSq -1
 
+# Press-and-hold on a piece lifts it for demonstration. A shorter press is
+# still a click, which may play the suggested move.
+set ::liftPressTime ""
+set ::liftHoldMs 300
+
 set EMPTY 0
 set KING 1
 set QUEEN 2
@@ -1606,6 +1611,7 @@ proc pressSquare { square } {
         return
     }
 
+    set ::liftPressTime ""
     if {$selectedSq == -1} {
         set selectedSq $square
         ::board::colorSquare .main.board $square $highcolor
@@ -1614,6 +1620,8 @@ proc pressSquare { square } {
         set p [string index [::board::piece .main.board $square] 0] ;# "w", "b" or "e"
         if {$c == $p} {
             ::board::setDragSquare .main.board $square
+            ::board::liftPiece .main.board
+            set ::liftPressTime [clock milliseconds]
         }
     } else {
         ::board::setDragSquare .main.board -1
@@ -1639,15 +1647,26 @@ proc releaseSquare { w x y } {
 
     global selectedSq bestSq
 
-    ::board::setDragSquare $w -1
     set square [::board::getSquare $w $x $y]
+    # A piece pressed and held is a demonstration lift, not a click: releasing
+    # it over its own square must not play the suggested move.
+    set held 0
+    if {$::liftPressTime ne "" && $square == $selectedSq} {
+        set held [expr {[clock milliseconds] - $::liftPressTime >= $::liftHoldMs}]
+    }
+    set ::liftPressTime ""
+
+    ::board::setDragSquare $w -1
     if {$square < 0} {
         set selectedSq -1
         return
     }
 
     if {$square == $selectedSq} {
-        if {[::suggestMove]} {
+        if {$held} {
+            # The piece is back on its square and stays selected, so a click
+            # on a destination square still completes the move.
+        } elseif {[::suggestMove]} {
             # User pressed and released on same square, so make the
             # suggested move if there is one:
             set selectedSq -1
