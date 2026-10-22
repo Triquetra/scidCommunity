@@ -91,6 +91,7 @@ menuText I EditPaste "Incolla l'ultima partita nella clipbase" 0 \
   {Incolla qui la partita della clipbase}
 menuText I EditPastePGN "Incolla il testo della clipboard come partita PGN..." 13 \
   {Interpreta il testo della clipboard come una partita in notazione PGN e lo incolla qui}
+menuText I EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText I EditSetup "Posizione definita..." 10 \
   {Definisce una posizione per la partita corrente}
 menuText I EditCopyBoard "Copia posizione" 6 \

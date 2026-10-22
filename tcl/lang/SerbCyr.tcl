@@ -126,6 +126,7 @@ menuText J EditPaste "Пасте Ласт Цлипбасе Гаме" 0 \
   {Овде налепите активну Цлипбасе игру}
 menuText J EditPastePGN "Налепите текст међумеморије као ПГН игру..." 18 \
   {Протумачите текст међуспремника као игру у ПГН нотацији и налепите га овде}
+menuText J EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText J EditSetup "Поставите почетну плочу..." 0 \
   {Поставите почетну позицију за ову игру}
 menuText J EditCopyBoard "Цопи Поситион" 6 \

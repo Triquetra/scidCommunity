@@ -76,6 +76,7 @@ menuText M EditReset "清空剪贴板" 0 {将剪贴板完全清空}
 menuText M EditCopy "复制此游戏到剪贴板" 0 {将此游戏复制到剪贴板数据库}
 menuText M EditPaste "粘贴最后的剪贴板游戏" 0 {在此处粘贴活动的剪贴板游戏}
 menuText M EditPastePGN "将剪贴板文本粘贴为PGN游戏..." 0 {将剪贴板文本解释为PGN记谱并在此处粘贴}
+menuText M EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText M EditSetup "设置开始局面..." 0 {为此游戏设置开始局面}
 menuText M EditCopyBoard "复制局面" 0 {以FEN记谱法将当前棋盘复制到剪贴板}
 menuText M EditPasteBoard "粘贴开始局面" 0 {从剪贴板设置开始局面}

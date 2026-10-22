@@ -126,6 +126,7 @@ menuText A EditPaste "最後のクリップベース ゲームを貼り付け" 0
   {アクティブな Clipbase ゲームをここに貼り付けます}
 menuText A EditPastePGN "クリップボードのテキストを PGN ゲームとして貼り付けます..." 18 \
   {クリップボードのテキストを PGN 表記のゲームとして解釈し、ここに貼り付けます}
+menuText A EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText A EditSetup "スタートボードをセットアップ..." 0 \
   {このゲームの開始位置を設定します}
 menuText A EditCopyBoard "コピー位置" 6 \

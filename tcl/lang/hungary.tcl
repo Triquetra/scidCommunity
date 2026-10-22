@@ -87,6 +87,7 @@ menuText H EditPaste "Beilleszti az utolsó játszmát a Vágóasztalról." 0 \
   {A Vágóasztal aktív játszmáját beilleszti ide.}
 menuText H EditPastePGN "A vágólap tartalmát PGN-játszmaként beilleszti" 20 \
   {A vágólap tartalmát PGN-jelölésû játszmának tekinti, és idemásolja.}
+menuText H EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText H EditSetup "Kezdõállás felállítása..." 14 \
   {Felállítja a kezdõállást ehhez a játszmához.}
 menuText H EditCopyBoard "Állás másolása FEN-ként" 17 \

@@ -126,6 +126,7 @@ menuText L EditPaste "Paste Last Clipbase Game" 0 \
   {Lipiți aici jocul Clipbase activ}
 menuText L EditPastePGN "Lipiți textul Clipboard ca joc PGN..." 18 \
   {Interpretați textul clipboard-ului ca un joc în notație PGN și inserați-l aici}
+menuText L EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText L EditSetup "Configurați placa de pornire..." 0 \
   {Setați poziția de început pentru acest joc}
 menuText L EditCopyBoard "Copiați poziția" 6 \

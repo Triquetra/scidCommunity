@@ -88,6 +88,7 @@ menuText F EditPaste "Coller depuis la Clipbase" 19 \
   {Copier la partie contenue dans la base Clipbase à cet emplacement}
 menuText F EditPastePGN "Coller le presse-papier comme partie PGN..." 1 \
   {Interpréter le texte du presse-papier comme de la notation PGN et le coller comme partie active}
+menuText F EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText F EditSetup "Définir la position de départ" 0 \
   {Choisir une position de départ pour cette partie}
 menuText F EditCopyBoard "Copier la position" 10 \

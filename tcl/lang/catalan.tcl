@@ -92,6 +92,7 @@ menuText K EditPaste "Enganxar l'última partida de la base de treball" 2 \
   {Enganxa al final de la base actual la partida activa de la base de treball (clipbase)}
 menuText K EditPastePGN "Enganxa el text del Clipboard com una partida PGN..." 10 \
   {Interpreta el text de la base de treball (clipbase) com una partida en notació PGN i l'enganxa}
+menuText K EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText K EditSetup "Establir posició inicial..." 26 \
   {Inicia una posició a l'escaquer amb la posició de la partida}
 menuText K EditCopyBoard "Copiar posició" 8 \

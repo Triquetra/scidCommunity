@@ -86,6 +86,7 @@ menuText Q EditPaste "Вставити останню гру Clipbase" 0 \
   {Вставте сюди активну гру Clipbase}
 menuText Q EditPastePGN "Вставити текст буфера обміну як гру PGN..." 18 \
   {Інтерпретуйте текст буфера обміну як гру в нотації PGN і вставте його сюди}
+menuText Q EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText Q EditSetup "Налаштувати стартову дошку..." 0 \
   {Встановіть початкову позицію для цієї гри}
 menuText Q EditCopyBoard "Копіювати позицію" 6 \

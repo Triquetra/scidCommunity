@@ -89,6 +89,7 @@ menuText O EditPaste "Lim inn siste parti fra utklippsbasen" 0 \
   {Limer inn gjeldende parti fra utklippsbasen her}
 menuText O EditPastePGN "Paste Clipboard text as PGN game..." 10 \
   {Interpret the clipboard text as a game in PGN notation and paste it here} ;# ***
+menuText O EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText O EditSetup "Still opp stilling..." 0 \
   {Lag en startstilling for dette partiet}
 menuText O EditCopyBoard "Copy position" 6 \

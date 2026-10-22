@@ -91,6 +91,7 @@ menuText R EditPaste "Вставить последнюю партию из бу
   {Вставить активную партию из буферной базы здесь}
 menuText R EditPastePGN "Вставить текст из буфера обмена как PGN партию..." 18 \
   {Интерпетировать текст в буфере обмена как партию в PGN нотации и вставить сюда}
+menuText R EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText R EditSetup "Установить начальную позицию..." 2 \
   {Установить стартовую позицию для этой партии}
 menuText R EditCopyBoard "Копировать позицию" 4 \

@@ -94,6 +94,7 @@ menuText N EditPaste "Partij vanuit klembord" 7 \
   {Plak actieve klembord-partij hier}
 menuText N EditPastePGN "Plak de Klipbord tekst als  PGN partij..." 10 \
   {Interpreteer de Klipbord tekst als een partij  in PGN notatie en plak die hier} ;
+menuText N EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText N EditSetup "Stelling opzetten..." 0 \
   {Kies een start-stelling voor de partij}
 menuText N EditCopyBoard "Copieer stelling " 6 \

@@ -85,6 +85,7 @@ menuText h EditPaste "अंतिम क्लिपबेस गेम चि�
   {सक्रिय क्लिपबेस गेम को यहां पेस्ट करें}
 menuText h EditPastePGN "क्लिपबोर्ड टेक्स्ट को पीजीएन गेम के रूप में चिपकाएँ..." 18 \
   {क्लिपबोर्ड टेक्स्ट को पीजीएन नोटेशन में एक गेम के रूप में समझें और इसे यहां पेस्ट करें}
+menuText h EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText h EditSetup "स्टार्ट बोर्ड सेट करें..." 0 \
   {इस गेम के लिए आरंभिक स्थिति निर्धारित करें}
 menuText h EditCopyBoard "स्थिति कॉपी करें" 6 \

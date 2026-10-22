@@ -88,6 +88,7 @@ menuText B EditPaste "Colar jogo da base de trabalho" 1 \
   {Cola o jogo ativo da base de trabalho}
 menuText B EditPastePGN "Colar como jogo em PGN..." 10 \
   {Interpreta o texto na área de transferência como um jogo em notação PGN e cola na posição corrente} 
+menuText B EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
 menuText B EditSetup "Configura posição inicial..." 12 \
   {Configura a posição inicial para o jogo}
 menuText B EditCopyBoard "Copia posição" 6 \

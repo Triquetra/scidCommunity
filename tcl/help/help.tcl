@@ -653,6 +653,8 @@ set helpText(Menus) {<h1>scidCommunity menus</h1>
   text selection (clipboard). This selection must be a valid <term>FEN</term> notation.</li>
   <li><menu>Copy Game as PGN</menu>: Copies the current game as <a PGN>PGN</a> to clipboard.</li>
   <li><menu>Paste Game from Clipboard</menu>: Pastes a game from clipboard in <a PGN>PGN format</a>.</li>
+  <li><menu>Null Move</menu>: Inserts a null move (a pass), skipping a move
+  for the side to move. The shortcut is <b>Ctrl+Alt+0</b>.</li>
   <br>
   <li><menu>Strip</menu>: Strips elements from the current game.</li>
   <ul>
@@ -972,8 +974,9 @@ set helpText(Moves) {<h1>Entering chess moves</h1>
   <p>
   <a Annotating Null>Null</a> (empty) moves can be useful in variations, where
   you want to skip a move for one side. You can enter a null move with the
-  mouse by capturing one king with the other king, or with the keyboard by
-  typing "<b>--</b>" (that is, pressing the minus key twice).
+  mouse by capturing one king with the other king, with the keyboard by
+  typing "<b>--</b>" (that is, pressing the minus key twice), or by pressing
+  <b>Ctrl+Alt+0</b> (<menu>Edit</menu> &gt; <menu>Null Move</menu>).
   </p>
   
   <h3><name Informant>Entering common annotation symbols</h3>
