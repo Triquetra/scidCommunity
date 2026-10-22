@@ -1,6 +1,6 @@
 # Commit hash from github branch
 # (the macros must be defined before Release uses shortcommit)
-%global commit 5c5e99e603dc2281fa1b6eedfe13f7fdaa6b80ae   
+%global commit 81215e22523fd0e46a0fcd3e6ac17eec8aebb617   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           scidcommunity
