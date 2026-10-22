@@ -1142,6 +1142,12 @@ set helpText(Searches) {<h1>Searches in scidCommunity</h1>
   image or diagram.
   </p>
   <p>
+  Use the <b>Copy</b> button (or the usual copy shortcut) to copy the
+  <b>Game</b>, <b>White</b>, <b>Black</b> and <b>Move</b> columns of the
+  selected result as tab-separated text, ready to paste into a spreadsheet
+  or another program.
+  </p>
+  <p>
   The matching is case-insensitive for ASCII letters. Accented letters
   such as German umlauts are compared as they are stored.
   </p>
