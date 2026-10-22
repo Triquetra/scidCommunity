@@ -1596,6 +1596,15 @@ proc shiftClickSquare { square } {
     pressSquare $square
 }
 
+# dragMainPiece:
+#    Motion handler for the main board. Drags the piece and mirrors the
+#    gesture on the presentation board, if it is open.
+#
+proc dragMainPiece {w x y} {
+    ::board::dragPiece $w $x $y
+    ::windows::present::mirrorDrag $x $y
+}
+
 # pressSquare:
 #    Called when the left mouse button is pressed on a square. Sets
 #    that square to be the selected square.
@@ -1621,6 +1630,7 @@ proc pressSquare { square } {
         if {$c == $p} {
             ::board::setDragSquare .main.board $square
             ::board::liftPiece .main.board
+            ::windows::present::mirrorLift $square
             set ::liftPressTime [clock milliseconds]
         }
     } else {
@@ -1657,6 +1667,7 @@ proc releaseSquare { w x y } {
     set ::liftPressTime ""
 
     ::board::setDragSquare $w -1
+    ::windows::present::mirrorEnd
     if {$square < 0} {
         set selectedSq -1
         return
@@ -1664,8 +1675,10 @@ proc releaseSquare { w x y } {
 
     if {$square == $selectedSq} {
         if {$held} {
-            # The piece is back on its square and stays selected, so a click
-            # on a destination square still completes the move.
+            # End the demonstration cleanly: put the selection away as well,
+            # so a fresh press on the piece starts a new gesture.
+            set selectedSq -1
+            ::board::colorSquare $w $square
         } elseif {[::suggestMove]} {
             # User pressed and released on same square, so make the
             # suggested move if there is one:
@@ -1989,7 +2002,7 @@ proc CreateMainBoard { {w} } {
       ::board::bind $w.board $i "<${mods}ButtonPress-1>"   $action
       ::board::bind $w.board $i "<${mods}ButtonRelease-1>" $action
     }
-    ::board::bind $w.board $i <B1-Motion> "::board::dragPiece $w.board %X %Y"
+    ::board::bind $w.board $i <B1-Motion> "::dragMainPiece $w.board %X %Y"
     ::board::bind $w.board $i <ButtonRelease-1> "releaseSquare $w.board %X %Y"
   }
 
