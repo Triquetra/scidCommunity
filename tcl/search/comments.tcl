@@ -31,12 +31,17 @@ proc ::search::comments::Open {} {
     ttk::entry $win.top.text -width 40
     ttk::button $win.top.search -text [tr Search] \
         -command ::search::comments::Search
+    ttk::button $win.top.copy -text "Copy" \
+        -command ::search::comments::Copy
     ttk::button $win.top.close -text [tr Close] \
         -command [list destroy $win]
     pack $win.top.label -side left
     pack $win.top.text -side left -fill x -expand 1 -padx 4
     pack $win.top.search -side left
+    pack $win.top.copy -side left -padx 2
     pack $win.top.close -side left -padx 4
+    ::utils::tooltip::Set $win.top.copy \
+        "Copy Game, White, Black and Move as tab-separated text"
 
     ttk::label $win.status -text "" -anchor w -padding {6 0}
     pack $win.status -side top -fill x
@@ -72,6 +77,7 @@ proc ::search::comments::Open {} {
     bind $win.top.text <Escape> [list destroy $win]
     bind $win.results.tv <Double-1> ::search::comments::Jump
     bind $win.results.tv <Return> ::search::comments::Jump
+    bind $win.results.tv "<$::COMMAND-c>" ::search::comments::Copy
     bind $win <Escape> [list destroy $win]
 
     if {[catch { lassign [sc_filter sizes [sc_base current] dbfilter] n }]} {
@@ -142,6 +148,26 @@ proc ::search::comments::Search {} {
         $tv focus $first
         $tv see $first
     }
+}
+
+# ::search::comments::Copy
+#   Copies the Game, White, Black and Move columns of the selected result,
+#   separated by tabs, so they can be pasted into a spreadsheet or another
+#   program.
+#
+proc ::search::comments::Copy {} {
+    variable win
+
+    set tv $win.results.tv
+    set iid [$tv focus]
+    if {$iid eq ""} { set iid [lindex [$tv selection] 0] }
+    if {$iid eq ""} { return }
+
+    lassign [$tv item $iid -values] game white black move
+    clipboard clear
+    clipboard append [join [list $game $white $black $move] \t]
+    $win.status configure -text \
+        "Copied Game, White, Black and Move to the clipboard."
 }
 
 # ::search::comments::Jump
