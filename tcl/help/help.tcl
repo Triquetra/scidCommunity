@@ -1037,7 +1037,7 @@ set helpTitle(Searches) "Searches"
 set helpText(Searches) {<h1>Searches in scidCommunity</h1>
   <p>
   scidCommunity can perform many different types of search on a database.
-  The three main types of search are:
+  The four main types of search are:
   <ul>
   <li><b>1)</b> for the current board, </li>
   <li><b>2)</b> for specified material and piece patterns, and </li>
