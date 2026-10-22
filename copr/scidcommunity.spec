@@ -1,11 +1,12 @@
+# Commit hash from github branch
+# (the macros must be defined before Release uses shortcommit)
+%global commit 5c5e99e603dc2281fa1b6eedfe13f7fdaa6b80ae   
+%global shortcommit %(c=%{commit}; echo ${c:0:7})
+
 Name:           scidcommunity
 Version:        5.1.4.44
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
-
-# Commit hash from github branch
-%global commit 5c5e99e603dc2281fa1b6eedfe13f7fdaa6b80ae   
-%global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 License:        GPL-2.0-or-later
 URL:            https://github.com/whelanh/scidCommunity
@@ -60,7 +61,10 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_bindir}/phalanx-scid
 %{_datadir}/scid/
 %{_datadir}/applications/io.github.whelanh.scidCommunity.desktop
-%{_datadir}/icons/hicolor/scalable/apps/io.github.whelanh.scidCommunity.svg
+# CMakeLists.txt installs data/icons/hicolor (PNG sizes; the scalable SVG is
+# not installed because appstreamcli cannot read it). Accept any icon size or
+# format the build produces instead of hard-coding one path.
+%{_datadir}/icons/hicolor/*/apps/io.github.whelanh.scidCommunity.*
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog

@@ -161,6 +161,7 @@ install(DIRECTORY tcl DESTINATION share/scid)
 # SVG (it fails with "icon-file-read-error"); the PNGs compose cleanly.
 install(FILES data/io.github.whelanh.scidCommunity.desktop DESTINATION share/applications)
 install(FILES data/io.github.whelanh.scidCommunity.appdata.xml DESTINATION share/metainfo)
+# Keep in sync with the hicolor icon glob in copr/scidcommunity.spec.
 install(DIRECTORY data/icons/hicolor DESTINATION share/icons)
 
 # engine phalanx
