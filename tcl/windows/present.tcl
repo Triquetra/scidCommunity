@@ -238,14 +238,22 @@ proc ::windows::present::mirrorDrag {x y} {
     if {![winfo exists $win.board]} { return }
     set sq [::board::getDragSquare $win.board]
     if {$sq < 0} { return }
+
+    # The shadow belongs to the stationary lift: remove it as soon as the
+    # piece starts moving, even if the cursor has already left the board.
+    ::board::lowerPiece $win.board
+
     set target [::board::getSquare .main.board $x $y]
     if {$target < 0} { return }
 
-    ::board::lowerPiece $win.board
     set bd $win.board.bd
     lassign [::board::midSquare $win.board $target] cx cy
     set lift [expr {max(4, $::board::_size($win.board) / 6)}]
-    $bd coords p$sq $cx [expr {$cy - $lift}]
+    # drawPiece() places piece images half the piece overflow above the
+    # square centre; subtract the same amount so the first drag motion does
+    # not drop the piece by that offset.
+    set y [expr {$cy - int($::board::_poffset($win.board) / 2) - $lift}]
+    $bd coords p$sq $cx $y
     $bd raise p$sq
 }
 
