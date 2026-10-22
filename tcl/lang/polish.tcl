@@ -132,6 +132,7 @@ menuText P SearchNegate "Odwróć filtr" 0 {Odwróć filtr, aby uwzględniał ty
 menuText P SearchCurrent "Bieżąca pozycja..." 0 {Szukaj bieżącej pozycji na szachownicy}
 menuText P SearchHeader "Nagłówek..." 0 {Szukaj wg nagłówka (zawodnik, turniej itd.)}
 menuText P SearchMaterial "Materiał/wzorzec..." 0 {Szukaj wg materiału lub wzorca na szachownicy}
+menuText P SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText P SearchUsing "Użyj pliku wyszukiwania..." 0 {Szukaj za pomocą pliku opcji wyszukiwania}
 
 # Windows menu:

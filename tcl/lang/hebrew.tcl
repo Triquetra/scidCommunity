@@ -128,6 +128,7 @@ menuText V SearchNegate "שלילת מסנן" 0 {שלל את המסנן כך ש�
 menuText V SearchCurrent "המועצה הנוכחית..." 0 {חפש את עמדת הדירקטוריון הנוכחית}
 menuText V SearchHeader "כּוֹתֶרֶת..." 0 {חפש לפי כותרת מידע (שחקן, אירוע וכו').}
 menuText V SearchMaterial "חומר/דפוס..." 0 {חפש חומר או דפוסי לוח}
+menuText V SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText V SearchUsing "משתמש בקובץ חיפוש..." 0 {חפש באמצעות קובץ SearchOptions}
 
 # Windows menu:

@@ -166,6 +166,7 @@ menuText U SearchNegate "Käänteinen suodatin" 0 {Suodatin näyttää aiemmin p
 menuText U SearchCurrent "Nykyinen asema..." 0 {Etsi nykyistä asemaa tietokannasta}
 menuText U SearchHeader "Otsikko..." 0 {Etsi otsikkotiedon perusteella (pelaaja, tapahtuma jne.)}
 menuText U SearchMaterial "Materiaali/asema..." 0 {Etsi materiaalin tai aseman tunnusmerkkien perusteella}
+menuText U SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText U SearchUsing "Haku tiedostolla..." 0 {Etsi käyttäen apuna erillistä hakutiedostoa}
 
 # Windows menu:

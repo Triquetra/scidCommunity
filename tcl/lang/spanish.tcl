@@ -142,6 +142,7 @@ menuText S SearchHeader "Encabezamiento..." 0 \
   {Busca por información de encabezamiento (jugador, evento, etc.)}
 menuText S SearchMaterial "Material/Patrón..." 0 \
   {Busca por material o patrón del tablero}
+menuText S SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText S SearchUsing "Usar archivo de búsqueda..." 0 \
   {Busca usando un archivo de opciones de búsqueda}
 

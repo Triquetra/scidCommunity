@@ -167,6 +167,7 @@ menuText E SearchNegate "Negate Filter" 0 {Negate the filter to only include exc
 menuText E SearchCurrent "Current Board..." 0 {Search for the current board position}
 menuText E SearchHeader "Header..." 0 {Search by Header (player, event, etc) information}
 menuText E SearchMaterial "Material/Pattern..." 0 {Search for material or board patterns}
+menuText E SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText E SearchUsing "Using Search File..." 0 {Search using a SearchOptions file}
 
 # Windows menu:

@@ -127,6 +127,7 @@ menuText h SearchNegate "नकारात्मक फ़िल्टर" 0 {�
 menuText h SearchCurrent "वर्तमान बोर्ड..." 0 {वर्तमान बोर्ड स्थिति खोजें}
 menuText h SearchHeader "हेडर..." 0 {हेडर (खिलाड़ी, घटना, आदि) जानकारी द्वारा खोजें}
 menuText h SearchMaterial "सामग्री/पैटर्न..." 0 {सामग्री या बोर्ड पैटर्न खोजें}
+menuText h SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText h SearchUsing "खोज फ़ाइल का उपयोग करना..." 0 {SearchOptions फ़ाइल का उपयोग करके खोजें}
 
 # Windows menu:

@@ -156,6 +156,7 @@ menuText D SearchHeader "Partiedaten..." 0 \
   {Partiedaten (Spieler, Turnier etc.) suchen}
 menuText D SearchMaterial "Material/Muster..." 0 \
   {Nach Material- oder Stellungsmustern suchen}
+menuText D SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText D SearchUsing "Mit Suchoptionsdatei..." 4 \
   {Mit Suchoptionsdatei suchen}
 

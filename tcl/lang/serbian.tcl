@@ -139,6 +139,7 @@ menuText Y SearchNegate "Invertuj filter" 0 {Invertuj filter da ukljui samo iskl
 menuText Y SearchCurrent "Tekua pozicija..." 0 {Pretrauj prema tekuoj poziciji na tabli}
 menuText Y SearchHeader "Zaglavlje..." 0 {Pretrauj prema informacijama iz zaglavlja (igra, turnir, itd)}
 menuText Y SearchMaterial "Materijal/Pozicije..." 0 {Pretrauj prema materijalu i poziciji}
+menuText Y SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText Y SearchUsing "Pomou Search fajla..." 0 {Pretrauj pomou Search fajla}
 
 # Windows menu:

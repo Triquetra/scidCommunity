@@ -134,6 +134,7 @@ menuText I SearchNegate "Inverti il filtro" 0 {Inverte il filtro per comprendere
 menuText I SearchCurrent "Posizione attuale..." 0 {Cerca la posizione attuale}
 menuText I SearchHeader "Intestazione..." 0 {Ricerca per intestazione (giocatore, evento, etc)}
 menuText I SearchMaterial "Materiale/schema..." 0 {Ricerca per materiale o schema posizionale}
+menuText I SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
 menuText I SearchUsing "Uso del file di ricerca..." 0 {Ricerca mediante un file di opzioni}
 
 # Windows menu:
