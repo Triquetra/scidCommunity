@@ -1311,6 +1311,11 @@ proc updatePlayerPhotos {{force ""}} {
 set selectedSq -1
 set bestSq -1
 
+# Press-and-hold on a piece lifts it for demonstration. A shorter press is
+# still a click, which may play the suggested move.
+set ::liftPressTime ""
+set ::liftHoldMs 300
+
 set EMPTY 0
 set KING 1
 set QUEEN 2
@@ -1591,6 +1596,15 @@ proc shiftClickSquare { square } {
     pressSquare $square
 }
 
+# dragMainPiece:
+#    Motion handler for the main board. Drags the piece and mirrors the
+#    gesture on the presentation board, if it is open.
+#
+proc dragMainPiece {w x y} {
+    ::board::dragPiece $w $x $y
+    ::windows::present::mirrorDrag $x $y
+}
+
 # pressSquare:
 #    Called when the left mouse button is pressed on a square. Sets
 #    that square to be the selected square.
@@ -1606,6 +1620,7 @@ proc pressSquare { square } {
         return
     }
 
+    set ::liftPressTime ""
     if {$selectedSq == -1} {
         set selectedSq $square
         ::board::colorSquare .main.board $square $highcolor
@@ -1614,6 +1629,9 @@ proc pressSquare { square } {
         set p [string index [::board::piece .main.board $square] 0] ;# "w", "b" or "e"
         if {$c == $p} {
             ::board::setDragSquare .main.board $square
+            ::board::liftPiece .main.board
+            ::windows::present::mirrorLift $square
+            set ::liftPressTime [clock milliseconds]
         }
     } else {
         ::board::setDragSquare .main.board -1
@@ -1639,15 +1657,29 @@ proc releaseSquare { w x y } {
 
     global selectedSq bestSq
 
-    ::board::setDragSquare $w -1
     set square [::board::getSquare $w $x $y]
+    # A piece pressed and held is a demonstration lift, not a click: releasing
+    # it over its own square must not play the suggested move.
+    set held 0
+    if {$::liftPressTime ne "" && $square == $selectedSq} {
+        set held [expr {[clock milliseconds] - $::liftPressTime >= $::liftHoldMs}]
+    }
+    set ::liftPressTime ""
+
+    ::board::setDragSquare $w -1
+    ::windows::present::mirrorEnd
     if {$square < 0} {
         set selectedSq -1
         return
     }
 
     if {$square == $selectedSq} {
-        if {[::suggestMove]} {
+        if {$held} {
+            # End the demonstration cleanly: put the selection away as well,
+            # so a fresh press on the piece starts a new gesture.
+            set selectedSq -1
+            ::board::colorSquare $w $square
+        } elseif {[::suggestMove]} {
             # User pressed and released on same square, so make the
             # suggested move if there is one:
             set selectedSq -1
@@ -1970,7 +2002,7 @@ proc CreateMainBoard { {w} } {
       ::board::bind $w.board $i "<${mods}ButtonPress-1>"   $action
       ::board::bind $w.board $i "<${mods}ButtonRelease-1>" $action
     }
-    ::board::bind $w.board $i <B1-Motion> "::board::dragPiece $w.board %X %Y"
+    ::board::bind $w.board $i <B1-Motion> "::dragMainPiece $w.board %X %Y"
     ::board::bind $w.board $i <ButtonRelease-1> "releaseSquare $w.board %X %Y"
   }
 

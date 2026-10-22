@@ -505,6 +505,7 @@ proc ::board::new {w {psize 40} } {
   set ::board::_hideMarks($w) 0
   set ::board::_mark($w) {}
   set ::board::_drag($w) -1
+  set ::board::_lift($w) 0
   set ::board::_showmat($w) 0
   set ::board::_evalbarShow($w) 0
   set ::board::_evalbarMaxScore($w) 4
@@ -1740,6 +1741,47 @@ proc ::board::piece {w sq} {
   return $::board::letterToPiece($p)
 }
 
+# ::board::liftPiece
+#   Lifts the piece on the drag square: it is raised a little and a shadow is
+#   drawn on its square, so a press-and-hold looks like the piece is held
+#   above the board for demonstration.
+#
+proc ::board::liftPiece {w} {
+  set sq $::board::_drag($w)
+  if {$sq < 0 || $sq > 63} { return }
+  set bd $w.bd
+  if {[llength [$bd coords p$sq]] == 0} { return }
+
+  set psize $::board::_size($w)
+  set lift [expr {max(4, $psize / 6)}]
+  $bd move p$sq 0 [expr {-$lift}]
+  $bd delete liftShadow
+
+  lassign [::board::midSquare $w $sq] xc yc
+  $bd create oval \
+      [expr {$xc - $psize / 3}] [expr {$yc + $psize / 5}] \
+      [expr {$xc + $psize / 3}] [expr {$yc + $psize / 2}] \
+      -fill gray20 -outline "" -stipple gray50 -tag liftShadow
+  $bd raise p$sq
+  set ::board::_lift($w) 1
+}
+
+# ::board::lowerPiece
+#   Removes the lift shadow. The piece itself is put back by setDragSquare.
+#
+proc ::board::lowerPiece {w} {
+  if {![info exists ::board::_lift($w)]} { return }
+  set ::board::_lift($w) 0
+  catch { $w.bd delete liftShadow }
+}
+
+# ::board::isLifted
+#   True while the piece of the drag square is being held up.
+#
+proc ::board::isLifted {w} {
+  return [expr {[info exists ::board::_lift($w)] && $::board::_lift($w)}]
+}
+
 # ::board::setDragSquare
 #   Sets the square from whose piece should be dragged.
 #   To drag nothing, the square value should be -1.
@@ -1752,6 +1794,7 @@ proc ::board::setDragSquare {w sq} {
     ::board::drawPiece $w $oldSq [string index $::board::_data($w) $oldSq]
     $w.bd raise arrows
   }
+  ::board::lowerPiece $w
   set ::board::_drag($w) $sq
   return $oldSq
 }
@@ -1768,6 +1811,8 @@ proc ::board::getDragSquare {w} {
 proc ::board::dragPiece {w x y} {
   set sq $::board::_drag($w)
   if {$sq < 0} { return }
+  # Once the piece follows the cursor the stationary lift no longer applies.
+  ::board::lowerPiece $w
   set x [expr {$x - [winfo rootx $w.bd]} ]
   set y [expr {$y - [winfo rooty $w.bd]} ]
   $w.bd coords p$sq $x $y
@@ -1912,6 +1957,10 @@ proc ::board::update {w {board ""} {animate 0}} {
 
   # Remove all marks (incl. arrows) from the board:
   $w.bd delete mark
+
+  # A redrawn position cannot keep the lift shadow of a held piece.
+  $w.bd delete liftShadow
+  if {[info exists ::board::_lift($w)]} { set ::board::_lift($w) 0 }
 
   $w.bd delete tmp_animate
   if { [::board::isFlipped $w] } {
