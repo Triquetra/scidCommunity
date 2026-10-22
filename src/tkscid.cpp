@@ -8451,7 +8451,16 @@ int sc_search_comments(Tcl_Interp *ti, scidBaseT *base, int argc,
       return UI_Result(ti, ERROR_UserCancel);
     }
     const IndexEntry *ie = base->getIndexEntry(gnum);
-    if (ie == nullptr || base->getGame(*ie, game) != OK) {
+    if (ie == nullptr) {
+      continue;
+    }
+    // Same index data as the header search's Comments flag: a game with no
+    // comments cannot contain a matching comment, so skip loading and
+    // parsing it. The count includes comments in variations.
+    if (!ie->GetCommentsFlag()) {
+      continue;
+    }
+    if (base->getGame(*ie, game) != OK) {
       continue;
     }
 
