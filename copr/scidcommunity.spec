@@ -1,10 +1,10 @@
 # Commit hash from github branch
 # (the macros must be defined before Release uses shortcommit)
-%global commit 81215e22523fd0e46a0fcd3e6ac17eec8aebb617   
+%global commit 3c59e30a85030d6315d53f1dea26e78743d93a2f   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           scidcommunity
-Version:        5.1.4.44
+Version:        5.1.4.45
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
@@ -68,6 +68,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Thu Oct 22, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-45
+- "New feature: Search Comments under the Search menu (includes searching variations)"
 * Wed Oct 21, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-44
 - "Fix Tree View training bug; Ctrl+Alt+0 enters null move; Left+click hold lifts piece"
 * Wed Oct 21, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-43
