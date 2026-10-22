@@ -1,10 +1,10 @@
 Name:           scidcommunity
-Version:        5.1.4.43
+Version:        5.1.4.44
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
 # Commit hash from github branch
-%global commit 0551482cb69df07494ff200589e9d33c77a9a7e3   
+%global commit 5c5e99e603dc2281fa1b6eedfe13f7fdaa6b80ae   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 License:        GPL-2.0-or-later
@@ -64,6 +64,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Wed Oct 21, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-44
+- "Fix Tree View training bug; Ctrl+Alt+0 enters null move; Left+click hold lifts piece"
 * Wed Oct 21, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-43
 - "Add a Presentation Board that syncs with the main Board Display"
 * Wed Oct 21, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-42
