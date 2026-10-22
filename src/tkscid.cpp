@@ -8413,10 +8413,9 @@ static bool commentContains(const char *comment, const char *text) {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // sc_search_comments:
-//    Searches the comments of the games in a filter.
-//    Only the main line is searched (comments in variations are ignored).
+//    Searches the comments of the games in a filter, including variations.
 //    Usage: sc_search comments <text> ?filter?
-//    Returns a flat Tcl list: game ply white black move comment ...
+//    Returns a flat Tcl list: game pgnOffset ply white black move comment ...
 int sc_search_comments(Tcl_Interp *ti, scidBaseT *base, int argc,
                        const char **argv) {
   if (argc < 3) {
@@ -8430,6 +8429,7 @@ int sc_search_comments(Tcl_Interp *ti, scidBaseT *base, int argc,
 
   struct Hit {
     gamenumT game;
+    unsigned offset;
     uint ply;
     std::string white;
     std::string black;
@@ -8452,25 +8452,25 @@ int sc_search_comments(Tcl_Interp *ti, scidBaseT *base, int argc,
     }
 
     game.MoveToStart();
-    uint ply = 0;
     while (true) {
       const char *comment = game.GetMoveComment();
       if (comment != nullptr && comment[0] != '\0' &&
           commentContains(comment, text)) {
         char san[10] = "";
+        uint ply = game.GetCurrentPly();
         if (ply > 0) game.GetPrevSAN(san);
-        hits.push_back({gnum + 1, ply, game.GetWhiteStr(), game.GetBlackStr(),
-                        san, comment});
+        hits.push_back({gnum + 1, game.GetLocationInPGN(), ply,
+                        game.GetWhiteStr(), game.GetBlackStr(), san, comment});
       }
-      if (game.MoveForward() != OK) break;
-      ++ply;
+      if (game.MoveForwardInPGN() != OK) break;
     }
   }
   if (total > 0) progress.report(total, total);
 
-  UI_List res(hits.size() * 6);
+  UI_List res(hits.size() * 7);
   for (const auto &hit : hits) {
     res.push_back(hit.game);
+    res.push_back(hit.offset);
     res.push_back(hit.ply);
     res.push_back(hit.white);
     res.push_back(hit.black);

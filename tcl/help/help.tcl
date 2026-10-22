@@ -1071,8 +1071,9 @@ set helpText(Searches) {<h1>Searches in scidCommunity</h1>
   automatically.
   </p>
   <p>
-  <b>Note</b> that searches only apply to the main line moves of a game,
-  not to any moves in variations.
+  <b>Note</b> that most searches only apply to the main line moves of a game,
+  not to any moves in variations. The <a CommentsSearch>Comments</a> search
+  is the exception: it also finds comments inside variations.
   </p>
   
   <h3><name Board>Search: Current Board</name></h3>
@@ -1131,8 +1132,8 @@ set helpText(Searches) {<h1>Searches in scidCommunity</h1>
   <h3><name CommentsSearch>Search: Comments</name></h3>
   <p>
   This search finds games that have a position comment containing the
-  text you enter. It searches the main line of the games in the current
-  filter; comments inside variations are not searched.
+  text you enter. It searches the comments of the games in the current
+  filter, including comments inside variations.
   </p>
   <p>
   The results show the game number, players, move and a snippet of the

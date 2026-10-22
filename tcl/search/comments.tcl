@@ -114,7 +114,7 @@ proc ::search::comments::Search {} {
     set tv $win.results.tv
     $tv delete [$tv children {}]
     set n 0
-    foreach {g ply white black move comment} $raw {
+    foreach {g offset ply white black move comment} $raw {
         incr n
         if {$ply == 0} {
             set movetxt "start"
@@ -129,7 +129,7 @@ proc ::search::comments::Search {} {
         }
         set iid [$tv insert {} end \
             -values [list $g $white $black $movetxt $snippet]]
-        set hits($iid) [list $g $ply]
+        set hits($iid) [list $g $offset]
     }
 
     $win.status configure -text \
@@ -152,13 +152,14 @@ proc ::search::comments::Jump {} {
     set tv $win.results.tv
     set iid [$tv focus]
     if {$iid eq "" || ![info exists hits($iid)]} { return }
-    lassign $hits($iid) g ply
+    lassign $hits($iid) g offset
 
     if {[::game::ConfirmDiscard] == 0} { return }
     if {[catch {
         sc_game load $g
         ::notify::GameChanged
-        sc_move ply $ply
+        # PGN offsets address main-line and variation positions alike.
+        sc_move pgn $offset
         ::notify::PosChanged -pgn
     } err]} {
         set ::errorInfo $err
