@@ -503,6 +503,7 @@ proc ::board::new {w {psize 40} } {
   set ::board::_data($w) [sc_pos board]
   set ::board::_showMarks($w) 0
   set ::board::_hideMarks($w) 0
+  unset -nocomplain ::board::_bestmoves($w)
   set ::board::_mark($w) {}
   set ::board::_drag($w) -1
   set ::board::_lift($w) 0
@@ -1531,9 +1532,16 @@ proc ::board::mark::DrawArrow {pathName from to color} {
 proc ::board::mark::DrawMultipleBestMoves {w moves_list} {
   # Delete all existing best move arrows
   $w.bd delete bestmove1 bestmove2 bestmove3
-  
-  if {! $::showMainEvalBarArrow} { return }
-  
+
+  # Remember the requested arrows so a pure board redraw (resize, flip,
+  # coordinate change, ...) can put them back. They are forgotten when the
+  # caller clears them or when the position changes.
+  if {! $::showMainEvalBarArrow || [llength $moves_list] == 0} {
+    unset -nocomplain ::board::_bestmoves($w)
+    return
+  }
+  set ::board::_bestmoves($w) $moves_list
+
   set colors {"#555555" "#999999" "#CCCCCC"}      ;# dark, medium, light grey
   set widths {0.10 0.065 0.045}                   ;# widest, narrower, thin
   set idx 0
@@ -1558,6 +1566,15 @@ proc ::board::mark::DrawMultipleBestMoves {w moves_list} {
     ::board::mark::DrawArrowEx $w $from $to $color $width {3.6 4.8 2.0} $tag
     incr idx
   }
+}
+
+# Re-draw the last best-move arrows after the board has been redrawn without
+# changing position (resize, flip, coordinates, ...). The transient
+# Shift+click "hide marks" state also hides them.
+proc ::board::mark::RedrawBestMoves {w} {
+  if {![info exists ::board::_bestmoves($w)]} { return }
+  if {$::board::_hideMarks($w)} { return }
+  ::board::mark::DrawMultipleBestMoves $w $::board::_bestmoves($w)
 }
 
 # Draw an arrow to indicate the best move.
@@ -1952,6 +1969,13 @@ proc ::board::update {w {board ""} {animate 0}} {
   }
   set psize $::board::_size($w)
 
+  # A position change invalidates the engine's best-move arrows. A pure
+  # redraw (resize, flip, coordinate change, ...) keeps them and puts them
+  # back at the end of this procedure.
+  if {$board != $oldboard} {
+    unset -nocomplain ::board::_bestmoves($w)
+  }
+
   # Cancel any current animation:
   after cancel "::board::_animate $w"
 
@@ -2032,6 +2056,9 @@ proc ::board::update {w {board ""} {animate 0}} {
   if {$::board::_showmat($w)} {
       ::board::material $w
   }
+
+  # Put back the engine's best-move arrows if this was a pure redraw:
+  ::board::mark::RedrawBestMoves $w
 
   # Animate board changes if requested:
   if {$animate  &&  $board != $oldboard} {

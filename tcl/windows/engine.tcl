@@ -452,8 +452,10 @@ proc ::enginewin::updateStoredEvalDisplay {id} {
             } else {
                 set scoreStr [format "%+.2f" [expr {$score / 100.0}]]
             }
-            # Update the evaluation bar with the best stored line
-            ::notify::EngineBestMove $id "" $scoreStr {}
+            # Update the evaluation bar with the best stored line.
+            # Only the bar: the arrows belong to the engine and must survive
+            # this refresh (the engine may already have stopped searching).
+            ::updateMainEvalBarOnly $id $scoreStr
         }
 
         set formatted [::stored_eval::formatForDisplay $storedData $fen]
@@ -464,8 +466,9 @@ proc ::enginewin::updateStoredEvalDisplay {id} {
     } else {
         # No stored data - query Lichess
         $w.stored_eval.text insert end "Querying Lichess..." header
-        # Clear the evaluation bar while waiting for Lichess/Engine
-        ::notify::EngineBestMove $id "" "" {}
+        # Clear only the evaluation bar while waiting for Lichess/Engine.
+        # Do not touch the engine's best-move arrows.
+        ::updateMainEvalBarOnly $id ""
         ::stored_eval::queryLichessAsync $id $fen ::enginewin::onLichessResult
     }
     
@@ -478,8 +481,12 @@ proc ::enginewin::onLichessResult {id fen result} {
         lassign $result depth pvlines
         set fenKey [::stored_eval::fenKey $fen]
         ::stored_eval::store $id $fenKey $depth "lichess" $pvlines
-        # Refresh display (will show stored data if still on same position)
-        ::enginewin::updateStoredEvalDisplay $id
+        # Refresh the display only if the board is still on the queried
+        # position. A late reply for an earlier position must not restart
+        # (or clear) the query for the current one.
+        if {[::stored_eval::fenKey [sc_pos fen]] eq $fenKey} {
+            ::enginewin::updateStoredEvalDisplay $id
+        }
     }
 }
 

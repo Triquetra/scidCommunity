@@ -408,6 +408,24 @@ proc ::updateMainEvalBar {engineID bestmove evaluation {pvlines {}}} {
     }
 }
 
+# Update only the main eval bar, without touching the engine's best-move
+# arrows. The stored-eval panel uses this to show a cached/cloud score:
+# it must not clear arrows that the engine has already drawn, because the
+# engine may be finished and will never send another PV to redraw them.
+proc ::updateMainEvalBarOnly {engineID evaluation} {
+    if {! $::showEvalBar(.main) || ![winfo exists .main.board]} { return }
+
+    if {![info exists ::mainEvalBarEngineID_]} {
+        set ::mainEvalBarEngineID_ $engineID
+    }
+    if {$engineID == $::mainEvalBarEngineID_} {
+        ::board::updateEvalBar .main.board $evaluation
+        if {$evaluation eq ""} {
+            unset ::mainEvalBarEngineID_
+        }
+    }
+}
+
 # Handle a <space> keypress inside the main board window.
 # Completes an in-progress keyboard move entry, otherwise plays the best move
 # of the engine currently driving the board.
