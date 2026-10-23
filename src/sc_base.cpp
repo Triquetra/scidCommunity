@@ -540,7 +540,9 @@ UI_res_t sc_base_import(scidBaseT* dbase, UI_handle_t ti, int argc,
  *
  * A game is considered a duplicate if its normalized White and Black player
  * names, exact Date, Result and exact move sequence all match a game already
- * in the database (or one imported earlier in the same batch).
+ * in the database (or one imported earlier in the same batch). Games that are
+ * only present because they are marked for deletion are also matched: the
+ * existing game is restored instead of importing another copy.
  *
  * Return:
  *   On success, returns a list of three elements: the number of games

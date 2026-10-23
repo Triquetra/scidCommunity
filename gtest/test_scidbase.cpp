@@ -16,11 +16,14 @@
 
 #include "scidbase.h"
 #include "pgnparse.h"
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
 #include <memory>
 #include <algorithm>
+#include <tuple>
 #include <gtest/gtest.h>
 
 template <typename TCont>
@@ -380,4 +383,61 @@ TEST_F(Test_Scidbase, new_compose_delete_get_Filter) {
 		dbase.deleteFilter(tests[i].first.c_str());
 		check();
 	}
+}
+
+TEST_F(Test_Scidbase, importGamesNoDup_skipsAndRestoresDeletedGames) {
+	const auto pgn = std::string(
+	    "[Event \"Test\"]\n"
+	    "[Site \"Chess.com\"]\n"
+	    "[Date \"2026.10.09\"]\n"
+	    "[Round \"-\"]\n"
+	    "[White \"alice\"]\n"
+	    "[Black \"bob\"]\n"
+	    "[Result \"1-0\"]\n"
+	    "\n"
+	    "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 1-0\n");
+	const auto path = std::filesystem::temp_directory_path() /
+	                  "scid_import_nodup_restore_test.pgn";
+	{
+		std::ofstream out(path);
+		out << pgn;
+	}
+
+	scidBaseT dbase;
+	ASSERT_EQ(OK, dbase.open("MEMORY", FMODE_Create, "Memory"));
+
+	const auto import = [&](const char* file) {
+		gamenumT nImported = 0;
+		gamenumT nSkipped = 0;
+		std::string errorMsg;
+		auto err = dbase.importGamesNoDup(ICodecDatabase::PGN, file, {},
+		                                  errorMsg, nImported, nSkipped);
+		return std::make_tuple(err, nImported, nSkipped);
+	};
+
+	auto [err, nImported, nSkipped] = import(path.string().c_str());
+	ASSERT_EQ(OK, err);
+	EXPECT_EQ(1u, nImported);
+	EXPECT_EQ(0u, nSkipped);
+	ASSERT_EQ(1u, dbase.numGames());
+
+	// Importing the same game again must skip it.
+	std::tie(err, nImported, nSkipped) = import(path.string().c_str());
+	ASSERT_EQ(OK, err);
+	EXPECT_EQ(0u, nImported);
+	EXPECT_EQ(1u, nSkipped);
+	ASSERT_EQ(1u, dbase.numGames());
+
+	// Mark the game deleted (as the Twin Checker does), then import it again.
+	// The existing game must be restored instead of adding a second copy.
+	ASSERT_EQ(OK, dbase.setFlag(true, 1u << IndexEntry::IDX_FLAG_DELETE, 0));
+	ASSERT_TRUE(dbase.getIndexEntry(0)->GetDeleteFlag());
+	std::tie(err, nImported, nSkipped) = import(path.string().c_str());
+	ASSERT_EQ(OK, err);
+	EXPECT_EQ(0u, nImported);
+	EXPECT_EQ(1u, nSkipped);
+	ASSERT_EQ(1u, dbase.numGames());
+	EXPECT_FALSE(dbase.getIndexEntry(0)->GetDeleteFlag());
+
+	std::filesystem::remove(path);
 }

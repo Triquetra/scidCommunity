@@ -428,6 +428,7 @@ errorT scidBaseT::importGamesNoDup(ICodecDatabase::Codec dbtype,
 	ASSERT(dbtype == ICodecDatabase::PGN);
 	nImported = 0;
 	nSkipped = 0;
+	gamenumT nRestored = 0;
 
 	if (auto errModify = beginTransaction())
 		return errModify;
@@ -437,6 +438,12 @@ errorT scidBaseT::importGamesNoDup(ICodecDatabase::Codec dbtype,
 	// Result); the exact move sequence is compared only against the (few)
 	// games that share the same key, which keeps the check fast even for
 	// very large databases.
+	//
+	// Games marked for deletion are included: they are still in the database
+	// until it is compacted, and the Twin Checker may leave one copy of a
+	// duplicated pair flagged as deleted. If such a game matches, it is
+	// undeleted instead of importing another copy (which would make the old
+	// and new copies reappear as twins when the Twin Checker undeletes all).
 	struct DupKey {
 		uint64_t key;
 		gamenumT gnum;
@@ -458,8 +465,6 @@ errorT scidBaseT::importGamesNoDup(ICodecDatabase::Codec dbtype,
 			return ERROR_UserCancel;
 		}
 		const IndexEntry* ie = getIndexEntry(g);
-		if (ie->GetDeleteFlag())
-			continue;
 		const auto whiteId = ie->GetWhite();
 		const auto blackId = ie->GetBlack();
 		const uint64_t wh = whiteId < nameHash.size()
@@ -480,18 +485,34 @@ errorT scidBaseT::importGamesNoDup(ICodecDatabase::Codec dbtype,
 	};
 	std::unordered_map<uint64_t, std::vector<BatchEntry>> batch;
 
-	auto findExisting = [&](uint64_t key, const std::vector<std::string>& moves) {
+	// A match returns the game number and whether that game is flagged for
+	// deletion. A live match is preferred; the first deleted match is kept as
+	// a fallback so it can be restored instead of importing a duplicate.
+	struct ExistingMatch {
+		gamenumT gnum = INVALID_GAMEID;
+		bool deleted = false;
+	};
+	auto findExisting = [&](uint64_t key,
+	                        const std::vector<std::string>& moves) {
+		ExistingMatch res;
 		auto range = std::equal_range(
 		    index.begin(), index.end(), DupKey{key, 0},
 		    [](const DupKey& a, const DupKey& b) { return a.key < b.key; });
 		for (auto it = range.first; it != range.second; ++it) {
+			const IndexEntry* ie = getIndexEntry(it->gnum);
 			Game existing;
-			if (getGame(*getIndexEntry(it->gnum), existing) != OK)
+			if (getGame(*ie, existing) != OK)
 				continue;
-			if (existing.mainLineUCI() == moves)
-				return true;
+			if (existing.mainLineUCI() != moves)
+				continue;
+			if (!ie->GetDeleteFlag()) {
+				return ExistingMatch{it->gnum, false};
+			}
+			if (res.gnum == INVALID_GAMEID) {
+				res = ExistingMatch{it->gnum, true};
+			}
 		}
-		return false;
+		return res;
 	};
 
 	CodecPgn pgn;
@@ -518,8 +539,19 @@ errorT scidBaseT::importGamesNoDup(ICodecDatabase::Codec dbtype,
 				}
 			}
 
-			// Skip duplicates against games already in the database.
-			if (findExisting(key, moves)) {
+			// Skip duplicates against games already in the database. If the
+			// only match was marked for deletion, restore it instead of
+			// adding another copy.
+			auto match = findExisting(key, moves);
+			if (match.gnum != INVALID_GAMEID) {
+				if (match.deleted) {
+					IndexEntry ie = *getIndexEntry(match.gnum);
+					ie.SetDeleteFlag(false);
+					if (auto err = codec_->saveIndexEntry(ie, match.gnum))
+						return err;
+					idx->replaceEntry(ie, match.gnum);
+					++nRestored;
+				}
 				++nSkipped;
 				return OK;
 			}
@@ -539,6 +571,12 @@ errorT scidBaseT::importGamesNoDup(ICodecDatabase::Codec dbtype,
 			return OK;
 		});
 		errorMsg = pgn.parseErrors();
+		if (nRestored) {
+			errorMsg.append("Restored ");
+			errorMsg.append(std::to_string(nRestored));
+			errorMsg.append(
+			    " previously deleted game(s) instead of importing duplicates.\n");
+		}
 		if (nChess960Errors) {
 			errorMsg.append("Ignored ");
 			errorMsg.append(std::to_string(nChess960Errors));

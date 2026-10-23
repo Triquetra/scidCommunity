@@ -230,7 +230,8 @@ proc importPgnFile {{base} {fnames ""}} {
 #   open, writable database) and imports the PGN file into it. Games whose
 #   normalized White and Black players, exact Date, Result and exact move
 #   sequence all match a game already present (or an earlier game in the
-#   same batch) are skipped.
+#   same batch) are skipped. If the only matching game is marked for
+#   deletion, it is restored instead of importing a duplicate.
 #
 #   Reports the outcome itself (success summary, import error, or the
 #   "no writable database" message) and returns 1 on success, 0 otherwise
