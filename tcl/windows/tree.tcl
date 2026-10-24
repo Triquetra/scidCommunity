@@ -1429,7 +1429,12 @@ proc ::tree::configGraphMenus { lang baseNumber } {
 proc ::tree::toggleRefresh { baseNumber } {
   global tree
   set b .treeWin$baseNumber.buttons.bStartStop
-  set ::tree::trainingReplyBase 0
+  # Only clear the pending end-of-line check when this is the base it belongs
+  # to. Toggling refresh in another Tree window must not hide the training
+  # base's feedback.
+  if {$::tree::trainingReplyBase == $baseNumber} {
+    set ::tree::trainingReplyBase 0
+  }
 
   if {$tree(autorefresh$baseNumber)} {
     $b configure -image tb_search_off
