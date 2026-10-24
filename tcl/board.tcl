@@ -148,18 +148,10 @@ proc updateBoardColors { w {choice -1}} {
   global squareColor_lite squareColor_dark highcolor bestcolor
   global colorSchemes newColors
   set colors {squareColor_lite squareColor_dark highcolor bestcolor}
-  # Just update the dialog box colors and return:
+  # A built-in preset replaces the pending colours and any board texture:
   if {$choice >= 0} {
     set list [lindex $colorSchemes $choice]
-    set newColors(squareColor_lite) [lindex $list 1]
-    set newColors(squareColor_dark) [lindex $list 2]
-    set newColors(highcolor) [lindex $list 3]
-    set newColors(bestcolor) [lindex $list 4]
-
-    # Remove board textures
-    set ::boardfile_dark emptySquare
-    set ::boardfile_lite emptySquare
-    ::SetBoardTextures
+    return [::board::applyColorPreset $w {*}[lrange $list 1 4]]
   }
   set nlite $newColors(squareColor_lite)
   set ndark $newColors(squareColor_dark)
@@ -224,6 +216,183 @@ proc chooseBoardColorFromScreen { w c } {
   if {$hex ne ""} {
     applyBoardColor $w $c $hex
   }
+}
+
+# ::board::normalizeColor:
+#   Return a canonical form of a colour so that two spellings compare equal.
+#   Colours picked by the chooser or the eyedropper are already #rrggbb, but
+#   hand-edited options.dat files may contain names or #rgb shorthand.
+#
+proc ::board::normalizeColor {c} {
+  set c [string tolower [string trim $c]]
+  if {[regexp {^#([0-9a-f])([0-9a-f])([0-9a-f])$} $c -> r g b]} {
+    return "#$r$r$g$g$b$b"
+  }
+  if {[regexp {^#[0-9a-f]{6}$} $c]} { return $c }
+  if {[catch {lassign [winfo rgb . $c] r g b}]} { return $c }
+  return [format "#%02x%02x%02x" [expr {$r / 257}] [expr {$g / 257}] [expr {$b / 257}]]
+}
+
+# ::board::presetPreviewSize:
+#   The square size used by the preset swatches in the preferences dialog.
+#
+proc ::board::presetPreviewSize {} {
+  foreach psize $::boardSizes {
+    if {$psize >= 40} { break }
+  }
+  return $psize
+}
+
+# ::board::applyColorPreset:
+#   Apply a solid-colour preset (lite, dark, selected, suggested) to the board
+#   and to the preferences dialog. A solid preset removes any board texture.
+#
+proc ::board::applyColorPreset {w lite dark high best} {
+  global newColors
+  set newColors(squareColor_lite) $lite
+  set newColors(squareColor_dark) $dark
+  set newColors(highcolor) $high
+  set newColors(bestcolor) $best
+
+  set ::boardfile_dark emptySquare
+  set ::boardfile_lite emptySquare
+  ::SetBoardTextures
+  updateBoardColors $w
+}
+
+# ::board::drawColorPresets:
+#   Draw (or redraw) the row of solid-colour presets. Built-in schemes come
+#   first and cannot be removed; saved schemes follow, each with a remove
+#   button. Called again after saving or removing a preset.
+#
+proc ::board::drawColorPresets {w} {
+  global colorSchemes
+  set psize [::board::presetPreviewSize]
+  set f $w.preset
+  foreach child [winfo children $f] {
+    destroy $child
+  }
+
+  set count 0
+  foreach list $colorSchemes {
+    set pf $f.p$count
+    pack [ttk::frame $pf] -side left -padx 5
+    ttk::label $pf.blite -image bp$psize -background [lindex $list 1]
+    ttk::label $pf.bdark -image bp$psize -background [lindex $list 2]
+    ttk::label $pf.wlite -image wp$psize -background [lindex $list 1]
+    ttk::label $pf.wdark -image wp$psize -background [lindex $list 2]
+    ttk::button $pf.select -text [expr {$count + 1}] \
+        -command [list updateBoardColors $w $count]
+    foreach lbl {blite bdark wlite wdark} {
+      ::bind $pf.$lbl <1> [list $pf.select invoke]
+    }
+    grid $pf.blite -row 0 -column 0 -sticky e
+    grid $pf.bdark -row 0 -column 1 -sticky w
+    grid $pf.wlite -row 1 -column 1 -sticky w
+    grid $pf.wdark -row 1 -column 0 -sticky e
+    grid $pf.select -row 2 -column 0 -columnspan 2
+    incr count
+  }
+
+  set firstSaved [expr {[llength $colorSchemes] + 1}]
+  set index 0
+  foreach scheme $::userColorSchemes {
+    if {[llength $scheme] != 4} {
+      incr index
+      continue
+    }
+    lassign $scheme lite dark high best
+    set pf $f.u$index
+    pack [ttk::frame $pf] -side left -padx 5
+    ttk::label $pf.blite -image bp$psize -background $lite
+    ttk::label $pf.bdark -image bp$psize -background $dark
+    ttk::label $pf.wlite -image wp$psize -background $lite
+    ttk::label $pf.wdark -image wp$psize -background $dark
+    ttk::button $pf.select -text [expr {$firstSaved + $index}] \
+        -command [list ::board::applyUserColorScheme $w $index]
+    ttk::button $pf.del -text "\u00d7" -width 2 -takefocus 0 \
+        -command [list ::board::removeUserColorScheme $w $index]
+    ::utils::tooltip::Set $pf.del [tr RemoveSavedColor]
+    foreach lbl {blite bdark wlite wdark} {
+      ::bind $pf.$lbl <1> [list $pf.select invoke]
+    }
+    grid $pf.blite -row 0 -column 0 -sticky e
+    grid $pf.bdark -row 0 -column 1 -sticky w
+    grid $pf.wlite -row 1 -column 1 -sticky w
+    grid $pf.wdark -row 1 -column 0 -sticky e
+    grid $pf.select -row 2 -column 0 -sticky we
+    grid $pf.del -row 2 -column 1
+    incr index
+  }
+}
+
+# ::board::persistColorPresets:
+#   Write only ::userColorSchemes to the options file. The Save button and
+#   the remove buttons are expected to survive a restart even when options
+#   auto-save is disabled, without persisting unrelated preference changes.
+#
+proc ::board::persistColorPresets {} {
+  catch {options.writeVar ::userColorSchemes}
+}
+
+# ::board::applyUserColorScheme:
+#   Apply one of the user's saved solid-colour presets.
+#
+proc ::board::applyUserColorScheme {w index} {
+  if {$index < 0 || $index >= [llength $::userColorSchemes]} { return }
+  set scheme [lindex $::userColorSchemes $index]
+  if {[llength $scheme] != 4} { return }
+  ::board::applyColorPreset $w {*}$scheme
+}
+
+# ::board::removeUserColorScheme:
+#   Delete one saved solid-colour preset, redraw the row and persist the
+#   change immediately.
+#
+proc ::board::removeUserColorScheme {w index} {
+  if {$index < 0 || $index >= [llength $::userColorSchemes]} { return }
+  set ::userColorSchemes [lreplace $::userColorSchemes $index $index]
+  ::board::drawColorPresets $w
+  ::board::persistColorPresets
+}
+
+# ::board::saveCurrentColors:
+#   Add the colours currently selected in the preferences dialog to the saved
+#   presets. An identical preset - built-in or saved - is not added twice.
+#
+proc ::board::saveCurrentColors {w} {
+  global newColors colorSchemes
+  set scheme [list \
+    [::board::normalizeColor $newColors(squareColor_lite)] \
+    [::board::normalizeColor $newColors(squareColor_dark)] \
+    [::board::normalizeColor $newColors(highcolor)] \
+    [::board::normalizeColor $newColors(bestcolor)]]
+
+  set number 0
+  foreach preset $colorSchemes {
+    incr number
+    set builtin [lmap c [lrange $preset 1 4] { ::board::normalizeColor $c }]
+    if {$scheme eq $builtin} {
+      tk_messageBox -parent [winfo toplevel $w] -title scidCommunity \
+          -icon info -message [format [tr ColorPresetExists] $number]
+      return
+    }
+  }
+
+  set index 0
+  foreach preset $::userColorSchemes {
+    incr index
+    set saved [lmap c $preset { ::board::normalizeColor $c }]
+    if {$scheme eq $saved} {
+      tk_messageBox -parent [winfo toplevel $w] -title scidCommunity \
+          -icon info -message [format [tr ColorPresetExists] [expr {$number + $index}]]
+      return
+    }
+  }
+
+  lappend ::userColorSchemes $scheme
+  ::board::drawColorPresets $w
+  ::board::persistColorPresets
 }
 
 # chooseBoardColors:
@@ -295,6 +464,12 @@ proc chooseBoardColors { w {choice -1}} {
     grid $f.pick$c -row $row -column [expr {$column + 2} ] -padx {2 8}
   }
 
+  # Save the current four colours as a reusable preset (duplicates ignored).
+  ttk::button $f.save -text [tr SaveCurrentColors] \
+      -command [list ::board::saveCurrentColors $w]
+  ::utils::tooltip::Set $f.save [tr SaveCurrentColorsHint]
+  grid $f.save -row 2 -column 0 -columnspan 7 -sticky w -pady {4 0}
+
   # Border width option:
   set f $w.border
   foreach i {0 1 2 3} {
@@ -353,27 +528,7 @@ proc chooseBoardColors { w {choice -1}} {
     bind $c <Button-1> $fcom
   }
 
-  set count 0
-  foreach list $colorSchemes {
-    set f $w.preset.p$count
-    pack [ttk::frame $f] -side left -padx 5
-    ttk::label $f.blite -image bp$psize -background [lindex $list 1]
-    ttk::label $f.bdark -image bp$psize -background [lindex $list 2]
-    ttk::label $f.wlite -image wp$psize -background [lindex $list 1]
-    ttk::label $f.wdark -image wp$psize -background [lindex $list 2]
-    ttk::button $f.select -text [expr {$count + 1}] \
-        -command "updateBoardColors $w $count"
-    bind $f.blite <1> "$f.select invoke"
-    bind $f.bdark <1> "$f.select invoke"
-    bind $f.wlite <1> "$f.select invoke"
-    bind $f.wdark <1> "$f.select invoke"
-    grid $f.blite -row 0 -column 0 -sticky e
-    grid $f.bdark -row 0 -column 1 -sticky w
-    grid $f.wlite -row 1 -column 1 -sticky w
-    grid $f.wdark -row 1 -column 0 -sticky e
-    grid $f.select -row 2 -column 0 -columnspan 2 ; # -sticky we
-    incr count
-  }
+  ::board::drawColorPresets $w
 
   #########################################################
   set f $w.texture

@@ -1538,6 +1538,10 @@ translate U CopyErrNotOpen {ei ole auki}
 translate U LightSquares {Vaaleat ruudut}
 translate U DarkSquares {Tummat ruudut}
 translate U PickColorFromScreen {Pick color from screen}
+translate U SaveCurrentColors {Save current colors}
+translate U SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate U RemoveSavedColor {Remove this saved color preset}
+translate U ColorPresetExists {Those colors are already saved as preset %d}
 translate U SelectedSquares {Valitut ruudut}
 translate U SuggestedSquares {Siirtoehdotusten ruudut}
 translate U WhitePieces {Valkeat nappulat}

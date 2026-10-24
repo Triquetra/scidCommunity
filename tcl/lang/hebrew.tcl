@@ -1491,6 +1491,10 @@ translate V CopyErrNotOpen {אינו פתוח}
 translate V LightSquares {ריבועים בהירים}
 translate V DarkSquares {ריבועים כהים}
 translate V PickColorFromScreen {Pick color from screen}
+translate V SaveCurrentColors {Save current colors}
+translate V SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate V RemoveSavedColor {Remove this saved color preset}
+translate V ColorPresetExists {Those colors are already saved as preset %d}
 translate V SelectedSquares {ריבועים נבחרים}
 translate V SuggestedSquares {הצעות להזיז ריבועים}
 translate V WhitePieces {חתיכות לבנות}

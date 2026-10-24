@@ -1506,6 +1506,10 @@ translate H CopyErrNotOpen {nincs megnyitva.}
 translate H LightSquares {Világos mezõk}
 translate H DarkSquares {Sötét mezõk}
 translate H PickColorFromScreen {Pick color from screen}
+translate H SaveCurrentColors {Save current colors}
+translate H SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate H RemoveSavedColor {Remove this saved color preset}
+translate H ColorPresetExists {Those colors are already saved as preset %d}
 translate H SelectedSquares {Kiválasztott mezõk}
 translate H SuggestedSquares {Javasolt lépések mezõi}
 translate H WhitePieces {Világos figurák}

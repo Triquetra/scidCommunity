@@ -1553,6 +1553,10 @@ translate D CopyErrNotOpen {ist nicht geöffnet}
 translate D LightSquares {Helle Felder}
 translate D DarkSquares {Dunkle Felder}
 translate D PickColorFromScreen {Pick color from screen}
+translate D SaveCurrentColors {Save current colors}
+translate D SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate D RemoveSavedColor {Remove this saved color preset}
+translate D ColorPresetExists {Those colors are already saved as preset %d}
 translate D SelectedSquares {Ausgewählte Felder}
 translate D SuggestedSquares {Zugvorschlagsfelder}
 translate D WhitePieces {Weiße Steine}

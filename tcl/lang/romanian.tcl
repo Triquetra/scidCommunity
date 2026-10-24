@@ -1531,6 +1531,10 @@ translate L CopyErrNotOpen {nu este deschis}
 translate L LightSquares {Pătrate ușoare}
 translate L DarkSquares {Pătrate întunecate}
 translate L PickColorFromScreen {Pick color from screen}
+translate L SaveCurrentColors {Save current colors}
+translate L SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate L RemoveSavedColor {Remove this saved color preset}
+translate L ColorPresetExists {Those colors are already saved as preset %d}
 translate L SelectedSquares {Pătrate selectate}
 translate L SuggestedSquares {Patratele de mutare sugerate}
 translate L WhitePieces {Bucăți albe}

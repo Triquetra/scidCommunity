@@ -1513,6 +1513,10 @@ translate B CopyErrNotOpen {não está aberta}
 translate B LightSquares {Casas Brancas}
 translate B DarkSquares {Casas Pretas}
 translate B PickColorFromScreen {Pick color from screen}
+translate B SaveCurrentColors {Save current colors}
+translate B SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate B RemoveSavedColor {Remove this saved color preset}
+translate B ColorPresetExists {Those colors are already saved as preset %d}
 translate B SelectedSquares {Casas selecionadas}
 translate B SuggestedSquares {Casas Sugeridas}
 translate B WhitePieces {Peças Brancas}

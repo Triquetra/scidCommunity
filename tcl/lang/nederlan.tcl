@@ -1530,6 +1530,10 @@ translate N CopyErrNotOpen {is niet geopend}
 translate N LightSquares {Lichte velden}
 translate N DarkSquares {Donkere velden}
 translate N PickColorFromScreen {Pick color from screen}
+translate N SaveCurrentColors {Save current colors}
+translate N SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate N RemoveSavedColor {Remove this saved color preset}
+translate N ColorPresetExists {Those colors are already saved as preset %d}
 translate N SelectedSquares {Geselecteerde velden}
 translate N SuggestedSquares {Zetsuggestie velden}
 translate N WhitePieces {Witte stukken}

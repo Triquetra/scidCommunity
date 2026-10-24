@@ -1511,6 +1511,10 @@ translate W CopyErrNotOpen {är ej öppen}
 translate W LightSquares {Ljusa fält}
 translate W DarkSquares {Mörka fält}
 translate W PickColorFromScreen {Pick color from screen}
+translate W SaveCurrentColors {Save current colors}
+translate W SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate W RemoveSavedColor {Remove this saved color preset}
+translate W ColorPresetExists {Those colors are already saved as preset %d}
 translate W SelectedSquares {Valda fält}
 translate W SuggestedSquares {Föreslagna fält}
 translate W WhitePieces {Vita pjäser}

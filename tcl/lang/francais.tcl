@@ -1513,6 +1513,10 @@ translate F CopyErrNotOpen {n'est pas ouverte}
 translate F LightSquares {Cases blanches}
 translate F DarkSquares {Cases noires}
 translate F PickColorFromScreen {Pick color from screen}
+translate F SaveCurrentColors {Save current colors}
+translate F SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate F RemoveSavedColor {Remove this saved color preset}
+translate F ColorPresetExists {Those colors are already saved as preset %d}
 translate F SelectedSquares {Cases sélectionnées}
 translate F SuggestedSquares {Cases des coups suggérés}
 translate F WhitePieces {Pièces blanches}

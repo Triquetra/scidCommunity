@@ -1527,6 +1527,10 @@ translate K CopyErrNotOpen {no està oberta}
 translate K LightSquares {Caselles blanques}
 translate K DarkSquares {Caselles negres}
 translate K PickColorFromScreen {Pick color from screen}
+translate K SaveCurrentColors {Save current colors}
+translate K SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate K RemoveSavedColor {Remove this saved color preset}
+translate K ColorPresetExists {Those colors are already saved as preset %d}
 translate K SelectedSquares {Caselles seleccionades}
 translate K SuggestedSquares {Caselles de jugada suggerida}
 translate K WhitePieces {Peces blanques}

@@ -1490,6 +1490,10 @@ translate Z CopyErrNotOpen {haijafunguliwa}
 translate Z LightSquares {Viwanja vya mwanga}
 translate Z DarkSquares {Viwanja vya giza}
 translate Z PickColorFromScreen {Pick color from screen}
+translate Z SaveCurrentColors {Save current colors}
+translate Z SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate Z RemoveSavedColor {Remove this saved color preset}
+translate Z ColorPresetExists {Those colors are already saved as preset %d}
 translate Z SelectedSquares {Viwanja vilivyochaguliwa}
 translate Z SuggestedSquares {Miraba inayopendekezwa ya kusogezwa}
 translate Z WhitePieces {Vipande vyeupe}
