@@ -241,6 +241,7 @@ proc helpMsg {lang button message} {
 
 array set tr {}
 array set translations {}
+set ::englishLoaded 0
 ################################################################################
 # translate:
 #    Assigns a translation for future reference.
@@ -351,6 +352,22 @@ proc setLanguage {} {
     }
   } else {
     sc_info language en
+  }
+
+  # Load English as the fallback base before the selected language. When
+  # scidCommunity starts directly in a non-English language, only that
+  # language file would be sourced; without this, keys missing from it are
+  # absent from ::tr and tr() returns the raw tag (e.g. TreeTrainingEndOfLine)
+  # instead of the English text.
+  if {! $::englishLoaded} {
+    if {[catch {
+      source -encoding utf-8 [file nativename [file join "$::scidTclDir" "lang/english.tcl"]]
+      unset -nocomplain ::langSourceFile(E)
+      setLanguage_E
+      set ::englishLoaded 1
+    } err]} {
+      tk_messageBox -message "Error loading English language fallback: $err"
+    }
   }
   
   if {[catch {
