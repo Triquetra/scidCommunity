@@ -2767,6 +2767,12 @@ set helpText(Tree) {<h1>The Tree window</h1>
   knowledge of your opening repertoire. Another option to train an
   opening offers <a OpeningTrainer>Training / Openings</a>.
   </p>
+  <p>
+  When training reaches the end of a line, the tree window reports
+  <term>End of line reached</term> and, for a game with a recorded result,
+  the result. A move that is not in the database is reported separately, so
+  a solved problem is not confused with a wrong move.
+  </p>
 
   
   <h3>Caching for faster results</h3>

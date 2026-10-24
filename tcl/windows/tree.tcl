@@ -6,6 +6,7 @@
 namespace eval ::tree {
   set trainingBase 0
   set trainingMove 0
+  set trainingReplyBase 0
   set userMovePending 0
   array set cachesize {}
   set scoreHighlight_MinGames 15
@@ -230,6 +231,7 @@ proc ::tree::toggleTraining { baseNumber } {
   }
 
   set ::tree::trainingBase 0
+  set ::tree::trainingReplyBase 0
   set ::tree::userMovePending 0
   if {$tree(training$baseNumber)} {
     set ::tree::trainingBase $baseNumber
@@ -242,14 +244,14 @@ proc ::tree::doTraining { { n 0 } } {
   global tree
   if {$n != 1  &&  [winfo exists .analysisWin1]  &&  $::analysis(automove1)} {
     automove 1
-    return
+    return 1
   }
   if {$n != 2  &&  [winfo exists .analysisWin2]  &&  $::analysis(automove2)} {
     automove 2
-    return
+    return 1
   }
-  if {! [winfo exists .treeWin$::tree::trainingBase]} { return }
-  if { $::tree::trainingBase == 0 } { return }
+  if {! [winfo exists .treeWin$::tree::trainingBase]} { return 1 }
+  if { $::tree::trainingBase == 0 } { return 1 }
 
   # Before issuing a training move, annotate player's move
   if { $::tree::mask::maskFile != ""  } {
@@ -312,10 +314,68 @@ proc ::tree::doTraining { { n 0 } } {
               set ::tree::trainingMove 1
               set result [addSanMove $san]
               set ::tree::trainingMove 0
-              return $result
+              # The automatic reply itself may be the last move of the line.
+              # Flag it for the refresh of the position it leads to: the tree
+              # filter has not been updated yet at this point.
+              if {$result} {
+                set ::tree::trainingReplyBase $::tree::trainingBase
+                return 1
+              }
+              # A move was selected but could not be played (e.g. a promotion
+              # dialog was cancelled): do not treat it as the end of the line.
+              return 2
           }
       }
   }
+
+  # No reply available: either the line ends here (the move was found in the
+  # database) or the move is not in the database at all. The caller reports
+  # which one it is; automove may call this without a user move.
+  return 0
+}
+
+################################################################################
+# ::tree::trainingHasMoves
+#   Returns true if the unrestricted "tree" filter has a continuation from the
+#   current position. This is the filter doTraining uses; the displayed tree
+#   may instead be composed with dbfilter when "all games" is off.
+################################################################################
+proc ::tree::trainingHasMoves { baseNumber } {
+  foreach move [sc_filter treestats $baseNumber "tree"] {
+    lassign $move san freq
+    if { $san ne {[end]} && $freq > 0 } { return 1 }
+  }
+  return 0
+}
+
+################################################################################
+# ::tree::trainingFeedback
+#   Called in training mode when no automatic reply can be played. A move that
+#   is in the database leaves games in the "tree" filter, so the line simply
+#   ends there; a move that is not in the database leaves the filter empty.
+################################################################################
+proc ::tree::trainingFeedback { baseNumber } {
+  set w .treeWin$baseNumber
+  if {! [winfo exists $w]} { return }
+
+  if {[sc_filter count $baseNumber "tree"] > 0} {
+    set msg [tr TreeTrainingEndOfLine]
+    if {$baseNumber == [sc_base current]
+        && ! [catch {sc_game info result} res]
+        && $res ne "*"} {
+      if {$res eq "=-="} { set res "1/2-1/2" }
+      append msg " ($res)"
+    }
+    set tag greenfg
+  } else {
+    set msg [tr TreeTrainingMoveNotInBase]
+    set tag redfg
+  }
+
+  set msg "[tr Training]: $msg"
+  $w.f.tl insert end "\n$msg\n" $tag
+  $w.f.tl see end
+  ::tree::status "  $msg" $baseNumber
 }
 
 ################################################################################
@@ -470,6 +530,28 @@ proc ::tree::dorefresh { baseNumber {filter "tree"}} {
 
   if {[winfo exists .treeGraph$baseNumber]} { ::tree::graph $baseNumber }
 
+  # The training reply may have been the last move of the line. This refresh
+  # is the first one whose "tree" filter describes the position it led to, so
+  # this is where that can be detected. Consume the flag on the training
+  # base's own refresh (other bases may refresh first).
+  if {$::tree::trainingReplyBase == $baseNumber} {
+    set ::tree::trainingReplyBase 0
+    if {$tree(allgames$baseNumber)} {
+      # The displayed stats already come from the unrestricted "tree" filter;
+      # sc_tree stats returns only the title row (no newline) when there are
+      # no moves.
+      set hasMoves [expr {[string first "\n" $moves] != -1}]
+    } else {
+      # The display composes dbfilter with "tree", but training ignores
+      # dbfilter. Ask the filter that doTraining actually uses, otherwise a
+      # continuation outside dbfilter looks like the end of the line.
+      set hasMoves [::tree::trainingHasMoves $baseNumber]
+    }
+    if {! $hasMoves} {
+      ::tree::trainingFeedback $baseNumber
+    }
+  }
+
   # Reply to the move the user just made. trainingColor used to be latched
   # when Training was switched on, so the reply stopped as soon as the next
   # problem had the other side to move; userMovePending already says the move
@@ -480,7 +562,9 @@ proc ::tree::dorefresh { baseNumber {filter "tree"}} {
       && $baseNumber == $::tree::trainingBase
       && $::tree::userMovePending} {
     set ::tree::userMovePending 0
-    ::tree::doTraining
+    if {! [::tree::doTraining]} {
+      ::tree::trainingFeedback $baseNumber
+    }
   }
 }
 
@@ -1345,6 +1429,12 @@ proc ::tree::configGraphMenus { lang baseNumber } {
 proc ::tree::toggleRefresh { baseNumber } {
   global tree
   set b .treeWin$baseNumber.buttons.bStartStop
+  # Only clear the pending end-of-line check when this is the base it belongs
+  # to. Toggling refresh in another Tree window must not hide the training
+  # base's feedback.
+  if {$::tree::trainingReplyBase == $baseNumber} {
+    set ::tree::trainingReplyBase 0
+  }
 
   if {$tree(autorefresh$baseNumber)} {
     $b configure -image tb_search_off
