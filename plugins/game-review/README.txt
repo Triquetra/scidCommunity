@@ -1,0 +1,132 @@
+scidCommunity game review plugin
+=================================
+
+Chess.com-style game review, computed locally, written into the PGN.
+
+WHAT IT DOES
+  * move labels: Brilliant / Great / Best / Excellent / Good / Book /
+    Forced / Inaccuracy / Mistake / Miss / Blunder
+  * accuracy % per side (CAPS-style: volatility weighted + harmonic blend)
+  * estimated Elo per side, and a performance rating when the PGN carries
+    the opponent's rating
+  * key moments (3-5, ranked like chess.com's highlight reel)
+  * optional coach prose (Ollama) on the key moments and as a game summary
+  * "What's the threat?" for the position on the board
+
+USAGE
+  Tools -> Game review -> Game review            (annotates the current game)
+  Tools -> Game review -> What's the threat?     (asks about the board position)
+  Tools -> Game review -> Review settings...     (engines, depth, coach)
+
+  The game must be saved in a writable database and you must be on the main
+  line (not inside a variation). Annotations are written to the PGN; Ctrl+Z
+  undoes the whole pass.
+
+ENGINE SETTINGS (applied in config/engines.dat)
+  All four engines are configured for 8 threads (the machine has 8 cores /
+  16 logical) and 1024 MB hash, Syzygy paths for every table directory, and
+  their own working directory set — RubiChess will not search at all unless
+  its folder (with the .nnue) is the cwd.
+  The review pass uses the same threads/hash from the plugin settings, so
+  changing them there is enough for the review; engines.dat matters for the
+  F2/F3 engine windows and the analysis window.
+
+ENGINES
+  Two engines are used, both chosen by name from scid's own engine list
+  (Tools -> Manage engines), never by path:
+
+    Analysis engine   one MultiPV-3 search per position, depth = setting.
+                      Use Stockfish: the thresholds were calibrated against
+                      Stockfish evals, and a different engine shifts labels.
+    Verifier engine   must be a *different* engine. It re-searches only the
+                      moves that would be labelled Brilliant or Great, at
+                      depth+4, and withdraws the upgrade when it disagrees on
+                      the best move (or does not see an only-good-move gap).
+
+  With the four engines installed here that means Stockfish 19 for analysis
+  and Berserk 14 (or RubiChess) for verification. If both boxes name the same
+  engine the verifier is skipped.
+
+  Neither uses the F2/F3 engine windows; the plugin opens its own sessions.
+
+BEST LINES
+  By default the engine's best line is written as a real PGN variation after
+  the played move, so you can step through it on the board. Length is the
+  "Best line in comment (plies)" setting (default 5, 0 = off). Only moves
+  that differ from the engine's choice and were labelled inaccuracy, mistake,
+  miss or blunder get a variation — anything else would just repeat the game.
+  An existing variation at the same point is left alone, so re-running the
+  review does not stack duplicates.
+  Untick "Best line as a variation" to get the line in the move comment
+  instead ("[Blunder] -3.00, best Nf5 exd5 Nxd4 [%eval -3.00]").
+
+PGN OUTPUT
+  Every move with a quality gets its NAG (!! ! ?! ? ??), plus a bracketed
+  label comment, e.g.
+
+    13. c3??  {[Blunder] -3.00, best Nf5 [%eval -3.00]}
+
+  Best/Excellent/Good/Book moves get no NAG and, by default, no comment
+  (turn that on in settings). [%eval] tokens are written so scid's score
+  graph redraws from the PGN.
+
+COACH (Ollama)
+  Set endpoint, API key and model in Review settings.
+    local Ollama:      http://localhost:11434   (no key)
+    Ollama Cloud:      https://ollama.com       (key required)
+  Model names differ between local and cloud: list them with
+    curl -H "Authorization: Bearer $KEY" https://ollama.com/v1/models
+  The model only writes prose from facts the plugin computed. It never
+  decides a label.
+
+FILES
+  10_cr_board.tcl     board core: movegen, make-move, material, SEE
+  11_cr_classify.tcl  labels, accuracy, Elo, key moments, phase split
+  12_cr_settings.tcl  settings + cr_settings.dat
+  13_cr_engine.tcl    headless MultiPV passes (ids 20 and 21)
+  14_cr_review.tcl    pipeline, writeback, report text
+  15_cr_llm.tcl       Ollama client and prompts
+  16_cr_ui.tcl        menus, progress, report, settings dialog
+
+  Plugins are executable Tcl with full privileges; keep this folder private.
+
+BOOK PLIES ARE NOT SEARCHED
+  The engine pass starts at the book boundary: positions up to the last ECO
+  match are never searched, because those moves are labelled Book anyway.
+  For a 40-ply game whose theory ends at ply 12 that is 5 searches instead of
+  41. A move that *leaves* theory sits beyond the boundary, so it is still
+  analysed and can still be labelled a blunder.
+  Known limit: scid reports the *deepest* ECO match, so a game that
+  transposes back into theory gets a later boundary and the plies in between
+  are labelled Book without being analysed. The log prints the boundary, and
+  "Skip engine analysis of book plies" turns the whole thing off.
+  Book plies get no [%eval] token, so the score graph starts where the
+  analysis does.
+
+BOOK DETECTION
+  Default is ECO-based: the plugin asks scid's own ECO book for the deepest
+  position of this game that it recognises ("sc_game eco ply") and treats
+  every ply up to there as Book. That is chess.com's rule — book ends when
+  you leave theory. If the game matches no ECO line, it falls back to the
+  "Book plies" setting (default 12).
+  Switch to plain "plies" in settings if you want the old behaviour.
+
+TROUBLESHOOTING
+  A plugin that fails to load is reported in a dialog and skipped.
+  This plugin also appends to  plugins/cr_load.log  on every start, e.g.
+
+      2026-10-23 17:12:28 plugin load start; scidUserDir=C:/Users/.../scidCommunity
+      2026-10-23 17:12:28 menu: cascade added under .menu.tools
+      2026-10-23 17:12:28 plugin load done; enginecfg=yes
+
+  * no cr_load.log at all  -> scid never loaded the plugins: check that this
+    folder is  %APPDATA%\scidCommunity\plugins  and restart scid.
+  * "menu: flat items added"  -> the cascade could not be built; the three
+    entries are at the bottom of the Tools menu instead.
+  * "settings load failed"    -> cr_settings.dat is unreadable; delete it.
+
+NOTES
+  * Estimated Elo is a fit to accuracy + ACPL, not a measurement. The
+    performance rating uses "opponent RD" from settings: 100 (established
+    rating) anchors it to the opponent; leaving it at 350 reduces it to the
+    plain strength estimate.
