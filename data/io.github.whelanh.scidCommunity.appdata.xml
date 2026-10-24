@@ -79,6 +79,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+ <release version="5.1.4.46" date="2026-10-23">
+      <description>
+        <p>Various bug fixes</p>
+      </description>
+    </release>
  <release version="5.1.4.45" date="2026-10-22">
       <description>
         <p>New feature: Search Comments in the Search menu (includes searching variations)</p>
