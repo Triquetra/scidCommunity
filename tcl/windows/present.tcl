@@ -141,7 +141,6 @@ proc ::windows::present::update {} {
 
     if {$frozen} { return }
     if {![winfo exists $win.board]} { return }
-    ::windows::present::mirrorEnd
     set shownBoard [sc_pos board]
     set shownMove [sc_game info previousMoveUCI]
     set shownNags [sc_pos getNags]
@@ -209,67 +208,6 @@ proc ::windows::present::syncFlip {} {
     ::windows::present::redraw
 }
 
-# ::windows::present::mirrorLift --
-#   Mirror a press-and-hold on the main board: lift the same piece on the
-#   presentation board so the audience sees it being held. No-op when frozen
-#   or when the window is closed.
-#
-proc ::windows::present::mirrorLift {sq} {
-    variable win
-    variable frozen
-
-    if {$frozen} { return }
-    if {![winfo exists $win.board]} { return }
-    ::board::setDragSquare $win.board -1
-    ::board::setDragSquare $win.board $sq
-    ::board::liftPiece $win.board
-}
-
-# ::windows::present::mirrorDrag --
-#   Follow the piece dragged on the main board: move the lifted copy on the
-#   presentation board to the square under the cursor. The shadow is removed
-#   as soon as the piece starts moving, like on the main board.
-#
-proc ::windows::present::mirrorDrag {x y} {
-    variable win
-    variable frozen
-
-    if {$frozen} { return }
-    if {![winfo exists $win.board]} { return }
-    set sq [::board::getDragSquare $win.board]
-    if {$sq < 0} { return }
-
-    # The shadow belongs to the stationary lift: remove it as soon as the
-    # piece starts moving, even if the cursor has already left the board.
-    ::board::lowerPiece $win.board
-
-    set target [::board::getSquare .main.board $x $y]
-    if {$target < 0} { return }
-
-    set bd $win.board.bd
-    lassign [::board::midSquare $win.board $target] cx cy
-    set lift [expr {max(4, $::board::_size($win.board) / 6)}]
-    # drawPiece() places piece images half the piece overflow above the
-    # square centre; subtract the same amount so the first drag motion does
-    # not drop the piece by that offset.
-    set y [expr {$cy - int($::board::_poffset($win.board) / 2) - $lift}]
-    $bd coords p$sq $cx $y
-    $bd raise p$sq
-}
-
-# ::windows::present::mirrorEnd --
-#   Put the mirrored piece back on its square (the main board's release or a
-#   new position ends the gesture).
-#
-proc ::windows::present::mirrorEnd {} {
-    variable win
-
-    if {![winfo exists $win.board]} { return }
-    if {[::board::getDragSquare $win.board] >= 0} {
-        ::board::setDragSquare $win.board -1
-    }
-}
-
 # ::windows::present::flip --
 #   Flips the presentation board alone, independently of the main board.
 #
@@ -312,7 +250,6 @@ proc ::windows::present::freeze {} {
         return
     }
     if {$frozen} {
-        ::windows::present::mirrorEnd
         # Reply on the presenter's board only: the audience must not see this.
         ::board::setInfoAlert .main.board [tr WindowsPresentationBoard] \
             [tr PresentationFrozen] red "::windows::present::toggleFreeze"

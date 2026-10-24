@@ -982,18 +982,6 @@ set helpText(Moves) {<h1>Entering chess moves</h1>
   <b>Ctrl+Alt+0</b> (<menu>Edit</menu> &gt; <menu>Null Move</menu>).
   </p>
   
-  <h3><name Lift>Lifting a piece</h3>
-  <p>
-  Press and hold the left mouse button on a piece of the side to move to lift
-  it above the board. Release it over its own square to put it back without
-  moving, which is useful for pointing out a threat while explaining a
-  position. Dragging the piece to another square moves it as usual.
-  </p>
-  <p>
-  A quick click still behaves according to the
-  <term>Show Suggested Move Squares</term> setting.
-  </p>
-
   <h3><name Informant>Entering common annotation symbols</h3>
   <p>
   You can also add common <a NAGs>annotation symbols</a> using the keyboard
