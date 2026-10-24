@@ -335,6 +335,20 @@ proc ::tree::doTraining { { n 0 } } {
 }
 
 ################################################################################
+# ::tree::trainingHasMoves
+#   Returns true if the unrestricted "tree" filter has a continuation from the
+#   current position. This is the filter doTraining uses; the displayed tree
+#   may instead be composed with dbfilter when "all games" is off.
+################################################################################
+proc ::tree::trainingHasMoves { baseNumber } {
+  foreach move [sc_filter treestats $baseNumber "tree"] {
+    lassign $move san freq
+    if { $san ne {[end]} && $freq > 0 } { return 1 }
+  }
+  return 0
+}
+
+################################################################################
 # ::tree::trainingFeedback
 #   Called in training mode when no automatic reply can be played. A move that
 #   is in the database leaves games in the "tree" filter, so the line simply
@@ -519,11 +533,21 @@ proc ::tree::dorefresh { baseNumber {filter "tree"}} {
   # The training reply may have been the last move of the line. This refresh
   # is the first one whose "tree" filter describes the position it led to, so
   # this is where that can be detected. Consume the flag on the training
-  # base's own refresh (other bases may refresh first). sc_tree stats returns
-  # only the title row (no newline) when there are no moves.
+  # base's own refresh (other bases may refresh first).
   if {$::tree::trainingReplyBase == $baseNumber} {
     set ::tree::trainingReplyBase 0
-    if {[string first "\n" $moves] == -1} {
+    if {$tree(allgames$baseNumber)} {
+      # The displayed stats already come from the unrestricted "tree" filter;
+      # sc_tree stats returns only the title row (no newline) when there are
+      # no moves.
+      set hasMoves [expr {[string first "\n" $moves] != -1}]
+    } else {
+      # The display composes dbfilter with "tree", but training ignores
+      # dbfilter. Ask the filter that doTraining actually uses, otherwise a
+      # continuation outside dbfilter looks like the end of the line.
+      set hasMoves [::tree::trainingHasMoves $baseNumber]
+    }
+    if {! $hasMoves} {
       ::tree::trainingFeedback $baseNumber
     }
   }
