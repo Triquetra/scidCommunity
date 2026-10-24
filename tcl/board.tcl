@@ -233,6 +233,15 @@ proc ::board::normalizeColor {c} {
   return [format "#%02x%02x%02x" [expr {$r / 257}] [expr {$g / 257}] [expr {$b / 257}]]
 }
 
+# ::board::isValidColor:
+#   True if Tk can parse the colour. Saved presets come from a text options
+#   file that can be hand-edited, and an unparseable value must not abort
+#   construction of the preferences dialog.
+#
+proc ::board::isValidColor {c} {
+  return [expr {![catch {winfo rgb . $c}]}]
+}
+
 # ::board::presetPreviewSize:
 #   The square size used by the preset swatches in the preferences dialog.
 #
@@ -302,6 +311,13 @@ proc ::board::drawColorPresets {w} {
       continue
     }
     lassign $scheme lite dark high best
+    if {![::board::isValidColor $lite] || ![::board::isValidColor $dark] ||
+        ![::board::isValidColor $high] || ![::board::isValidColor $best]} {
+      # Keep the original index so the remove buttons of the remaining saved
+      # presets still point at the right entry.
+      incr index
+      continue
+    }
     set pf $f.u$index
     pack [ttk::frame $pf] -side left -padx 5
     ttk::label $pf.blite -image bp$psize -background $lite
