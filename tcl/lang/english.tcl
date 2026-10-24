@@ -684,6 +684,8 @@ menuText E TreeHelpIndex "Help Index" 0
 menuText E TreeFindGames "Find games with annotation" 0 {Build the list of the games where this move was played with an annotation}
 translate E SaveCache {Save Cache}
 translate E Training {Training}
+translate E TreeTrainingEndOfLine {End of line reached.}
+translate E TreeTrainingMoveNotInBase {This move is not in the database.}
 translate E LockTree {Lock}
 translate E TreeDepth {Plies:}
 translate E TreeLocked {locked}
