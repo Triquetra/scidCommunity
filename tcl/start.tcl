@@ -754,16 +754,15 @@ proc ::loadDeferredTheme {themeName} {
 }
 
 # Load bundled Uwe Klimmek ttk-themes (image-based, require direct source)
-set _tclthemesDir [file join [file dirname [info script]] "tclthemes"]
-if {[file isdirectory $_tclthemesDir]} {
-    foreach _themeScript [glob -nocomplain -directory $_tclthemesDir */scid*.tcl] {
+if {[file isdirectory $themeDir]} {
+    foreach _themeScript [glob -nocomplain -directory $themeDir */scid*.tcl] {
         if {[catch {source -encoding utf-8 [file nativename $_themeScript]} _err]} {
             catch { puts stderr "Warning: Failed to load bundled theme $_themeScript - $_err" }
         }
     }
     unset -nocomplain _themeScript _err
 }
-unset -nocomplain _tclthemesDir
+unset -nocomplain themeDir
 
 # Load more theme
 if { [file exists $::ThemePackageFile] } {
