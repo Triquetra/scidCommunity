@@ -1,10 +1,10 @@
 # Commit hash from github branch
 # (the macros must be defined before Release uses shortcommit)
-%global commit a4d58886307d91e598198c13aa0008efae33cf67   
+%global commit dd45a9368ffbfa31eaaecda893c7020a890c39d2   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           scidcommunity
-Version:        5.1.4.46
+Version:        5.1.4.47
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
@@ -68,6 +68,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Sat Oct 24, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-47
+- "Enable saving multiple custom board color sets; enhance training in Tree View"
 * Fri Oct 23, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-46
 - "Various bug fixes"
 * Thu Oct 22, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-45
