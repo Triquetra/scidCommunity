@@ -1532,6 +1532,10 @@ translate G CopyErrNotOpen {δεν είναι ανοικτή}
 translate G LightSquares {Λευκά τετράγωνα}
 translate G DarkSquares {Μαύρα τετράγωνα}
 translate G PickColorFromScreen {Pick color from screen}
+translate G SaveCurrentColors {Save current colors}
+translate G SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate G RemoveSavedColor {Remove this saved color preset}
+translate G ColorPresetExists {Those colors are already saved as preset %d}
 translate G SelectedSquares {Επιλεγμένα τετράγωνα}
 translate G SuggestedSquares {Τετράγωνα που προτείνονται για την κίνηση}
 translate G WhitePieces {Λευκά κομμάτια}

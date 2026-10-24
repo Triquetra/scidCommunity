@@ -1507,6 +1507,10 @@ translate R CopyErrNotOpen {не открыта}
 translate R LightSquares {Светлые поля}
 translate R DarkSquares {Тёмные поля}
 translate R PickColorFromScreen {Pick color from screen}
+translate R SaveCurrentColors {Save current colors}
+translate R SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate R RemoveSavedColor {Remove this saved color preset}
+translate R ColorPresetExists {Those colors are already saved as preset %d}
 translate R SelectedSquares {Выбранные поля}
 translate R SuggestedSquares {Поля подсказанных ходов}
 translate R WhitePieces {Белые фигуры}

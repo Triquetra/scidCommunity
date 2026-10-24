@@ -1506,6 +1506,10 @@ translate O CopyErrNotOpen {er ikke åpnet}
 translate O LightSquares {Lyse felt}
 translate O DarkSquares {Mørke felt}
 translate O PickColorFromScreen {Pick color from screen}
+translate O SaveCurrentColors {Save current colors}
+translate O SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate O RemoveSavedColor {Remove this saved color preset}
+translate O ColorPresetExists {Those colors are already saved as preset %d}
 translate O SelectedSquares {Merkede felt}
 translate O SuggestedSquares {Foreslåtte trekkfelt}
 translate O WhitePieces {Hvite brikker}

@@ -1531,6 +1531,10 @@ translate g CopyErrNotOpen {не е отворено}
 translate g LightSquares {Светли квадратчета}
 translate g DarkSquares {Тъмни квадратчета}
 translate g PickColorFromScreen {Pick color from screen}
+translate g SaveCurrentColors {Save current colors}
+translate g SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate g RemoveSavedColor {Remove this saved color preset}
+translate g ColorPresetExists {Those colors are already saved as preset %d}
 translate g SelectedSquares {Избрани квадратчета}
 translate g SuggestedSquares {Предложени квадратчета за преместване}
 translate g WhitePieces {Бели парчета}

@@ -1531,6 +1531,10 @@ translate J CopyErrNotOpen {није отворен}
 translate J LightSquares {Светли квадрати}
 translate J DarkSquares {Тамни квадрати}
 translate J PickColorFromScreen {Pick color from screen}
+translate J SaveCurrentColors {Save current colors}
+translate J SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate J RemoveSavedColor {Remove this saved color preset}
+translate J ColorPresetExists {Those colors are already saved as preset %d}
 translate J SelectedSquares {Одабрани квадрати}
 translate J SuggestedSquares {Предложено померање квадрата}
 translate J WhitePieces {Бели комади}

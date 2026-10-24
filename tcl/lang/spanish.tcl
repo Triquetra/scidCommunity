@@ -1558,6 +1558,10 @@ translate S CopyErrNotOpen {no está abierta}
 translate S LightSquares {Casillas claras}
 translate S DarkSquares {Casillas oscuras}
 translate S PickColorFromScreen {Pick color from screen}
+translate S SaveCurrentColors {Save current colors}
+translate S SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate S RemoveSavedColor {Remove this saved color preset}
+translate S ColorPresetExists {Those colors are already saved as preset %d}
 translate S SelectedSquares {Casillas seleccionadas}
 translate S SuggestedSquares {Casillas de movimiento sugerido}
 translate S WhitePieces {Piezas blancas}

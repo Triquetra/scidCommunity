@@ -1491,6 +1491,10 @@ translate Q CopyErrNotOpen {не відкрито}
 translate Q LightSquares {Світлі квадрати}
 translate Q DarkSquares {Темні квадрати}
 translate Q PickColorFromScreen {Pick color from screen}
+translate Q SaveCurrentColors {Save current colors}
+translate Q SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate Q RemoveSavedColor {Remove this saved color preset}
+translate Q ColorPresetExists {Those colors are already saved as preset %d}
 translate Q SelectedSquares {Вибрані квадрати}
 translate Q SuggestedSquares {Запропоновані переміщення квадратів}
 translate Q WhitePieces {Білі фігури}

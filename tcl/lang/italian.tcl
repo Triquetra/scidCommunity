@@ -1506,6 +1506,10 @@ translate I CopyErrNotOpen {non è aperto}
 translate I LightSquares {Case chiare}
 translate I DarkSquares {Case scure}
 translate I PickColorFromScreen {Pick color from screen}
+translate I SaveCurrentColors {Save current colors}
+translate I SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate I RemoveSavedColor {Remove this saved color preset}
+translate I ColorPresetExists {Those colors are already saved as preset %d}
 translate I SelectedSquares {Case selezionate}
 translate I SuggestedSquares {Case delle mosse suggerite}
 translate I WhitePieces {Pezzi bianchi}

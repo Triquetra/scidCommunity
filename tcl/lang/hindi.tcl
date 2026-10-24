@@ -1490,6 +1490,10 @@ translate h CopyErrNotOpen {खुला नहीं है}
 translate h LightSquares {हल्के वर्ग}
 translate h DarkSquares {अंधेरे वर्ग}
 translate h PickColorFromScreen {Pick color from screen}
+translate h SaveCurrentColors {Save current colors}
+translate h SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate h RemoveSavedColor {Remove this saved color preset}
+translate h ColorPresetExists {Those colors are already saved as preset %d}
 translate h SelectedSquares {चयनित वर्ग}
 translate h SuggestedSquares {सुझाए गए चाल वर्ग}
 translate h WhitePieces {सफ़ेद टुकड़े}

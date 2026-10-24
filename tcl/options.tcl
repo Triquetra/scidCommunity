@@ -622,6 +622,13 @@ if {[file exists $optionsFile] && [catch {safeLoadConfig $optionsFile}]} {
 #   player's perspective.
 options.store ::myPlayerNames {}
 
+# userColorSchemes:
+#   Solid-colour board presets saved by the user from the Chessboard
+#   preferences. Each entry is {lite dark selected suggested}. Registered
+#   after the options file is loaded so a saved list is kept and the variable
+#   is added to the autosave list of the current options file.
+options.store ::userColorSchemes {}
+
 # Marker palette color and type (defaults set above, before the options file
 # was loaded). Registered here so the user's choice survives a restart.
 options.store ::markColor green
@@ -850,6 +857,97 @@ proc options.write {} {
     set ::statusBar "Options were saved to: [scidConfigFile options]"
   }
  }
+}
+
+# options.writeVar:
+#   Write a single option variable to the options file without rewriting the
+#   other settings. An existing "set varname ..." command is replaced in
+#   place (even when its value spans several lines); otherwise a new command
+#   is appended. The rest of the file is left untouched.
+#
+proc options.writeVar {varname} {
+  if {![info exists $varname] || [array exists $varname]} { return }
+
+  set filename [scidConfigFile options]
+  set assignment "set [list $varname] [list [set $varname]]"
+  set bare [string trimleft $varname :]
+
+  set content ""
+  if {[file exists $filename]} {
+    if {[catch {open $filename r} fh]} {
+      tk_messageBox -title "scidCommunity: Unable to write file" -type ok -icon warning \
+          -message "Unable to write options file: $filename\n$fh"
+      return
+    }
+    # "auto" would silently turn CRLF into LF on read; we want to preserve
+    # the file's existing convention.
+    fconfigure $fh -translation lf
+    set content [read $fh]
+    close $fh
+  }
+
+  # Remember the file's line-ending convention and normalise to LF while
+  # parsing, so "info complete" can delimit Tcl commands reliably.
+  set eol "\n"
+  if {[string first "\r\n" $content] >= 0} { set eol "\r\n" }
+  set content [string map [list "\r\n" "\n"] $content]
+
+  # Walk whole Tcl commands rather than raw lines: a saved list value can
+  # legitimately span several lines.
+  set lines [split $content "\n"]
+  if {[lindex $lines end] eq ""} { set lines [lrange $lines 0 end-1] }
+  set out ""
+  set buf ""
+  set found 0
+  foreach line $lines {
+    append buf $line "\n"
+    if {![info complete $buf]} { continue }
+    if {[string trim $buf] eq ""} {
+      append out $buf
+      set buf ""
+      continue
+    }
+    set cmd [string trimleft $buf]
+    set isTarget 0
+    if {![catch {llength $cmd} cmdLen] && $cmdLen >= 2 && [lindex $cmd 0] eq "set"} {
+      set cmdVar [lindex $cmd 1]
+      if {$cmdVar eq $varname || $cmdVar eq $bare} { set isTarget 1 }
+    }
+    if {$isTarget} {
+      if {!$found} {
+        append out $assignment "\n"
+        set found 1
+      }
+      # Any duplicate assignment for the same variable is dropped.
+    } else {
+      append out $buf
+    }
+    set buf ""
+  }
+  if {$buf ne ""} { append out $buf }
+
+  if {!$found} {
+    if {$out ne "" && [string index $out end] ne "\n"} { append out "\n" }
+    append out $assignment "\n"
+  }
+  if {$eol ne "\n"} { set out [string map [list "\n" $eol] $out] }
+
+  # Replace the file atomically, so an interrupted write cannot lose the
+  # rest of the user's options.
+  set tmp "${filename}.tmp[pid]"
+  if {[catch {
+    set fh [open $tmp w]
+    fconfigure $fh -translation lf
+    puts -nonewline $fh $out
+    close $fh
+    catch {file attributes $tmp -permissions 0600}
+    file rename -force $tmp $filename
+  } err]} {
+    catch {close $fh}
+    catch {file delete $tmp}
+    tk_messageBox -title "scidCommunity: Unable to write file" -type ok -icon warning \
+        -message "Unable to write options file: $filename\n$err"
+  }
 }
 
 proc options.autoSaveHack {} {

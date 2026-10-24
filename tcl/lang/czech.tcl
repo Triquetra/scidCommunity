@@ -1505,6 +1505,10 @@ translate C CopyErrNotOpen {nen otevena}
 translate C LightSquares {Bl pole}
 translate C DarkSquares {ern pole}
 translate C PickColorFromScreen {Pick color from screen}
+translate C SaveCurrentColors {Save current colors}
+translate C SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate C RemoveSavedColor {Remove this saved color preset}
+translate C ColorPresetExists {Those colors are already saved as preset %d}
 translate C SelectedSquares {Vybran pole}
 translate C SuggestedSquares {Pole navrhovanch tah}
 translate C WhitePieces {Bl figury}

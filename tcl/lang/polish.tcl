@@ -1504,6 +1504,10 @@ translate P CopyErrNotOpen {nie jest otwarta}
 translate P LightSquares {Jasne pola}
 translate P DarkSquares {Ciemne pola}
 translate P PickColorFromScreen {Wybierz kolor z ekranu}
+translate P SaveCurrentColors {Save current colors}
+translate P SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate P RemoveSavedColor {Remove this saved color preset}
+translate P ColorPresetExists {Those colors are already saved as preset %d}
 translate P SelectedSquares {Zaznaczone pola}
 translate P SuggestedSquares {Pola sugerowanych posunięć}
 translate P WhitePieces {Białe bierki}

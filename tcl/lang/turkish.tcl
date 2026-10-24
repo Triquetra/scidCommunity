@@ -1494,6 +1494,10 @@ translate T CopyErrNotOpen {açık değil}
 translate T LightSquares {Açık kareler}
 translate T DarkSquares {Koyu kareler}
 translate T PickColorFromScreen {Pick color from screen}
+translate T SaveCurrentColors {Save current colors}
+translate T SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate T RemoveSavedColor {Remove this saved color preset}
+translate T ColorPresetExists {Those colors are already saved as preset %d}
 translate T SelectedSquares {Seçilen kareler}
 translate T SuggestedSquares {Önerilen hareket kareleri}
 translate T WhitePieces {Beyaz parçalar}

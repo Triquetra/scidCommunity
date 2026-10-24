@@ -1490,6 +1490,10 @@ translate b CopyErrNotOpen {খোলা হয় না}
 translate b LightSquares {হালকা স্কোয়ার}
 translate b DarkSquares {গাঢ় বর্গক্ষেত্র}
 translate b PickColorFromScreen {Pick color from screen}
+translate b SaveCurrentColors {Save current colors}
+translate b SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate b RemoveSavedColor {Remove this saved color preset}
+translate b ColorPresetExists {Those colors are already saved as preset %d}
 translate b SelectedSquares {নির্বাচিত বর্গক্ষেত্র}
 translate b SuggestedSquares {প্রস্তাবিত সরানো বর্গক্ষেত্র}
 translate b WhitePieces {সাদা টুকরা}

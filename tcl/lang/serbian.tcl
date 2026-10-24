@@ -2472,6 +2472,10 @@ translate Y LightSquares {Light squares}
 translate Y DarkSquares {Dark squares}
 # ====== TODO To be translated ======
 translate Y PickColorFromScreen {Pick color from screen}
+translate Y SaveCurrentColors {Save current colors}
+translate Y SaveCurrentColorsHint {Add the current board colors to the preset list}
+translate Y RemoveSavedColor {Remove this saved color preset}
+translate Y ColorPresetExists {Those colors are already saved as preset %d}
 # ====== TODO To be translated ======
 translate Y SelectedSquares {Selected squares}
 # ====== TODO To be translated ======
