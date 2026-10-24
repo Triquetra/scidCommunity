@@ -5,7 +5,6 @@
       "*": "allow",
       "aur/**": "deny",
       "bitmaps/**": "deny",
-      "bitmaps2/**": "deny",
       "books/**": "deny",
       "build/**": "deny",
       "Debug/**": "deny",
@@ -28,7 +27,6 @@
       "*": "allow",
       "aur/**": "deny",
       "bitmaps/**": "deny",
-      "bitmaps2/**": "deny",
       "books/**": "deny",
       "build/**": "deny",
       "Debug/**": "deny",
@@ -50,7 +48,6 @@
     "grep": {
       "*": "allow",
       "bitmaps/**": "deny",
-      "bitmaps2/**": "deny",
       "books/**": "deny",
       "build/**": "deny",
       "Debug/**": "deny",

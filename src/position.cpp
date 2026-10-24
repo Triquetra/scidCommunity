@@ -2673,7 +2673,7 @@ void Position::PrintFEN(char *str) const {
 
 // The following values define the available HTML styles.
 // Style 0 has 40x40 non-transparent images in the "bitmaps" directory.
-// Style 1 has 36x35 non-transparent images in the "bitmaps2" directory.
+// Style 1 has 36x35 non-transparent images in the "bitmaps/36x35" directory.
 
 struct htmlStyleT {
   const char *dir;  // directory containing images.
@@ -2690,7 +2690,7 @@ void Position::DumpHtmlBoard(DString *dstr, uint style, const char *dir,
   hs[0].dir = "bitmaps";
   hs[0].width = 40;
   hs[0].height = 40;
-  hs[1].dir = "bitmaps2";
+  hs[1].dir = "bitmaps/36x35";
   hs[1].width = 36;
   hs[1].height = 35;
   if (style >= HTML_DIAG_STYLES) {

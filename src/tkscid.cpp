@@ -5916,7 +5916,7 @@ int sc_pos_hash(ClientData, Tcl_Interp *ti, int argc, const char **argv) {
 //    There are two styles: 0 (the default), which has
 //    40x40 squares and images in a "bitmaps" subdirectory;
 //    and style 1 which has 36x35 squares and images in
-//    a "bitmaps2" directory.
+//    a "bitmaps/36x35" directory.
 //    The directory can be overridden with the "-path" command.
 int sc_pos_html(ClientData, Tcl_Interp *ti, int argc, const char **argv) {
   const char *usage =
