@@ -168,7 +168,7 @@ menuText J SearchNegate "Негати филтер" 0 {Негирајте фил
 menuText J SearchCurrent "Тренутни одбор..." 0 {Потражите тренутну позицију на табли}
 menuText J SearchHeader "Заглавље..." 0 {Претражите по информацијама заглавља (играч, догађај, итд.).}
 menuText J SearchMaterial "Материјал/Узорак..." 0 {Потражите узорке материјала или плоча}
-menuText J SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText J SearchComments "Претражи коментаре..." 0 {Претражите коментаре игара у тренутном филтеру}
 menuText J SearchUsing "Коришћење датотеке претраге..." 0 {Претражујте помоћу датотеке СеарцхОптионс}
 
 # Windows menu:
@@ -190,9 +190,9 @@ menuText J WindowsTree "Трее Виндов" 0 {Отворите/затвор�
 menuText J WindowsBook "Боок Виндов" 0 {Отворите/затворите прозор књиге}
 menuText J WindowsCorrChess "Прозор за кореспонденцију" 0 {Отворите/затворите прозор Преписка}
 menuText J WindowsGraph "Аналисис Грапх" 0 {Отворите прозор Графикон са временима потеза и проценама}
-menuText J WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText J WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate J PresentationFrozen {Frozen - the presentation board is not following}
+menuText J WindowsPresentationBoard "Презентациони одбор" 0 {Отворите/затворите прозор само за плочу који прати главну плочу, за пројектор или други екран}
+menuText J WindowsPresentationFreeze "Фреезе Пресентатион Боард" 0 {Зауставите/наставите са презентацијом, тако да се игра може кретати а да је публика не види}
+translate J PresentationFrozen {Замрзнуто - презентациона табла не прати}
 
 menuText J WindowsEPD "ЕПД прозор..." 0 {Отворите прозор уређивача ЕПД (датотеке позиције).}
 
@@ -262,8 +262,8 @@ menuText J ToolsExpCurrentPGN "Извези игру у ПГН датотеку.
 menuText J ToolsExpCurrentHTML "Извези игру у ХТМЛ датотеку..." 15 \
   {Напишите тренутну игру у ХТМЛ датотеку}
 menuText J ToolsExpCurrentHTMLJS "Извезите игру у ХТМЛ и ЈаваСцрипт датотеку..." 15 {Напишите тренутну игру у ХТМЛ и ЈаваСцрипт датотеку}
-menuText J ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText J ToolsExpCurrentRTF "Извези игру у РТФ датотеку..." 15 \
+  {Напишите тренутну игру у РТФ датотеку чувајући форматирање коментара}
 menuText J ToolsExpFilter "Извези све игре филтера" 1 \
   {Запишите све филтриране игре у текстуалну датотеку}
 menuText J ToolsExpFilterPGN "Извези филтер у ПГН датотеку..." 17 \
@@ -271,13 +271,13 @@ menuText J ToolsExpFilterPGN "Извези филтер у ПГН датотек
 menuText J ToolsExpFilterHTML "Извези филтер у ХТМЛ датотеку..." 17 \
   {Запишите све филтриране игре у ХТМЛ датотеку}
 menuText J ToolsExpFilterHTMLJS "Извези филтер у ХТМЛ и ЈаваСцрипт датотеку..." 17 {Запишите све филтриране игре у ХТМЛ и ЈаваСцрипт датотеку}
-menuText J ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText J ToolsExpFilterRTF "Извези филтер у РТФ датотеку..." 17 \
+  {Запишите све филтриране игре у РТФ датотеку чувајући форматирање коментара}
 menuText J ToolsImportOne "Увези једну ПГН игру..." 0 \
   {Увезите игру из ПГН текста}
 menuText J ToolsImportFile "Увезите игре из ПГН датотека..." 7 {Увезите игре из ПГН датотека}
-menuText J FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText J FileImportRTF "Увези РТФ игру..." 0 \
+  {Увезите игру из РТФ датотеке коју је креирао сцидЦоммунити}
 menuText J ToolsStartEngine1 "Покрените мотор 1" 13  {Покрените мотор 1}
 menuText J ToolsStartEngine2 "Покрените мотор 2" 13  {Покрените мотор 2}
 menuText J ToolsCaptureBoard "Сними тренутну таблу..." 5  {Сачувајте тренутну плочу као слику.}
@@ -685,6 +685,8 @@ menuText J TreeHelpIndex "Индекс помоћи" 0
 menuText J TreeFindGames "Пронађи партије са коментаром" 0 {Направи листу партија у којима је овај потез одигран са коментаром}
 translate J SaveCache {Сачувај кеш}
 translate J Training {Обука}
+translate J TreeTrainingEndOfLine {Достигнут је крај реда.}
+translate J TreeTrainingMoveNotInBase {Овај потез није у бази података.}
 translate J LockTree {Закључај}
 translate J TreeDepth {Дубина стабла (половине):}
 translate J TreeLocked {закључано}
@@ -1530,11 +1532,11 @@ translate J CopyErrNotOpen {није отворен}
 # Colors:
 translate J LightSquares {Светли квадрати}
 translate J DarkSquares {Тамни квадрати}
-translate J PickColorFromScreen {Pick color from screen}
-translate J SaveCurrentColors {Save current colors}
-translate J SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate J RemoveSavedColor {Remove this saved color preset}
-translate J ColorPresetExists {Those colors are already saved as preset %d}
+translate J PickColorFromScreen {Изаберите боју са екрана}
+translate J SaveCurrentColors {Сачувајте тренутне боје}
+translate J SaveCurrentColorsHint {Додајте тренутне боје плоче на листу унапред подешених}
+translate J RemoveSavedColor {Уклоните ову сачувану унапред подешену боју}
+translate J ColorPresetExists {Те боје су већ сачуване као унапред подешене %д}
 translate J SelectedSquares {Одабрани квадрати}
 translate J SuggestedSquares {Предложено померање квадрата}
 translate J WhitePieces {Бели комади}
@@ -2071,13 +2073,13 @@ translate J LSSOppTime {Опп Тиме}
 translate J LSSDrawOffered {Драв Офферед}
 
 # RTF Export and Import
-translate J RtfExportTitle {Export to RTF File}
-translate J RtfExportError {Error exporting to RTF}
-translate J RtfImportTitle {Import RTF File}
-translate J RtfImportError {Error importing RTF file}
-translate J RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate J RtfImportSuccess {Game imported into clipboard database successfully.}
-translate J RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate J RtfExportTitle {Извези у РТФ датотеку}
+translate J RtfExportError {Грешка при извозу у РТФ}
+translate J RtfImportTitle {Увезите РТФ датотеку}
+translate J RtfImportError {Грешка при увозу РТФ датотеке}
+translate J RtfNotScidFile {Ову датотеку није извезла сцидЦоммунити са форматирањем коментара или је оштећена.}
+translate J RtfImportSuccess {Игра је успешно увезена у базу података међумеморије.}
+translate J RtfImportSuccessMulti {%д игре су успешно увезене у базу података међумеморије.}
 }
 # end of english.tcl
 

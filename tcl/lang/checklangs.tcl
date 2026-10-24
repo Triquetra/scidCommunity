@@ -20,7 +20,6 @@ array set codes {
   polish P
   portbr B
   russian R
-  serbian Y
   spanish S
   swedish W
   catalan K
@@ -32,7 +31,7 @@ array set codes {
 }
 
 set languages {czech deutsch francais hungary italian chinese nederlan norsk polish
-  portbr spanish swedish serbian russian catalan suomi greek SerbCyr romanian japanese
+  portbr spanish swedish russian catalan suomi greek SerbCyr romanian japanese
 }
 
 ################################################################################

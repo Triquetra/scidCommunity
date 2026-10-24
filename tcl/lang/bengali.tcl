@@ -85,7 +85,7 @@ menuText b EditPaste "শেষ ক্লিপবেস গেমটি আট�
   {সক্রিয় ক্লিপবেস গেমটি এখানে পেস্ট করুন}
 menuText b EditPastePGN "PGN গেম হিসাবে ক্লিপবোর্ড পাঠ্য আটকান..." 18 \
   {PGN স্বরলিপিতে ক্লিপবোর্ড পাঠ্যটিকে একটি গেম হিসাবে ব্যাখ্যা করুন এবং এটি এখানে পেস্ট করুন}
-menuText b EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText b EditNullMove "নাল মুভ" 0 {একটি নাল মুভ ঢোকান (একটি পদক্ষেপ এড়িয়ে যান)}
 menuText b EditSetup "স্টার্ট বোর্ড সেট আপ করুন..." 0 \
   {এই গেমের জন্য শুরুর অবস্থান সেট করুন}
 menuText b EditCopyBoard "কপি অবস্থান" 6 \
@@ -127,7 +127,7 @@ menuText b SearchNegate "নেগেট ফিল্টার" 0 {শুধু�
 menuText b SearchCurrent "বর্তমান বোর্ড..." 0 {বর্তমান বোর্ড অবস্থানের জন্য অনুসন্ধান করুন}
 menuText b SearchHeader "হেডার..." 0 {হেডার (প্লেয়ার, ইভেন্ট, ইত্যাদি) তথ্য দ্বারা অনুসন্ধান করুন}
 menuText b SearchMaterial "উপাদান/প্যাটার্ন..." 0 {উপাদান বা বোর্ড নিদর্শন জন্য অনুসন্ধান}
-menuText b SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText b SearchComments "মন্তব্য অনুসন্ধান করুন..." 0 {বর্তমান ফিল্টারে গেমের মন্তব্য অনুসন্ধান করুন}
 menuText b SearchUsing "অনুসন্ধান ফাইল ব্যবহার করে..." 0 {একটি SearchOptions ফাইল ব্যবহার করে অনুসন্ধান করুন}
 
 # Windows menu:
@@ -149,9 +149,9 @@ menuText b WindowsTree "গাছের জানালা" 0 {ট্রি উ�
 menuText b WindowsBook "বইয়ের জানালা" 0 {বইয়ের উইন্ডো খুলুন/বন্ধ করুন}
 menuText b WindowsCorrChess "চিঠিপত্র উইন্ডো" 0 {চিঠিপত্র উইন্ডো খুলুন/বন্ধ করুন}
 menuText b WindowsGraph "বিশ্লেষণ গ্রাফ" 0 {মুভের সময় এবং মূল্যায়ন সহ গ্রাফ উইন্ডোটি খুলুন}
-menuText b WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText b WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate b PresentationFrozen {Frozen - the presentation board is not following}
+menuText b WindowsPresentationBoard "উপস্থাপনা বোর্ড" 0 {প্রজেক্টর বা দ্বিতীয় স্ক্রীনের জন্য শুধুমাত্র বোর্ডের উইন্ডোটি খুলুন/বন্ধ করুন যা প্রধান বোর্ড অনুসরণ করে}
+menuText b WindowsPresentationFreeze "ফ্রিজ প্রেজেন্টেশন বোর্ড" 0 {উপস্থাপনা বোর্ড বন্ধ/পুনরায় শুরু করুন, যাতে দর্শকরা না দেখেই গেমটি নেভিগেট করা যায়}
+translate b PresentationFrozen {হিমায়িত - উপস্থাপনা বোর্ড অনুসরণ করছে না}
 
 menuText b WindowsEPD "EPD উইন্ডো..." 0 {একটি EPD (পজিশন ফাইল) সম্পাদক উইন্ডো খুলুন}
 
@@ -221,8 +221,8 @@ menuText b ToolsExpCurrentPGN "PGN ফাইলে গেম রপ্তান�
 menuText b ToolsExpCurrentHTML "HTML ফাইলে গেম রপ্তানি করুন..." 15 \
   {একটি HTML ফাইলে বর্তমান গেম লিখুন}
 menuText b ToolsExpCurrentHTMLJS "HTML এবং JavaScript ফাইলে গেম রপ্তানি করুন..." 15 {একটি HTML এবং JavaScript ফাইলে বর্তমান গেমটি লিখুন}
-menuText b ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText b ToolsExpCurrentRTF "RTF ফাইলে গেম রপ্তানি করুন..." 15 \
+  {মন্তব্য বিন্যাস সংরক্ষণ করে একটি RTF ফাইলে বর্তমান গেমটি লিখুন}
 menuText b ToolsExpFilter "সমস্ত ফিল্টার গেম রপ্তানি করুন" 1 \
   {সমস্ত ফিল্টার করা গেমগুলি একটি পাঠ্য ফাইলে লিখুন}
 menuText b ToolsExpFilterPGN "PGN ফাইলে ফিল্টার রপ্তানি করুন..." 17 \
@@ -230,13 +230,13 @@ menuText b ToolsExpFilterPGN "PGN ফাইলে ফিল্টার রপ�
 menuText b ToolsExpFilterHTML "HTML ফাইলে ফিল্টার রপ্তানি করুন..." 17 \
   {সমস্ত ফিল্টার করা গেম একটি HTML ফাইলে লিখুন}
 menuText b ToolsExpFilterHTMLJS "HTML এবং JavaScript ফাইলে ফিল্টার রপ্তানি করুন..." 17 {একটি HTML এবং JavaScript ফাইলে সমস্ত ফিল্টার করা গেম লিখুন}
-menuText b ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText b ToolsExpFilterRTF "RTF ফাইলে ফিল্টার রপ্তানি করুন..." 17 \
+  {সমস্ত ফিল্টার করা গেমগুলিকে মন্তব্য বিন্যাস সংরক্ষণ করে একটি RTF ফাইলে লিখুন}
 menuText b ToolsImportOne "একটি PGN গেম আমদানি করুন..." 0 \
   {PGN পাঠ্য থেকে একটি গেম আমদানি করুন৷}
 menuText b ToolsImportFile "PGN ফাইল থেকে গেম ইম্পোর্ট করুন..." 7 {PGN ফাইল(গুলি) থেকে গেম ইম্পোর্ট করুন}
-menuText b FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText b FileImportRTF "RTF গেম আমদানি করুন..." 0 \
+  {scidCommunity দ্বারা তৈরি একটি RTF ফাইল থেকে একটি গেম আমদানি করুন৷}
 menuText b ToolsStartEngine1 "স্টার্ট ইঞ্জিন ১" 13  {স্টার্ট ইঞ্জিন ১}
 menuText b ToolsStartEngine2 "স্টার্ট ইঞ্জিন 2" 13  {স্টার্ট ইঞ্জিন 2}
 menuText b ToolsCaptureBoard "বর্তমান বোর্ড ক্যাপচার করুন..." 5  {বর্তমান বোর্ডটিকে একটি চিত্র হিসাবে সংরক্ষণ করুন।}
@@ -644,6 +644,8 @@ menuText b TreeHelpIndex "সাহায্য সূচক" 0
 menuText b TreeFindGames "টীকা সহ গেম খুঁজুন" 0 {যেসব খেলায় এই চালটি টীকা সহ খেলা হয়েছিল তার তালিকা তৈরি করুন}
 translate b SaveCache {ক্যাশে সংরক্ষণ করুন}
 translate b Training {প্রশিক্ষণ}
+translate b TreeTrainingEndOfLine {লাইনের শেষে পৌঁছে গেছে।}
+translate b TreeTrainingMoveNotInBase {এই পদক্ষেপটি ডাটাবেসের মধ্যে নেই।}
 translate b LockTree {তালা}
 translate b TreeDepth {গাছের গভীরতা (অর্ধেক চাল):}
 translate b TreeLocked {তালাবদ্ধ}
@@ -1489,11 +1491,11 @@ translate b CopyErrNotOpen {খোলা হয় না}
 # Colors:
 translate b LightSquares {হালকা স্কোয়ার}
 translate b DarkSquares {গাঢ় বর্গক্ষেত্র}
-translate b PickColorFromScreen {Pick color from screen}
-translate b SaveCurrentColors {Save current colors}
-translate b SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate b RemoveSavedColor {Remove this saved color preset}
-translate b ColorPresetExists {Those colors are already saved as preset %d}
+translate b PickColorFromScreen {পর্দা থেকে রঙ চয়ন করুন}
+translate b SaveCurrentColors {বর্তমান রং সংরক্ষণ করুন}
+translate b SaveCurrentColorsHint {প্রিসেট তালিকায় বর্তমান বোর্ডের রং যোগ করুন}
+translate b RemoveSavedColor {এই সংরক্ষিত রঙ প্রিসেট সরান}
+translate b ColorPresetExists {এই রঙগুলি ইতিমধ্যেই প্রিসেট %d হিসাবে সংরক্ষিত হয়েছে৷}
 translate b SelectedSquares {নির্বাচিত বর্গক্ষেত্র}
 translate b SuggestedSquares {প্রস্তাবিত সরানো বর্গক্ষেত্র}
 translate b WhitePieces {সাদা টুকরা}
@@ -2030,13 +2032,13 @@ translate b LSSOppTime {সময় বিপরীত}
 translate b LSSDrawOffered {ড্র অফার করা হয়েছে}
 
 # RTF Export and Import
-translate b RtfExportTitle {Export to RTF File}
-translate b RtfExportError {Error exporting to RTF}
-translate b RtfImportTitle {Import RTF File}
-translate b RtfImportError {Error importing RTF file}
-translate b RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate b RtfImportSuccess {Game imported into clipboard database successfully.}
-translate b RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate b RtfExportTitle {RTF ফাইলে রপ্তানি করুন}
+translate b RtfExportError {RTF এ রপ্তানি করার সময় ত্রুটি৷}
+translate b RtfImportTitle {RTF ফাইল আমদানি করুন}
+translate b RtfImportError {RTF ফাইল আমদানিতে ত্রুটি৷}
+translate b RtfNotScidFile {এই ফাইলটি মন্তব্য বিন্যাস সহ scidCommunity দ্বারা রপ্তানি করা হয়নি, বা দূষিত হয়েছে৷}
+translate b RtfImportSuccess {গেম সফলভাবে ক্লিপবোর্ড ডাটাবেসে আমদানি করা হয়েছে।}
+translate b RtfImportSuccessMulti {%d গেম সফলভাবে ক্লিপবোর্ড ডাটাবেসে আমদানি করা হয়েছে।}
 }
 # end of english.tcl
 

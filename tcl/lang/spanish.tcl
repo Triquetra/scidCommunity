@@ -94,7 +94,7 @@ menuText S EditPaste "Pegar la última partida de la base de trabajo" 2 \
   {Pega en la base actual la partida activa en la base de trabajo (clipbase)}
 menuText S EditPastePGN "Pegar el texto del portapapeles como partida PGN..." 10 \
   {Interpreta el texto de la base de trabajo (clipbase) como una partida en notación PGN y la pega aquí}
-menuText S EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText S EditNullMove "Movimiento nulo" 0 {Insertar un movimiento nulo (omitir un movimiento)}
 menuText S EditSetup "Iniciar tablero de posición..." 26 \
   {Inicia el tablero de posición con la posición de la partida}
 menuText S EditCopyBoard "Copiar posición" 8 \
@@ -142,7 +142,7 @@ menuText S SearchHeader "Encabezamiento..." 0 \
   {Busca por información de encabezamiento (jugador, evento, etc.)}
 menuText S SearchMaterial "Material/Patrón..." 0 \
   {Busca por material o patrón del tablero}
-menuText S SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText S SearchComments "Buscar comentarios..." 0 {Busca los comentarios de los juegos en el filtro actual.}
 menuText S SearchUsing "Usar archivo de búsqueda..." 0 \
   {Busca usando un archivo de opciones de búsqueda}
 
@@ -167,9 +167,9 @@ menuText S WindowsTree "Ventana de árbol de aperturas" 6 {Abre/cierra la ventan
 menuText S WindowsBook "Ventana de libros de aperturas (Book)" 0 {Abrir/Cerrar la ventana de libros de aperturas (Book)}
 menuText S WindowsCorrChess "Ventana de Correo" 0 {Abrir/Cerrar la ventra de Correo}
 menuText S WindowsGraph "Gráfico de análisis" 0 {Abra la ventana de Gráfico con tiempos y evaluaciones de movimientos.}
-menuText S WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText S WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate S PresentationFrozen {Frozen - the presentation board is not following}
+menuText S WindowsPresentationBoard "Tablero de presentación" 0 {Abrir/cerrar una ventana de solo tablero que sigue al tablero principal, para un proyector o una segunda pantalla}
+menuText S WindowsPresentationFreeze "Congelar tablero de presentación" 0 {Detener/reanudar el tablero de presentación, para que se pueda navegar por el juego sin que el público lo vea.}
+translate S PresentationFrozen {Frozen: el tablero de presentación no sigue}
 
 menuText S WindowsEPD "Ventana EPD..." 0 {Abrir una ventana del editor de EPD (archivo de posición)}
 
@@ -242,8 +242,8 @@ menuText S ToolsExpCurrentHTML "Exportar la partida a un archivo HTML..." 33 \
   {Escribe la partida actual en un archivo HTML}
 menuText S ToolsExpCurrentHTMLJS "Exportar la partida a un archivo HTML y JavaScript..." 15 \
   {Escribe la partida actual a un fichero HTML y JavaScript} 
-menuText S ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText S ToolsExpCurrentRTF "Exportar juego a archivo RTF..." 15 \
+  {Escribe el juego actual en un archivo RTF conservando el formato de los comentarios.}
 menuText S ToolsExpFilter "Exportar todas las partidas filtradas..." 1 \
   {Escribe todas las partidas filtradas en un archivo de texto}
 menuText S ToolsExpFilterPGN "Exportar filtro a un archivo PGN..." 29 \
@@ -252,14 +252,14 @@ menuText S ToolsExpFilterHTML "Exportar filtro a un archivo HTML..." 29 \
   {Escribe todas las partidas filtradas en un archivo HTML}
 menuText S ToolsExpFilterHTMLJS "Exportar filtro a un archivo HTML y JavaScript..." 17 \
   {Escribe todas las partidas filtradas a ficheros HTML y JavaScript}  
-menuText S ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText S ToolsExpFilterRTF "Exportar filtro a archivo RTF..." 17 \
+  {Escriba todos los juegos filtrados en un archivo RTF conservando el formato de los comentarios.}
 menuText S ToolsImportOne "Importar una partida PGN..." 0 \
   {Importa una partida de un texto PGN}
 menuText S ToolsImportFile "Importar un archivo de partidas PGN..." 2 \
   {Importa partidas de un archivo PGN}
-menuText S FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText S FileImportRTF "Importar juego RTF..." 0 \
+  {Importar un juego desde un archivo RTF creado por scidCommunity}
 menuText S ToolsStartEngine1 "Empezar motor 1" 0  {Empieza el motor 1}
 menuText S ToolsStartEngine2 "Empezar motor 2" 0  {Empieza el motor 2}
 menuText S ToolsCaptureBoard "Capturar Tablero Actual..." 0  {Guardar el tablero actual como imagen.}
@@ -701,6 +701,8 @@ menuText S TreeHelpIndex "Índice de la ayuda" 0
 menuText S TreeFindGames "Buscar partidas con anotación" 0 {Crear la lista de partidas donde este movimiento se jugó con una anotación}
 translate S SaveCache {Guardar caché}
 translate S Training {Entrenamiento}
+translate S TreeTrainingEndOfLine {Se alcanzó el final de la línea.}
+translate S TreeTrainingMoveNotInBase {Este movimiento no está en la base de datos.}
 translate S LockTree {Bloquear}
 translate S TreeDepth {Profundidad del árbol (medios movimientos):}
 translate S TreeLocked {Bloqueado}
@@ -1557,11 +1559,11 @@ translate S CopyErrNotOpen {no está abierta}
 # Colors:
 translate S LightSquares {Casillas claras}
 translate S DarkSquares {Casillas oscuras}
-translate S PickColorFromScreen {Pick color from screen}
-translate S SaveCurrentColors {Save current colors}
-translate S SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate S RemoveSavedColor {Remove this saved color preset}
-translate S ColorPresetExists {Those colors are already saved as preset %d}
+translate S PickColorFromScreen {Elige el color de la pantalla}
+translate S SaveCurrentColors {Guardar colores actuales}
+translate S SaveCurrentColorsHint {Agregue los colores del tablero actual a la lista preestablecida}
+translate S RemoveSavedColor {Eliminar este ajuste preestablecido de color guardado}
+translate S ColorPresetExists {Esos colores ya están guardados como preestablecidos %d}
 translate S SelectedSquares {Casillas seleccionadas}
 translate S SuggestedSquares {Casillas de movimiento sugerido}
 translate S WhitePieces {Piezas blancas}
@@ -2105,13 +2107,13 @@ translate S LSSOppTime {Tiempo de oportunidad}
 translate S LSSDrawOffered {Sorteo ofrecido}
 
 # RTF Export and Import
-translate S RtfExportTitle {Export to RTF File}
-translate S RtfExportError {Error exporting to RTF}
-translate S RtfImportTitle {Import RTF File}
-translate S RtfImportError {Error importing RTF file}
-translate S RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate S RtfImportSuccess {Game imported into clipboard database successfully.}
-translate S RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate S RtfExportTitle {Exportar a archivo RTF}
+translate S RtfExportError {Error al exportar a RTF}
+translate S RtfImportTitle {Importar archivo RTF}
+translate S RtfImportError {Error al importar el archivo RTF}
+translate S RtfNotScidFile {Este archivo no fue exportado por scidCommunity con formato de comentario o está dañado.}
+translate S RtfImportSuccess {El juego se importó correctamente a la base de datos del portapapeles.}
+translate S RtfImportSuccessMulti {%d juegos importados correctamente a la base de datos del portapapeles.}
 }
 # end of english.tcl
 

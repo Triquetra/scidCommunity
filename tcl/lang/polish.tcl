@@ -90,7 +90,7 @@ menuText P EditPaste "Wklej ostatnią partię ze schowka" 0 \
   {Wklej tutaj aktywną partię ze schowka}
 menuText P EditPastePGN "Wklej tekst ze schowka jako partię PGN..." 18 \
   {Zinterpretuj tekst ze schowka jako partię w notacji PGN i wklej ją tutaj}
-menuText P EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText P EditNullMove "Ruch zerowy" 0 {Wstaw ruch zerowy (pomiń ruch)}
 menuText P EditSetup "Ustaw pozycję ..." 0 \
   {Ustaw pozycję początkową dla tej partii}
 menuText P EditCopyBoard "Kopiuj pozycję jako FEN" 6 \
@@ -132,7 +132,7 @@ menuText P SearchNegate "Odwróć filtr" 0 {Odwróć filtr, aby uwzględniał ty
 menuText P SearchCurrent "Bieżąca pozycja..." 0 {Szukaj bieżącej pozycji na szachownicy}
 menuText P SearchHeader "Nagłówek..." 0 {Szukaj wg nagłówka (zawodnik, turniej itd.)}
 menuText P SearchMaterial "Materiał/wzorzec..." 0 {Szukaj wg materiału lub wzorca na szachownicy}
-menuText P SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText P SearchComments "Wyszukaj komentarze..." 0 {Wyszukaj komentarze do gier w bieżącym filtrze}
 menuText P SearchUsing "Użyj pliku wyszukiwania..." 0 {Szukaj za pomocą pliku opcji wyszukiwania}
 
 # Windows menu:
@@ -154,9 +154,9 @@ menuText P WindowsTree "Drzewo wariantów" 0 {Otwórz/zamknij okno drzewa warian
 menuText P WindowsBook "Okno księgi debiutowej" 0 {Otwórz/zamknij okno księgi debiutowej}
 menuText P WindowsCorrChess "Okno gry korespondencyjnej" 0 {Otwórz/zamknij okno partii korespondencyjnych}
 menuText P WindowsGraph "Wykres analizy" 0 {Otwórz okno wykresu czasu posunięć i ocen}
-menuText P WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText P WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate P PresentationFrozen {Frozen - the presentation board is not following}
+menuText P WindowsPresentationBoard "Tablica prezentacyjna" 0 {Otwórz/zamknij okno zawierające tylko tablicę, które znajduje się za płytą główną, dla projektora lub drugiego ekranu}
+menuText P WindowsPresentationFreeze "Zamroź tablicę prezentacyjną" 0 {Zatrzymaj/wznów tablicę prezentacyjną, aby można było poruszać się po grze tak, aby publiczność jej nie widziała}
+translate P PresentationFrozen {Zamrożone - tablica prezentacyjna nie podąża}
 
 menuText P WindowsEPD "Okno EPD..." 0 {Otwórz edytor okna EPD (pliku pozycji)}
 
@@ -649,6 +649,8 @@ menuText P TreeHelpIndex "Indeks pomocy" 0
 menuText P TreeFindGames "Znajdź partie z adnotacją NAG" 0 {Utwórz listę partii, w których to posunięcie ma symbol adnotacji.}
 translate P SaveCache {Zapisz pamięć podręczną}
 translate P Training {Trening}
+translate P TreeTrainingEndOfLine {Osiągnięto koniec linii.}
+translate P TreeTrainingMoveNotInBase {Tego ruchu nie ma w bazie danych.}
 translate P LockTree {Zablokuj}
 translate P TreeDepth {Półposunięcia:}
 translate P TreeLocked {zablokowane}
@@ -1504,10 +1506,10 @@ translate P CopyErrNotOpen {nie jest otwarta}
 translate P LightSquares {Jasne pola}
 translate P DarkSquares {Ciemne pola}
 translate P PickColorFromScreen {Wybierz kolor z ekranu}
-translate P SaveCurrentColors {Save current colors}
-translate P SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate P RemoveSavedColor {Remove this saved color preset}
-translate P ColorPresetExists {Those colors are already saved as preset %d}
+translate P SaveCurrentColors {Zapisz aktualne kolory}
+translate P SaveCurrentColorsHint {Dodaj aktualne kolory planszy do listy ustawień wstępnych}
+translate P RemoveSavedColor {Usuń zapisane ustawienie wstępne kolorów}
+translate P ColorPresetExists {Te kolory są już zapisane jako ustawienie wstępne %d}
 translate P SelectedSquares {Zaznaczone pola}
 translate P SuggestedSquares {Pola sugerowanych posunięć}
 translate P WhitePieces {Białe bierki}

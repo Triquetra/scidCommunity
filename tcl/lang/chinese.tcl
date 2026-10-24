@@ -76,7 +76,7 @@ menuText M EditReset "清空剪贴板" 0 {将剪贴板完全清空}
 menuText M EditCopy "复制此游戏到剪贴板" 0 {将此游戏复制到剪贴板数据库}
 menuText M EditPaste "粘贴最后的剪贴板游戏" 0 {在此处粘贴活动的剪贴板游戏}
 menuText M EditPastePGN "将剪贴板文本粘贴为PGN游戏..." 0 {将剪贴板文本解释为PGN记谱并在此处粘贴}
-menuText M EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText M EditNullMove "空移动" 0 {插入空动作（跳过动作）}
 menuText M EditSetup "设置开始局面..." 0 {为此游戏设置开始局面}
 menuText M EditCopyBoard "复制局面" 0 {以FEN记谱法将当前棋盘复制到剪贴板}
 menuText M EditPasteBoard "粘贴开始局面" 0 {从剪贴板设置开始局面}
@@ -108,7 +108,7 @@ menuText M SearchNegate "反转过滤器" 0 {反转过滤器，仅包含被排�
 menuText M SearchCurrent "当前局面..." 0 {搜索当前局面}
 menuText M SearchHeader "标头..." 0 {按标头（棋手、赛事等）搜索}
 menuText M SearchMaterial "子力/局面..." 0 {按子力或局面模式搜索}
-menuText M SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText M SearchComments "搜索评论..." 0 {搜索当前过滤器中游戏的评论}
 menuText M SearchUsing "使用搜索选项文件..." 0 {使用SearchOptions文件搜索}
 
 # Windows menu:
@@ -129,9 +129,9 @@ menuText M WindowsTree "棋局树" 0 {显示/隐藏棋局树窗口}
 menuText M WindowsBook "开局库窗口" 0 {打开/关闭开局库窗口}
 menuText M WindowsCorrChess "通讯窗口" 0 {打开/关闭通讯窗口}
 menuText M WindowsGraph "分析图表" 0 {打开显示着法时间和评估的图表窗口}
-menuText M WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText M WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate M PresentationFrozen {Frozen - the presentation board is not following}
+menuText M WindowsPresentationBoard "演示板" 0 {打开/关闭主板后面的仅板窗口，用于投影仪或第二个屏幕}
+menuText M WindowsPresentationFreeze "冻结演示板" 0 {停止/恢复演示板，这样就可以在观众看不到的情况下导航游戏}
+translate M PresentationFrozen {冻结 - 演示板不跟随}
 
 menuText M WindowsEPD "EPD窗口..." 0 {打开 EPD（位置文件）编辑器窗口}
 
@@ -198,21 +198,21 @@ menuText M ToolsExpCurrentPGN "导出对局到PGN文件..." 15 \
 menuText M ToolsExpCurrentHTML "导出对局到HTML文件..." 15 \
   {将当前对局写入HTML文件}
 menuText M ToolsExpCurrentHTMLJS "导出对局到HTML和JavaScript文件..." 15 {将当前对局写入HTML和JavaScript文件}
-menuText M ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText M ToolsExpCurrentRTF "将游戏导出为 RTF 文件..." 15 \
+  {将当前游戏写入保留注释格式的 RTF 文件}
 menuText M ToolsExpFilter "扩展过滤器" 0 {显示当前过滤器中的所有游戏}
 menuText M ToolsExpFilterPGN "导出筛选到PGN文件..." 17 \
   {将所有筛选的对局写入PGN文件}
 menuText M ToolsExpFilterHTML "导出筛选到HTML文件..." 17 \
   {将所有筛选的对局写入HTML文件}
 menuText M ToolsExpFilterHTMLJS "导出筛选到HTML和JavaScript文件..." 17 {将所有筛选的对局写入HTML和JavaScript文件}
-menuText M ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText M ToolsExpFilterRTF "将过滤器导出到 RTF 文件..." 17 \
+  {将所有过滤的游戏写入保留评论格式的 RTF 文件}
 menuText M ToolsImportOne "导入一个PGN对局..." 0 \
   {从PGN文本导入对局}
 menuText M ToolsImportFile "从PGN文件导入对局..." 7 {从PGN文件导入对局}
-menuText M FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText M FileImportRTF "导入 RTF 游戏..." 0 \
+  {从 scidCommunity 创建的 RTF 文件导入游戏}
 menuText M ToolsStartEngine1 "启动引擎1" 13  {启动引擎1}
 menuText M ToolsStartEngine2 "启动引擎2" 13  {启动引擎2}
 menuText M ToolsCaptureBoard "捕获当前棋盘..." 5  {将当前棋盘保存为图像。}
@@ -620,6 +620,8 @@ menuText M TreeHelpIndex "Help Index" 0
 menuText M TreeFindGames "查找带评注的对局" 0 {生成该着法带有评注的对局列表}
 translate M SaveCache {Save Cache}
 translate M Training {训练}
+translate M TreeTrainingEndOfLine {已到达行尾。}
+translate M TreeTrainingMoveNotInBase {此动作不在数据库中。}
 translate M LockTree {锁定}
 translate M TreeDepth {树深度（半步）：}
 translate M TreeLocked {locked}
@@ -1465,11 +1467,11 @@ translate M CopyErrNotOpen {未开放}
 # Colors:
 translate M LightSquares {浅色方块}
 translate M DarkSquares {深色方块}
-translate M PickColorFromScreen {Pick color from screen}
-translate M SaveCurrentColors {Save current colors}
-translate M SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate M RemoveSavedColor {Remove this saved color preset}
-translate M ColorPresetExists {Those colors are already saved as preset %d}
+translate M PickColorFromScreen {从屏幕上选择颜色}
+translate M SaveCurrentColors {保存当前颜色}
+translate M SaveCurrentColorsHint {将当前板颜色添加到预设列表中}
+translate M RemoveSavedColor {删除此已保存的颜色预设}
+translate M ColorPresetExists {这些颜色已保存为预设 %d}
 translate M SelectedSquares {选定的方块}
 translate M SuggestedSquares {建议的移动方块}
 translate M WhitePieces {白色碎片}
@@ -2006,13 +2008,13 @@ translate M LSSOppTime {机会时间}
 translate M LSSDrawOffered {提供抽奖}
 
 # RTF Export and Import
-translate M RtfExportTitle {Export to RTF File}
-translate M RtfExportError {Error exporting to RTF}
-translate M RtfImportTitle {Import RTF File}
-translate M RtfImportError {Error importing RTF file}
-translate M RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate M RtfImportSuccess {Game imported into clipboard database successfully.}
-translate M RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate M RtfExportTitle {导出至 RTF 文件}
+translate M RtfExportError {导出为 RTF 时出错}
+translate M RtfImportTitle {导入 RTF 文件}
+translate M RtfImportError {导入 RTF 文件时出错}
+translate M RtfNotScidFile {scidCommunity 未使用注释格式导出该文件，或者该文件已损坏。}
+translate M RtfImportSuccess {游戏已成功导入剪贴板数据库。}
+translate M RtfImportSuccessMulti {%d 个游戏已成功导入剪贴板数据库。}
 }
 # end of english.tcl
 

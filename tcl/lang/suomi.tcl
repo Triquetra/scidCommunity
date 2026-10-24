@@ -123,7 +123,7 @@ menuText U EditPaste "Liitä leikekannasta" 0 \
   {Liitä leiketietokannan aktiivinen peli tähän}
 menuText U EditPastePGN "Liitä leikepöydän teksti PGN-pelinä..." 12 \
   {Tulkitse leikepöydällä oleva teksti PGN-muotoiseksi peliksi ja liitä tähän}
-menuText U EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText U EditNullMove "Null Move" 0 {Lisää tyhjä siirto (ohita liike)}
 menuText U EditSetup "Uusi asema..." 0 \
   {Luo uusi alkuasema pelille}
 menuText U EditCopyBoard "Kopioi asema" 0 \
@@ -166,7 +166,7 @@ menuText U SearchNegate "Käänteinen suodatin" 0 {Suodatin näyttää aiemmin p
 menuText U SearchCurrent "Nykyinen asema..." 0 {Etsi nykyistä asemaa tietokannasta}
 menuText U SearchHeader "Otsikko..." 0 {Etsi otsikkotiedon perusteella (pelaaja, tapahtuma jne.)}
 menuText U SearchMaterial "Materiaali/asema..." 0 {Etsi materiaalin tai aseman tunnusmerkkien perusteella}
-menuText U SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText U SearchComments "Hae kommentteja..." 0 {Hae pelien kommentteja nykyisestä suodattimesta}
 menuText U SearchUsing "Haku tiedostolla..." 0 {Etsi käyttäen apuna erillistä hakutiedostoa}
 
 # Windows menu:
@@ -188,9 +188,9 @@ menuText U WindowsTree "Puunäkymä" 3 {Avaa/sulje puunäkymä}
 menuText U WindowsBook "Avauskirja" 8 {Avaa/sulje avauskirja}
 menuText U WindowsCorrChess "Kirjeshakki" 6 {Avaa/sulje kirjeshakki-ikkuna}
 menuText U WindowsGraph "Analyysikaavio" 0 {Avaa Graafi-ikkuna, jossa on siirtoajat ja arvioinnit}
-menuText U WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText U WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate U PresentationFrozen {Frozen - the presentation board is not following}
+menuText U WindowsPresentationBoard "Esittelylautakunta" 0 {Avaa/sulje vain taululle tarkoitettu ikkuna, joka seuraa emolevyä projektoria tai toista näyttöä varten}
+menuText U WindowsPresentationFreeze "Freeze-esitystaulu" 0 {Pysäytä / jatka esitystaulua, jotta peliä voidaan navigoida ilman, että yleisö näkee sitä}
+translate U PresentationFrozen {Jäätynyt - esitystaulu ei seuraa}
 
 menuText U WindowsEPD "EPD-ikkuna..." 0 {Avaa EPD (sijaintitiedosto) -editori-ikkuna}
 
@@ -260,8 +260,8 @@ menuText U ToolsExpCurrentPGN "Vie PGN-tiedostoon" 6 \
 menuText U ToolsExpCurrentHTML "Vie HTML-tiedostoon" 4 \
   {Kirjoita nykyinen peli HTML-tiedostoon}
 menuText U ToolsExpCurrentHTMLJS "Vie HTML- ja JavaScript-tiedostoihin" 6 {Kirjoita nykyinen peli HTML- ja JavaScript-tiedostoihin}  
-menuText U ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText U ToolsExpCurrentRTF "Vie peli RTF-tiedostoon..." 15 \
+  {Kirjoita nykyinen peli RTF-tiedostoon säilyttäen kommenttien muotoilun}
 menuText U ToolsExpFilter "Vie suodatetut pelit tekstitiedostoon" 0 \
   {Kirjoita kaikki suodatetut pelit tekstitiedostoon}
 menuText U ToolsExpFilterPGN "Vie suodatetut pelit PGN-tiedostoon" 0 \
@@ -269,13 +269,13 @@ menuText U ToolsExpFilterPGN "Vie suodatetut pelit PGN-tiedostoon" 0 \
 menuText U ToolsExpFilterHTML "Vie suodatetut pelit HTML-tiedostoon" 0 \
   {Kirjoita kaikki suodatetut pelit HTML-tiedostoon}
 menuText U ToolsExpFilterHTMLJS "Vie suodatetut pelit HTML- ja JavaScript-tiedostoihin" 0 {Kirjoita kaikki suodatetut pelit HTML- ja JavaScript-tiedostoihin}  
-menuText U ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText U ToolsExpFilterRTF "Vie suodatin RTF-tiedostoon..." 17 \
+  {Kirjoita kaikki suodatetut pelit RTF-tiedostoon säilyttäen kommenttien muotoilun}
 menuText U ToolsImportOne "Tuo yksi PGN-peli" 0 \
   {Tuo yksittäinen peli PGN-tekstistä}
 menuText U ToolsImportFile "Tuo PGN pelitiedosto" 0 {Tuo yksi tai useampia pelejä sisältävä PGN-tiedosto}
-menuText U FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText U FileImportRTF "Tuo RTF-peli..." 0 \
+  {Tuo peli scidCommunityn luomasta RTF-tiedostosta}
 menuText U ToolsStartEngine1 "Käynnistä moottori 1" 19  {Käynnistä moottori 1}
 menuText U ToolsStartEngine2 "Käynnistä moottori 2" 19  {Käynnistä moottori 2}
 menuText U ToolsCaptureBoard "Kuvakaappaus asemasta..." 1  {Tallenna asema kuvana.}
@@ -683,6 +683,8 @@ menuText U TreeHelpIndex "Aakkosellinen ohje" 0
 menuText U TreeFindGames "Etsi kommentoidut pelit" 0 {Muodosta luettelo peleistä, joissa tämä siirto pelattiin kommentoituna}
 translate U SaveCache {Tallenna välimuisti}
 translate U Training {Valmennus}
+translate U TreeTrainingEndOfLine {Linjan loppu saavutettu.}
+translate U TreeTrainingMoveNotInBase {Tämä siirto ei ole tietokannassa.}
 translate U LockTree {Lukitse}
 translate U TreeDepth {Puun syvyys (puolet liikkeet):}
 translate U TreeLocked {lukittu}
@@ -1537,11 +1539,11 @@ translate U CopyErrNotOpen {ei ole auki}
 # Colors:
 translate U LightSquares {Vaaleat ruudut}
 translate U DarkSquares {Tummat ruudut}
-translate U PickColorFromScreen {Pick color from screen}
-translate U SaveCurrentColors {Save current colors}
-translate U SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate U RemoveSavedColor {Remove this saved color preset}
-translate U ColorPresetExists {Those colors are already saved as preset %d}
+translate U PickColorFromScreen {Valitse väri näytöltä}
+translate U SaveCurrentColors {Tallenna nykyiset värit}
+translate U SaveCurrentColorsHint {Lisää nykyiset taulun värit esiasetusluetteloon}
+translate U RemoveSavedColor {Poista tämä tallennettu värien esiasetus}
+translate U ColorPresetExists {Nämä värit on jo tallennettu esiasetuksina %d}
 translate U SelectedSquares {Valitut ruudut}
 translate U SuggestedSquares {Siirtoehdotusten ruudut}
 translate U WhitePieces {Valkeat nappulat}
@@ -2083,13 +2085,13 @@ translate U LSSOppTime {Opp aika}
 translate U LSSDrawOffered {Arvonta tarjotaan}
 
 # RTF Export and Import
-translate U RtfExportTitle {Export to RTF File}
-translate U RtfExportError {Error exporting to RTF}
-translate U RtfImportTitle {Import RTF File}
-translate U RtfImportError {Error importing RTF file}
-translate U RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate U RtfImportSuccess {Game imported into clipboard database successfully.}
-translate U RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate U RtfExportTitle {Vie RTF-tiedostoon}
+translate U RtfExportError {Virhe vietäessä RTF:ään}
+translate U RtfImportTitle {Tuo RTF-tiedosto}
+translate U RtfImportError {Virhe RTF-tiedoston tuonnissa}
+translate U RtfNotScidFile {ScidCommunity ei ole vienyt tätä tiedostoa kommentin muotoilulla tai se on vioittunut.}
+translate U RtfImportSuccess {Peli tuotu leikepöydän tietokantaan onnistuneesti.}
+translate U RtfImportSuccessMulti {%d peliä tuotu leikepöydälle onnistuneesti.}
 }
 # end of english.tcl
 

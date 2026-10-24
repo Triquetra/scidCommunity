@@ -126,7 +126,7 @@ menuText A EditPaste "最後のクリップベース ゲームを貼り付け" 0
   {アクティブな Clipbase ゲームをここに貼り付けます}
 menuText A EditPastePGN "クリップボードのテキストを PGN ゲームとして貼り付けます..." 18 \
   {クリップボードのテキストを PGN 表記のゲームとして解釈し、ここに貼り付けます}
-menuText A EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText A EditNullMove "ヌルムーブ" 0 {ヌル移動を挿入します (移動をスキップします)}
 menuText A EditSetup "スタートボードをセットアップ..." 0 \
   {このゲームの開始位置を設定します}
 menuText A EditCopyBoard "コピー位置" 6 \
@@ -168,7 +168,7 @@ menuText A SearchNegate "ネゲートフィルター" 0 {フィルタを無効�
 menuText A SearchCurrent "現在のボード..." 0 {現在のボード位置を検索します}
 menuText A SearchHeader "ヘッダ..." 0 {ヘッダー（選手、イベントなど）情報から検索}
 menuText A SearchMaterial "素材・柄..." 0 {材質や基板パターンを探す}
-menuText A SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText A SearchComments "コメントを検索..." 0 {現在のフィルターでゲームのコメントを検索します}
 menuText A SearchUsing "ファイル検索を使用しています..." 0 {SearchOptions ファイルを使用して検索する}
 
 # Windows menu:
@@ -190,9 +190,9 @@ menuText A WindowsTree "ツリーウィンドウ" 0 {ツリーウィンドウの
 menuText A WindowsBook "ブックウィンドウ" 0 {ブックウィンドウを開く/閉じる}
 menuText A WindowsCorrChess "通信窓口" 0 {通信ウィンドウの開閉}
 menuText A WindowsGraph "分析グラフ" 0 {グラフウィンドウを開き、移動時間と評価を表示します}
-menuText A WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText A WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate A PresentationFrozen {Frozen - the presentation board is not following}
+menuText A WindowsPresentationBoard "プレゼンテーションボード" 0 {メインボードに続く、プロジェクターまたはセカンドスクリーン用のボード専用ウィンドウを開閉します。}
+menuText A WindowsPresentationFreeze "フリーズプレゼンテーションボード" 0 {プレゼンテーション ボードを停止/再開して、観客に見られずにゲームを操作できるようにします。}
+translate A PresentationFrozen {アナと雪の女王 - プレゼンテーションボードがフォローしていません}
 
 menuText A WindowsEPD "EPD ウィンドウ..." 0 {EPD（ポジションファイル）エディタウィンドウを開く}
 
@@ -262,8 +262,8 @@ menuText A ToolsExpCurrentPGN "ゲームを PGN ファイルにエクスポー�
 menuText A ToolsExpCurrentHTML "ゲームを HTML ファイルにエクスポート..." 15 \
   {現在のゲームを HTML ファイルに書き込みます}
 menuText A ToolsExpCurrentHTMLJS "ゲームを HTML および JavaScript ファイルにエクスポート..." 15 {現在のゲームを HTML および JavaScript ファイルに書き込みます}
-menuText A ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText A ToolsExpCurrentRTF "ゲームを RTF ファイルにエクスポート..." 15 \
+  {コメントの書式を維持したまま現在のゲームを RTF ファイルに書き込みます}
 menuText A ToolsExpFilter "すべてのフィルター ゲームをエクスポート" 1 \
   {フィルタリングされたすべてのゲームをテキスト ファイルに書き込みます}
 menuText A ToolsExpFilterPGN "フィルターを PGN ファイルにエクスポート..." 17 \
@@ -271,13 +271,13 @@ menuText A ToolsExpFilterPGN "フィルターを PGN ファイルにエクスポ
 menuText A ToolsExpFilterHTML "フィルタを HTML ファイルにエクスポート..." 17 \
   {フィルタリングされたすべてのゲームを HTML ファイルに書き込みます}
 menuText A ToolsExpFilterHTMLJS "フィルターを HTML および JavaScript ファイルにエクスポート..." 17 {フィルタリングされたすべてのゲームを HTML および JavaScript ファイルに書き込みます}
-menuText A ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText A ToolsExpFilterRTF "フィルターを RTF ファイルにエクスポート..." 17 \
+  {コメントの書式を維持したまま、フィルタリングされたすべてのゲームを RTF ファイルに書き込みます}
 menuText A ToolsImportOne "1 つの PGN ゲームをインポート..." 0 \
   {PGN テキストからゲームをインポートする}
 menuText A ToolsImportFile "PGN ファイルからゲームをインポート..." 7 {PGN ファイルからゲームをインポートする}
-menuText A FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText A FileImportRTF "RTF ゲームをインポート..." 0 \
+  {scidCommunity によって作成された RTF ファイルからゲームをインポートする}
 menuText A ToolsStartEngine1 "エンジン1を開始" 13  {エンジン1を始動します}
 menuText A ToolsStartEngine2 "エンジン2を開始" 13  {エンジン2を始動します}
 menuText A ToolsCaptureBoard "現在のボードをキャプチャ..." 5  {現在のボードを画像として保存します。}
@@ -685,6 +685,8 @@ menuText A TreeHelpIndex "ヘルプインデックス" 0
 menuText A TreeFindGames "注釈付きの対局を検索" 0 {この手が注釈付きで指された対局のリストを作成します}
 translate A SaveCache {キャッシュの保存}
 translate A Training {トレーニング}
+translate A TreeTrainingEndOfLine {行末に到達しました。}
+translate A TreeTrainingMoveNotInBase {この動きはデータベースにありません。}
 translate A LockTree {ロック}
 translate A TreeDepth {ツリーの深さ (半分の移動):}
 translate A TreeLocked {ロックされた}
@@ -1530,11 +1532,11 @@ translate A CopyErrNotOpen {開いていません}
 # Colors:
 translate A LightSquares {ライトスクエア}
 translate A DarkSquares {暗い四角形}
-translate A PickColorFromScreen {Pick color from screen}
-translate A SaveCurrentColors {Save current colors}
-translate A SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate A RemoveSavedColor {Remove this saved color preset}
-translate A ColorPresetExists {Those colors are already saved as preset %d}
+translate A PickColorFromScreen {画面から色を選択する}
+translate A SaveCurrentColors {現在の色を保存する}
+translate A SaveCurrentColorsHint {現在のボードの色をプリセット リストに追加します}
+translate A RemoveSavedColor {この保存されたカラープリセットを削除します}
+translate A ColorPresetExists {これらの色はすでにプリセット %d として保存されています}
 translate A SelectedSquares {選択された正方形}
 translate A SuggestedSquares {推奨移動マス}
 translate A WhitePieces {白い部分}
@@ -2071,13 +2073,13 @@ translate A LSSOppTime {作業時間}
 translate A LSSDrawOffered {抽選が行われました}
 
 # RTF Export and Import
-translate A RtfExportTitle {Export to RTF File}
-translate A RtfExportError {Error exporting to RTF}
-translate A RtfImportTitle {Import RTF File}
-translate A RtfImportError {Error importing RTF file}
-translate A RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate A RtfImportSuccess {Game imported into clipboard database successfully.}
-translate A RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate A RtfExportTitle {RTF ファイルにエクスポート}
+translate A RtfExportError {RTF へのエクスポートでエラーが発生しました}
+translate A RtfImportTitle {RTF ファイルのインポート}
+translate A RtfImportError {RTF ファイルのインポートでエラーが発生しました}
+translate A RtfNotScidFile {このファイルは、scidCommunity によってコメント形式でエクスポートされていないか、破損しています。}
+translate A RtfImportSuccess {ゲームはクリップボード データベースに正常にインポートされました。}
+translate A RtfImportSuccessMulti {%d ゲームがクリップボード データベースに正常にインポートされました。}
 }
 # end of english.tcl
 

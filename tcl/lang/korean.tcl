@@ -126,7 +126,7 @@ menuText k EditPaste "마지막 Clipbase 게임 코팅 삽입기" 0 \
   {여기 적극적으로 Clipbase 게임을 도입하시기 바랍니다.}
 menuText k EditPastePGN "클립보드 텍스트를 PGN 게임으로 코팅..." 18 \
   {PGN 이름표법으로 클립보드 텍스트를 게임으로 해석해서 여기에 포인트를 넣으세요}
-menuText k EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText k EditNullMove "널 이동" 0 {Null 이동 삽입(이동 건너뛰기)}
 menuText k EditSetup "보드 설정 시작..." 0 \
   {이 게임의 시작 위치를 설정하세요}
 menuText k EditCopyBoard "위치 복사" 6 \
@@ -168,7 +168,7 @@ menuText k SearchNegate "낚시 분야" 0 {제외된 게임만을 포함하여 �
 menuText k SearchCurrent "현재 보드..." 0 {현재 보드 위치 검색}
 menuText k SearchHeader "헤더..." 0 {헤더(플레이어, 이벤트 등) 정보로 검색}
 menuText k SearchMaterial "있다/패턴..." 0 {재료 또는 보드 검색}
-menuText k SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText k SearchComments "댓글 검색..." 0 {현재 필터에서 게임의 댓글을 검색하세요.}
 menuText k SearchUsing "파일 검색 사용 중..." 0 {SearchOptions 파일을 사용하여 검색}
 
 # Windows menu:
@@ -190,9 +190,9 @@ menuText k WindowsTree "트리창" 0 {트리 창가/닫기}
 menuText k WindowsBook "책 창" 0 {책 창구/닫기}
 menuText k WindowsCorrChess "대응창구" 0 {서신창고/닫기}
 menuText k WindowsGraph "분석 그래프" 0 {이동 시간 및 평가가 포함된 그래프 창 비교}
-menuText k WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText k WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate k PresentationFrozen {Frozen - the presentation board is not following}
+menuText k WindowsPresentationBoard "프리젠테이션 보드" 0 {프로젝터 또는 보조 스크린을 위해 메인보드 뒤에 있는 보드 전용 창을 열고 닫습니다.}
+menuText k WindowsPresentationFreeze "프리즈 프리젠테이션 보드" 0 {프레젠테이션 보드를 중지/재개하여 청중이 보지 않고도 게임을 탐색할 수 있습니다.}
+translate k PresentationFrozen {겨울왕국 - 프레젠테이션 보드가 팔로우하지 않습니다.}
 
 menuText k WindowsEPD "EPD 창..." 0 {EPD(위치 파일) 편집기 창 열기}
 
@@ -262,8 +262,8 @@ menuText k ToolsExpCurrentPGN "PGN 파일로 게임을..." 15 \
 menuText k ToolsExpCurrentHTML "게임을 HTML 파일로 사용할 수 있습니다..." 15 \
   {현재 게임을 HTML 파일에 쓰기}
 menuText k ToolsExpCurrentHTMLJS "HTML 및 JavaScript 파일로 게임할 수 있는..." 15 {현재 게임을 HTML 및 JavaScript 파일에 작성했습니다.}
-menuText k ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText k ToolsExpCurrentRTF "게임을 RTF 파일로 내보내기..." 15 \
+  {코멘트 형식을 유지하면서 RTF 파일에 현재 게임 쓰기}
 menuText k ToolsExpFilter "모든 것이 가능합니다." 1 \
   {모든 게임을 문자 파일에 입력했습니다.}
 menuText k ToolsExpFilterPGN "필터를 PGN 파일로 위치..." 17 \
@@ -271,13 +271,13 @@ menuText k ToolsExpFilterPGN "필터를 PGN 파일로 위치..." 17 \
 menuText k ToolsExpFilterHTML "HTML 파일로 검색..." 17 \
   {모든 게임을 HTML 파일에 작성했습니다.}
 menuText k ToolsExpFilterHTMLJS "필터링을 HTML 및 JavaScript 파일로 포함..." 17 {모든 게임을 HTML 및 JavaScript 파일에 작성했습니다.}
-menuText k ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText k ToolsExpFilterRTF "필터를 RTF 파일로 내보내기..." 17 \
+  {댓글 형식을 유지하면서 필터링된 모든 게임을 RTF 파일에 기록합니다.}
 menuText k ToolsImportOne "하나의 PGN 게임 가져오기..." 0 \
   {PGN 텍스트에서 게임을 가져오기}
 menuText k ToolsImportFile "PGN 파일을 가져오려면..." 7 {PGN 파일을 가져오기}
-menuText k FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText k FileImportRTF "RTF 게임 가져오기..." 0 \
+  {scidCommunity에서 생성된 RTF 파일에서 게임 가져오기}
 menuText k ToolsStartEngine1 "엔진 1 시동" 13  {엔진 1}
 menuText k ToolsStartEngine2 "엔진 2 시동" 13  {엔진 2}
 menuText k ToolsCaptureBoard "현재 캡처 중..." 5  {현재 보드를 이미지로 생성합니다.}
@@ -685,6 +685,8 @@ menuText k TreeHelpIndex "도움말 색인" 0
 menuText k TreeFindGames "주석이 있는 대국 찾기" 0 {이 수가 주석과 함께 두어진 대국 목록을 생성합니다}
 translate k SaveCache {쿠키 저장}
 translate k Training {훈련}
+translate k TreeTrainingEndOfLine {줄의 끝에 도달했습니다.}
+translate k TreeTrainingMoveNotInBase {이 이동은 데이터베이스에 없습니다.}
 translate k LockTree {잠그다}
 translate k TreeDepth {트리(반쯤 이동):}
 translate k TreeLocked {잠긴}
@@ -1530,11 +1532,11 @@ translate k CopyErrNotOpen {이기적이지 않아요}
 # Colors:
 translate k LightSquares {의자}
 translate k DarkSquares {어두운 의자}
-translate k PickColorFromScreen {Pick color from screen}
-translate k SaveCurrentColors {Save current colors}
-translate k SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate k RemoveSavedColor {Remove this saved color preset}
-translate k ColorPresetExists {Those colors are already saved as preset %d}
+translate k PickColorFromScreen {화면에서 색상 선택}
+translate k SaveCurrentColors {현재 색상 저장}
+translate k SaveCurrentColorsHint {현재 보드 색상을 사전 설정 목록에 추가}
+translate k RemoveSavedColor {저장된 색상 사전 설정 삭제}
+translate k ColorPresetExists {해당 색상은 이미 사전 설정 %d에 저장되어 있습니다.}
 translate k SelectedSquares {선택 코너}
 translate k SuggestedSquares {제안된 이동 코너}
 translate k WhitePieces {조각}
@@ -2071,13 +2073,13 @@ translate k LSSOppTime {기회 시간}
 translate k LSSDrawOffered {추첨 제공}
 
 # RTF Export and Import
-translate k RtfExportTitle {Export to RTF File}
-translate k RtfExportError {Error exporting to RTF}
-translate k RtfImportTitle {Import RTF File}
-translate k RtfImportError {Error importing RTF file}
-translate k RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate k RtfImportSuccess {Game imported into clipboard database successfully.}
-translate k RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate k RtfExportTitle {RTF 파일로 내보내기}
+translate k RtfExportError {RTF로 내보내는 중 오류가 발생했습니다.}
+translate k RtfImportTitle {RTF 파일 가져오기}
+translate k RtfImportError {RTF 파일을 가져오는 중 오류가 발생했습니다.}
+translate k RtfNotScidFile {이 파일은 scidCommunity에서 설명 형식으로 내보내지 않았거나 손상되었습니다.}
+translate k RtfImportSuccess {게임을 클립보드 데이터베이스로 성공적으로 가져왔습니다.}
+translate k RtfImportSuccessMulti {%d개의 게임을 클립보드 데이터베이스로 성공적으로 가져왔습니다.}
 }
 # end of english.tcl
 

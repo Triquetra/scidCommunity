@@ -86,7 +86,7 @@ menuText Q EditPaste "Вставити останню гру Clipbase" 0 \
   {Вставте сюди активну гру Clipbase}
 menuText Q EditPastePGN "Вставити текст буфера обміну як гру PGN..." 18 \
   {Інтерпретуйте текст буфера обміну як гру в нотації PGN і вставте його сюди}
-menuText Q EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText Q EditNullMove "Нульовий хід" 0 {Вставити нульовий хід (пропустити хід)}
 menuText Q EditSetup "Налаштувати стартову дошку..." 0 \
   {Встановіть початкову позицію для цієї гри}
 menuText Q EditCopyBoard "Копіювати позицію" 6 \
@@ -128,7 +128,7 @@ menuText Q SearchNegate "Скасувати фільтр" 0 {Відмініть 
 menuText Q SearchCurrent "Поточна рада..." 0 {Пошук поточної позиції дошки}
 menuText Q SearchHeader "Заголовок..." 0 {Пошук за інформацією заголовка (гравець, подія тощо).}
 menuText Q SearchMaterial "Матеріал/Візерунок..." 0 {Шукайте шаблони матеріалів або дощок}
-menuText Q SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText Q SearchComments "Пошук коментарів..." 0 {Шукайте коментарі до ігор у поточному фільтрі}
 menuText Q SearchUsing "Використання файлу пошуку..." 0 {Шукайте за допомогою файлу SearchOptions}
 
 # Windows menu:
@@ -150,9 +150,9 @@ menuText Q WindowsTree "Вікно дерева" 0 {Відкрити/закри�
 menuText Q WindowsBook "Книжкове вікно" 0 {Відкрити/закрити вікно Книги}
 menuText Q WindowsCorrChess "Вікно листування" 0 {Відкрити/закрити вікно Листування}
 menuText Q WindowsGraph "Графік аналізу" 0 {Відкрийте вікно графіка з часом ходів і оцінками}
-menuText Q WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText Q WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate Q PresentationFrozen {Frozen - the presentation board is not following}
+menuText Q WindowsPresentationBoard "Презентаційна дошка" 0 {Відкрити/закрити вікно лише для дошки, яке слідує за основною дошкою, для проектора чи другого екрана}
+menuText Q WindowsPresentationFreeze "Заморозити презентаційну дошку" 0 {Зупиніть/відновіть показ презентаційної дошки, щоб можна було переміщатися по грі, не бачивши її аудиторії}
+translate Q PresentationFrozen {Frozen - дошка презентацій не стежить}
 
 menuText Q WindowsEPD "Вікно EPD..." 0 {Відкрийте вікно редактора EPD (файл позиції).}
 
@@ -222,8 +222,8 @@ menuText Q ToolsExpCurrentPGN "Експорт гри у файл PGN..." 15 \
 menuText Q ToolsExpCurrentHTML "Експорт гри у файл HTML..." 15 \
   {Записати поточну гру у файл HTML}
 menuText Q ToolsExpCurrentHTMLJS "Експорт гри у файл HTML і JavaScript..." 15 {Записати поточну гру у файл HTML і JavaScript}
-menuText Q ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText Q ToolsExpCurrentRTF "Експорт гри у файл RTF..." 15 \
+  {Записати поточну гру у файл RTF із збереженням форматування коментаря}
 menuText Q ToolsExpFilter "Експортувати всі ігри з фільтрами" 1 \
   {Записати всі відфільтровані ігри в текстовий файл}
 menuText Q ToolsExpFilterPGN "Експортувати фільтр у файл PGN..." 17 \
@@ -231,13 +231,13 @@ menuText Q ToolsExpFilterPGN "Експортувати фільтр у файл 
 menuText Q ToolsExpFilterHTML "Експортувати фільтр у файл HTML..." 17 \
   {Записати всі відфільтровані ігри у файл HTML}
 menuText Q ToolsExpFilterHTMLJS "Експортувати фільтр у файл HTML і JavaScript..." 17 {Запишіть усі відфільтровані ігри у файл HTML і JavaScript}
-menuText Q ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText Q ToolsExpFilterRTF "Експортувати фільтр у файл RTF..." 17 \
+  {Запишіть усі відфільтровані ігри у файл RTF із збереженням форматування коментарів}
 menuText Q ToolsImportOne "Імпортувати одну гру PGN..." 0 \
   {Імпортувати гру з тексту PGN}
 menuText Q ToolsImportFile "Імпортувати ігри з файлів PGN..." 7 {Імпортувати ігри з файлів PGN}
-menuText Q FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText Q FileImportRTF "Імпорт гри RTF..." 0 \
+  {Імпортуйте гру з файлу RTF, створеного scidCommunity}
 menuText Q ToolsStartEngine1 "Запустіть двигун 1" 13  {Запустіть двигун 1}
 menuText Q ToolsStartEngine2 "Запустіть двигун 2" 13  {Запустіть двигун 2}
 menuText Q ToolsCaptureBoard "Захопити поточну плату..." 5  {Збережіть поточну дошку як зображення.}
@@ -645,6 +645,8 @@ menuText Q TreeHelpIndex "Індекс довідки" 0
 menuText Q TreeFindGames "Знайти партії з анотацією" 0 {Скласти список партій, де цей хід було зіграно з анотацією}
 translate Q SaveCache {Зберегти кеш}
 translate Q Training {Навчання}
+translate Q TreeTrainingEndOfLine {Досягнуто кінця рядка.}
+translate Q TreeTrainingMoveNotInBase {Цього ходу немає в базі даних.}
 translate Q LockTree {Замок}
 translate Q TreeDepth {Глибина дерева (половина ходу):}
 translate Q TreeLocked {заблокований}
@@ -1490,11 +1492,11 @@ translate Q CopyErrNotOpen {не відкрито}
 # Colors:
 translate Q LightSquares {Світлі квадрати}
 translate Q DarkSquares {Темні квадрати}
-translate Q PickColorFromScreen {Pick color from screen}
-translate Q SaveCurrentColors {Save current colors}
-translate Q SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate Q RemoveSavedColor {Remove this saved color preset}
-translate Q ColorPresetExists {Those colors are already saved as preset %d}
+translate Q PickColorFromScreen {Виберіть колір з екрана}
+translate Q SaveCurrentColors {Зберегти поточні кольори}
+translate Q SaveCurrentColorsHint {Додайте поточні кольори дошки до попередньо встановленого списку}
+translate Q RemoveSavedColor {Видаліть цей збережений стиль кольору}
+translate Q ColorPresetExists {Ці кольори вже збережено як шаблон %d}
 translate Q SelectedSquares {Вибрані квадрати}
 translate Q SuggestedSquares {Запропоновані переміщення квадратів}
 translate Q WhitePieces {Білі фігури}
@@ -2031,13 +2033,13 @@ translate Q LSSOppTime {Час Opp}
 translate Q LSSDrawOffered {Пропонується нічия}
 
 # RTF Export and Import
-translate Q RtfExportTitle {Export to RTF File}
-translate Q RtfExportError {Error exporting to RTF}
-translate Q RtfImportTitle {Import RTF File}
-translate Q RtfImportError {Error importing RTF file}
-translate Q RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate Q RtfImportSuccess {Game imported into clipboard database successfully.}
-translate Q RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate Q RtfExportTitle {Експорт у файл RTF}
+translate Q RtfExportError {Помилка експорту в RTF}
+translate Q RtfImportTitle {Імпорт файлу RTF}
+translate Q RtfImportError {Помилка імпортування файлу RTF}
+translate Q RtfNotScidFile {Цей файл не було експортовано scidCommunity із форматуванням коментарів або він пошкоджений.}
+translate Q RtfImportSuccess {Гру успішно імпортовано в базу даних буфера обміну.}
+translate Q RtfImportSuccessMulti {%d ігор успішно імпортовано в базу даних буфера обміну.}
 }
 # end of english.tcl
 

@@ -107,7 +107,7 @@ menuText D EditPaste "Partie aus Ablage einfügen" 19 \
   {Die aktuele Partie aus der Ablagedatenbank hier einfügen}
 menuText D EditPastePGN "PGN-Partie aus Ablage einfügen..." 1 \
   {Interpretiere den Inhalt der Zwischenablage als PGN-Notation und füge ihn hier ein}
-menuText D EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText D EditNullMove "Null-Bewegung" 0 {Einen Nullzug einfügen (einen Zug überspringen)}
 menuText D EditSetup "Stellungseingabe..." 0 \
   {Neue Stellung eingeben (FEN oder manuell)}
 menuText D EditCopyBoard "Stellung kopieren" 10 \
@@ -156,7 +156,7 @@ menuText D SearchHeader "Partiedaten..." 0 \
   {Partiedaten (Spieler, Turnier etc.) suchen}
 menuText D SearchMaterial "Material/Muster..." 0 \
   {Nach Material- oder Stellungsmustern suchen}
-menuText D SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText D SearchComments "Kommentare durchsuchen..." 0 {Durchsuchen Sie die Kommentare der Spiele im aktuellen Filter}
 menuText D SearchUsing "Mit Suchoptionsdatei..." 4 \
   {Mit Suchoptionsdatei suchen}
 
@@ -176,9 +176,9 @@ menuText D WindowsTree "Zugbaum" 0 {Zugbaum öffnen/schließen}
 menuText D WindowsBook "Buchfenster" 0 {Buchfenster öffnen/schließen}
 menuText D WindowsCorrChess "Fernschachfenster" 0 {Öffnet/schließt das Fernschachfenster}
 menuText D WindowsGraph "Analysediagramm" 0 {Öffnen Sie das Diagrammfenster mit den Zugzeiten und -bewertungen}
-menuText D WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText D WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate D PresentationFrozen {Frozen - the presentation board is not following}
+menuText D WindowsPresentationBoard "Präsentationstafel" 0 {Öffnen/schließen Sie ein reines Board-Fenster, das sich an das Hauptboard anschließt, für einen Projektor oder einen zweiten Bildschirm}
+menuText D WindowsPresentationFreeze "Präsentationstafel einfrieren" 0 {Stoppen Sie die Präsentationstafel bzw. setzen Sie sie fort, damit Sie durch das Spiel navigieren können, ohne dass das Publikum es sieht}
+translate D PresentationFrozen {Eingefroren – die Präsentationstafel folgt nicht}
 
 menuText D WindowsEPD "EPD-Fenster..." 0 {Öffnen Sie ein EPD-Editorfenster (Positionsdatei).}
 
@@ -252,8 +252,8 @@ menuText D ToolsExpCurrentPGN "Partie in PGN-Datei exportieren..." 10 \
 menuText D ToolsExpCurrentHTML "Partie in HTML-Datei exportieren..." 10 \
   {Aktuelle Partie in eine HTML-Datei schreiben}
 menuText D ToolsExpCurrentHTMLJS "Partie in HTML/JavaScript-Datei exportieren..." 15 {Aktuelle Partie wird in eine HTML und JavaScript Datei exportiert.}  
-menuText D ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText D ToolsExpCurrentRTF "Spiel in RTF-Datei exportieren..." 15 \
+  {Schreiben Sie das aktuelle Spiel in eine RTF-Datei und behalten Sie dabei die Kommentarformatierung bei}
 menuText D ToolsExpFilter "Alles im Filter exportieren" 16 \
   {Alle Partien im Filter in eine Textdatei schreiben}
 menuText D ToolsExpFilterPGN "Filter in PGN-Datei exportieren..." 10 \
@@ -261,14 +261,14 @@ menuText D ToolsExpFilterPGN "Filter in PGN-Datei exportieren..." 10 \
 menuText D ToolsExpFilterHTML "Filter in HTML-Datei exportieren..." 10 \
   {Alle Partien im Filter in eine HTML-Datei schreiben}
 menuText D ToolsExpFilterHTMLJS "Filter in HTML/JavaScript exportieren..." 17 {Alle Partien im Filter werden in eine HTML und JavaScript Datei exportiert.}  
-menuText D ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText D ToolsExpFilterRTF "Filter in RTF-Datei exportieren..." 17 \
+  {Schreiben Sie alle gefilterten Spiele in eine RTF-Datei, wobei die Kommentarformatierung erhalten bleibt}
 menuText D ToolsImportOne "Eine PGN-Partie importieren..." 16 \
   {Eine Partie im PGN-Format eingeben oder einfügen}
 menuText D ToolsImportFile "PGN-Partien importieren..." 0 \
   {Partien aus einer PGN-Datei lesen}
-menuText D FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText D FileImportRTF "RTF-Spiel importieren..." 0 \
+  {Importieren Sie ein Spiel aus einer von scidCommunity erstellten RTF-Datei}
 menuText D ToolsStartEngine1 "Starte Engine1" 0  {Starte Analyse von Analyse-Engine1}
 menuText D ToolsStartEngine2 "Starte Engine2" 0  {Starte Analyse von Analyse-Engine2}
 menuText D ToolsCaptureBoard "Brettfoto..." 0  {Aktuelles Brett als Bild speichern.}
@@ -684,6 +684,8 @@ menuText D TreeHelpIndex "Index" 0
 menuText D TreeFindGames "Partien mit Anmerkung finden" 0 {Liste der Partien erstellen, in denen dieser Zug mit einer Anmerkung gespielt wurde}
 translate D SaveCache {Cache sichern}
 translate D Training {Training}
+translate D TreeTrainingEndOfLine {Zeilenende erreicht.}
+translate D TreeTrainingMoveNotInBase {Dieser Umzug ist nicht in der Datenbank.}
 translate D LockTree {Anbinden}
 translate D TreeDepth {Baumtiefe (halbe Züge):}
 translate D TreeLocked {angebunden}
@@ -1552,11 +1554,11 @@ translate D CopyErrNotOpen {ist nicht geöffnet}
 # Colors:
 translate D LightSquares {Helle Felder}
 translate D DarkSquares {Dunkle Felder}
-translate D PickColorFromScreen {Pick color from screen}
-translate D SaveCurrentColors {Save current colors}
-translate D SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate D RemoveSavedColor {Remove this saved color preset}
-translate D ColorPresetExists {Those colors are already saved as preset %d}
+translate D PickColorFromScreen {Wählen Sie eine Farbe vom Bildschirm aus}
+translate D SaveCurrentColors {Aktuelle Farben speichern}
+translate D SaveCurrentColorsHint {Fügen Sie die aktuellen Platinenfarben zur Voreinstellungsliste hinzu}
+translate D RemoveSavedColor {Entfernen Sie diese gespeicherte Farbvoreinstellung}
+translate D ColorPresetExists {Diese Farben sind bereits als Voreinstellung %d gespeichert}
 translate D SelectedSquares {Ausgewählte Felder}
 translate D SuggestedSquares {Zugvorschlagsfelder}
 translate D WhitePieces {Weiße Steine}
@@ -2102,13 +2104,13 @@ translate D LSSOppTime {Opp Zeit}
 translate D LSSDrawOffered {Auslosung angeboten}
 
 # RTF Export and Import
-translate D RtfExportTitle {Export to RTF File}
-translate D RtfExportError {Error exporting to RTF}
-translate D RtfImportTitle {Import RTF File}
-translate D RtfImportError {Error importing RTF file}
-translate D RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate D RtfImportSuccess {Game imported into clipboard database successfully.}
-translate D RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate D RtfExportTitle {In RTF-Datei exportieren}
+translate D RtfExportError {Fehler beim Exportieren nach RTF}
+translate D RtfImportTitle {RTF-Datei importieren}
+translate D RtfImportError {Fehler beim Importieren der RTF-Datei}
+translate D RtfNotScidFile {Diese Datei wurde von scidCommunity nicht mit Kommentarformatierung exportiert oder ist beschädigt.}
+translate D RtfImportSuccess {Das Spiel wurde erfolgreich in die Zwischenablage-Datenbank importiert.}
+translate D RtfImportSuccessMulti {%d Spiele wurden erfolgreich in die Zwischenablage-Datenbank importiert.}
 }
 # end of english.tcl
 

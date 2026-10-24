@@ -92,7 +92,7 @@ menuText K EditPaste "Enganxar l'última partida de la base de treball" 2 \
   {Enganxa al final de la base actual la partida activa de la base de treball (clipbase)}
 menuText K EditPastePGN "Enganxa el text del Clipboard com una partida PGN..." 10 \
   {Interpreta el text de la base de treball (clipbase) com una partida en notació PGN i l'enganxa}
-menuText K EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText K EditNullMove "Moviment nul" 0 {Insereix un moviment nul (omet un moviment)}
 menuText K EditSetup "Establir posició inicial..." 26 \
   {Inicia una posició a l'escaquer amb la posició de la partida}
 menuText K EditCopyBoard "Copiar posició" 8 \
@@ -140,7 +140,7 @@ menuText K SearchHeader "Metadades..." 0 \
   {Cerca per les metadades de la capçalera (jugador, torneig, etc)}
 menuText K SearchMaterial "Material/Patró..." 0 \
   {Cerca posició per material o patró}
-menuText K SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText K SearchComments "Cerca comentaris..." 0 {Cerca els comentaris dels jocs al filtre actual}
 menuText K SearchUsing "Fer servir arxiu de recerca..." 0 \
   {Cerca fent servir un arxiu d'opcions de recerca}
 
@@ -165,9 +165,9 @@ menuText K WindowsTree "Finestra de l'Arbre d'Obertures" 6 {Obre/tanca la finest
 menuText K WindowsBook "Finestra de Llibres d'Obertures" 0 {Obrir/Tancar la finestra de Llibres d'Obertures (Book)}
 menuText K WindowsCorrChess "Finestra d'Escacs Postal" 0 {Obrir/Tancar la Finestra d'Escacs Postal}
 menuText K WindowsGraph "Gràfic d'anàlisi" 0 {Obriu la finestra Gràfic amb els temps i les avaluacions dels moviments}
-menuText K WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText K WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate K PresentationFrozen {Frozen - the presentation board is not following}
+menuText K WindowsPresentationBoard "Tauler de presentació" 0 {Obre/tanca una finestra només de pissarra que segueix la placa principal, per a un projector o una segona pantalla}
+menuText K WindowsPresentationFreeze "Tauler de presentació de congelació" 0 {Atura/reprèn el tauler de presentació, de manera que es pugui navegar pel joc sense que el públic el vegi}
+translate K PresentationFrozen {Congelat: el tauler de presentació no segueix}
 
 menuText K WindowsEPD "Finestra EPD..." 0 {Obriu una finestra de l'editor d'EPD (fitxer de posició).}
 
@@ -239,8 +239,8 @@ menuText K ToolsExpCurrentPGN "Exportar la partida a un arxiu PGN..." 33 \
 menuText K ToolsExpCurrentHTML "Exportar la partida a un arxiu HTML..." 33 \
   {Escriu la partida actual a un arxiu HTML}
 menuText K ToolsExpCurrentHTMLJS "Exportar la partida a un arxiu HTML i JavaScript..." 15 {Escriu la partida actual a un arxiu HTML i JavaScript} 
-menuText K ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText K ToolsExpCurrentRTF "Exporta el joc a un fitxer RTF..." 15 \
+  {Escriu el joc actual en un fitxer RTF conservant el format dels comentaris}
 menuText K ToolsExpFilter "Exportar totes les partides filtrades" 1 \
   {Escriu totes les partides filtrades a un arxiu de text}
 menuText K ToolsExpFilterPGN "Exportar filtre a un arxiu PGN..." 29 \
@@ -248,14 +248,14 @@ menuText K ToolsExpFilterPGN "Exportar filtre a un arxiu PGN..." 29 \
 menuText K ToolsExpFilterHTML "Exportar filtre a un arxiu HTML..." 29 \
   {Escriu totes les partides filtrades a un arxiu HTML}
 menuText K ToolsExpFilterHTMLJS "Exportar filtre a un arxiu HTML i JavaScript..." 17 {Escriu totes les partides filtrades a un arxiu HTML i JavaScript}  
-menuText K ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText K ToolsExpFilterRTF "Exporta el filtre a un fitxer RTF..." 17 \
+  {Escriu tots els jocs filtrats en un fitxer RTF conservant el format dels comentaris}
 menuText K ToolsImportOne "Importar una partida PGN..." 0 \
   {Importa una partida de un text PGN}
 menuText K ToolsImportFile "Importar un arxiu de partides PGN..." 2 \
   {Importa partides de un arxiu PGN}
-menuText K FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText K FileImportRTF "Importa el joc RTF..." 0 \
+  {Importa un joc des d'un fitxer RTF creat per scidCommunity}
 menuText K ToolsStartEngine1 "Iniciar motor 1" 0  {Iniciar motor 1}
 menuText K ToolsStartEngine2 "Iniciar motor 2" 0  {Iniciar Motor 2}
 menuText K ToolsCaptureBoard "Desa posició actual" 0  {Desa la posició del tauler actual com a imatge.}
@@ -670,6 +670,8 @@ menuText K TreeHelpIndex "Índex del fitxer d'ajuda" 0
 menuText K TreeFindGames "Cercar partides amb anotació" 0 {Crear la llista de partides on aquest moviment s'ha jugat amb una anotació}
 translate K SaveCache {Desar memòria cau}
 translate K Training {Entrenament}
+translate K TreeTrainingEndOfLine {S'ha arribat al final de la línia.}
+translate K TreeTrainingMoveNotInBase {Aquest moviment no es troba a la base de dades.}
 translate K LockTree {Bloquejar}
 translate K TreeDepth {Profunditat de l'arbre (meitat de moviments):}
 translate K TreeLocked {Bloquejat}
@@ -1526,11 +1528,11 @@ translate K CopyErrNotOpen {no està oberta}
 # Colors:
 translate K LightSquares {Caselles blanques}
 translate K DarkSquares {Caselles negres}
-translate K PickColorFromScreen {Pick color from screen}
-translate K SaveCurrentColors {Save current colors}
-translate K SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate K RemoveSavedColor {Remove this saved color preset}
-translate K ColorPresetExists {Those colors are already saved as preset %d}
+translate K PickColorFromScreen {Trieu el color de la pantalla}
+translate K SaveCurrentColors {Desa els colors actuals}
+translate K SaveCurrentColorsHint {Afegiu els colors actuals del tauler a la llista predefinida}
+translate K RemoveSavedColor {Elimina aquest valor predefinit de color desat}
+translate K ColorPresetExists {Aquests colors ja estan desats com a %d predefinit}
 translate K SelectedSquares {Caselles seleccionades}
 translate K SuggestedSquares {Caselles de jugada suggerida}
 translate K WhitePieces {Peces blanques}
@@ -2074,13 +2076,13 @@ translate K LSSOppTime {Temps d'Opp}
 translate K LSSDrawOffered {Sorteig ofert}
 
 # RTF Export and Import
-translate K RtfExportTitle {Export to RTF File}
-translate K RtfExportError {Error exporting to RTF}
-translate K RtfImportTitle {Import RTF File}
-translate K RtfImportError {Error importing RTF file}
-translate K RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate K RtfImportSuccess {Game imported into clipboard database successfully.}
-translate K RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate K RtfExportTitle {Exporta a un fitxer RTF}
+translate K RtfExportError {S'ha produït un error en exportar a RTF}
+translate K RtfImportTitle {Importa un fitxer RTF}
+translate K RtfImportError {S'ha produït un error en importar el fitxer RTF}
+translate K RtfNotScidFile {ScidCommunity no ha exportat aquest fitxer amb format de comentari o està malmès.}
+translate K RtfImportSuccess {El joc s'ha importat correctament a la base de dades del porta-retalls.}
+translate K RtfImportSuccessMulti {%d jocs importats a la base de dades del porta-retalls correctament.}
 }
 # end of english.tcl
 

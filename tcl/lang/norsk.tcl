@@ -89,7 +89,7 @@ menuText O EditPaste "Lim inn siste parti fra utklippsbasen" 0 \
   {Limer inn gjeldende parti fra utklippsbasen her}
 menuText O EditPastePGN "Paste Clipboard text as PGN game..." 10 \
   {Interpret the clipboard text as a game in PGN notation and paste it here} ;# ***
-menuText O EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText O EditNullMove "Null Move" 0 {Sett inn et nulltrekk (hopp over et trekk)}
 menuText O EditSetup "Still opp stilling..." 0 \
   {Lag en startstilling for dette partiet}
 menuText O EditCopyBoard "Copy position" 6 \
@@ -132,7 +132,7 @@ menuText O SearchNegate "Snu filter" 0 {Reverserer filteret til å kun inneholde
 menuText O SearchCurrent "Stilling..." 0 {Søk etter denne stillingen}
 menuText O SearchHeader "Header..." 0 {Søk etter Header (partier, turnering etc) informasjon}
 menuText O SearchMaterial "Kvalitet/stilling..." 0 {Søk på kvalitet eller stilling}
-menuText O SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText O SearchComments "Søk i kommentarer..." 0 {Søk i kommentarene til spillene i gjeldende filter}
 menuText O SearchUsing "Bruk søkefil..." 0 {Søk vha lagrede søkevilkår}
 
 # Windows menu:
@@ -154,9 +154,9 @@ menuText O WindowsTree "Trevindu" 0 {Åpne/lukk trevinduet}
 menuText O WindowsBook "Bokvindu" 0 {Åpne/lukk bokvinduet}
 menuText O WindowsCorrChess "Korrespondansevindu" 0 {Åpne/lukk korrespondansevinduet}
 menuText O WindowsGraph "Analysegraf" 0 {Åpne grafvinduet med trekktider og evalueringer}
-menuText O WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText O WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate O PresentationFrozen {Frozen - the presentation board is not following}
+menuText O WindowsPresentationBoard "Presentasjonstavle" 0 {Åpne/lukk et vindu som kun er for brett som følger hovedkortet, for en projektor eller en annen skjerm}
+menuText O WindowsPresentationFreeze "Frys presentasjonstavle" 0 {Stopp/gjenoppta presentasjonsbrettet, slik at spillet kan navigeres uten at publikum ser det}
+translate O PresentationFrozen {Frozen - presentasjonstavlen følger ikke med}
 
 menuText O WindowsEPD "EPD-vindu..." 0 {Åpne et EPD-redigeringsvindu (posisjonsfil).}
 
@@ -228,8 +228,8 @@ menuText O ToolsExpCurrentPGN "Eksporter parti til PGN-fil..." 0 \
 menuText O ToolsExpCurrentHTML "Eksporter parti til HTML fil..." 0 \
   {Skriv dette partiet til en HTML-fil}
 menuText O ToolsExpCurrentHTMLJS "Eksporter spillet til HTML- og JavaScript-fil..." 15 {Skriv gjeldende spill til en HTML- og JavaScript-fil}  
-menuText O ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText O ToolsExpCurrentRTF "Eksporter spillet til RTF-fil..." 15 \
+  {Skriv gjeldende spill til en RTF-fil som bevarer kommentarformatering}
 menuText O ToolsExpFilter "Eksporter alle partier i filteret" 0 \
   {Skriv alle partier i filteret til en tekstfil}
 menuText O ToolsExpFilterPGN "Eksporter filter til PGN-fil..." 0 \
@@ -237,14 +237,14 @@ menuText O ToolsExpFilterPGN "Eksporter filter til PGN-fil..." 0 \
 menuText O ToolsExpFilterHTML "Eksporter filter til HTML-fil..." 0 \
   {Skriv alle partier i filteret til en HTML-fil}
 menuText O ToolsExpFilterHTMLJS "Eksporter filter til HTML- og JavaScript-fil..." 17 {Skriv alle filtrerte spill til en HTML- og JavaScript-fil}  
-menuText O ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText O ToolsExpFilterRTF "Eksporter filter til RTF-fil..." 17 \
+  {Skriv alle filtrerte spill til en RTF-fil som bevarer kommentarformateringen}
 menuText O ToolsImportOne "Importer ett PGN-parti..." 0 \
   {Importer ett parti fra en PGN-fil}
 menuText O ToolsImportFile "Importer fil med PGN-partier..." 0 \
   {Importer partier fra en PGN-fil}
-menuText O FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText O FileImportRTF "Importer RTF-spill..." 0 \
+  {Importer et spill fra en RTF-fil opprettet av scidCommunity}
 menuText O ToolsStartEngine1 "Start motoren 1" 0  {Start motoren 1}
 menuText O ToolsStartEngine2 "Start motor 2" 0  {Start motor 2}
 menuText O ToolsCaptureBoard "Ta opp gjeldende tavle..." 0  {Lagre gjeldende tavle som et bilde.}
@@ -654,6 +654,8 @@ menuText O TreeHelpIndex "Innholdsfortegnelse" 0
 menuText O TreeFindGames "Finn partier med kommentar" 0 {Bygg listen over partier der dette trekket ble spilt med en kommentar}
 translate O SaveCache {Lagre hurtigbuffer}
 translate O Training {Trening}
+translate O TreeTrainingEndOfLine {Enden av linjen nådd.}
+translate O TreeTrainingMoveNotInBase {Dette trekket er ikke i databasen.}
 translate O LockTree {Lås}
 translate O TreeDepth {Tredybde (halve bevegelser):}
 translate O TreeLocked {låst}
@@ -1505,11 +1507,11 @@ translate O CopyErrNotOpen {er ikke åpnet}
 # Colors:
 translate O LightSquares {Lyse felt}
 translate O DarkSquares {Mørke felt}
-translate O PickColorFromScreen {Pick color from screen}
-translate O SaveCurrentColors {Save current colors}
-translate O SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate O RemoveSavedColor {Remove this saved color preset}
-translate O ColorPresetExists {Those colors are already saved as preset %d}
+translate O PickColorFromScreen {Velg farge fra skjermen}
+translate O SaveCurrentColors {Lagre gjeldende farger}
+translate O SaveCurrentColorsHint {Legg til gjeldende tavlefarger til forhåndsinnstillingslisten}
+translate O RemoveSavedColor {Fjern denne lagrede fargeforhåndsinnstillingen}
+translate O ColorPresetExists {Disse fargene er allerede lagret som forhåndsinnstilling %d}
 translate O SelectedSquares {Merkede felt}
 translate O SuggestedSquares {Foreslåtte trekkfelt}
 translate O WhitePieces {Hvite brikker}
@@ -2052,13 +2054,13 @@ translate O LSSOppTime {Opp tid}
 translate O LSSDrawOffered {Trekning tilbys}
 
 # RTF Export and Import
-translate O RtfExportTitle {Export to RTF File}
-translate O RtfExportError {Error exporting to RTF}
-translate O RtfImportTitle {Import RTF File}
-translate O RtfImportError {Error importing RTF file}
-translate O RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate O RtfImportSuccess {Game imported into clipboard database successfully.}
-translate O RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate O RtfExportTitle {Eksporter til RTF-fil}
+translate O RtfExportError {Feil ved eksport til RTF}
+translate O RtfImportTitle {Importer RTF-fil}
+translate O RtfImportError {Feil ved import av RTF-fil}
+translate O RtfNotScidFile {Denne filen ble ikke eksportert av scidCommunity med kommentarformatering, eller den er ødelagt.}
+translate O RtfImportSuccess {Spillet ble importert til utklippstavledatabasen.}
+translate O RtfImportSuccessMulti {%d spill ble importert til utklippstavledatabasen.}
 }
 # end of english.tcl
 

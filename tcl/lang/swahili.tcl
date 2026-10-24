@@ -85,7 +85,7 @@ menuText Z EditPaste "Bandika Mchezo wa Clipbase wa Mwisho" 0 \
   {Bandika mchezo unaotumika wa Clipbase hapa}
 menuText Z EditPastePGN "Bandika maandishi ya Ubao wa kunakili kama mchezo wa PGN..." 18 \
   {Tafsiri maandishi ya ubao wa kunakili kama mchezo katika nukuu za PGN na ubandike hapa}
-menuText Z EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText Z EditNullMove "Null Hoja" 0 {Ingiza hoja batili (ruka hoja)}
 menuText Z EditSetup "Sanidi Bodi ya Kuanza..." 0 \
   {Weka nafasi ya kuanza kwa mchezo huu}
 menuText Z EditCopyBoard "Nakili Nafasi" 6 \
@@ -127,7 +127,7 @@ menuText Z SearchNegate "Punguza Kichujio" 0 {Punguza kichujio ili kujumuisha mi
 menuText Z SearchCurrent "Bodi ya Sasa..." 0 {Tafuta nafasi ya sasa ya bodi}
 menuText Z SearchHeader "Kijajuu..." 0 {Tafuta kwa Kichwa (mchezaji, tukio, nk) habari}
 menuText Z SearchMaterial "Nyenzo/Muundo..." 0 {Tafuta muundo wa nyenzo au ubao}
-menuText Z SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText Z SearchComments "Tafuta Maoni..." 0 {Tafuta maoni ya michezo kwenye kichujio cha sasa}
 menuText Z SearchUsing "Kwa kutumia Faili ya Utafutaji..." 0 {Tafuta kwa kutumia faili ya SearchOptions}
 
 # Windows menu:
@@ -149,9 +149,9 @@ menuText Z WindowsTree "Dirisha la mti" 0 {Fungua / funga dirisha la Mti}
 menuText Z WindowsBook "Dirisha la Kitabu" 0 {Fungua/funga dirisha la Kitabu}
 menuText Z WindowsCorrChess "Dirisha la Mawasiliano" 0 {Fungua/funga dirisha la Mawasiliano}
 menuText Z WindowsGraph "Grafu ya Uchambuzi" 0 {Fungua dirisha la Grafu na nyakati za hatua na tathmini}
-menuText Z WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText Z WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate Z PresentationFrozen {Frozen - the presentation board is not following}
+menuText Z WindowsPresentationBoard "Bodi ya Uwasilishaji" 0 {Fungua/funga dirisha la ubao pekee linalofuata ubao kuu, kwa projekta au skrini ya pili}
+menuText Z WindowsPresentationFreeze "Kufungia Bodi ya Wasilisho" 0 {Simamisha/rejesha ubao wa wasilisho, ili mchezo uweze kuangaziwa bila hadhira kuuona}
+translate Z PresentationFrozen {Iliyogandishwa - ubao wa uwasilishaji haufuati}
 
 menuText Z WindowsEPD "Dirisha la EPD..." 0 {Fungua dirisha la mhariri wa EPD (faili ya nafasi).}
 
@@ -221,8 +221,8 @@ menuText Z ToolsExpCurrentPGN "Hamisha Mchezo kwa Faili ya PGN..." 15 \
 menuText Z ToolsExpCurrentHTML "Hamisha Mchezo kwa Faili ya HTML..." 15 \
   {Andika mchezo wa sasa kwenye faili ya HTML}
 menuText Z ToolsExpCurrentHTMLJS "Hamisha Mchezo kwa HTML na faili ya JavaScript..." 15 {Andika mchezo wa sasa kwa faili ya HTML na JavaScript}
-menuText Z ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText Z ToolsExpCurrentRTF "Hamisha Mchezo kwa Faili ya RTF..." 15 \
+  {Andika mchezo wa sasa kwenye faili ya RTF inayohifadhi umbizo la maoni}
 menuText Z ToolsExpFilter "Hamisha Michezo Yote ya Vichujio" 1 \
   {Andika michezo yote iliyochujwa kwenye faili ya maandishi}
 menuText Z ToolsExpFilterPGN "Hamisha Kichujio hadi Faili ya PGN..." 17 \
@@ -230,13 +230,13 @@ menuText Z ToolsExpFilterPGN "Hamisha Kichujio hadi Faili ya PGN..." 17 \
 menuText Z ToolsExpFilterHTML "Hamisha Kichujio hadi Faili ya HTML..." 17 \
   {Andika michezo yote iliyochujwa kwenye faili ya HTML}
 menuText Z ToolsExpFilterHTMLJS "Hamisha Kichujio kwa HTML na Faili ya JavaScript..." 17 {Andika michezo yote iliyochujwa kwenye faili ya HTML na JavaScript}
-menuText Z ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText Z ToolsExpFilterRTF "Hamisha Kichujio hadi Faili ya RTF..." 17 \
+  {Andika michezo yote iliyochujwa kwenye faili ya RTF inayohifadhi umbizo la maoni}
 menuText Z ToolsImportOne "Ingiza Mchezo Mmoja wa PGN..." 0 \
   {Ingiza mchezo kutoka kwa maandishi ya PGN}
 menuText Z ToolsImportFile "Ingiza Michezo kutoka kwa Faili za PGN..." 7 {Ingiza michezo kutoka kwa faili za PGN}
-menuText Z FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText Z FileImportRTF "Ingiza Mchezo wa RTF..." 0 \
+  {Ingiza mchezo kutoka kwa faili ya RTF iliyoundwa na scidCommunity}
 menuText Z ToolsStartEngine1 "Anza injini 1" 13  {Anza injini 1}
 menuText Z ToolsStartEngine2 "Anza injini 2" 13  {Anza injini 2}
 menuText Z ToolsCaptureBoard "Nasa Bodi ya Sasa..." 5  {Hifadhi ubao wa sasa kama picha.}
@@ -644,6 +644,8 @@ menuText Z TreeHelpIndex "Msaada Index" 0
 menuText Z TreeFindGames "Tafuta michezo yenye maelezo" 0 {Tengeneza orodha ya michezo ambapo hatua hii ilichezwa ikiwa na maelezo}
 translate Z SaveCache {Hifadhi Cache}
 translate Z Training {Mafunzo}
+translate Z TreeTrainingEndOfLine {Mwisho wa mstari umefikiwa.}
+translate Z TreeTrainingMoveNotInBase {Hatua hii haiko kwenye hifadhidata.}
 translate Z LockTree {Funga}
 translate Z TreeDepth {Kina cha mti (nusu hatua):}
 translate Z TreeLocked {imefungwa}
@@ -1489,11 +1491,11 @@ translate Z CopyErrNotOpen {haijafunguliwa}
 # Colors:
 translate Z LightSquares {Viwanja vya mwanga}
 translate Z DarkSquares {Viwanja vya giza}
-translate Z PickColorFromScreen {Pick color from screen}
-translate Z SaveCurrentColors {Save current colors}
-translate Z SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate Z RemoveSavedColor {Remove this saved color preset}
-translate Z ColorPresetExists {Those colors are already saved as preset %d}
+translate Z PickColorFromScreen {Chagua rangi kutoka skrini}
+translate Z SaveCurrentColors {Hifadhi rangi za sasa}
+translate Z SaveCurrentColorsHint {Ongeza rangi za sasa za ubao kwenye orodha iliyowekwa mapema}
+translate Z RemoveSavedColor {Ondoa mpangilio huu wa rangi uliohifadhiwa}
+translate Z ColorPresetExists {Rangi hizo tayari zimehifadhiwa kama zilivyowekwa awali %d}
 translate Z SelectedSquares {Viwanja vilivyochaguliwa}
 translate Z SuggestedSquares {Miraba inayopendekezwa ya kusogezwa}
 translate Z WhitePieces {Vipande vyeupe}
@@ -2030,13 +2032,13 @@ translate Z LSSOppTime {Muda wa Opp}
 translate Z LSSDrawOffered {Droo Imetolewa}
 
 # RTF Export and Import
-translate Z RtfExportTitle {Export to RTF File}
-translate Z RtfExportError {Error exporting to RTF}
-translate Z RtfImportTitle {Import RTF File}
-translate Z RtfImportError {Error importing RTF file}
-translate Z RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate Z RtfImportSuccess {Game imported into clipboard database successfully.}
-translate Z RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate Z RtfExportTitle {Hamisha kwa Faili ya RTF}
+translate Z RtfExportError {Hitilafu katika kuhamisha kwa RTF}
+translate Z RtfImportTitle {Ingiza Faili ya RTF}
+translate Z RtfImportError {Hitilafu katika kuleta faili ya RTF}
+translate Z RtfNotScidFile {Faili hii haikuhamishwa na scidCommunity yenye umbizo la maoni, au imeharibika.}
+translate Z RtfImportSuccess {Mchezo umeingizwa kwenye hifadhidata ya ubao wa kunakili.}
+translate Z RtfImportSuccessMulti {Michezo %d imeingizwa kwenye hifadhidata ya ubao wa kunakili.}
 }
 # end of english.tcl
 

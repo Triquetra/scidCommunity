@@ -25,7 +25,6 @@ array set encodings {
   polish utf-8
   portbr utf-8
   russian utf-8
-  serbian utf-8
   spanish utf-8
   swedish utf-8
   catalan utf-8
@@ -56,7 +55,6 @@ array set codes {
   polish P
   portbr B
   russian R
-  serbian Y
   spanish S
   swedish W
   catalan K
@@ -76,9 +74,12 @@ array set codes {
 }
 
 set languages {czech deutsch francais hungary italian chinese nederlan norsk polish
-  portbr spanish swedish serbian russian catalan suomi greek turkish SerbCyr 
+  portbr spanish swedish russian catalan suomi greek turkish SerbCyr
   japanese romanian hebrew swahili hindi ukrainian bengali korean bulgarian
 }
+# serbian.tcl is intentionally not in this list: Google Translate does not
+# provide Serbian written in the Latin alphabet, so it cannot be maintained
+# through the machine-translation pipeline.
 
 ################################################################################
 proc checkfile {code langfile enc} {

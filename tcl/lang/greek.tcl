@@ -116,7 +116,7 @@ menuText G EditPaste "Επικόλληση της τελευταίας παρτ�
   {Επικολλήστε εδώ την ενεργή παρτίδα της προσωρινής βάσης}
 menuText G EditPastePGN "Επικόλληση του κειμένου της προσωρινής μνήμης ως παρτίδας PGN..." 18 \
   {Μετατρέψτε το κείμενο της προσωρινής μνήμης ως παρτίδας με σχολιασμό PGN και επικολλήστε την εδώ}
-menuText G EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText G EditNullMove "Null Move" 0 {Εισαγωγή μηδενικής κίνησης (παράλειψη κίνησης)}
 menuText G EditSetup "Στήσιμο αρχικής σκακιέρας..." 0 \
   {Καθορίστε την θέση έναρξης αυτής της παρτίδας}
 menuText G EditCopyBoard "Αντιγραφή θέσης" 6 \
@@ -159,7 +159,7 @@ menuText G SearchNegate "Αναίρεση φίλτρου" 0 {Αναιρέστε 
 menuText G SearchCurrent "Τρέχουσα σκακιέρα..." 0 {Αναζητήστε την τρέχουσα θέση της σκακιέρας}
 menuText G SearchHeader "Κεφαλίδα..." 0 {Αναζήτηση βάσει των πληροφοριών κεφαλίδας (παίκτης, διοργάωνση, κλπ)}
 menuText G SearchMaterial "Υλικό/Διάταξη..." 0 {Αναζήτηση για υλικό ή διάταξη σκακιέρας}
-menuText G SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText G SearchComments "Αναζήτηση σχολίων..." 0 {Αναζητήστε τα σχόλια των παιχνιδιών στο τρέχον φίλτρο}
 menuText G SearchUsing "Με χρήση αρχείου αναζήτησης..." 0 {Αναζήτηση με την χρήση ενός αρχείου SearchOptions}
 
 # Windows menu:
@@ -181,9 +181,9 @@ menuText G WindowsTree "Παράθυρο δένδρου" 0 {Άνοιγμα/κλ�
 menuText G WindowsBook "Παράθυρο βιβλίου" 0 {Άνοιγμα/κλείσιμο του παραθύρου του βιβλίου}
 menuText G WindowsCorrChess "Παράθυρο αλληλογραφίας" 0 {Άνοιγμα/κλείσιμο του παραθύρου αλληλογραφίας}
 menuText G WindowsGraph "Γράφημα ανάλυσης" 0 {Ανοίξτε το παράθυρο Γράφημα με τους χρόνους και τις αξιολογήσεις των κινήσεων}
-menuText G WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText G WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate G PresentationFrozen {Frozen - the presentation board is not following}
+menuText G WindowsPresentationBoard "Συμβούλιο παρουσίασης" 0 {Ανοίξτε/κλείστε ένα παράθυρο μόνο για πλακέτα που ακολουθεί την κύρια πλακέτα, για προβολέα ή δεύτερη οθόνη}
+menuText G WindowsPresentationFreeze "Πίνακας παρουσίασης Freeze" 0 {Διακοπή/συνέχιση του πίνακα παρουσίασης, ώστε το παιχνίδι να μπορεί να πλοηγηθεί χωρίς να το δει το κοινό}
+translate G PresentationFrozen {Frozen - ο πίνακας παρουσίασης δεν ακολουθεί}
 
 menuText G WindowsEPD "Παράθυρο EPD..." 0 {Ανοίξτε ένα παράθυρο επεξεργασίας EPD (αρχείο θέσης).}
 
@@ -253,8 +253,8 @@ menuText G ToolsExpCurrentPGN "Εξαγωγή παρτίδας σε ένα αρ�
 menuText G ToolsExpCurrentHTML "Εξαγωγή παρτίδας σε αρχείο HTML..." 15 \
   {Γράψτε την τρέχουσα παρτίδα σε ένα αρχείο HTML}
 menuText G ToolsExpCurrentHTMLJS "Εξαγωγή παρτίδας σε αρχεία HTML και JavaScript..." 15 {Γράψτε την τρέχουσα παρτίδα σε αρχεία HTML και JavaScript}  
-menuText G ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText G ToolsExpCurrentRTF "Εξαγωγή παιχνιδιού σε αρχείο RTF..." 15 \
+  {Γράψτε το τρέχον παιχνίδι σε ένα αρχείο RTF διατηρώντας τη μορφοποίηση σχολίων}
 menuText G ToolsExpFilter "Εξαγωγή όλων των φιλτραρισμένων παρτίδων" 1 \
   {Γράψτε όλες τις φιλτραρισμένες παρτίδες σε ένα αρχείο κειμένου}
 menuText G ToolsExpFilterPGN "Εξαγωγή φίλτρου σε αρχείο PGN..." 17 \
@@ -262,13 +262,13 @@ menuText G ToolsExpFilterPGN "Εξαγωγή φίλτρου σε αρχείο PG
 menuText G ToolsExpFilterHTML "Εξαγωγή φίλτρου σε αρχείο HTML..." 17 \
   {Γράψτε όλες τις φιλτραρισμένες παρτίδες σε ένα αρχείο HTML}
 menuText G ToolsExpFilterHTMLJS "Εξαγωγή φίλτρου σε αρχεία HTML και JavaScript..." 17 {Γράψτε όλες τις φιλτραρισμένες παρτίδες σε αρχεία HTML και JavaScript}  
-menuText G ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText G ToolsExpFilterRTF "Εξαγωγή φίλτρου σε αρχείο RTF..." 17 \
+  {Γράψτε όλα τα φιλτραρισμένα παιχνίδια σε ένα αρχείο RTF διατηρώντας τη μορφοποίηση σχολίων}
 menuText G ToolsImportOne "Εισαγωγή παρτίδας PGN..." 0 \
   {Εισάγετε μια παρτίδα από ένα κείμενο PGN}
 menuText G ToolsImportFile "Εισαγωγή αρχείου παρτίδων PGN..." 7 {Εισάγετε παρτίδες από ένα αρχείο PGN}
-menuText G FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText G FileImportRTF "Εισαγωγή παιχνιδιού RTF..." 0 \
+  {Εισαγάγετε ένα παιχνίδι από ένα αρχείο RTF που δημιουργήθηκε από το scidCommunity}
 menuText G ToolsStartEngine1 "Εκκίνηση μηχανής 1" 13  {Εκκινήστε την μηχανή 1}
 menuText G ToolsStartEngine2 "Εκκίνηση μηχανής 2" 13  {Εκκινήστε την μηχανή 2}
 menuText G ToolsCaptureBoard "Σύλληψη τρέχουσας σκακιέρας..." 5  {Αποθηκεύστε την τρέχουσα σκακιέρα ως εικόνα.}
@@ -676,6 +676,8 @@ menuText G TreeHelpIndex "Κατάλογος βοήθειας" 0
 menuText G TreeFindGames "Εύρεση παρτίδων με σχολιασμό" 0 {Δημιουργία λίστας των παρτίδων όπου αυτή η κίνηση παίχτηκε με σχολιασμό}
 translate G SaveCache {Αποθήκευση προσωρινής μνήμης Cache}
 translate G Training {Προπόνηση}
+translate G TreeTrainingEndOfLine {Έφτασε στο τέλος της γραμμής.}
+translate G TreeTrainingMoveNotInBase {Αυτή η κίνηση δεν βρίσκεται στη βάση δεδομένων.}
 translate G LockTree {Κλείδωμα}
 translate G TreeDepth {Βάθος δέντρου (μισές κινήσεις):}
 translate G TreeLocked {κλειδωμένο}
@@ -1531,11 +1533,11 @@ translate G CopyErrNotOpen {δεν είναι ανοικτή}
 # Colors:
 translate G LightSquares {Λευκά τετράγωνα}
 translate G DarkSquares {Μαύρα τετράγωνα}
-translate G PickColorFromScreen {Pick color from screen}
-translate G SaveCurrentColors {Save current colors}
-translate G SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate G RemoveSavedColor {Remove this saved color preset}
-translate G ColorPresetExists {Those colors are already saved as preset %d}
+translate G PickColorFromScreen {Επιλέξτε χρώμα από την οθόνη}
+translate G SaveCurrentColors {Αποθηκεύστε τα τρέχοντα χρώματα}
+translate G SaveCurrentColorsHint {Προσθέστε τα τρέχοντα χρώματα του πίνακα στη λίστα προεπιλογών}
+translate G RemoveSavedColor {Καταργήστε αυτήν την αποθηκευμένη προεπιλογή χρωμάτων}
+translate G ColorPresetExists {Αυτά τα χρώματα έχουν ήδη αποθηκευτεί ως προκαθορισμένα %d}
 translate G SelectedSquares {Επιλεγμένα τετράγωνα}
 translate G SuggestedSquares {Τετράγωνα που προτείνονται για την κίνηση}
 translate G WhitePieces {Λευκά κομμάτια}
@@ -2079,13 +2081,13 @@ translate G LSSOppTime {Opp Time}
 translate G LSSDrawOffered {Προσφέρεται κλήρωση}
 
 # RTF Export and Import
-translate G RtfExportTitle {Export to RTF File}
-translate G RtfExportError {Error exporting to RTF}
-translate G RtfImportTitle {Import RTF File}
-translate G RtfImportError {Error importing RTF file}
-translate G RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate G RtfImportSuccess {Game imported into clipboard database successfully.}
-translate G RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate G RtfExportTitle {Εξαγωγή σε αρχείο RTF}
+translate G RtfExportError {Σφάλμα κατά την εξαγωγή σε RTF}
+translate G RtfImportTitle {Εισαγωγή αρχείου RTF}
+translate G RtfImportError {Σφάλμα κατά την εισαγωγή του αρχείου RTF}
+translate G RtfNotScidFile {Αυτό το αρχείο δεν εξήχθη από το scidCommunity με μορφοποίηση σχολίου ή είναι κατεστραμμένο.}
+translate G RtfImportSuccess {Το παιχνίδι εισήχθη με επιτυχία στη βάση δεδομένων του προχείρου.}
+translate G RtfImportSuccessMulti {%d παιχνίδια εισήχθησαν με επιτυχία στη βάση δεδομένων του προχείρου.}
 }
 # end of english.tcl
 

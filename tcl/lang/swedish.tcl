@@ -89,7 +89,7 @@ menuText W EditPaste "Klistra in det senaste Clipbasepartiet" 8 \
   {Klistrar in det senaste tillagda i Clipbase i den aktiva databasen}
 menuText W EditPastePGN "Klistra in Clipbasetext som PGNparti..." 10 \
   {Tolka Clipbasetexten som ett parti i PGN notation och klistra in det här}
-menuText W EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText W EditNullMove "Null Move" 0 {Infoga ett nolldrag (hoppa över ett drag)}
 menuText W EditSetup "Skapa ställning..." 0 \
   {Skapa en utgångsställning för aktuellt parti}
 menuText W EditCopyBoard "Kopiera ställning" 0 \
@@ -133,7 +133,7 @@ menuText W SearchNegate "Omvänt filter" 0 {Ta med partier som utesluts av filtr
 menuText W SearchCurrent "Aktuell position..." 8 {Sök partier med aktuell position på brädet}
 menuText W SearchHeader "I huvud..." 2 {Använd fast information (spelare, evenemang, plats, mm)}
 menuText W SearchMaterial "Material/ställning..." 0 {Sökning baserad på material eller ställning}
-menuText W SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText W SearchComments "Sök kommentarer..." 0 {Sök igenom kommentarerna till spelen i det aktuella filtret}
 menuText W SearchUsing "Använd sökfil..." 10 {Använd en fil med lagrade sökvillkor}
 
 # Windows menu:
@@ -155,9 +155,9 @@ menuText W WindowsTree "Trädfönster" 2 {Öppna/ stäng variantträdets fönste
 menuText W WindowsBook "Bokfönster" 0 {Öppna/stäng Bokfönstret}
 menuText W WindowsCorrChess "Korrespondensfönster" 0 {Öppna/stäng Korrespondensfönstret}
 menuText W WindowsGraph "Analysdiagram" 0 {Öppna graffönstret med dragtider och utvärderingar}
-menuText W WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText W WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate W PresentationFrozen {Frozen - the presentation board is not following}
+menuText W WindowsPresentationBoard "Presentationstavla" 0 {Öppna/stäng ett fönster endast för kortet som följer huvudkortet, för en projektor eller en andra skärm}
+menuText W WindowsPresentationFreeze "Frys presentationstavla" 0 {Stoppa/återuppta presentationstavlan, så att spelet kan navigeras utan att publiken ser det}
+translate W PresentationFrozen {Fryst - presentationstavlan följer inte}
 
 menuText W WindowsEPD "EPD-fönster..." 0 {Öppna ett EPD-redigeringsfönster (positionsfil).}
 
@@ -229,8 +229,8 @@ menuText W ToolsExpCurrentPGN "Exportera till PGN..." 15 \
 menuText W ToolsExpCurrentHTML "Exportera till HTML..." 15 \
   {Spara aktuellt parti till en HTML-fil}
 menuText W ToolsExpCurrentHTMLJS "Exportera till HTML och JavaScript-fil..." 15 {Spara aktuellt parti till en HTML och JavaScript-fil}  
-menuText W ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText W ToolsExpCurrentRTF "Exportera spel till RTF-fil..." 15 \
+  {Skriv aktuellt spel till en RTF-fil som bevarar kommentarsformateringen}
 menuText W ToolsExpFilter "Exportera alla filtrerade partier" 15 \
   {Spara alla filterade partier till en textfil}
 menuText W ToolsExpFilterPGN "Exportera till PGN..." 15 \
@@ -238,14 +238,14 @@ menuText W ToolsExpFilterPGN "Exportera till PGN..." 15 \
 menuText W ToolsExpFilterHTML "Exportera till HTML..." 15 \
   {Spara alla filterade partier till en HTML-fil}
 menuText W ToolsExpFilterHTMLJS "Exportera filtrerade till HTML och JavaScript-fil..." 17 {Spara alla filtrerade partier till en HTML och JavaScript-fil}  
-menuText W ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText W ToolsExpFilterRTF "Exportera filter till RTF-fil..." 17 \
+  {Skriv alla filtrerade spel till en RTF-fil som bevarar kommentarsformateringen}
 menuText W ToolsImportOne "Importera ett parti i PGN-format..." 0 \
   {Importera ett parti i PGN-format}
 menuText W ToolsImportFile "Importera flera partier i PGN-format..." 16 \
   {Importera flera partier i PGN-format från en fil}
-menuText W FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText W FileImportRTF "Importera RTF-spel..." 0 \
+  {Importera ett spel från en RTF-fil skapad av scidCommunity}
 menuText W ToolsStartEngine1 "Starta schackmotor 1" 0  {Starta schackmotor 1}
 menuText W ToolsStartEngine2 "Starta schackmotor 2" 0  {Starta schackmotor 2}
 menuText W ToolsCaptureBoard "Spara aktuellt schackbräde..." 0  {Spara det aktuella schackbrädet som en bild.}
@@ -655,6 +655,8 @@ menuText W TreeHelpIndex "Hjälpindex" 0
 menuText W TreeFindGames "Hitta partier med kommentar" 0 {Skapa listan över partier där detta drag spelades med en kommentar}
 translate W SaveCache {Spara cache}
 translate W Training {Träna}
+translate W TreeTrainingEndOfLine {Slutet på raden nått.}
+translate W TreeTrainingMoveNotInBase {Denna flytt finns inte i databasen.}
 translate W LockTree {Lås}
 translate W TreeDepth {Träddjup (halva rörelser):}
 translate W TreeLocked {Låst}
@@ -1510,11 +1512,11 @@ translate W CopyErrNotOpen {är ej öppen}
 # Colors:
 translate W LightSquares {Ljusa fält}
 translate W DarkSquares {Mörka fält}
-translate W PickColorFromScreen {Pick color from screen}
-translate W SaveCurrentColors {Save current colors}
-translate W SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate W RemoveSavedColor {Remove this saved color preset}
-translate W ColorPresetExists {Those colors are already saved as preset %d}
+translate W PickColorFromScreen {Välj färg från skärmen}
+translate W SaveCurrentColors {Spara aktuella färger}
+translate W SaveCurrentColorsHint {Lägg till de aktuella brädfärgerna i förinställningslistan}
+translate W RemoveSavedColor {Ta bort denna sparade färgförinställning}
+translate W ColorPresetExists {Dessa färger är redan sparade som förinställning %d}
 translate W SelectedSquares {Valda fält}
 translate W SuggestedSquares {Föreslagna fält}
 translate W WhitePieces {Vita pjäser}
@@ -2058,13 +2060,13 @@ translate W LSSOppTime {Upp tid}
 translate W LSSDrawOffered {Dragning erbjuds}
 
 # RTF Export and Import
-translate W RtfExportTitle {Export to RTF File}
-translate W RtfExportError {Error exporting to RTF}
-translate W RtfImportTitle {Import RTF File}
-translate W RtfImportError {Error importing RTF file}
-translate W RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate W RtfImportSuccess {Game imported into clipboard database successfully.}
-translate W RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate W RtfExportTitle {Exportera till RTF-fil}
+translate W RtfExportError {Fel vid export till RTF}
+translate W RtfImportTitle {Importera RTF-fil}
+translate W RtfImportError {Fel vid import av RTF-fil}
+translate W RtfNotScidFile {Den här filen exporterades inte av scidCommunity med kommentarsformatering eller är skadad.}
+translate W RtfImportSuccess {Spelet har importerats till urklippsdatabasen.}
+translate W RtfImportSuccessMulti {%d spel har importerats till urklippsdatabasen.}
 }
 # end of english.tcl
 

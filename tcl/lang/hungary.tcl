@@ -87,7 +87,7 @@ menuText H EditPaste "Beilleszti az utolsó játszmát a Vágóasztalról." 0 \
   {A Vágóasztal aktív játszmáját beilleszti ide.}
 menuText H EditPastePGN "A vágólap tartalmát PGN-játszmaként beilleszti" 20 \
   {A vágólap tartalmát PGN-jelölésû játszmának tekinti, és idemásolja.}
-menuText H EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText H EditNullMove "Null Move" 0 {Nulla mozgás beszúrása (mozgatás kihagyása)}
 menuText H EditSetup "Kezdõállás felállítása..." 14 \
   {Felállítja a kezdõállást ehhez a játszmához.}
 menuText H EditCopyBoard "Állás másolása FEN-ként" 17 \
@@ -130,7 +130,7 @@ menuText H SearchNegate "Szûrõ negálása" 6 {Negálja a szûrõt, hogy csak a
 menuText H SearchCurrent "Aktuális állás..." 0 {A táblán lévõ állást keresi.}
 menuText H SearchHeader "Fejléc..." 0 {Keresés fejléc (játékos, esemény, stb.) alapján}
 menuText H SearchMaterial "Anyag/szerkezet..." 6 {Keresés anyag vagy állásszerkezet alapján}
-menuText H SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText H SearchComments "Keresés a megjegyzésekben..." 0 {Keresés a játékok megjegyzései között az aktuális szűrőben}
 menuText H SearchUsing "Keresõfájl használata..." 0 {Keresés SearchOptions fájl használatával}
 
 # Windows menu:
@@ -152,9 +152,9 @@ menuText H WindowsTree "Faszerkezet" 0 {Kinyitja/becsukja a faszerkezet-ablakot.
 menuText H WindowsBook "Megnyitástárablak" 3 {Kinyitja/becsukja a megnyitástárablakot.}
 menuText H WindowsCorrChess "Levelezési sakk" 14 {Open/close the Correspondence window}
 menuText H WindowsGraph "Elemzési grafikon" 0 {Nyissa meg a Grafikon ablakot a lépések idejével és értékelésével}
-menuText H WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText H WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate H PresentationFrozen {Frozen - the presentation board is not following}
+menuText H WindowsPresentationBoard "Bemutató Testület" 0 {Nyissa meg/zárja be a csak táblára szolgáló ablakot, amely a fő táblát követi, projektor vagy második képernyő számára}
+menuText H WindowsPresentationFreeze "Freeze Presentation Board" 0 {Állítsa le/folytassa a bemutató táblát, hogy a játékban navigálni lehessen anélkül, hogy a közönség látná}
+translate H PresentationFrozen {Fagyott – a bemutató tábla nem követi}
 
 menuText H WindowsEPD "EPD ablak..." 0 {Nyisson meg egy EPD (pozíciófájl) szerkesztő ablakot}
 
@@ -226,8 +226,8 @@ menuText H ToolsExpCurrentPGN "Exportálás PGN-fájlba..." 11 \
 menuText H ToolsExpCurrentHTML "Exportálás HTML-fájlba..." 11 \
   {HTML-fájlba írja az aktuális játszmát.}
 menuText H ToolsExpCurrentHTMLJS "Játszma exportálása HTML és JavaScript fájlba" 28 {Az aktuális játszmát HTML és JavaScript fájlba írja.}  
-menuText H ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText H ToolsExpCurrentRTF "Játék exportálása RTF fájlba..." 15 \
+  {Írja az aktuális játékot egy RTF fájlba, megőrizve a megjegyzés formázását}
 menuText H ToolsExpFilter "Az összes szûrt játszma exportálása" 11 \
   {Szövegfájlba írja az összes szûrt játszmát.}
 menuText H ToolsExpFilterPGN "Szûrõ exportálása PGN-fájlba..." 18 \
@@ -235,14 +235,14 @@ menuText H ToolsExpFilterPGN "Szûrõ exportálása PGN-fájlba..." 18 \
 menuText H ToolsExpFilterHTML "Szûrõ exportálása HTML-fájlba..." 18 \
   {HTML-fájlba írja az összes szûrt játszmát.}
 menuText H ToolsExpFilterHTMLJS "Szûrõ exportálása HTML és JavaScript fájlba" 30 {Az összes kiszûrt játszmát HTML és JavaScript fájlba írja.}  
-menuText H ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText H ToolsExpFilterRTF "Szűrő exportálása RTF fájlba..." 17 \
+  {Írja az összes szűrt játékot RTF-fájlba, megőrizve a megjegyzések formázását}
 menuText H ToolsImportOne "PGN-játszma importálása..." 0 \
   {PGN-formátumú játszma importálása}
 menuText H ToolsImportFile "PGN-fájl importálása..." 2 \
   {PGN-fájl összes játszmájának importálása}
-menuText H FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText H FileImportRTF "RTF játék importálása..." 0 \
+  {Játék importálása a scidCommunity által létrehozott RTF-fájlból}
 menuText H ToolsStartEngine1 "Az 1. motor elindítása" 3  {Elindítja az 1. motort.}
 menuText H ToolsStartEngine2 "A 2. motor elindítása" 2  {Elindítja a 2. motort.}
 menuText H ToolsCaptureBoard "Az aktuális tábla rögzítése..." 0  {Mentse el az aktuális táblát képként.}
@@ -652,6 +652,8 @@ menuText H TreeHelpIndex "Tartalom" 0
 menuText H TreeFindGames "Játszmák keresése megjegyzéssel" 0 {Azon játszmák listájának összeállítása, ahol ezt a lépést megjegyzéssel játszották}
 translate H SaveCache {Cache mentése}
 translate H Training {Edzés}
+translate H TreeTrainingEndOfLine {Elérkezett a sor vége.}
+translate H TreeTrainingMoveNotInBase {Ez a lépés nem szerepel az adatbázisban.}
 translate H LockTree {Rögzítés}
 translate H TreeDepth {Fa mélysége (fél mozgás):}
 translate H TreeLocked {rögzítve}
@@ -1505,11 +1507,11 @@ translate H CopyErrNotOpen {nincs megnyitva.}
 # Colors:
 translate H LightSquares {Világos mezõk}
 translate H DarkSquares {Sötét mezõk}
-translate H PickColorFromScreen {Pick color from screen}
-translate H SaveCurrentColors {Save current colors}
-translate H SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate H RemoveSavedColor {Remove this saved color preset}
-translate H ColorPresetExists {Those colors are already saved as preset %d}
+translate H PickColorFromScreen {Válasszon színt a képernyőről}
+translate H SaveCurrentColors {Az aktuális színek mentése}
+translate H SaveCurrentColorsHint {Adja hozzá az aktuális táblaszíneket az előre beállított listához}
+translate H RemoveSavedColor {Távolítsa el ezt a mentett színbeállítást}
+translate H ColorPresetExists {Ezek a színek már mentve vannak %d előre beállított értékként}
 translate H SelectedSquares {Kiválasztott mezõk}
 translate H SuggestedSquares {Javasolt lépések mezõi}
 translate H WhitePieces {Világos figurák}
@@ -2053,13 +2055,13 @@ translate H LSSOppTime {Opp idő}
 translate H LSSDrawOffered {Sorsolás Felajánlott}
 
 # RTF Export and Import
-translate H RtfExportTitle {Export to RTF File}
-translate H RtfExportError {Error exporting to RTF}
-translate H RtfImportTitle {Import RTF File}
-translate H RtfImportError {Error importing RTF file}
-translate H RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate H RtfImportSuccess {Game imported into clipboard database successfully.}
-translate H RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate H RtfExportTitle {Exportálás RTF fájlba}
+translate H RtfExportError {Hiba az RTF-be exportáláskor}
+translate H RtfImportTitle {RTF fájl importálása}
+translate H RtfImportError {Hiba az RTF-fájl importálásakor}
+translate H RtfNotScidFile {Ezt a fájlt a scidCommunity nem exportálta megjegyzésformázással, vagy sérült.}
+translate H RtfImportSuccess {A játék sikeresen importálva a vágólap adatbázisba.}
+translate H RtfImportSuccessMulti {%d játék sikeresen importálva a vágólap adatbázisba.}
 }
 # end of english.tcl
 

@@ -87,7 +87,7 @@ menuText C EditPaste "Vloit posledn partii ze schrnky" 24 \
   {Vloit aktivn partii z databze schrnka}
 menuText C EditPastePGN "Vloit text ze schrnky jako PGN..." 10 \
   {Interpretovat text schrnky jako partii v PGN notaci a vloit ji sem}
-menuText C EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText C EditNullMove "Null Move" 0 {Vložit nulový tah (přeskočit tah)}
 menuText C EditSetup "Nastavit vchoz pozici..." 0 \
   {Nastavit vchoz pozici pro tuto partii}
 menuText C EditCopyBoard "Koprovat pozici" 4 \
@@ -130,7 +130,7 @@ menuText C SearchNegate "Negace filtru" 0 {Negace filtru -  vybrny budou pouze p
 menuText C SearchCurrent "Aktuln pozice..." 0 {Hledat aktuln pozici}
 menuText C SearchHeader "Hlavika..." 0 {Hledat podle hlaviky partie (hr, turnaj apod.)}
 menuText C SearchMaterial "Materil/Vzor..." 0 {Hledat podle materilu nebo podle vzoru}
-menuText C SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText C SearchComments "Hledat komentáře..." 0 {Hledejte komentáře her v aktuálním filtru}
 menuText C SearchUsing "Hledat pomoc souboru voleb..." 14 {Hledat s pouitm voleb zapsanch v souboru}
 
 # Windows menu:
@@ -148,9 +148,9 @@ menuText C WindowsTree "Stromov okno" 4 {Otevt/zavt stromov okno}
 menuText C WindowsBook "Okno knihovny zahjen" 0 {Otevt/zavt okno knihovny zahjen}
 menuText C WindowsCorrChess "Korespondenn okno" 0 {Otevt/zavt okno knihovny zahjen}
 menuText C WindowsGraph "Analza Graf" 0 {Otevete okno Graf s asy tah a vyhodnocenm}
-menuText C WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText C WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate C PresentationFrozen {Frozen - the presentation board is not following}
+menuText C WindowsPresentationBoard "Prezentační deska" 0 {Otevřete/zavřete okno pouze pro desku, které následuje po hlavní desce, pro projektor nebo druhou obrazovku}
+menuText C WindowsPresentationFreeze "Freeze Presentation Board" 0 {Zastavte/obnovte prezentační tabuli, aby bylo možné hru procházet, aniž by ji diváci viděli}
+translate C PresentationFrozen {Frozen - prezentační tabule nenásleduje}
 
 menuText C WindowsEPD "EPD okno..." 0 {Otevřete okno editoru EPD (soubor pozic).}
 
@@ -222,8 +222,8 @@ menuText C ToolsExpCurrentPGN "Export partie do PGN souboru..." 17 \
 menuText C ToolsExpCurrentHTML "Export partie do HTML souboru..." 17 \
   {Zapsat aktuln partii do HTML souboru}
 menuText C ToolsExpCurrentHTMLJS "Exportovat partii do souboru HTML s JavaScriptem..." 15 {Uloit aktuln partii do souboru s HTML a JavaScriptem}  
-menuText C ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText C ToolsExpCurrentRTF "Exportovat hru do souboru RTF..." 15 \
+  {Zapište aktuální hru do souboru RTF se zachováním formátování komentářů}
 menuText C ToolsExpFilter "Export filtrovanch parti" 7 \
   {Zapsat vechny filtrovan partie do textovho souboru}
 menuText C ToolsExpFilterPGN "Export filtrovanch parti do PGN souboru..." 30 \
@@ -231,14 +231,14 @@ menuText C ToolsExpFilterPGN "Export filtrovanch parti do PGN souboru..." 30 \
 menuText C ToolsExpFilterHTML "Export filtrovanch parti do HTML souboru..." 30 \
   {Zapsat vechny filtrovan partie do HTML souboru}
 menuText C ToolsExpFilterHTMLJS "Exportovat filtr do souboru HTML s JavaScriptem..." 17 {Uloit vechny vyfiltrovan partie do souboru HTML s JavaScriptem}  
-menuText C ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText C ToolsExpFilterRTF "Exportovat filtr do souboru RTF..." 17 \
+  {Zapište všechny filtrované hry do souboru RTF se zachováním formátování komentářů}
 menuText C ToolsImportOne "Import jedn PGN partie..." 7 \
   {Importovat partii z PGN zpisu}
 menuText C ToolsImportFile "Import souboru PGN parti..." 10 \
   {Importovat partie z PGN souboru}
-menuText C FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText C FileImportRTF "Importovat hru RTF..." 0 \
+  {Importujte hru ze souboru RTF vytvořeného společností scidCommunity}
 menuText C ToolsStartEngine1 "Spustit hern program 1" 0  {Spustit hern program 1}
 menuText C ToolsStartEngine2 "Spustit hern program 2" 0  {Spustit hern program 2}
 menuText C ToolsCaptureBoard "Uloit aktuln achovnici..." 0  {Uloit aktuln achovnici jako obrzek.}
@@ -649,6 +649,8 @@ menuText C TreeHelpIndex "Index npovdy" 0
 menuText C TreeFindGames "Najít partie s anotací" 0 {Vytvořit seznam partií, kde byl tento tah hrán s anotací}
 translate C SaveCache {Uloit cache}
 translate C Training {Trnink}
+translate C TreeTrainingEndOfLine {Dosažen konec řádku.}
+translate C TreeTrainingMoveNotInBase {Tento přesun není v databázi.}
 translate C LockTree {Zamknout}
 translate C TreeDepth {Hloubka stromu (pl tahu):}
 translate C TreeLocked {Zamknuto}
@@ -1504,11 +1506,11 @@ translate C CopyErrNotOpen {nen otevena}
 # Colors:
 translate C LightSquares {Bl pole}
 translate C DarkSquares {ern pole}
-translate C PickColorFromScreen {Pick color from screen}
-translate C SaveCurrentColors {Save current colors}
-translate C SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate C RemoveSavedColor {Remove this saved color preset}
-translate C ColorPresetExists {Those colors are already saved as preset %d}
+translate C PickColorFromScreen {Vyberte barvu z obrazovky}
+translate C SaveCurrentColors {Uložit aktuální barvy}
+translate C SaveCurrentColorsHint {Přidejte aktuální barvy desky do seznamu předvoleb}
+translate C RemoveSavedColor {Odeberte toto uložené přednastavení barev}
+translate C ColorPresetExists {Tyto barvy jsou již uloženy jako přednastavené %d}
 translate C SelectedSquares {Vybran pole}
 translate C SuggestedSquares {Pole navrhovanch tah}
 translate C WhitePieces {Bl figury}
@@ -2052,13 +2054,13 @@ translate C LSSOppTime {Opp Time}
 translate C LSSDrawOffered {Nabídka remízy}
 
 # RTF Export and Import
-translate C RtfExportTitle {Export to RTF File}
-translate C RtfExportError {Error exporting to RTF}
-translate C RtfImportTitle {Import RTF File}
-translate C RtfImportError {Error importing RTF file}
-translate C RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate C RtfImportSuccess {Game imported into clipboard database successfully.}
-translate C RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate C RtfExportTitle {Export do souboru RTF}
+translate C RtfExportError {Při exportu do formátu RTF došlo k chybě}
+translate C RtfImportTitle {Importujte soubor RTF}
+translate C RtfImportError {Chyba při importu souboru RTF}
+translate C RtfNotScidFile {Tento soubor nebyl exportován scidCommunity s formátováním komentáře nebo je poškozen.}
+translate C RtfImportSuccess {Hra byla úspěšně importována do databáze schránky.}
+translate C RtfImportSuccessMulti {%d her bylo úspěšně importováno do databáze schránky.}
 }
 # end of english.tcl
 

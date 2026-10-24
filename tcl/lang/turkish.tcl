@@ -89,7 +89,7 @@ menuText T EditPaste "Son Clipbase Oyununu Yapıştır" 0 \
   {Aktif Clipbase oyununu buraya yapıştırın}
 menuText T EditPastePGN "Pano metnini PGN oyunu olarak yapıştırın..." 18 \
   {Pano metnini PGN gösteriminde bir oyun olarak yorumlayın ve buraya yapıştırın}
-menuText T EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText T EditNullMove "Boş Hareket" 0 {Boş bir hamle ekle (bir hamleyi atla)}
 menuText T EditSetup "Başlangıç ​​Panosunu Ayarla..." 0 \
   {Bu oyunun başlangıç ​​pozisyonunu ayarlayın}
 menuText T EditCopyBoard "Konumu Kopyala" 6 \
@@ -131,7 +131,7 @@ menuText T SearchNegate "Filtreyi Reddet" 0 {Yalnızca hariç tutulan oyunları 
 menuText T SearchCurrent "Mevcut Yönetim Kurulu..." 0 {Geçerli pano konumunu arayın}
 menuText T SearchHeader "Başlık..." 0 {Başlık (oyuncu, etkinlik vb.) bilgilerine göre arama yapın}
 menuText T SearchMaterial "Malzeme/Desen..." 0 {Malzeme veya tahta desenlerini arayın}
-menuText T SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText T SearchComments "Yorumları Ara..." 0 {Oyunların yorumlarını mevcut filtrede arayın}
 menuText T SearchUsing "Arama Dosyası Kullanılıyor..." 0 {SearchOptions dosyasını kullanarak arama yapın}
 
 # Windows menu:
@@ -153,9 +153,9 @@ menuText T WindowsTree "Ağaç Penceresi" 0 {Ağaç penceresini aç/kapat}
 menuText T WindowsBook "Kitap Penceresi" 0 {Kitap penceresini aç/kapat}
 menuText T WindowsCorrChess "Yazışma Penceresi" 0 {Yazışma penceresini aç/kapat}
 menuText T WindowsGraph "Analiz Grafiği" 0 {Hareket sürelerini ve değerlendirmelerini içeren Grafik penceresini açın}
-menuText T WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText T WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate T PresentationFrozen {Frozen - the presentation board is not following}
+menuText T WindowsPresentationBoard "Sunum Panosu" 0 {Bir projektör veya ikinci bir ekran için ana kartı takip eden yalnızca karttan oluşan bir pencereyi açın/kapatın}
+menuText T WindowsPresentationFreeze "Sunum Panosunu Dondur" 0 {Sunum panosunu durdurun/devam ettirin, böylece seyirciler görmeden oyunda gezinebilirsiniz}
+translate T PresentationFrozen {Dondurulmuş - sunum panosu takip etmiyor}
 
 menuText T WindowsEPD "EPD Penceresi..." 0 {Bir EPD (konum dosyası) düzenleyici penceresi açın}
 
@@ -225,8 +225,8 @@ menuText T ToolsExpCurrentPGN "Oyunu PGN Dosyasına Aktar..." 15 \
 menuText T ToolsExpCurrentHTML "Oyunu HTML Dosyasına Aktar..." 15 \
   {Mevcut oyunu bir HTML dosyasına yaz}
 menuText T ToolsExpCurrentHTMLJS "Oyunu HTML ve JavaScript Dosyasına Aktar..." 15 {Mevcut oyunu bir HTML ve JavaScript dosyasına yaz}
-menuText T ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText T ToolsExpCurrentRTF "Oyunu RTF Dosyasına Aktar..." 15 \
+  {Geçerli oyunu, yorum biçimlendirmesini koruyarak bir RTF dosyasına yazın}
 menuText T ToolsExpFilter "Tüm Filtre Oyunlarını Dışa Aktar" 1 \
   {Filtrelenen tüm oyunları bir metin dosyasına yaz}
 menuText T ToolsExpFilterPGN "Filtreyi PGN Dosyasına Aktar..." 17 \
@@ -234,13 +234,13 @@ menuText T ToolsExpFilterPGN "Filtreyi PGN Dosyasına Aktar..." 17 \
 menuText T ToolsExpFilterHTML "Filtreyi HTML Dosyasına Aktar..." 17 \
   {Filtrelenen tüm oyunları bir HTML dosyasına yazın}
 menuText T ToolsExpFilterHTMLJS "Filtreyi HTML ve JavaScript Dosyasına Dışa Aktar..." 17 {Filtrelenen tüm oyunları bir HTML ve JavaScript dosyasına yazın}
-menuText T ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText T ToolsExpFilterRTF "Filtreyi RTF Dosyasına Aktar..." 17 \
+  {Filtrelenen tüm oyunları, yorum formatını koruyarak bir RTF dosyasına yazın}
 menuText T ToolsImportOne "Bir PGN Oyununu İçe Aktar..." 0 \
   {PGN metninden bir oyunu içe aktarın}
 menuText T ToolsImportFile "Oyunları PGN Dosyalarından İçe Aktar..." 7 {Oyunları PGN dosyalarından içe aktarın}
-menuText T FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText T FileImportRTF "RTF Oyununu İçe Aktar..." 0 \
+  {ScidCommunity tarafından oluşturulan bir RTF dosyasından oyunu içe aktarın}
 menuText T ToolsStartEngine1 "Motor 1'i çalıştırın" 13  {Motor 1'i çalıştırın}
 menuText T ToolsStartEngine2 "Motor 2'yi çalıştırın" 13  {Motor 2'yi çalıştırın}
 menuText T ToolsCaptureBoard "Mevcut Panoyu Yakala..." 5  {Geçerli panoyu resim olarak kaydedin.}
@@ -648,6 +648,8 @@ menuText T TreeHelpIndex "Yardım Dizini" 0
 menuText T TreeFindGames "Açıklamalı oyunları bul" 0 {Bu hamlenin bir açıklama ile oynandığı oyunların listesini oluştur}
 translate T SaveCache {Önbelleği Kaydet}
 translate T Training {Eğitim}
+translate T TreeTrainingEndOfLine {Hattın sonuna ulaşıldı.}
+translate T TreeTrainingMoveNotInBase {Bu hamle veritabanında yok.}
 translate T LockTree {Kilit}
 translate T TreeDepth {Ağaç derinliği (yarım hamle):}
 translate T TreeLocked {kilitli}
@@ -1493,11 +1495,11 @@ translate T CopyErrNotOpen {açık değil}
 # Colors:
 translate T LightSquares {Açık kareler}
 translate T DarkSquares {Koyu kareler}
-translate T PickColorFromScreen {Pick color from screen}
-translate T SaveCurrentColors {Save current colors}
-translate T SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate T RemoveSavedColor {Remove this saved color preset}
-translate T ColorPresetExists {Those colors are already saved as preset %d}
+translate T PickColorFromScreen {Ekrandan renk seç}
+translate T SaveCurrentColors {Mevcut renkleri kaydet}
+translate T SaveCurrentColorsHint {Mevcut pano renklerini ön ayar listesine ekleyin}
+translate T RemoveSavedColor {Kaydedilen bu renk ön ayarını kaldırın}
+translate T ColorPresetExists {Bu renkler zaten %d ön ayarı olarak kaydedildi}
 translate T SelectedSquares {Seçilen kareler}
 translate T SuggestedSquares {Önerilen hareket kareleri}
 translate T WhitePieces {Beyaz parçalar}
@@ -2034,13 +2036,13 @@ translate T LSSOppTime {Rakip Zamanı}
 translate T LSSDrawOffered {Çekiliş Teklif Edildi}
 
 # RTF Export and Import
-translate T RtfExportTitle {Export to RTF File}
-translate T RtfExportError {Error exporting to RTF}
-translate T RtfImportTitle {Import RTF File}
-translate T RtfImportError {Error importing RTF file}
-translate T RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate T RtfImportSuccess {Game imported into clipboard database successfully.}
-translate T RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate T RtfExportTitle {RTF Dosyasına Aktar}
+translate T RtfExportError {RTF'ye aktarma hatası}
+translate T RtfImportTitle {RTF Dosyasını İçe Aktar}
+translate T RtfImportError {RTF dosyası içe aktarılırken hata oluştu}
+translate T RtfNotScidFile {Bu dosya scidCommunity tarafından yorum formatıyla dışa aktarılmadı veya bozuk.}
+translate T RtfImportSuccess {Oyun başarıyla pano veritabanına aktarıldı.}
+translate T RtfImportSuccessMulti {%d oyun başarıyla pano veritabanına aktarıldı.}
 }
 # end of english.tcl
 

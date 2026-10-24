@@ -94,7 +94,7 @@ menuText N EditPaste "Partij vanuit klembord" 7 \
   {Plak actieve klembord-partij hier}
 menuText N EditPastePGN "Plak de Klipbord tekst als  PGN partij..." 10 \
   {Interpreteer de Klipbord tekst als een partij  in PGN notatie en plak die hier} ;
-menuText N EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText N EditNullMove "Nulbeweging" 0 {Een nulzet invoegen (een zet overslaan)}
 menuText N EditSetup "Stelling opzetten..." 0 \
   {Kies een start-stelling voor de partij}
 menuText N EditCopyBoard "Copieer stelling " 6 \
@@ -144,7 +144,7 @@ menuText N SearchHeader "Partijgegevens..." 5 \
   {Zoek op speciale informatie: speler, evenement enz.}
 menuText N SearchMaterial "Materiaal/Kenmerken..." 0 \
   {Zoek op patroon: bord, materiaal enz.}
-menuText N SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText N SearchComments "Zoek opmerkingen..." 0 {Zoek de commentaren van de games in het huidige filter}
 menuText N SearchUsing "Zoekopties" 0 \
   {Zoek met gebruikmaking van opgeslagen opties}
 
@@ -170,9 +170,9 @@ menuText N WindowsBook "Boek Venster" 0 {Open/sluit het Boek venster}
 menuText N WindowsCorrChess "Correspondentieschaak venster" 0 \
     {Open/sluit het correspondentieschaak venster}
 menuText N WindowsGraph "Analyse grafiek" 0 {Open het grafiekvenster met de zettijden en evaluaties}
-menuText N WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText N WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate N PresentationFrozen {Frozen - the presentation board is not following}
+menuText N WindowsPresentationBoard "Presentatiebord" 0 {Open/sluit een alleen-bordvenster dat het moederbord volgt, voor een projector of een tweede scherm}
+menuText N WindowsPresentationFreeze "Presentatiebord bevriezen" 0 {Stop/hervat het presentatiebord, zodat u door het spel kunt navigeren zonder dat het publiek het ziet}
+translate N PresentationFrozen {Frozen - het presentatiebord volgt niet}
 
 menuText N WindowsEPD "EPD-venster..." 0 {Open een EPD-editor (positiebestand).}
 
@@ -245,8 +245,8 @@ menuText N ToolsExpCurrentPGN "Partij in PGN-formaat exporteren..." 11 \
 menuText N ToolsExpCurrentHTML "Partij in HTML-formaat exporteren..." 11 \
   {Schrijf huidige partij naar HTML-bestand}
 menuText N ToolsExpCurrentHTMLJS "Exporteer Partij naar een HTML en JavaScript Bestand..." 15 {Schrijf de huidige partij naar een HTML en JavaScript bestand}  
-menuText N ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText N ToolsExpCurrentRTF "Game exporteren naar RTF-bestand..." 15 \
+  {Schrijf het huidige spel naar een RTF-bestand met behoud van de commentaaropmaak}
 menuText N ToolsExpFilter "Alle partijen in filter exporteren" 17 \
   {Exporteer alle geslecteerde partijen naar een bestand}
 menuText N ToolsExpFilterPGN "Filter in PGN-formaat exporteren..." 10 \
@@ -254,14 +254,14 @@ menuText N ToolsExpFilterPGN "Filter in PGN-formaat exporteren..." 10 \
 menuText N ToolsExpFilterHTML "Filter in HTML-formaat exporteren..." 10 \
   {Schrijf selectie naar HTML-bestand}
 menuText N ToolsExpFilterHTMLJS "Exporteer Filter naar HTML en JavaScript Bestand..." 17 {Schrijf alle gefilterde partijen naar een HTML en JavaScript bestand}  
-menuText N ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText N ToolsExpFilterRTF "Filter exporteren naar RTF-bestand..." 17 \
+  {Schrijf alle gefilterde games naar een RTF-bestand met behoud van de commentaaropmaak}
 menuText N ToolsImportOne "Een PGN partij importeren..." 4 \
   {Importeer PGN partij}
 menuText N ToolsImportFile "PGN database importeren..." 4 \
   {Importeer PGN bestand}
-menuText N FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText N FileImportRTF "RTF-game importeren..." 0 \
+  {Importeer een game vanuit een RTF-bestand gemaakt door scidCommunity}
 menuText N ToolsStartEngine1 "Start engine 1" 0  {Start engine 1}
 menuText N ToolsStartEngine2 "Start engine 2" 0  {Start engine 2}
 menuText N ToolsCaptureBoard "Huidig ??bord vastleggen..." 5  {Sla het huidige bord op als afbeelding.}
@@ -674,6 +674,8 @@ menuText N TreeHelpIndex "Index" 0
 menuText N TreeFindGames "Partijen met annotatie zoeken" 0 {Maak de lijst met partijen waarin deze zet met een annotatie is gespeeld}
 translate N SaveCache {Cache Bewaren}
 translate N Training {Training}
+translate N TreeTrainingEndOfLine {Einde van de lijn bereikt.}
+translate N TreeTrainingMoveNotInBase {Deze zet staat niet in de database.}
 translate N LockTree {Boom Vergrendelen}
 translate N TreeDepth {Boomdiepte (halve zetten):}
 translate N TreeLocked {Vergrendeld}
@@ -1529,11 +1531,11 @@ translate N CopyErrNotOpen {is niet geopend}
 # Colors:
 translate N LightSquares {Lichte velden}
 translate N DarkSquares {Donkere velden}
-translate N PickColorFromScreen {Pick color from screen}
-translate N SaveCurrentColors {Save current colors}
-translate N SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate N RemoveSavedColor {Remove this saved color preset}
-translate N ColorPresetExists {Those colors are already saved as preset %d}
+translate N PickColorFromScreen {Kies kleur op het scherm}
+translate N SaveCurrentColors {Bewaar huidige kleuren}
+translate N SaveCurrentColorsHint {Voeg de huidige bordkleuren toe aan de vooraf ingestelde lijst}
+translate N RemoveSavedColor {Verwijder deze opgeslagen kleurvoorinstelling}
+translate N ColorPresetExists {Deze kleuren zijn al opgeslagen als voorinstelling %d}
 translate N SelectedSquares {Geselecteerde velden}
 translate N SuggestedSquares {Zetsuggestie velden}
 translate N WhitePieces {Witte stukken}
@@ -2077,13 +2079,13 @@ translate N LSSOppTime {Op tijd}
 translate N LSSDrawOffered {Gelijkspel aangeboden}
 
 # RTF Export and Import
-translate N RtfExportTitle {Export to RTF File}
-translate N RtfExportError {Error exporting to RTF}
-translate N RtfImportTitle {Import RTF File}
-translate N RtfImportError {Error importing RTF file}
-translate N RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate N RtfImportSuccess {Game imported into clipboard database successfully.}
-translate N RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate N RtfExportTitle {Exporteren naar RTF-bestand}
+translate N RtfExportError {Fout bij exporteren naar RTF}
+translate N RtfImportTitle {RTF-bestand importeren}
+translate N RtfImportError {Fout bij het importeren van RTF-bestand}
+translate N RtfNotScidFile {Dit bestand is niet door scidCommunity geëxporteerd met commentaaropmaak, of is beschadigd.}
+translate N RtfImportSuccess {Spel is succesvol geïmporteerd in de klemborddatabase.}
+translate N RtfImportSuccessMulti {%d games zijn succesvol geïmporteerd in de klemborddatabase.}
 }
 # end of english.tcl
 

@@ -126,7 +126,7 @@ menuText L EditPaste "Paste Last Clipbase Game" 0 \
   {Lipiți aici jocul Clipbase activ}
 menuText L EditPastePGN "Lipiți textul Clipboard ca joc PGN..." 18 \
   {Interpretați textul clipboard-ului ca un joc în notație PGN și inserați-l aici}
-menuText L EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText L EditNullMove "Mișcare nulă" 0 {Inserați o mișcare nulă (săriți o mișcare)}
 menuText L EditSetup "Configurați placa de pornire..." 0 \
   {Setați poziția de început pentru acest joc}
 menuText L EditCopyBoard "Copiați poziția" 6 \
@@ -168,7 +168,7 @@ menuText L SearchNegate "Negați filtrul" 0 {Anulați filtrul pentru a include n
 menuText L SearchCurrent "Consiliul actual..." 0 {Căutați poziția curentă a consiliului}
 menuText L SearchHeader "Antet..." 0 {Căutați informații după antet (jucător, eveniment etc.).}
 menuText L SearchMaterial "Material/Model..." 0 {Căutați materiale sau modele de tablă}
-menuText L SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText L SearchComments "Căutați comentarii..." 0 {Căutați comentariile jocurilor în filtrul curent}
 menuText L SearchUsing "Se utilizează fișierul de căutare..." 0 {Căutați folosind un fișier SearchOptions}
 
 # Windows menu:
@@ -190,9 +190,9 @@ menuText L WindowsTree "Fereastra copacului" 0 {Deschide/închide fereastra Tree
 menuText L WindowsBook "Fereastra de carte" 0 {Deschide/închide fereastra Carte}
 menuText L WindowsCorrChess "Fereastra de corespondență" 0 {Deschide/închide fereastra de corespondență}
 menuText L WindowsGraph "Graficul de analiză" 0 {Deschideți fereastra Grafic cu timpii și evaluările mișcărilor}
-menuText L WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText L WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate L PresentationFrozen {Frozen - the presentation board is not following}
+menuText L WindowsPresentationBoard "Tablă de prezentare" 0 {Deschideți/închideți o fereastră numai de placă care urmează placa principală, pentru un proiector sau un al doilea ecran}
+menuText L WindowsPresentationFreeze "Înghețați panoul de prezentare" 0 {Opriți/reluați panoul de prezentare, astfel încât jocul să poată fi navigat fără ca publicul să-l vadă}
+translate L PresentationFrozen {Frozen - panoul de prezentare nu urmărește}
 
 menuText L WindowsEPD "Fereastra EPD..." 0 {Deschideți o fereastră de editor EPD (fișier de poziție).}
 
@@ -262,8 +262,8 @@ menuText L ToolsExpCurrentPGN "Exportați jocul în fișierul PGN..." 15 \
 menuText L ToolsExpCurrentHTML "Exportați jocul în fișierul HTML..." 15 \
   {Scrieți jocul curent într-un fișier HTML}
 menuText L ToolsExpCurrentHTMLJS "Exportați jocul în fișierul HTML și JavaScript..." 15 {Scrieți jocul curent într-un fișier HTML și JavaScript}
-menuText L ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText L ToolsExpCurrentRTF "Exportați jocul în fișierul RTF..." 15 \
+  {Scrieți jocul curent într-un fișier RTF păstrând formatarea comentariilor}
 menuText L ToolsExpFilter "Exportați toate jocurile de filtrare" 1 \
   {Scrieți toate jocurile filtrate într-un fișier text}
 menuText L ToolsExpFilterPGN "Exportați filtrul în fișierul PGN..." 17 \
@@ -271,13 +271,13 @@ menuText L ToolsExpFilterPGN "Exportați filtrul în fișierul PGN..." 17 \
 menuText L ToolsExpFilterHTML "Exportați filtrul în fișierul HTML..." 17 \
   {Scrieți toate jocurile filtrate într-un fișier HTML}
 menuText L ToolsExpFilterHTMLJS "Exportați filtrul în fișierul HTML și JavaScript..." 17 {Scrieți toate jocurile filtrate într-un fișier HTML și JavaScript}
-menuText L ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText L ToolsExpFilterRTF "Exportați filtrul în fișierul RTF..." 17 \
+  {Scrieți toate jocurile filtrate într-un fișier RTF, păstrând formatarea comentariilor}
 menuText L ToolsImportOne "Importă un joc PGN..." 0 \
   {Importați un joc din text PGN}
 menuText L ToolsImportFile "Importați jocuri din fișiere PGN..." 7 {Importați jocuri din fișiere PGN}
-menuText L FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText L FileImportRTF "Import joc RTF..." 0 \
+  {Importați un joc dintr-un fișier RTF creat de scidCommunity}
 menuText L ToolsStartEngine1 "Porniți motorul 1" 13  {Porniți motorul 1}
 menuText L ToolsStartEngine2 "Porniți motorul 2" 13  {Porniți motorul 2}
 menuText L ToolsCaptureBoard "Capturați tabloul curent..." 5  {Salvați tabloul curent ca imagine.}
@@ -685,6 +685,8 @@ menuText L TreeHelpIndex "Index de ajutor" 0
 menuText L TreeFindGames "Găsește partide cu adnotare" 0 {Creează lista partidelor în care această mutare a fost jucată cu o adnotare}
 translate L SaveCache {Salvați cache}
 translate L Training {Antrenamentul}
+translate L TreeTrainingEndOfLine {S-a ajuns la sfârșitul liniei.}
+translate L TreeTrainingMoveNotInBase {Această mutare nu se află în baza de date.}
 translate L LockTree {Blocare}
 translate L TreeDepth {Adâncimea copacului (jumătate de mișcări):}
 translate L TreeLocked {încuiat}
@@ -1530,11 +1532,11 @@ translate L CopyErrNotOpen {nu este deschis}
 # Colors:
 translate L LightSquares {Pătrate ușoare}
 translate L DarkSquares {Pătrate întunecate}
-translate L PickColorFromScreen {Pick color from screen}
-translate L SaveCurrentColors {Save current colors}
-translate L SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate L RemoveSavedColor {Remove this saved color preset}
-translate L ColorPresetExists {Those colors are already saved as preset %d}
+translate L PickColorFromScreen {Alegeți culoarea de pe ecran}
+translate L SaveCurrentColors {Salvați culorile curente}
+translate L SaveCurrentColorsHint {Adăugați culorile tablei curente la lista presetată}
+translate L RemoveSavedColor {Eliminați această presetare de culoare salvată}
+translate L ColorPresetExists {Aceste culori sunt deja salvate ca %d presetat}
 translate L SelectedSquares {Pătrate selectate}
 translate L SuggestedSquares {Patratele de mutare sugerate}
 translate L WhitePieces {Bucăți albe}
@@ -2071,13 +2073,13 @@ translate L LSSOppTime {Opp Time}
 translate L LSSDrawOffered {Remiză oferită}
 
 # RTF Export and Import
-translate L RtfExportTitle {Export to RTF File}
-translate L RtfExportError {Error exporting to RTF}
-translate L RtfImportTitle {Import RTF File}
-translate L RtfImportError {Error importing RTF file}
-translate L RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate L RtfImportSuccess {Game imported into clipboard database successfully.}
-translate L RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate L RtfExportTitle {Exportați în fișierul RTF}
+translate L RtfExportError {Eroare la exportul în RTF}
+translate L RtfImportTitle {Importați fișierul RTF}
+translate L RtfImportError {Eroare la importarea fișierului RTF}
+translate L RtfNotScidFile {Acest fișier nu a fost exportat de scidCommunity cu formatarea comentariilor sau este corupt.}
+translate L RtfImportSuccess {Jocul a fost importat cu succes în baza de date clipboard.}
+translate L RtfImportSuccessMulti {%d jocuri importate în baza de date clipboard cu succes.}
 }
 # end of english.tcl
 

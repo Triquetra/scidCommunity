@@ -86,7 +86,7 @@ menuText V EditPaste "הדבק את משחק ה-Clipbase האחרון" 0 \
   {הדבק את משחק Clipbase הפעיל כאן}
 menuText V EditPastePGN "הדבק את טקסט הלוח כמשחק PGN..." 18 \
   {פרש את טקסט הלוח כמשחק בסימון PGN והדבק אותו כאן}
-menuText V EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText V EditNullMove "Null Move" 0 {הוסף מהלך ריק (דלג על מהלך)}
 menuText V EditSetup "הגדר לוח התחלה..." 0 \
   {הגדר את עמדת ההתחלה למשחק זה}
 menuText V EditCopyBoard "העתק עמדה" 6 \
@@ -128,7 +128,7 @@ menuText V SearchNegate "שלילת מסנן" 0 {שלל את המסנן כך ש�
 menuText V SearchCurrent "המועצה הנוכחית..." 0 {חפש את עמדת הדירקטוריון הנוכחית}
 menuText V SearchHeader "כּוֹתֶרֶת..." 0 {חפש לפי כותרת מידע (שחקן, אירוע וכו').}
 menuText V SearchMaterial "חומר/דפוס..." 0 {חפש חומר או דפוסי לוח}
-menuText V SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText V SearchComments "חפש תגובות..." 0 {חפש את ההערות של המשחקים במסנן הנוכחי}
 menuText V SearchUsing "משתמש בקובץ חיפוש..." 0 {חפש באמצעות קובץ SearchOptions}
 
 # Windows menu:
@@ -150,9 +150,9 @@ menuText V WindowsTree "חלון עץ" 0 {פתח/סגור את חלון העץ}
 menuText V WindowsBook "חלון ספרים" 0 {פתח/סגור את חלון הספר}
 menuText V WindowsCorrChess "חלון התכתבות" 0 {פתח/סגור את חלון ההתכתבות}
 menuText V WindowsGraph "גרף ניתוח" 0 {פתח את חלון הגרף עם זמני המהלכים והערכות}
-menuText V WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText V WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate V PresentationFrozen {Frozen - the presentation board is not following}
+menuText V WindowsPresentationBoard "לוח מצגות" 0 {פתח/סגור חלון ללוח בלבד העוקב אחר הלוח הראשי, עבור מקרן או מסך שני}
+menuText V WindowsPresentationFreeze "הקפאת לוח מצגות" 0 {עצור/המשך את לוח המצגת, כך שניתן יהיה לנווט במשחק מבלי שהקהל יראה אותו}
+translate V PresentationFrozen {קפוא - לוח המצגת לא עוקב}
 
 menuText V WindowsEPD "חלון EPD..." 0 {פתח חלון עורך EPD (קובץ מיקום).}
 
@@ -222,8 +222,8 @@ menuText V ToolsExpCurrentPGN "ייצא משחק לקובץ PGN..." 15 \
 menuText V ToolsExpCurrentHTML "ייצוא משחק לקובץ HTML..." 15 \
   {כתוב את המשחק הנוכחי לקובץ HTML}
 menuText V ToolsExpCurrentHTMLJS "ייצוא משחק לקובץ HTML ו-JavaScript..." 15 {כתוב את המשחק הנוכחי לקובץ HTML ו-JavaScript}
-menuText V ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText V ToolsExpCurrentRTF "ייצוא משחק לקובץ RTF..." 15 \
+  {כתוב את המשחק הנוכחי לקובץ RTF המשמר את עיצוב ההערות}
 menuText V ToolsExpFilter "ייצא את כל משחקי הסינון" 1 \
   {כתוב את כל המשחקים המסוננים לקובץ טקסט}
 menuText V ToolsExpFilterPGN "ייצא מסנן לקובץ PGN..." 17 \
@@ -231,13 +231,13 @@ menuText V ToolsExpFilterPGN "ייצא מסנן לקובץ PGN..." 17 \
 menuText V ToolsExpFilterHTML "ייצוא מסנן לקובץ HTML..." 17 \
   {כתוב את כל המשחקים המסוננים לקובץ HTML}
 menuText V ToolsExpFilterHTMLJS "ייצוא מסנן לקובץ HTML ו-JavaScript..." 17 {כתוב את כל המשחקים המסוננים לקובץ HTML ו-JavaScript}
-menuText V ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText V ToolsExpFilterRTF "ייצוא מסנן לקובץ RTF..." 17 \
+  {כתוב את כל המשחקים המסוננים לקובץ RTF המשמר את עיצוב ההערות}
 menuText V ToolsImportOne "ייבוא משחק PGN אחד..." 0 \
   {ייבא משחק מטקסט PGN}
 menuText V ToolsImportFile "ייבוא משחקים מקבצי PGN..." 7 {ייבוא משחקים מקבצי PGN}
-menuText V FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText V FileImportRTF "ייבוא ​​משחק RTF..." 0 \
+  {ייבא משחק מקובץ RTF שנוצר על ידי scidCommunity}
 menuText V ToolsStartEngine1 "הפעל מנוע 1" 13  {הפעל מנוע 1}
 menuText V ToolsStartEngine2 "הפעל מנוע 2" 13  {הפעל מנוע 2}
 menuText V ToolsCaptureBoard "לכידת לוח נוכחי..." 5  {שמור את הלוח הנוכחי כתמונה.}
@@ -645,6 +645,8 @@ menuText V TreeHelpIndex "אינדקס עזרה" 0
 menuText V TreeFindGames "מצא משחקים עם הערה" 0 {צור רשימה של המשחקים שבהם מהלך זה שוחק עם הערה}
 translate V SaveCache {שמור מטמון}
 translate V Training {הַדְרָכָה}
+translate V TreeTrainingEndOfLine {הגיע סוף השורה.}
+translate V TreeTrainingMoveNotInBase {המהלך הזה לא נמצא במסד הנתונים.}
 translate V LockTree {לִנְעוֹל}
 translate V TreeDepth {עומק עץ (חצי מהלכים):}
 translate V TreeLocked {נָעוּל}
@@ -1490,11 +1492,11 @@ translate V CopyErrNotOpen {אינו פתוח}
 # Colors:
 translate V LightSquares {ריבועים בהירים}
 translate V DarkSquares {ריבועים כהים}
-translate V PickColorFromScreen {Pick color from screen}
-translate V SaveCurrentColors {Save current colors}
-translate V SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate V RemoveSavedColor {Remove this saved color preset}
-translate V ColorPresetExists {Those colors are already saved as preset %d}
+translate V PickColorFromScreen {בחר צבע מהמסך}
+translate V SaveCurrentColors {שמור את הצבעים הנוכחיים}
+translate V SaveCurrentColorsHint {הוסף את צבעי הלוח הנוכחיים לרשימה המוגדרת מראש}
+translate V RemoveSavedColor {הסר את הגדרת הצבע שנשמרה מראש}
+translate V ColorPresetExists {הצבעים האלה כבר שמורים כ-%d מוגדר מראש}
 translate V SelectedSquares {ריבועים נבחרים}
 translate V SuggestedSquares {הצעות להזיז ריבועים}
 translate V WhitePieces {חתיכות לבנות}
@@ -2031,13 +2033,13 @@ translate V LSSOppTime {Opp Time}
 translate V LSSDrawOffered {הגרלה מוצעת}
 
 # RTF Export and Import
-translate V RtfExportTitle {Export to RTF File}
-translate V RtfExportError {Error exporting to RTF}
-translate V RtfImportTitle {Import RTF File}
-translate V RtfImportError {Error importing RTF file}
-translate V RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate V RtfImportSuccess {Game imported into clipboard database successfully.}
-translate V RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate V RtfExportTitle {ייצוא לקובץ RTF}
+translate V RtfExportError {שגיאה בייצוא ל-RTF}
+translate V RtfImportTitle {ייבוא ​​קובץ RTF}
+translate V RtfImportError {שגיאה בייבוא ​​קובץ RTF}
+translate V RtfNotScidFile {קובץ זה לא יצא על ידי scidCommunity עם עיצוב הערות, או שהוא פגום.}
+translate V RtfImportSuccess {המשחק יובא למסד הנתונים של הלוח בהצלחה.}
+translate V RtfImportSuccessMulti {%d משחקים יובאו למסד הנתונים של הלוח בהצלחה.}
 }
 # end of english.tcl
 

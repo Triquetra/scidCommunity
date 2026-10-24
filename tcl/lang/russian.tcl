@@ -91,7 +91,7 @@ menuText R EditPaste "Вставить последнюю партию из бу
   {Вставить активную партию из буферной базы здесь}
 menuText R EditPastePGN "Вставить текст из буфера обмена как PGN партию..." 18 \
   {Интерпетировать текст в буфере обмена как партию в PGN нотации и вставить сюда}
-menuText R EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText R EditNullMove "Нулевой ход" 0 {Вставить нулевой ход (пропустить ход)}
 menuText R EditSetup "Установить начальную позицию..." 2 \
   {Установить стартовую позицию для этой партии}
 menuText R EditCopyBoard "Копировать позицию" 4 \
@@ -134,7 +134,7 @@ menuText R SearchNegate "Инвертировать фильтр" 0 {Обрат�
 menuText R SearchCurrent "Текущая позиция..." 0 {Поиск текущей позиции}
 menuText R SearchHeader "Заголовок..." 0 {Поиск по заголовку (игрок, турнир, и т. д.)}
 menuText R SearchMaterial "Материал/позиция..." 0 {Поиск по материалу или образцам позиции}
-menuText R SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText R SearchComments "Поиск комментариев..." 0 {Поиск комментариев к играм в текущем фильтре}
 menuText R SearchUsing "Использовать файл поиска..." 0 {Поиск с использованием файла с установками поиска}
 
 # Windows menu:
@@ -156,9 +156,9 @@ menuText R WindowsTree "Окно дерева" 10 {Открыть/закрыть
 menuText R WindowsBook "Окно книги" 0 {Открыть/закрыть окно книги}
 menuText R WindowsCorrChess "Окно переписки" 0 {Открыть/закрыть окно переписки}
 menuText R WindowsGraph "График анализа" 0 {Откройте окно графики со временем ходов и дополнительных возможностей.}
-menuText R WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText R WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate R PresentationFrozen {Frozen - the presentation board is not following}
+menuText R WindowsPresentationBoard "Презентационная доска" 0 {Открыть/закрыть окно только для доски, которое следует за основной платой, для проектора или второго экрана.}
+menuText R WindowsPresentationFreeze "Доска для заморозки презентаций" 0 {Остановите/возобновите доску презентации, чтобы можно было перемещаться по игре так, чтобы зрители ее не видели.}
+translate R PresentationFrozen {Заморожено — доска презентаций не отслеживается.}
 
 menuText R WindowsEPD "Окно ЭПД..." 0 {Откройте окно редактора EPD (файла позиции).}
 
@@ -228,8 +228,8 @@ menuText R ToolsExpCurrentPGN "Экспорт партии в файл PGN..." 0
 menuText R ToolsExpCurrentHTML "Экспорт партии в файл HTML..." 0 \
   {Записать текущую партию в файл HTML}
 menuText R ToolsExpCurrentHTMLJS "Экспорт партии в HTML и JavaScript файл..." 0 {Записать текущую партию HTML и JavaScript файл}
-menuText R ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText R ToolsExpCurrentRTF "Экспортировать игру в файл RTF..." 15 \
+  {Записать текущую игру в файл RTF, сохраняя формат комментариев.}
 menuText R ToolsExpFilter "Экспорт всех фильтрованных партий" 11 \
   {Записать все фильтрованные партии в текстовый файл}
 menuText R ToolsExpFilterPGN "Экспорт фильтрованных партий в файл PGN..." 0 \
@@ -237,13 +237,13 @@ menuText R ToolsExpFilterPGN "Экспорт фильтрованных парт
 menuText R ToolsExpFilterHTML "Экспорт фильтрованных партий в файл HTML..." 0 \
   {Записать все фильтрованные партии в файл HTML}
 menuText R ToolsExpFilterHTMLJS "Экспорт фильтрованных партий в HTML и JavaScript файл..." 17 {Записывает все фильтрованные партии в HTML и JavaScript файл}
-menuText R ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText R ToolsExpFilterRTF "Экспортировать фильтр в файл RTF..." 17 \
+  {Запишите все отфильтрованные игры в файл RTF, сохраняя формат комментариев.}
 menuText R ToolsImportOne "Импорт одной партии PGN..." 0 \
   {Импорт партии из текстового файла PGN}
 menuText R ToolsImportFile "Импорт файла партий PGN..." 9 {Импорт партий из файла PGN}
-menuText R FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText R FileImportRTF "Импортировать игру в формате RTF..." 0 \
+  {Импортируйте игру из файла RTF, созданного scidCommunity.}
 menuText R ToolsStartEngine1 "Запустить движок 1" 0  {Запускает движок 1}
 menuText R ToolsStartEngine2 "Запустить движок 2" 0  {Запускает движок 2}
 menuText R ToolsCaptureBoard "Фиксировать текущую позицию..." 0  {Сохранить текущую позицию как изображение.}
@@ -651,6 +651,8 @@ menuText R TreeHelpIndex "Индекс помощи" 0
 menuText R TreeFindGames "Найти партии с аннотацией" 0 {Составить список партий, где этот ход был сыгран с аннотацией}
 translate R SaveCache {Сохранить кеш}
 translate R Training {Тренировка}
+translate R TreeTrainingEndOfLine {Достигнут конец строки.}
+translate R TreeTrainingMoveNotInBase {Этого хода нет в базе данных.}
 translate R LockTree {Блокировка}
 translate R TreeDepth {Глубина дерева (половина хода):}
 translate R TreeLocked {Заблокировано}
@@ -1506,11 +1508,11 @@ translate R CopyErrNotOpen {не открыта}
 # Colors:
 translate R LightSquares {Светлые поля}
 translate R DarkSquares {Тёмные поля}
-translate R PickColorFromScreen {Pick color from screen}
-translate R SaveCurrentColors {Save current colors}
-translate R SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate R RemoveSavedColor {Remove this saved color preset}
-translate R ColorPresetExists {Those colors are already saved as preset %d}
+translate R PickColorFromScreen {Выбрать цвет с экрана}
+translate R SaveCurrentColors {Сохранить текущие цвета}
+translate R SaveCurrentColorsHint {Добавить текущие цвета доски в список предустановок}
+translate R RemoveSavedColor {Удалить этот сохраненный набор цветов}
+translate R ColorPresetExists {Эти цвета уже сохранены как пресет %d.}
 translate R SelectedSquares {Выбранные поля}
 translate R SuggestedSquares {Поля подсказанных ходов}
 translate R WhitePieces {Белые фигуры}
@@ -2054,13 +2056,13 @@ translate R LSSOppTime {Время приема}
 translate R LSSDrawOffered {Предлагается ничья}
 
 # RTF Export and Import
-translate R RtfExportTitle {Export to RTF File}
-translate R RtfExportError {Error exporting to RTF}
-translate R RtfImportTitle {Import RTF File}
-translate R RtfImportError {Error importing RTF file}
-translate R RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate R RtfImportSuccess {Game imported into clipboard database successfully.}
-translate R RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate R RtfExportTitle {Экспорт в файл RTF}
+translate R RtfExportError {Ошибка экспорта в RTF.}
+translate R RtfImportTitle {Импортировать файл RTF}
+translate R RtfImportError {Ошибка импорта файла RTF.}
+translate R RtfNotScidFile {Этот файл не был экспортирован scidCommunity с форматированием комментариев или поврежден.}
+translate R RtfImportSuccess {Игра успешно импортирована в базу данных буфера обмена.}
+translate R RtfImportSuccessMulti {%d игр успешно импортированы в базу данных буфера обмена.}
 }
 # end of english.tcl
 

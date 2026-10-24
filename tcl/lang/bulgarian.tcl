@@ -126,7 +126,7 @@ menuText g EditPaste "Поставете последната игра на Clip
   {Поставете активната игра Clipbase тук}
 menuText g EditPastePGN "Поставяне на текст от клипборда като PGN игра..." 18 \
   {Интерпретирайте текста на клипборда като игра в PGN нотация и го поставете тук}
-menuText g EditNullMove "Null Move" 0 {Insert a null move (skip a move)}
+menuText g EditNullMove "Нулево движение" 0 {Вмъкване на нулев ход (пропускане на ход)}
 menuText g EditSetup "Настройване на начална дъска..." 0 \
   {Задайте началната позиция за тази игра}
 menuText g EditCopyBoard "Копиране на позиция" 6 \
@@ -168,7 +168,7 @@ menuText g SearchNegate "Филтър за отхвърляне" 0 {Отхвър
 menuText g SearchCurrent "Настоящ борд..." 0 {Търсете текущата позиция на борда}
 menuText g SearchHeader "Заглавка..." 0 {Търсене по информация за заглавка (играч, събитие и т.н.).}
 menuText g SearchMaterial "Материал/модел..." 0 {Търсене на материали или шаблони на дъски}
-menuText g SearchComments "Search Comments..." 0 {Search the comments of the games in the current filter}
+menuText g SearchComments "Търсене на коментари..." 0 {Търсете коментарите на игрите в текущия филтър}
 menuText g SearchUsing "Използване на файл за търсене..." 0 {Търсете с помощта на SearchOptions файл}
 
 # Windows menu:
@@ -190,9 +190,9 @@ menuText g WindowsTree "Прозорец на дърво" 0 {Отворете/з
 menuText g WindowsBook "Прозорец на книгата" 0 {Отворете/затворете прозореца на книгата}
 menuText g WindowsCorrChess "Прозорец за кореспонденция" 0 {Отворете/затворете прозореца за кореспонденция}
 menuText g WindowsGraph "Графика за анализ" 0 {Отворете прозореца Графика с времена на ходове и оценки}
-menuText g WindowsPresentationBoard "Presentation Board" 0 {Open/close a board-only window that follows the main board, for a projector or a second screen}
-menuText g WindowsPresentationFreeze "Freeze Presentation Board" 0 {Stop/resume the presentation board, so the game can be navigated without the audience seeing it}
-translate g PresentationFrozen {Frozen - the presentation board is not following}
+menuText g WindowsPresentationBoard "Табло за представяне" 0 {Отваряне/затваряне на прозорец само за платка, който следва основната платка, за проектор или втори екран}
+menuText g WindowsPresentationFreeze "Замразяване на таблото за представяне" 0 {Спрете/възобновете презентационната дъска, така че играта да може да се навигира, без публиката да я вижда}
+translate g PresentationFrozen {Frozen - таблото за презентации не следва}
 
 menuText g WindowsEPD "EPD прозорец..." 0 {Отворете прозорец на редактор на EPD (файл с позиция).}
 
@@ -262,8 +262,8 @@ menuText g ToolsExpCurrentPGN "Експортиране на играта в PGN
 menuText g ToolsExpCurrentHTML "Експортиране на играта в HTML файл..." 15 \
   {Запишете текущата игра в HTML файл}
 menuText g ToolsExpCurrentHTMLJS "Експортирайте играта в HTML и JavaScript файл..." 15 {Напишете текущата игра в HTML и JavaScript файл}
-menuText g ToolsExpCurrentRTF "Export Game to RTF File..." 15 \
-  {Write current game to an RTF file preserving comment formatting}
+menuText g ToolsExpCurrentRTF "Експортиране на играта в RTF файл..." 15 \
+  {Запишете текущата игра в RTF файл, запазвайки форматирането на коментара}
 menuText g ToolsExpFilter "Експортиране на всички филтрирани игри" 1 \
   {Запишете всички филтрирани игри в текстов файл}
 menuText g ToolsExpFilterPGN "Експортиране на филтър към PGN файл..." 17 \
@@ -271,13 +271,13 @@ menuText g ToolsExpFilterPGN "Експортиране на филтър към 
 menuText g ToolsExpFilterHTML "Експортиране на филтър в HTML файл..." 17 \
   {Запишете всички филтрирани игри в HTML файл}
 menuText g ToolsExpFilterHTMLJS "Експортиране на филтър в HTML и JavaScript файл..." 17 {Запишете всички филтрирани игри в HTML и JavaScript файл}
-menuText g ToolsExpFilterRTF "Export Filter to RTF File..." 17 \
-  {Write all filtered games to an RTF file preserving comment formatting}
+menuText g ToolsExpFilterRTF "Експортиране на филтър към RTF файл..." 17 \
+  {Запишете всички филтрирани игри в RTF файл, запазвайки форматирането на коментарите}
 menuText g ToolsImportOne "Импортиране на една PGN игра..." 0 \
   {Импортирайте игра от PGN текст}
 menuText g ToolsImportFile "Импортиране на игри от PGN файлове..." 7 {Импортиране на игри от PGN файл(ове)}
-menuText g FileImportRTF "Import RTF Game..." 0 \
-  {Import a game from an RTF file created by scidCommunity}
+menuText g FileImportRTF "Импортиране на RTF игра..." 0 \
+  {Импортирайте игра от RTF файл, създаден от scidCommunity}
 menuText g ToolsStartEngine1 "Стартирайте двигател 1" 13  {Стартирайте двигател 1}
 menuText g ToolsStartEngine2 "Стартирайте двигател 2" 13  {Стартирайте двигател 2}
 menuText g ToolsCaptureBoard "Заснемане на текущата дъска..." 5  {Запазете текущата дъска като изображение.}
@@ -685,6 +685,8 @@ menuText g TreeHelpIndex "Помощен индекс" 0
 menuText g TreeFindGames "Намери партии с анотация" 0 {Създаване на списък с партиите, в които този ход е изигран с анотация}
 translate g SaveCache {Запазване на кеша}
 translate g Training {обучение}
+translate g TreeTrainingEndOfLine {Краят на реда е достигнат.}
+translate g TreeTrainingMoveNotInBase {Този ход не е в базата данни.}
 translate g LockTree {Заключване}
 translate g TreeDepth {Дълбочина на дървото (половина ходове):}
 translate g TreeLocked {заключено}
@@ -1530,11 +1532,11 @@ translate g CopyErrNotOpen {не е отворено}
 # Colors:
 translate g LightSquares {Светли квадратчета}
 translate g DarkSquares {Тъмни квадратчета}
-translate g PickColorFromScreen {Pick color from screen}
-translate g SaveCurrentColors {Save current colors}
-translate g SaveCurrentColorsHint {Add the current board colors to the preset list}
-translate g RemoveSavedColor {Remove this saved color preset}
-translate g ColorPresetExists {Those colors are already saved as preset %d}
+translate g PickColorFromScreen {Изберете цвят от екрана}
+translate g SaveCurrentColors {Запазване на текущите цветове}
+translate g SaveCurrentColorsHint {Добавете текущите цветове на дъската към предварително зададения списък}
+translate g RemoveSavedColor {Премахнете тази запазена предварително зададена цветова настройка}
+translate g ColorPresetExists {Тези цветове вече са запазени като предварително зададени %d}
 translate g SelectedSquares {Избрани квадратчета}
 translate g SuggestedSquares {Предложени квадратчета за преместване}
 translate g WhitePieces {Бели парчета}
@@ -2071,13 +2073,13 @@ translate g LSSOppTime {Opp Time}
 translate g LSSDrawOffered {Предлага се равенство}
 
 # RTF Export and Import
-translate g RtfExportTitle {Export to RTF File}
-translate g RtfExportError {Error exporting to RTF}
-translate g RtfImportTitle {Import RTF File}
-translate g RtfImportError {Error importing RTF file}
-translate g RtfNotScidFile {This file was not exported by scidCommunity with comment formatting, or is corrupted.}
-translate g RtfImportSuccess {Game imported into clipboard database successfully.}
-translate g RtfImportSuccessMulti {%d games imported into clipboard database successfully.}
+translate g RtfExportTitle {Експортиране в RTF файл}
+translate g RtfExportError {Грешка при експортиране в RTF}
+translate g RtfImportTitle {Импортиране на RTF файл}
+translate g RtfImportError {Грешка при импортирането на RTF файл}
+translate g RtfNotScidFile {Този файл не е експортиран от scidCommunity с форматиране на коментари или е повреден.}
+translate g RtfImportSuccess {Играта е импортирана успешно в базата данни на клипборда.}
+translate g RtfImportSuccessMulti {%d игри са импортирани успешно в базата данни на клипборда.}
 }
 # end of english.tcl
 
