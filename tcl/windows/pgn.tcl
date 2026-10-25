@@ -260,6 +260,19 @@ namespace eval pgn {
     $mctxt add cascade -label "+-  +/-  ..." -menu $mctxt.evals2
     $mctxt add command -label "[tr WindowsComment]" -command {::makeCommentWin}
 
+    # Copy FEN for the move under the pointer, below the tear-off line:
+    set fenAt 0
+    if {[$mctxt type 0] eq "tearoff"} { set fenAt 1 }
+    set moveTag [::pgn::moveTagAt $win $x $y]
+    if {$moveTag eq ""} {
+      $mctxt insert $fenAt command -label [tr CopyFen] -state disabled
+    } else {
+      set san [string trim [$win get "$moveTag.first" "$moveTag.last"]]
+      $mctxt insert $fenAt command -label [format [tr CopyFenAfter] $san] \
+          -command [list ::pgn::copyFen $win $moveTag]
+    }
+    $mctxt insert [expr {$fenAt + 1}] separator
+
     tk_popup $mctxt $x $y
   }
 
@@ -304,6 +317,44 @@ namespace eval pgn {
   ################################################################################
   proc HideBoard {} {
     destroy .pgnPopup
+  }
+
+  ################################################################################
+  # ::pgn::moveTagAt
+  #
+  #    Returns the move tag (m_<n>) under the given screen coordinates in the
+  #    notation text, or "" when the pointer is not over a move.
+  #
+  ################################################################################
+  proc moveTagAt {win x y} {
+    set x [expr {$x - [winfo rootx $win]}]
+    set y [expr {$y - [winfo rooty $win]}]
+    foreach tag [$win tag names [$win index @$x,$y]] {
+      if {[regexp {^m_[0-9]+$} $tag]} { return $tag }
+    }
+    return ""
+  }
+
+  ################################################################################
+  # ::pgn::copyFen
+  #
+  #    Puts the FEN of the position after the given move on the clipboard.
+  #    The current position is restored afterwards, as in ::pgn::ShowBoard,
+  #    so the board does not move.
+  #
+  ################################################################################
+  proc copyFen {win moveTag} {
+    set offSet [sc_pos pgnOffset]
+    set fen ""
+    catch {
+      sc_move pgn [string range $moveTag 2 end]
+      set fen [sc_pos fen]
+    }
+    catch { sc_move pgn $offSet }
+    if {$fen eq ""} { return }
+
+    clipboard clear
+    clipboard append $fen
   }
 
   ################################################################################

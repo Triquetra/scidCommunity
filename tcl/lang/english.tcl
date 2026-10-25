@@ -924,6 +924,8 @@ menuText E PgnHelp "Help" 0
 menuText E PgnHelpPgn "PGN Help" 0
 menuText E PgnHelpIndex "Index" 0
 translate E PgnWindowTitle {Notation - game %u}
+translate E CopyFen {Copy FEN}
+translate E CopyFenAfter {Copy FEN after %s}
 
 # Notation pane (PGN window) button tooltips:
 translate E TBLookupTooltip {Tablebase Lookup on Lichess}
