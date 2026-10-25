@@ -215,3 +215,31 @@ game's middlegame to ply 11, `<= 11` to ply 20.
 - Patzer, `server/src/routes/analyze.ts`, `computePhaseSplit` — the source of our
   current rule (local copy of the project).
 - Our plugin, `11_cr_classify.tcl`, `::crclass::phaseSplit` (local).
+
+## Amendment: the book floor was removed
+
+The rule described above gated the opening on the opening book as well as on the
+positional signal - the opening could not end before the book did. That coupling
+is gone: `::crclass::phaseSplit` now takes the moves and nothing else, and the
+opening ends at the first ply whose position is no longer opening-like. Any
+second argument is accepted and ignored, so an older caller cannot break the
+report.
+
+Why: which book is installed is a user preference, and the books differ a lot in
+width - `gm2600.bin` ends theory early, a Cerebellum net or `Perfect2019.bin`
+much later. Phase boundaries moving because a different `.bin` was selected is
+not a property of the game. The positional signal is the only thing that
+describes the position itself.
+
+What changes in practice, measured on the game above: nothing. The book ended at
+ply 7 there and the middlegame still started at ply 21, because the positional
+signal did not fire until then - the floor was not the binding constraint. It
+only binds when a book outlasts the positional signal (deep theory into a
+reduced-material position), which is exactly the case where the book, not the
+game, would have been deciding the phase.
+
+One consequence worth knowing: with no floor, a game that trades early can leave
+the opening well before move 10, and a game that keeps all its material can still
+be "opening" at move 20. That is the rule doing what it says, but it is a
+different distribution of phase lengths than before, and the phase paragraph
+prompts inherit it.

@@ -578,16 +578,19 @@ proc ::crclass::_phaseStats {moves from to} {
         acpl_black [expr {[llength $bCp] ? round($sumB / [llength $bCp]) : 0}]]
 }
 
-proc ::crclass::phaseSplit {moves {bookPlies 12}} {
+# Phase boundaries come from the position alone. The opening ends at the first
+# ply whose position no longer looks like an opening, and the middlegame at the
+# first ply that looks like an endgame. The opening book is deliberately not
+# consulted: which book is installed, and whether it covers the line at all,
+# must not move the boundaries of the report.
+# Any second argument is accepted and ignored - it used to be the book boundary.
+proc ::crclass::phaseSplit {moves args} {
     set total [llength $moves]
     if {$total == 0} { return {} }
 
-    # opening -> middlegame: book ended AND the position stopped looking like
-    # an opening. A game still in theory stays in the opening.
     set mid ""
     foreach m $moves {
         set ply [dict get $m ply]
-        if {$ply <= $bookPlies} continue
         if {[openingOver [dict get $m fen_after]]} { set mid $ply ; break }
     }
 

@@ -116,6 +116,11 @@ BOOK DETECTION
   The log prints which source was used:
       book: source=book first non-book position=11 of 40
 
+  The book decides *labels* only. Game phases are never derived from it: the
+  opening ends at the first position that no longer looks like an opening
+  (material left, back rank, pawn structure), so swapping books - or having no
+  book at all - cannot move a move from one phase paragraph to another.
+
 CLOUD EVALUATIONS  (Review settings -> Cloud evaluations)
   lichess.org keeps a public store of Stockfish analysis. Asking for it costs
   about a fifth of a second per position and usually returns depth 25-75, while

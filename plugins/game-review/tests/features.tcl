@@ -198,5 +198,28 @@ check "tree line names the score" [string match {*45.6%*} $tl] "got '$tl'"
 proc sc_base {args} { if {[lindex $args 0] eq "numGames"} { return 5000000 } ; return 0 }
 check "large base is skipped" [expr {[::crfacts::treeLine] eq ""}] "got '[::crfacts::treeLine]'"
 
+# ---------------------------------------------------------------- phase split --
+puts "\n== phase split is book-independent =="
+# Six opening-like plies, then a sparse board: openingOver fires at ply 7.
+set openFen "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+set sparseFen "r2q1rk1/pp2ppbp/2n2n2/8/8/2N2N2/PP1QBPPP/R4RK1 w - - 0 20"
+set recs {}
+for {set i 1} {$i <= 6} {incr i} {
+    lappend recs [dict create ply $i side [expr {$i % 2 ? "white" : "black"}] \
+        fen_after $openFen eval_after_cp 10 player_before 10 player_after 10 \
+        classification best]
+}
+for {set i 7} {$i <= 12} {incr i} {
+    lappend recs [dict create ply $i side [expr {$i % 2 ? "white" : "black"}] \
+        fen_after $sparseFen eval_after_cp 10 player_before 10 player_after 10 \
+        classification best]
+}
+set ps [::crclass::phaseSplit $recs]
+set mid7 [dict get [dict get $ps middlegame] from_ply]
+check "opening ends at the first non-opening position" [expr {$mid7 == 7}] "got $mid7"
+set ps2 [::crclass::phaseSplit $recs 40]
+check "a book boundary argument changes nothing" [expr {[dict get [dict get $ps2 middlegame] from_ply] == $mid7}] "got [dict get [dict get $ps2 middlegame] from_ply]"
+check "opening phase covers plies 1-6" [expr {[dict get [dict get $ps opening] from_ply] == 1 && [dict get [dict get $ps opening] to_ply] == 6}] "got [dict get $ps opening]"
+
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

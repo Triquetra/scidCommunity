@@ -612,8 +612,8 @@ proc ::cr_review::classifyAll {} {
     set R(acc,black) [expr {round($accB * 10) / 10.0}]
     set R(acpl,white) $acplW
     set R(acpl,black) $acplB
-    # game phases: opening to the end of the book, endgame by material
-    set R(phaseStats) [::crclass::phaseSplit $R(movesOut) [expr {[info exists R(bookEnd)] ? $R(bookEnd) : 12}]]
+    # game phases: decided by the position, never by the book
+    set R(phaseStats) [::crclass::phaseSplit $R(movesOut)]
     foreach ph {opening middlegame endgame} {
         set st [dict get $R(phaseStats) $ph]
         if {$st eq ""} {
