@@ -79,6 +79,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+ <release version="5.1.4.48" date="2026-10-25">
+      <description>
+        <p>Update translations</p>
+      </description>
+    </release>
  <release version="5.1.4.47" date="2026-10-24">
       <description>
         <p>Enable saving multiple custom board color sets; enhance Tree View training</p>
