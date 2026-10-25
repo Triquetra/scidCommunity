@@ -1158,6 +1158,10 @@ proc glist.destroy_ {{w}} {
   unset ::glistYScroll($w)
   unset ::glistFindBar($w)
   unset -nocomplain ::glistMultiSel($w)
+  # The accumulator is keyed on the widget path, and layout_apply destroys and
+  # recreates $w.glist at that same path: a stale fraction would otherwise
+  # carry over and make the recreated list scroll on its first small delta.
+  unset -nocomplain ::glist::wheelAcc($w)
 }
 
 proc glist.update_ {{w} {base}} {
@@ -1729,8 +1733,10 @@ proc glist.wheelDir {w delta} {
 # touchpad does nothing at all on a Tk 9 build.
 proc glist.tkPrecise {} {
     if {[catch {package require Tk} v]} { return 0 }
-    if {[catch {package vsatisfies $v 8.7} ok]} { return 0 }
-    return $ok
+    # vcompare, not vsatisfies: a bare "8.7" requirement bounds the major, so
+    # "vsatisfies 9.0 8.7" is 0 and the binding would never register on Tk 9.
+    if {[catch {package vcompare $v 8.7} cmp]} { return 0 }
+    return [expr {$cmp >= 0}]
 }
 
 # Precise deltas per row. Windows reports them on the same 120-scale as the
