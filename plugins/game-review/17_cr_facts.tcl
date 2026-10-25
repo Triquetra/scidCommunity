@@ -950,3 +950,47 @@ proc ::crfacts::forMove {m} {
     if {$note ne ""} { lappend lines $note }
     return [join $lines "\n"]
 }
+
+# ---- identity and database facts -------------------------------------------
+
+# Name of an ECO code, from scid's own ECO table. Used only where a PGN carries
+# a code and no Opening name; the caller labels the result as derived.
+proc ::crfacts::ecoName {eco} {
+    set summary ""
+    catch { set summary [sc_eco summary $eco 0] }
+    if {$summary eq ""} { return "" }
+    foreach line [split $summary "\n"] {
+        if {[regexp {^[A-E][0-9][0-9][a-z]?[0-9]?\s+\[([^\]]+)\]} $line -> name]} {
+            return $name
+        }
+    }
+    return ""
+}
+
+# One line of database statistics for the current position, or "" when there is
+# nothing to say. This runs a filter search over the open database, which
+# replaces the user's current filter (scid exposes no save/restore for it), so
+# the caller keeps it opt-in and runs it once per review, and it is skipped on
+# large bases where the scan would cost more than the review itself.
+proc ::crfacts::treeLine {{maxGames 100000}} {
+    set base 0
+    catch { set base [sc_base current] }
+    set n 0
+    catch { set n [sc_base numGames $base] }
+    if {![string is integer -strict $n] || $n > $maxGames} { return "" }
+    if {[catch { sc_filter search $base tree board } err]} { return "" }
+    set stats ""
+    if {[catch { set stats [sc_tree stats $base "+dbfilter+tree" 0 frequency 4] } err]} {
+        return ""
+    }
+    set games "" ; set score ""
+    foreach line [split $stats "\n"] {
+        if {[string match "*Move(s)*" $line]} continue
+        if {[string match "*TOTAL:*" $line]} continue
+        if {[regexp {^\s*[0-9]+:\s+\S.*?([0-9]+):\s+([0-9.]+)%} $line -> g s]} {
+            set games $g ; set score $s ; break
+        }
+    }
+    if {$games eq ""} { return "" }
+    return "the position occurred in $games games in the open database; White scored $score%"
+}

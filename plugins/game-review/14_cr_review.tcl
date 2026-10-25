@@ -38,20 +38,104 @@ proc ::cr_review::startSafe {} {
     }
 }
 
-# Position index where the engine pass should start. Idempotent: computed
-# from scid's ECO book once per loaded game.
-proc ::cr_review::bookSkipStart {} {
+# Which plies are opening theory, and where the engine pass should start.
+# Preferred source is the opening book itself (sc_book): a book is keyed on the
+# position, so a game that wanders out of theory and transposes back is judged
+# per ply instead of by a single boundary. Falls back to the ECO probe, then to
+# a plain ply count.
+proc ::cr_review::bookInfo {} {
     variable R
-    if {![info exists R(bookEnd)]} { set R(bookEnd) [::cr_review::bookEndPly] }
-    if {![info exists R(firstSearch)]} {
-        if {$::cr_settings::s(skip_book) && $R(bookEnd) > 0} {
-            set R(firstSearch) [expr {min($R(bookEnd), $R(n))}]
+    if {[info exists R(bookInfo)]} { return $R(bookInfo) }
+    set flags {}
+    set src plies
+    if {$::cr_settings::s(book_mode) eq "book"} {
+        set flags [::cr_review::bookFlags]
+        if {[llength $flags]} { set src book }
+    }
+    if {![llength $flags]} {
+        if {$::cr_settings::s(book_mode) eq "plies"} {
+            set end $::cr_settings::s(book_plies)
         } else {
-            set R(firstSearch) 0
+            # eco mode, or book mode with no usable book: the ECO probe
+            set end [::cr_review::bookEndPly]
+            set src eco
+        }
+        if {$end > $R(n)} { set end $R(n) }
+        if {$end < 0} { set end 0 }
+        for {set i 0} {$i < $R(n)} {incr i} {
+            lappend flags [expr {$i < $end ? 1 : 0}]
         }
     }
+    set start $R(n)
+    set firstZero [lsearch -exact $flags 0]
+    if {$firstZero >= 0} { set start $firstZero }
+    set R(bookEnd) $start
+    set R(bookInfo) [dict create start $start flags $flags source $src]
+    catch { ::cr_review::log "book: source=$src first non-book position=$start of $R(n)" }
+    return $R(bookInfo)
+}
+
+# Per-ply book flags straight from the opening book: walk the main line, ask
+# the book for the moves it offers at each position, and stop counting at the
+# first ply whose played move the book does not contain. Returns "" when the
+# probe cannot run, so the caller can fall back to the ECO answer.
+proc ::cr_review::bookFlags {} {
+    variable R
+    set file [::cr_settings::bookFile]
+    if {$file eq ""} {
+        catch { ::cr_review::log "book probe: no readable book file" }
+        return ""
+    }
+    if {[catch { sc_book load $file 2 } err]} {
+        catch { ::cr_review::log "book probe: cannot load $file ($err)" }
+        return ""
+    }
+    set flags {}
+    set inBook 1
+    set ok 0
+    if {[catch {
+        sc_game push
+        for {set k 1} {$k <= $R(n)} {incr k} {
+            set bookMoves {}
+            if {$inBook} { catch { lassign [sc_book moves 2] bookMoves } }
+            ::uci::sc_move_add [list [lindex $R(moves) [expr {$k - 1}]]]
+            set san [sc_game info previousMoveNT]
+            if {$inBook} {
+                set hit 0
+                foreach {m p} $bookMoves {
+                    if {$m eq $san} { set hit 1 ; break }
+                }
+                if {$hit} {
+                    lappend flags 1
+                } else {
+                    lappend flags 0
+                    set inBook 0
+                }
+            } else {
+                lappend flags 0
+            }
+        }
+        set ok 1
+    } err]} {
+        catch { ::cr_review::log "book probe failed: $err" }
+    }
+    catch { sc_game pop }
+    catch { sc_book close 2 }
+    if {!$ok} { return "" }
+    catch { ::cr_review::log "book probe: [llength $flags] plies walked, [lsearch -exact $flags 0] book plies" }
+    return $flags
+}
+
+# Position index where the engine pass should start.
+proc ::cr_review::bookSkipStart {} {
+    variable R
+    set info [::cr_review::bookInfo]
+    if {!$::cr_settings::s(skip_book)} { return 0 }
+    set start [dict get $info start]
+    set R(firstSearch) [expr {min($start, $R(n))}]
     return $R(firstSearch)
 }
+
 
 proc ::cr_review::start {} {
     variable R
@@ -89,12 +173,49 @@ proc ::cr_review::start {} {
     # Book boundary: plies up to here are theory, so nothing there is worth
     # searching - the label is Book by definition.
     set first [::cr_review::bookSkipStart]
-    ::cr_review::log "book end ply: $R(bookEnd) (skip_book=$::cr_settings::s(skip_book)) -> first searched position $first"
-    set work [expr {[llength $R(positions)] - $R(firstSearch)}]
+    set info [::cr_review::bookInfo]
+    ::cr_review::log "book: source=[dict get $info source], first searched position $first (skip_book=$::cr_settings::s(skip_book))"
+
+    # Cloud pre-pass: positions the community has already analysed deeply come
+    # back in a fraction of a second, so ask for all of them before spending
+    # minutes of local search. What the cloud does not cover is searched locally.
+    if {$::cr_settings::s(cloud_mode) ne "off"} {
+        ::cr_review::log "cloud pre-pass: mode=$::cr_settings::s(cloud_mode) min depth=$::cr_settings::s(cloud_min_depth) min pvs=$::cr_settings::s(cloud_min_pv)"
+        ::cr_engine::cloudPrefill [dict create \
+            fens $R(fens) startIndex $first \
+            mode $::cr_settings::s(cloud_mode) \
+            minDepth $::cr_settings::s(cloud_min_depth) \
+            minPv $::cr_settings::s(cloud_min_pv) \
+            onProgress ::cr_review::onCloudProgress \
+            onDone ::cr_review::onCloudDone]
+        return
+    }
+    ::cr_review::beginAnalysis {}
+}
+
+proc ::cr_review::onCloudProgress {done total} {
+    catch { ::cr_ui::proseNote "Cloud evaluations: $done/$total" }
+}
+
+proc ::cr_review::onCloudDone {prefilled stats} {
+    variable R
+    set R(prefilled) $prefilled
+    catch { ::cr_ui::proseNote "" }
+    ::cr_review::beginAnalysis $prefilled
+}
+
+# Start the engine pass over whatever the cloud did not cover.
+proc ::cr_review::beginAnalysis {prefilled} {
+    variable R
+    set first [::cr_review::bookSkipStart]
+    set work [expr {[llength $R(positions)] - $first - [dict size $prefilled]}]
+    if {$work < 0} { set work 0 }
+    ::cr_review::log "analysis: $work positions to search, [dict size $prefilled] prefilled"
     ::cr_ui::progressOpen $work "depth $::cr_settings::s(depth), $R(n) plies, $work positions"
-    set rc [::cr_review::launch]
+    set rc [::cr_review::launch $prefilled]
     ::cr_review::log "engine launch returned: $rc"
 }
+
 
 # Turn scid's "position ... moves" list into one position string per ply,
 # plus the FEN of every ply worked out on our own board.
@@ -139,14 +260,15 @@ proc ::cr_review::buildLine {ml} {
     return ok
 }
 
-proc ::cr_review::launch {} {
+proc ::cr_review::launch {{prefilled {}}} {
     variable R
-    ::cr_review::log "launch: engine1='$::cr_settings::s(engine_analysis)' depth=$::cr_settings::s(depth)"
+    ::cr_review::log "launch: engine1='$::cr_settings::s(engine_analysis)' depth=$::cr_settings::s(depth) prefilled=[dict size $prefilled]"
     set opts [dict create \
         positions $R(positions) \
         startIndex [::cr_review::bookSkipStart] \
         depth $::cr_settings::s(depth) \
         engine1 $::cr_settings::s(engine_analysis) \
+        prefilled $prefilled \
         engine2 [expr {$::cr_settings::s(verify_mode) eq "off" ? "" : $::cr_settings::s(engine_verify)}] \
         onStatus ::cr_review::onStatus \
         onDone ::cr_review::onEngineDone \
@@ -210,6 +332,16 @@ proc ::cr_review::onVerifyDone {status args} {
 proc ::cr_review::finish {} {
     variable R
     ::cr_review::log "writing annotations"
+    # One database search per review at most: the tree line costs a filter scan,
+    # so it stays opt-in and is computed once, before the report is built.
+    if {$::cr_settings::s(tree_stats)} {
+        if {[catch { set R(treeLine) [::crfacts::treeLine] } terr]} {
+            ::cr_review::log "tree stats failed: $terr"
+        }
+        if {[info exists R(treeLine)] && $R(treeLine) ne ""} {
+            ::cr_review::log "tree stats: $R(treeLine)"
+        }
+    }
     if {[catch {
         ::cr_review::writeGame
         ::cr_ui::progressClose
@@ -332,7 +464,7 @@ proc ::cr_review::classifyAll {} {
     variable R
     set R(movesOut) {}
     set R(keyInput) {}
-    if {![info exists R(bookEnd)]} { set R(bookEnd) [::cr_review::bookEndPly] }
+    set bookFlags [dict get [::cr_review::bookInfo] flags]
 
     # Repetition is a property of the sequence, not of one FEN: count how often
     # each position has occurred up to and including itself.
@@ -352,7 +484,7 @@ proc ::cr_review::classifyAll {} {
         # A book ply was never searched: label it Book and move on. Its evals
         # are unknown, and the book rule would return 'book' anyway unless the
         # move was a blunder - which no searched game can show without evals.
-        if {$i <= $R(bookEnd)} {
+        if {[lindex $bookFlags [expr {$i - 1}]]} {
             lappend R(movesOut) [dict create ply $i side $sideW \
                 played [lindex $R(moves) [expr {$i - 1}]] \
                 fen_before $fenBefore fen_after $fenAfter \

@@ -17,6 +17,39 @@ proc ::cr_ui::log {msg} {
     }
 }
 
+# ---- helpers used by the settings dialog ------------------------------------
+# The books scid ships with, as pickable paths; the user can browse for others.
+proc ::cr_ui::bookChoices {} {
+    set out {}
+    catch {
+        if {[info exists ::scidBooksDir] && [file isdirectory $::scidBooksDir]} {
+            foreach f [lsort [glob -nocomplain -directory $::scidBooksDir *.bin]] {
+                lappend out $f
+            }
+        }
+    }
+    return $out
+}
+
+proc ::cr_ui::loadModels {} {
+    ::cr_ui::log "model list requested"
+    ::cr_llm::listModels ::cr_ui::loadModelsDone
+}
+
+proc ::cr_ui::loadModelsDone {ids err} {
+    if {$err ne ""} {
+        ::cr_ui::log "model list failed: $err"
+        catch { tk_messageBox -icon info -title "scidCommunity" \
+            -message "Could not list models from the endpoint:\n\n$err" }
+        return
+    }
+    catch { .crSettings.f.mf.cb configure -values $ids }
+    if {[llength $ids] && $::cr_settings::s(model) eq ""} {
+        set ::cr_settings::s(model) [lindex $ids 0]
+    }
+    ::cr_ui::log "models: [llength $ids] found"
+}
+
 proc ::cr_ui::installMenus {} {
     set parent .menu.tools
     if {![winfo exists $parent]} {
@@ -210,10 +243,29 @@ proc ::cr_ui::settings {} {
         -variable ::cr_settings::s(pv_variation)
     ttk::checkbutton $w.f.sb -text "Skip engine analysis of book plies" \
         -variable ::cr_settings::s(skip_book)
-    ttk::label $w.f.lb1 -text "Book detection" -anchor w
-    ttk::combobox $w.f.bm -values {eco plies} -textvariable ::cr_settings::s(book_mode) -state readonly -width 12
-    ttk::label $w.f.lb2 -text "Book plies (fallback / plies mode)" -anchor w
+    ttk::label $w.f.lb1 -text "Book detection (book = opening-book probe)" -anchor w
+    ttk::combobox $w.f.bm -values {book eco plies} -textvariable ::cr_settings::s(book_mode) -state readonly -width 12
+    ttk::label $w.f.lb3 -text "Opening book file" -anchor w
+    ttk::frame $w.f.bf
+    ttk::combobox $w.f.bf.cb -values [::cr_ui::bookChoices] -textvariable ::cr_settings::s(book_file) -width 26
+    ttk::button $w.f.bf.br -text "..." -width 3 -command {
+        set f [tk_getOpenFile -title "Opening book" -filetypes {{{Polyglot book} {.bin}} {{All files} *}}]
+        if {$f ne ""} { set ::cr_settings::s(book_file) $f }
+    }
+    pack $w.f.bf.cb $w.f.bf.br -side left
+    ttk::label $w.f.lb2 -text "Book plies (plies mode, or no book file)" -anchor w
     ttk::spinbox $w.f.bp -from 0 -to 30 -textvariable ::cr_settings::s(book_plies) -width 5
+    ttk::label $w.f.lc0 -text "Cloud evaluations (lichess.org, no key needed)" -anchor w
+    ttk::combobox $w.f.cm -values {off uniform fill} -textvariable ::cr_settings::s(cloud_mode) -state readonly -width 12
+    ttk::label $w.f.lc1 -text "Cloud: minimum depth and PV lines to accept" -anchor w
+    ttk::frame $w.f.cf
+    ttk::spinbox $w.f.cf.d -from 1 -to 60 -textvariable ::cr_settings::s(cloud_min_depth) -width 4
+    ttk::spinbox $w.f.cf.p -from 1 -to 5 -textvariable ::cr_settings::s(cloud_min_pv) -width 3
+    ttk::label $w.f.cf.t1 -text "depth" -anchor w
+    ttk::label $w.f.cf.t2 -text "lines" -anchor w
+    pack $w.f.cf.d $w.f.cf.t1 $w.f.cf.p $w.f.cf.t2 -side left -padx {0 6}
+    ttk::checkbutton $w.f.ts -text "Database line in the report (runs a filter search)" \
+        -variable ::cr_settings::s(tree_stats)
     ttk::label $w.f.l4 -text "Verification" -anchor w
     ttk::combobox $w.f.v -values {candidates all off} -textvariable ::cr_settings::s(verify_mode) -state readonly -width 12
 
@@ -227,15 +279,20 @@ proc ::cr_ui::settings {} {
     ttk::label $w.f.l6 -text "API key (Ollama Cloud)" -anchor w
     ttk::entry $w.f.k -textvariable ::cr_settings::s(api_key) -width 34 -show "*"
     ttk::label $w.f.l7 -text "Model" -anchor w
-    ttk::entry $w.f.m -textvariable ::cr_settings::s(model) -width 34
+    ttk::frame $w.f.mf
+    ttk::combobox $w.f.mf.cb -textvariable ::cr_settings::s(model) -width 30
+    ttk::button $w.f.mf.ld -text "Load" -command ::cr_ui::loadModels
+    pack $w.f.mf.cb $w.f.mf.ld -side left
     ttk::label $w.f.l8 -text "Opponent RD (100 = established rating)" -anchor w
     ttk::spinbox $w.f.rd -from 30 -to 350 -textvariable ::cr_settings::s(opponent_rd) -width 5
 
     set r 0
     foreach wdg [list $w.f.l1 $w.f.e1 $w.f.l2 $w.f.e2 $w.f.l3 $w.f.d \
                       $w.f.lt1 $w.f.th $w.f.lt2 $w.f.ha $w.f.lp $w.f.pv $w.f.pvv $w.f.sb \
-                      $w.f.lb1 $w.f.bm $w.f.lb2 $w.f.bp $w.f.l4 $w.f.v \
-                      $w.f.ca $w.f.we $w.f.l5 $w.f.u $w.f.l6 $w.f.k $w.f.l7 $w.f.m \
+                      $w.f.lb1 $w.f.bm $w.f.lb3 $w.f.bf $w.f.lb2 $w.f.bp \
+                      $w.f.lc0 $w.f.cm $w.f.lc1 $w.f.cf $w.f.ts \
+                      $w.f.l4 $w.f.v \
+                      $w.f.ca $w.f.we $w.f.l5 $w.f.u $w.f.l6 $w.f.k $w.f.l7 $w.f.mf \
                       $w.f.l8 $w.f.rd $w.f.le] {
         grid $wdg -row $r -column 0 -sticky w -pady 2
         incr r

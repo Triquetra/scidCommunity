@@ -4,12 +4,19 @@
 
 set ::scidUserDir /tmp/crtest
 file mkdir /tmp/crtest/plugins
-source [file join [file dirname [info script]] cr_board.tcl]
-source [file join [file dirname [info script]] cr_classify.tcl]
-source [file join [file dirname [info script]] cr_settings.tcl]
-source [file join [file dirname [info script]] cr_engine.tcl]
-source [file join [file dirname [info script]] cr_review.tcl]
-source [file join [file dirname [info script]] cr_llm.tcl]
+# Tk stubs needed before sourcing the GUI module (it installs its menus at load)
+if {[llength [info commands winfo]] == 0} { proc winfo {args} { return 0 } }
+if {[llength [info commands menu]] == 0} { proc menu {args} { return "" } }
+if {[llength [info commands destroy]] == 0} { proc destroy {args} { return "" } }
+
+source [file join [file dirname [info script]] 10_cr_board.tcl]
+source [file join [file dirname [info script]] 11_cr_classify.tcl]
+source [file join [file dirname [info script]] 12_cr_settings.tcl]
+source [file join [file dirname [info script]] 13_cr_engine.tcl]
+source [file join [file dirname [info script]] 14_cr_review.tcl]
+source [file join [file dirname [info script]] 16_cr_ui.tcl]
+source [file join [file dirname [info script]] 17_cr_facts.tcl]
+source [file join [file dirname [info script]] 15_cr_llm.tcl]
 
 # ---------------------------------------------------------------- fake game --
 set ::G(moves) {e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6 e1g1 f8e7 f1e1 b7b5 a4b3 d7d6 c2c3 e8g8}
@@ -112,7 +119,7 @@ proc ::engine::send {id msg data} {
 }
 
 # --------------------------------------------------------------------- run --
-proc runScenario {label} {
+proc runScenario {label {prefilled {}}} {
     array unset ::CMT ; array set ::CMT {}
     array unset ::NG ; array set ::NG {}
     set ::ENGINE_LOG {}
@@ -124,8 +131,10 @@ proc runScenario {label} {
     set ::cr_settings::s(verify_mode) candidates
     set ::cr_settings::s(api_key) ""
     ::cr_review::buildLine $::G(mainLine)
-    ::cr_review::launch
-    vwait ::done
+    ::cr_review::launch $prefilled
+    # a run that needs no engine finishes synchronously; do not wait for a
+    # done flag that is already set
+    if {!$::done} { vwait ::done }
     puts "scenario: $label  log=[llength $::ENGINE_LOG] lines"
 }
 
@@ -197,5 +206,31 @@ check "escape handling" [expr {$esc eq "say \"hi\"\nthen stop"}] "got '$esc'"
 
 puts "\n== engine calls =="
 puts "  [join $::ENGINE_LOG \n  ]"
+puts "\n== cloud-prefilled pipeline =="
+# Same game, but every searched position arrives from the cloud: the engine
+# must not run, and the labels must come out identical to the local pass.
+set ::EVAL {-20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 30 -300 -300 -280 -290}
+set ::BOOKEND 12
+set ::GAP 30
+set ::FORCE_NOTBEST 1
+set cloud {}
+foreach {idx} {12 13 14 15 16} {
+    set whiteCp [lindex $::EVAL $idx]
+    set stm [expr {$idx % 2 == 0 ? "w" : "b"}]
+    set cp [expr {$stm eq "w" ? $whiteCp : -$whiteCp}]
+    set pv1 "e2e4 e7e5 g1f3"
+    set pv2 "d2d4 d7d5 c2c4"
+    set pv3 "c2c4 g8f6 d2d4"
+    set one [dict create 1 [list $cp cp $pv1 55] 2 [list [expr {$cp-30}] cp $pv2 55] 3 [list [expr {$cp-60}] cp $pv3 55]]
+    dict set cloud $idx $one
+}
+runScenario "cloud prefilled" $cloud
+set mvC $::cr_review::R(movesOut)
+set labelsC [lmap m $mvC {dict get $m classification}]
+puts "  labels: $labelsC"
+check "cloud run labels 13 a blunder" [expr {[lindex $labelsC 12] eq "blunder"}] "got [lindex $labelsC 12]"
+check "cloud run did not start the analysis engine" [expr {[lsearch -regexp $::ENGINE_LOG {^20 Go}] < 0}] "log: $::ENGINE_LOG"
+check "cloud run still wrote the comment" [string match {\[Blunder\]*} [expr {[info exists ::CMT(13)] ? $::CMT(13) : ""}]] "got '[expr {[info exists ::CMT(13)] ? $::CMT(13) : ""}]'"
+
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

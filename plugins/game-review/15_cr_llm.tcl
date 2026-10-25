@@ -166,6 +166,32 @@ proc ::cr_llm::asciiSafe {text} {
     return [string map $map $text]
 }
 
+# Models write SAN sloppily: capitalised pawn moves (A6), lowercase pieces (nf3)
+# and markdown emphasis. Left alone they land in the PGN as written. One pass
+# per letter, never a single alternation: a combined pattern with a backreference
+# is the kind of thing that quietly rewrites text mid-word.
+proc ::cr_llm::sanFix {text} {
+    set text [regsub -all {\*\*([^*]+)\*\*} $text {\1}]
+    set text [regsub -all {\*([^*]+)\*} $text {\1}]
+    foreach cap {A B C D E F G H} {
+        set low [string tolower $cap]
+        set rep "\\1${low}\\2"
+        set text [regsub -all "(^|\[^a-zA-Z\])${cap}(\[1-8\])" $text $rep]
+    }
+    foreach l {k q r b n} {
+        set U [string toupper $l]
+        set rep "\\1${U}\\2"
+        set text [regsub -all "(^|\[^a-zA-Z\])${l}(\[a-h\]\[1-8\])" $text $rep]
+        set text [regsub -all "(^|\[^a-zA-Z\])${l}(x\[a-h\]\[1-8\])" $text $rep]
+    }
+    return $text
+}
+
+# Everything model prose passes through before it is written anywhere.
+proc ::cr_llm::cleanProse {text} {
+    return [::cr_llm::sanFix [::cr_llm::asciiSafe $text]]
+}
+
 # ---- game summary ----------------------------------------------------------
 #
 # Colour-neutral, and built from the same facts Patzer uses: the turning point,
@@ -398,11 +424,20 @@ proc ::cr_llm::summaryFacts {} {
     set opn ""
     catch { set opn [string trim [sc_game tags get Opening]] }
     # The ECO code already sits in the PGN header, so it is never repeated in
-    # the prose - and it is not a name, so it is never used as one either.
+    # the prose - and it is not a name, so it is never used as one either. When
+    # the header carries only a code, the ECO table can still supply the name;
+    # that is a derived name, not a substitute for one.
+    if {$opn eq "" && $eco ne ""} {
+        catch { set opn [::crfacts::ecoName $eco] }
+    }
     if {$opn ne ""} {
         lappend lines "opening: $opn"
     } else {
         lappend lines "opening: no name recorded"
+    }
+    # Opt-in database line: the position occurred elsewhere and how it scored.
+    if {[info exists ::cr_review::R(treeLine)] && $::cr_review::R(treeLine) ne ""} {
+        lappend lines "database: $::cr_review::R(treeLine)"
     }
 
     set decided ""
@@ -755,14 +790,14 @@ proc ::cr_llm::applyProse {} {
                 if {[catch { sc_move ply $ply }]} continue
                 if {[sc_pos location] != $ply} continue
                 set cur [sc_pos getComment]
-                catch { sc_pos setComment "[string trim $cur] - [::cr_llm::asciiSafe [dict get $J(texts) $key]]" }
+                catch { sc_pos setComment "[string trim $cur] - [::cr_llm::cleanProse [dict get $J(texts) $key]]" }
             }
         }
         sc_move ply 0
         set cur [sc_pos getComment]
         set sm [dict create summary "" level "" opening ""]
         if {[dict exists $J(texts) [list summary 0]]} {
-            catch { set sm [::cr_llm::parseSummary [::cr_llm::asciiSafe [dict get $J(texts) [list summary 0]]] ""] }
+            catch { set sm [::cr_llm::parseSummary [::cr_llm::cleanProse [dict get $J(texts) [list summary 0]]] ""] }
             set ::cr_review::R(summary) [dict get $sm summary]
             set ::cr_review::R(summaryLevel) [dict get $sm level]
             set ::cr_review::R(summaryOpening) [dict get $sm opening]
@@ -770,7 +805,7 @@ proc ::cr_llm::applyProse {} {
         set phs {}
         foreach ph {opening middlegame endgame} {
             if {[dict exists $J(texts) [list phase $ph]]} {
-                lappend phs "$ph: [::cr_llm::asciiSafe [dict get $J(texts) [list phase $ph]]]"
+                lappend phs "$ph: [::cr_llm::cleanProse [dict get $J(texts) [list phase $ph]]]"
             }
         }
         set body [string trim $cur]
@@ -932,7 +967,7 @@ proc ::cr_llm::plainText {text} {
     # Model output is UTF-8 read as the host codepage: typographic characters
     # arrive as mojibake and emoji as rubble. This dialog is short prose, so
     # anything outside printable ASCII is dropped rather than repaired.
-    set t [::cr_llm::asciiSafe $text]
+    set t [::cr_llm::cleanProse $text]
     regsub -all {[^ -~\n\t]} $t {} t
     return [string trim [regsub -all {\s+} $t " "]]
 }
@@ -944,4 +979,68 @@ proc ::cr_llm::threatShow {fallback text err} {
         if {$clean ne ""} { set msg $clean }
     }
     tk_messageBox -icon info -title "What's the threat?" -message $msg
+}
+
+# ---- model discovery --------------------------------------------------------
+# Ask the endpoint what it has, so the model field is a pick instead of a guess.
+# A wrong model name otherwise surfaces only as an empty reply at review time.
+proc ::cr_llm::listModels {cb} {
+    set base [string trimright $::cr_settings::s(api_url) /]
+    ::cr_llm::fetchIds "$base/v1/models" [list ::cr_llm::listModelsStep $base $cb]
+}
+
+proc ::cr_llm::listModelsStep {base cb ids} {
+    if {[llength $ids]} { catch { {*}$cb $ids "" } ; return }
+    # Ollama's native endpoint, for a server without the OpenAI-compatible one
+    ::cr_llm::fetchIds "$base/api/tags" [list ::cr_llm::listModelsDone $cb]
+}
+
+proc ::cr_llm::listModelsDone {cb ids} {
+    if {![llength $ids]} {
+        catch { {*}$cb {} "no model list from this endpoint" }
+        return
+    }
+    catch { {*}$cb $ids "" }
+}
+
+proc ::cr_llm::fetchIds {url cb} {
+    variable M
+    set cmd [list | curl -s --max-time 10 -H {Accept: application/json}]
+    if {$::cr_settings::s(api_key) ne ""} {
+        lappend cmd -H "Authorization: Bearer $::cr_settings::s(api_key)"
+    }
+    lappend cmd $url
+    if {[catch {
+        set fd [open $cmd r]
+        fconfigure $fd -blocking 0 -translation binary
+    } err]} {
+        catch { {*}$cb {} }
+        return
+    }
+    set M(buf,$fd) ""
+    set M(cb,$fd) $cb
+    fileevent $fd readable [list ::cr_llm::onIds $fd]
+}
+
+proc ::cr_llm::onIds {fd} {
+    variable M
+    if {[catch { append M(buf,$fd) [read $fd] }]} {
+        catch { close $fd }
+        set cb $M(cb,$fd)
+        unset -nocomplain M(buf,$fd) M(cb,$fd)
+        catch { {*}$cb {} }
+        return
+    }
+    if {![eof $fd]} { return }
+    fileevent $fd readable ""
+    catch { close $fd }
+    set raw $M(buf,$fd)
+    set cb $M(cb,$fd)
+    unset -nocomplain M(buf,$fd) M(cb,$fd)
+    set ids {}
+    foreach {all id} [regexp -all -inline {"id"\s*:\s*"([^"]+)"} $raw] { lappend ids $id }
+    if {![llength $ids]} {
+        foreach {all nm} [regexp -all -inline {"name"\s*:\s*"([^"]+)"} $raw] { lappend ids $nm }
+    }
+    catch { {*}$cb $ids }
 }

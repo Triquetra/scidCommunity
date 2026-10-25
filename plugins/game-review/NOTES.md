@@ -51,8 +51,18 @@ private user plugin. Before any of this is published:
 
 ## Known state and what comes next
 
-- `README.txt` predates `17_cr_facts.tcl` and its file list stops at
-  `16_cr_ui.tcl`.
+- Six improvements were taken from the modules upstream already ships (see the
+  README sections for the settings): the opening-book probe replaces the ECO
+  boundary, a lichess cloud pre-pass fills what the engine would otherwise
+  search, model prose is normalised (SAN repair, markdown stripped), the model
+  field lists what the endpoint offers, an ECO code can supply an opening name
+  when the PGN has no Opening tag, and an opt-in database line adds tree
+  statistics to the coach facts.
+- Verification: `tests/harness.tcl` (pipeline, verifier, book boundary,
+  cloud-prefilled run) and `tests/features.tcl` (unit tests for the six grafts)
+  both pass in `tclsh`; the plugin also loads cleanly under
+  `plugin-loadtest.tcl`. Neither harness runs the GUI, so dialog layout and
+  menu placement still need one manual run.
 - `cr_settings.dat` (runtime settings, may hold an API key) and the `*.log`
   files are deliberately **not** in this snapshot.
 - Upstream `whelanh/scidCommunity` already ships `auto_comment.tcl` (LLM

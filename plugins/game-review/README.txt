@@ -83,10 +83,11 @@ FILES
   10_cr_board.tcl     board core: movegen, make-move, material, SEE
   11_cr_classify.tcl  labels, accuracy, Elo, key moments, phase split
   12_cr_settings.tcl  settings + cr_settings.dat
-  13_cr_engine.tcl    headless MultiPV passes (ids 20 and 21)
+  13_cr_engine.tcl    headless MultiPV passes (ids 20 and 21) and the cloud pre-pass
   14_cr_review.tcl    pipeline, writeback, report text
   15_cr_llm.tcl       Ollama client and prompts
   16_cr_ui.tcl        menus, progress, report, settings dialog
+  17_cr_facts.tcl     FACTS lines for the coach, ECO names, database line
 
   Plugins are executable Tcl with full privileges; keep this folder private.
 
@@ -104,12 +105,50 @@ BOOK PLIES ARE NOT SEARCHED
   analysis does.
 
 BOOK DETECTION
-  Default is ECO-based: the plugin asks scid's own ECO book for the deepest
-  position of this game that it recognises ("sc_game eco ply") and treats
-  every ply up to there as Book. That is chess.com's rule — book ends when
-  you leave theory. If the game matches no ECO line, it falls back to the
-  "Book plies" setting (default 12).
-  Switch to plain "plies" in settings if you want the old behaviour.
+  Default is the opening book itself: the plugin asks sc_book which moves the
+  book offers at each position and stops at the first ply whose played move is
+  not in it. A book is keyed on the position, so a game that leaves theory and
+  transposes back in is still judged per ply - no boundary, no over-extended
+  "Book" run. Book file: Review settings -> Opening book file (the books that
+  ship with scidCommunity are offered; Browse... takes any Polyglot .bin).
+  Falls back to the ECO probe when no book file is readable or the book cannot
+  be loaded, and to the "Book plies" setting when there is no ECO match either.
+  The log prints which source was used:
+      book: source=book first non-book position=11 of 40
+
+CLOUD EVALUATIONS  (Review settings -> Cloud evaluations)
+  lichess.org keeps a public store of Stockfish analysis. Asking for it costs
+  about a fifth of a second per position and usually returns depth 25-75, while
+  a local depth-18 MultiPV search costs 1-13 seconds. The pre-pass therefore
+  asks for every position first and only searches locally what the cloud does
+  not cover. Measured here on two games: 95% hits for a mainline Ruy Lopez, 40%
+  for an offbeat line, 72% overall.
+    off      no network traffic at all
+    uniform  use the cloud only when it covers *every* position of the game;
+             otherwise ignore it and search the whole game locally. A game
+             judged from two sources has two baselines, and a centipawn loss
+             across them is not a comparison.
+    fill     use the cloud wherever it is good enough and search the rest
+             locally. Faster, but two moves can then be judged at different
+             depths - use with care.
+  A cloud entry is used only when its depth is at least "Cloud: minimum depth"
+  and it carries at least "Cloud: minimum PV lines" lines; a single PV line
+  cannot drive the brilliant/great gap rule, so those positions are searched
+  locally. No API key is needed. Nothing is sent except the position.
+
+DATABASE LINE  (Review settings -> Database line in the report)
+  Off by default. When on, one search of the open database for the final
+  position adds a line to the coach's facts: how many games reached it and what
+  White scored. Warning: scid has no save/restore for the game filter, so this
+  replaces the current filter, and it is skipped on databases over 100,000
+  games.
+
+MODEL LIST
+  "Load" next to the Model field asks the endpoint what it has
+  (/v1/models, then Ollama's /api/tags) and fills the list, so the model is a
+  pick instead of a guess. Model prose is normalised before it is written:
+  markdown emphasis is stripped and SAN is repaired (nf3 -> Nf3, A6 -> a6), so
+  a sloppy model cannot put a lowercase piece move into the PGN.
 
 TROUBLESHOOTING
   A plugin that fails to load is reported in a dialog and skipped.
