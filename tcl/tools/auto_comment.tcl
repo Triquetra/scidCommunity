@@ -7,8 +7,26 @@
 ### or DeepSeek) to generate natural language commentary.
 
 namespace eval ::auto_comment {
-    # LLM provider: "gemini" or "deepseek"
+    # LLM provider, one value for every path:
+    #   none    no model at all - no request is ever made
+    #   local   any Ollama-style server (ollama, LM Studio's Ollama endpoint)
+    #   openai  any OpenAI-compatible endpoint: DeepSeek, Gemini's compatibility
+    #           endpoint, vLLM, LM Studio, a gateway...
+    #   gemini  Google's native API   (kept until Game Comment is retired)
+    #   deepseek DeepSeek's native API (kept until Game Comment is retired)
+    # The default stays "gemini" until the dialogs offer the other values and
+    # "none" is safe to be the default; that flip is the last commit of this
+    # change, so every commit before it behaves exactly as before.
     options.store ::auto_comment::provider "gemini"
+
+    # Local (Ollama-style) settings
+    options.store ::auto_comment::localUrl "http://localhost:11434"
+    options.store ::auto_comment::localModel ""
+
+    # OpenAI-compatible settings
+    options.store ::auto_comment::openaiUrl "https://api.deepseek.com"
+    options.store ::auto_comment::openaiKey ""
+    options.store ::auto_comment::openaiModel ""
 
     # Gemini settings
     options.store ::auto_comment::apiKey ""
@@ -89,6 +107,171 @@ proc ::auto_comment::fitWindow {w {minW 0} {minH 0}} {
     if {$y < 0} { set y 0 }
 
     wm geometry $w "${reqW}x${reqH}+${x}+${y}"
+}
+
+# ::auto_comment::providerList
+#   The values the settings combo offers, in the order it shows them.
+proc ::auto_comment::providerList {} {
+    return {none local openai gemini deepseek}
+}
+
+# ::auto_comment::providerReady
+#   Empty when the selected provider has what it needs, otherwise the reason it
+#   cannot run - shown to the user instead of a request that silently fails.
+proc ::auto_comment::providerReady {} {
+    switch -- $::auto_comment::provider {
+        none     { return "no model selected" }
+        local {
+            if {$::auto_comment::localUrl eq ""} { return "no local endpoint set" }
+            if {$::auto_comment::localModel eq ""} { return "no local model selected" }
+            return ""
+        }
+        openai {
+            if {$::auto_comment::openaiUrl eq ""} { return "no endpoint set" }
+            if {$::auto_comment::openaiModel eq ""} { return "no model selected" }
+            return ""
+        }
+        gemini {
+            if {$::auto_comment::apiKey eq ""} { return "no Gemini key set" }
+            if {$::auto_comment::model eq ""} { return "no Gemini model selected" }
+            return ""
+        }
+        deepseek {
+            if {$::auto_comment::deepseekApiKey eq ""} { return "no DeepSeek key set" }
+            if {$::auto_comment::deepseekModel eq ""} { return "no DeepSeek model selected" }
+            return ""
+        }
+    }
+    return "unknown provider: $::auto_comment::provider"
+}
+
+# ::auto_comment::chatEndpoint
+#   The URL a chat request goes to for the selected provider.
+proc ::auto_comment::chatEndpoint {} {
+    switch -- $::auto_comment::provider {
+        local  { return "[string trimright $::auto_comment::localUrl /]/api/chat" }
+        openai { return "[string trimright $::auto_comment::openaiUrl /]/v1/chat/completions" }
+    }
+    return ""
+}
+
+# ::auto_comment::chatBody
+#   The request body for the selected provider. Ollama's native API takes
+#   "options num_predict"; OpenAI-compatible ones take "max_tokens". Both take a
+#   single user message.
+proc ::auto_comment::chatBody {prompt {maxTokens 300}} {
+    set esc [::auto_comment::escapeJson $prompt]
+    switch -- $::auto_comment::provider {
+        local {
+            set model [::auto_comment::escapeJson $::auto_comment::localModel]
+            return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"options\":{\"num_predict\":$maxTokens}}"
+        }
+        openai {
+            set model [::auto_comment::escapeJson $::auto_comment::openaiModel]
+            return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"max_tokens\":$maxTokens}"
+        }
+    }
+    return ""
+}
+
+# ::auto_comment::chatAuth
+#   The Authorization header value, or "" when the endpoint needs no key. A local
+#   server must never be sent someone's cloud key.
+proc ::auto_comment::chatAuth {} {
+    if {$::auto_comment::provider eq "openai" && $::auto_comment::openaiKey ne ""} {
+        return "Authorization: Bearer $::auto_comment::openaiKey"
+    }
+    return ""
+}
+
+# ::auto_comment::replyText
+#   Pull the assistant text out of a chat response. OpenAI-compatible endpoints
+#   answer in choices[0].message.content; Ollama in message.content. Both are
+#   read here so the caller does not care which provider produced the reply.
+proc ::auto_comment::replyText {raw} {
+    set text [::auto_comment::extractOpenAIChoice $raw]
+    if {$text eq ""} { set text [::auto_comment::extractOllamaMessage $raw] }
+    return $text
+}
+
+proc ::auto_comment::extractOpenAIChoice {raw} {
+    if {![regexp {"choices"\s*:\s*\[} $raw]} { return "" }
+    if {[regexp {"content"\s*:\s*"((?:[^"\\]|\\.)*)"} $raw -> text]} {
+        return [::auto_comment::unescapeJson $text]
+    }
+    return ""
+}
+
+proc ::auto_comment::extractOllamaMessage {raw} {
+    if {![regexp {"message"\s*:\s*\{.*?"content"\s*:\s*"((?:[^"\\]|\\.)*)"} $raw -> text]} {
+        return ""
+    }
+    return [::auto_comment::unescapeJson $text]
+}
+
+# ::auto_comment::unescapeJson
+#   Minimal JSON string decoder: the escapes a chat reply actually contains.
+proc ::auto_comment::unescapeJson {text} {
+    return [subst -nocommands -novariables [string map [list {\\n} "\n" {\\t} "\t" {\\r} "\r" {\\\"} {"} {\\\\} {\\}] $text]]
+}
+
+# ::auto_comment::query
+#   One entry point for every caller. Returns the assistant text, or a string
+#   starting with "ERROR:" that the caller shows to the user. "none" is a
+#   refusal, not a failure: nothing is sent, and the caller is expected to have
+#   offered the user a way to turn the coach on.
+proc ::auto_comment::query {prompt {maxTokens 300}} {
+    switch -- $::auto_comment::provider {
+        none     { return "ERROR: no model selected (Options: Game Comment)" }
+        gemini   { return [::auto_comment::queryGemini $prompt] }
+        deepseek { return [::auto_comment::queryDeepSeek $prompt] }
+        local -
+        openai   { return [::auto_comment::queryChat $prompt $maxTokens] }
+    }
+    return "ERROR: unknown provider: $::auto_comment::provider"
+}
+
+# ::auto_comment::queryChat
+#   The transport for both generic providers: one request shape per provider,
+#   written to a temp file and handed to curl, exactly like the native DeepSeek
+#   path so Windows (curl.exe) and Unix behave the same.
+proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
+    set reason [::auto_comment::providerReady]
+    if {$reason ne ""} { return "ERROR: $reason" }
+    set url [::auto_comment::chatEndpoint]
+    set body [::auto_comment::chatBody $prompt $maxTokens]
+
+    set tmpfile [file join [::auto_comment::getTempDir] "auto_comment_chat.json"]
+    if {[catch {
+        set fd [open $tmpfile w]
+        puts -nonewline $fd $body
+        close $fd
+    } err]} {
+        return "ERROR: cannot write the request: $err"
+    }
+
+    set args [list curl -s --connect-timeout 15 --max-time 180 \
+        -H {Content-Type: application/json} -X POST -d @$tmpfile]
+    set auth [::auto_comment::chatAuth]
+    if {$auth ne ""} { lappend args -H $auth }
+    lappend args $url
+
+    set result ""
+    set ok 0
+    if {![catch {exec {*}$args 2>@1} result]} { set ok 1 }
+    catch { file delete -force $tmpfile }
+    if {!$ok} {
+        return "ERROR: request failed (network error or timeout): [string range [string trim $result] 0 300]"
+    }
+    if {[regexp {"error"\s*:\s*\{} $result] || [regexp {"error"\s*:\s*"([^"]*)"} $result -> msg]} {
+        if {[info exists msg]} { return "ERROR: $msg" }
+        return "ERROR: [string range [string trim $result] 0 300]"
+    }
+    set text [string trim [::auto_comment::replyText $result]]
+    if {$text eq ""} {
+        return "ERROR: the endpoint returned no text (check the model name)"
+    }
+    return $text
 }
 
 # ::auto_comment::modelChoices
