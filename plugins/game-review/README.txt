@@ -78,9 +78,19 @@ PGN OUTPUT
                             game
     end of each phase       [Phase opening] / [Phase middlegame] /
                             [Phase endgame], then that phase's plies, accuracy
-                            and acpl, then its paragraph. The last phase sits on
-                            the game's last ply. Each block is replaced, not
-                            stacked, when the same game is reviewed again.
+                            and acpl (average centipawn loss - the mean
+                            centipawns the side gave up per move in the phase),
+                            then its paragraph. The last phase sits on the game's
+                            last ply. A phase gets its block even when no move in
+                            it cleared the "notable" bar, so no stretch of the
+                            game is left without a comment. Each block is
+                            replaced, not stacked, when the game is reviewed
+                            again.
+
+  Scores: mate is written as [%eval #N] (the token scid's own score graph
+  understands). Anything past twenty pawns is decisive and clamps to +20.00,
+  because Stockfish reports tablebase wins as centipawns in the thousands and
+  printing "+88.01" helps nobody.
 
   Phase boundaries come from the position (material, back rank, pawn
   structure), never from the opening book, so which book is installed cannot
@@ -93,7 +103,8 @@ COACH (Ollama)
   Model names differ between local and cloud: list them with
     curl -H "Authorization: Bearer $KEY" https://ollama.com/v1/models
   The model only writes prose from facts the plugin computed. It never
-  decides a label.
+  decides a label. Every move labelled Mistake or Blunder gets a comment, not
+  just the key moments (capped at 10 per game; the log prints the count).
 
 FILES
   10_cr_board.tcl     board core: movegen, make-move, material, SEE

@@ -274,6 +274,7 @@ set sp [::cr_llm::summaryPrompt]
 check "no 'single habit' instruction" [expr {[string first "single habit" $sp] < 0}] "prompt still asks for a habit"
 check "states that one game cannot show a habit" [expr {[string first "cannot show a habit" $sp] >= 0}] "no ban on the word"
 check "asks for an improvement in this game" [expr {[string first "in THIS game" $sp] >= 0}] "no single-game framing"
+check "tells the model to use the net material" [expr {[string first "net material after the punishment" $sp] >= 0}] "no net material rule"
 
 puts "\n== the window opens before the new work =="
 set ::SEQ {}
@@ -299,6 +300,25 @@ check "book probe runs with the window up" [expr {[lsearch -regexp $::SEQ {^log:
 check "analysis gets its own stage" [expr {[lsearch -regexp $::SEQ {^stage:Analysing}] > 0}] "seq: $::SEQ"
 ::cr_review::onCloudProgress 3 28 9
 check "cloud progress shows the usable count" [expr {[string first "9 usable" $::LAST_SET] >= 0 && [string first "3/28" $::LAST_SET] >= 0}] "got '$::LAST_SET'"
+
+puts "\n== a phase with no prose still gets its block =="
+array set ::CMT {}
+set ::cr_review::R(phaseStats) [dict create \
+    opening [dict create from_ply 1 to_ply 10 plies 10 accuracy_white 70.0 accuracy_black 60.0 acpl_white 20 acpl_black 30] \
+    middlegame "" \
+    endgame [dict create from_ply 11 to_ply 16 plies 6 accuracy_white 55.0 accuracy_black 44.0 acpl_white 50 acpl_black 70]]
+array set ::cr_llm::J {game 1 done 0 total 1}
+set ::cr_llm::J(texts) [dict create]
+dict set ::cr_llm::J(texts) [list phase opening] "The opening was quiet."
+::cr_llm::applyProse
+check "opening block written" [string match {*\[Phase opening\]*} $::CMT(10)] "got '$::CMT(10)'"
+check "endgame block written without prose" [string match {*\[Phase endgame\]*} $::CMT(16)] "got '$::CMT(16)'"
+check "endgame block carries its figures" [string match {*accuracy W 55.0%*} $::CMT(16)] "got '$::CMT(16)'"
+
+puts "\n== phase prompt asks for consequences =="
+set pp [::cr_llm::phasePrompt opening]
+check "does not ask for a move-by-move grouping" [expr {[string first "group by side" $pp] < 0}] "prompt still groups by side"
+check "forbids going through the moves in order" [expr {[string first "Never go through the moves in game order" $pp] >= 0}] "no anti-list rule"
 
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

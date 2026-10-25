@@ -994,3 +994,97 @@ proc ::crfacts::treeLine {{maxGames 100000}} {
     if {$games eq ""} { return "" }
     return "the position occurred in $games games in the open database; White scored $score%"
 }
+
+# ---- material swing and forks ----------------------------------------------
+# What an error actually cost, and whether the punishment was a fork. A comment
+# that says "the rook was taken" when the sequence was a fork winning the
+# exchange teaches the wrong lesson: the capture was not the point.
+
+proc ::crfacts::_counts {fen} {
+    set out [dict create]
+    set pos ""
+    catch { set pos [::crboard::fromFen $fen] }
+    if {$pos eq ""} { return $out }
+    set bd [dict get $pos board]
+    for {set sq 0} {$sq < 64} {incr sq} {
+        set p [::crboard::pieceAt $bd $sq]
+        if {$p eq ""} continue
+        set c [::crboard::colorOf $p]
+        set t [string tolower [string index $p end]]
+        dict incr out "$c$t"
+    }
+    return $out
+}
+
+proc ::crfacts::_swingWord {n} {
+    switch -- $n {
+        1 { return "a pawn" }
+        2 { return "the exchange (a rook for a knight)" }
+        3 { return "a piece" }
+        5 { return "a rook" }
+        9 { return "a queen" }
+    }
+    return "$n points of material"
+}
+
+# Net material won and lost between two positions, from the point of view of the
+# side that came out ahead. Returns "" when nothing changed.
+proc ::crfacts::materialSwing {fenA fenB} {
+    set a ""
+    set b ""
+    catch { lassign [::crboard::material [::crboard::fromFen $fenA]] wa ba ; set a [list $wa $ba] }
+    catch { lassign [::crboard::material [::crboard::fromFen $fenB]] wb bb ; set b [list $wb $bb] }
+    if {$a eq "" || $b eq ""} { return "" }
+    lassign $a wa ba
+    lassign $b wb bb
+    set lostW [expr {$wa - $wb}]
+    set lostB [expr {$ba - $bb}]
+    set delta [expr {$lostB - $lostW}]
+    if {$delta == 0} { return "" }
+    set side [expr {$delta > 0 ? "White" : "Black"}]
+    set n [expr {abs($delta)}]
+    return "$side won [_swingWord $n]"
+}
+
+# A fork in its useful sense: the move gives check AND attacks another piece
+# worth a minor piece or more. Returns "" for anything else.
+proc ::crfacts::forkLine {fenBefore uci} {
+    if {[string length $uci] < 4} { return "" }
+    set pos ""
+    catch { set pos [::crboard::fromFen $fenBefore] }
+    if {$pos eq ""} { return "" }
+    set pos2 ""
+    catch { set pos2 [::crboard::makeMove $pos $uci] }
+    if {$pos2 eq ""} { return "" }
+    set toSq [::crboard::sqIndex [string range $uci 2 3]]
+    set bd2 [dict get $pos2 board]
+    set piece [::crboard::pieceAt $bd2 $toSq]
+    if {$piece eq ""} { return "" }
+    set mover [::crboard::colorOf $piece]
+    set other [expr {$mover eq "w" ? "b" : "w"}]
+    set ksq -1
+    catch { set ksq [::crboard::kingSquare $pos2 $other] }
+    if {$ksq < 0} { return "" }
+    # the move must give check, or it is not a fork in the sense that matters
+    set check 0
+    catch { set check [::crboard::attacked $pos2 $ksq $mover] }
+    if {!$check} { return "" }
+    set targets {}
+    for {set sq 0} {$sq < 64} {incr sq} {
+        if {$sq == $ksq} continue
+        set p [::crboard::pieceAt $bd2 $sq]
+        if {$p eq ""} continue
+        if {[::crboard::colorOf $p] ne $other} continue
+        set v 0
+        catch { set v [::crfacts::valueOf $p] }
+        if {$v < 3} continue
+        set hit 0
+        catch { set hit [::crfacts::attacksFrom $pos2 $toSq $sq] }
+        if {!$hit} continue
+        lappend targets "the [string tolower [::crfacts::pieceName $p]] on [::crboard::sqName $sq]"
+        if {[llength $targets] >= 2} break
+    }
+    if {![llength $targets]} { return "" }
+    set me "[string tolower [::crfacts::pieceName $piece]] on [::crboard::sqName $toSq]"
+    return "the punishment is a fork: the $me checks the king and attacks [join $targets { and }]"
+}

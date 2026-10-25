@@ -197,7 +197,7 @@ proc ::cr_llm::cleanProse {text} {
 # report to know what the paragraph is about), then the prose.
 proc ::cr_llm::phaseBlock {ph st text} {
     set block "\[Phase $ph\] plies [dict get $st from_ply]-[dict get $st to_ply] - "
-    append block [format "accuracy W %.1f%% B %.1f%%, acpl W %d B %d." \
+    append block [format "accuracy W %.1f%% B %.1f%%, acpl (average centipawn loss) W %d B %d." \
         [dict get $st accuracy_white] [dict get $st accuracy_black] \
         [dict get $st acpl_white] [dict get $st acpl_black]]
     set prose [string trim [::cr_llm::cleanProse $text]]
@@ -348,6 +348,26 @@ proc ::cr_llm::punishmentFacts {turn} {
             }]} { set hits {} }
             if {[llength $hits]} {
                 lappend out "the punishment attacks the $tpiece on $tsq"
+            }
+            # The punishment is often two moves, not one: a rook trade that
+            # clears the way for a fork is one sequence, and a comment that
+            # stops at the capture names the wrong lesson.
+            foreach pply [list [expr {$tply + 1}] [expr {$tply + 2}] [expr {$tply + 3}]] {
+                set pm [::cr_review::moveByPly $pply]
+                if {$pm eq ""} continue
+                set fl ""
+                catch { set fl [::crfacts::forkLine [dict get $pm fen_before] [dict get $pm played]] }
+                if {$fl ne ""} { lappend out $fl ; break }
+            }
+            # Six plies on, the sequence has settled: trades clear and
+            # recaptures land, so the net is the cost, not the first capture.
+            set later [::cr_review::moveByPly [expr {$tply + 6}]]
+            if {$later ne ""} {
+                set swing ""
+                catch { set swing [::crfacts::materialSwing [dict get $turn fen_before] [dict get $later fen_after]] }
+                if {$swing ne ""} {
+                    lappend out "net material after the punishment: $swing"
+                }
             }
             set answer [::cr_review::moveByPly [expr {$tply + 2}]]
             if {$answer ne ""} {
@@ -594,6 +614,7 @@ Rules:
 - The game turned on the move in FACTS marked \"the game turned here\". Name it in your first sentence and do not say that any other move turned the game.
 - Do not describe what a line or variation shows beyond the moves in it. If FACTS does not say what a move achieved, say less rather than guessing.
 - Prefer the consequence over the sequence: Black taking on e4 and losing the queen to a rook is a summary; naming each move in order is not. If FACTS gives the net exchange, put it in the first sentence.
+- If FACTS gives the net material after the punishment, that is what the error cost: state it in outcome terms (the exchange, a piece, a rook, a queen), not as what the immediate reply captured. If FACTS says the punishment was a fork, the fork is the mechanism and the net material is the price.
 - FACTS says when the game was decided, with a move number. If you mention it, use that move number exactly. Mistakes made after that point did not change the result: mention them only as loose play in a lost position, never as being as important as the move that decided the game.
 - No lists, no headings, no preamble, no markdown.
 - Answer in exactly three labelled lines, each starting at the beginning of a line:
@@ -693,9 +714,10 @@ proc ::cr_llm::phaseFacts {phase} {
 }
 
 proc ::cr_llm::phasePrompt {phase} {
-    # Nothing noteworthy in the phase (a book opening, a quiet stretch) means
-    # nothing worth a paragraph - and no call to pay for.
-    if {![llength [phaseNotable $phase]]} { return "" }
+    # A phase with no notable move still gets a paragraph: the phase happened,
+    # it has figures, and skipping it leaves a phase of the game with no comment
+    # at all. FACTS then says "moves you may name in this phase: none", and the
+    # rules below forbid naming any.
     set facts [::cr_llm::phaseFacts $phase]
     if {$facts eq ""} { return "" }
     return "You are a chess coach writing one paragraph about the $phase of a game, for the scoresheet.
@@ -703,9 +725,9 @@ Write about both sides by colour - \"White\" and \"Black\". Never address anyone
 
 Rules:
 - Use only the FACTS below. Never name a piece, square or move that is not in FACTS.
-- Name the concrete moves from FACTS that mattered and say what each one did or allowed. Do not stop at calling a move good or bad: the scoresheet already labels it.
 - Open with one sentence on the state of this phase: who stood better when it began and whether that changed by its end.
-- Then group by side: White's moves that mattered in game order, then Black's. Never alternate between the sides.
+- Then say what changed it, as consequences: one clause per turning event, giving what the move allowed or prevented and what followed from it. Never go through the moves in game order and never chain clauses with then, next or after that.
+- Name a move only where it is the subject of a consequence you are stating. Never tell the reader that a move was played.
 - Keep to the balance: if one side was already completely winning in this phase, say what the losing side was playing for rather than listing small errors.
 - Never quote the accuracy, centipawn or ply figures from FACTS, and give no percentages. The reader sees those already.
 - Never compare the two sides' accuracy, even in words: saying one side was more accurate is still a number in disguise.
@@ -729,8 +751,22 @@ proc ::cr_llm::startProse {} {
     set J(game) [sc_game number]
     set gnum $J(game)
 
-    foreach k $::cr_review::R(keyMoments) {
-        set m [::cr_review::moveByPly [dict get $k ply]]
+    # Key moments first, then every mistake and blunder that did not make the
+    # cut: a move the PGN labels "?!" or "??" with no comment next to it reads as
+    # an oversight in the review, not as a deliberate silence. Capped, because
+    # each one is a model call.
+    set want {}
+    foreach k $::cr_review::R(keyMoments) { lappend want [dict get $k ply] }
+    foreach rec $::cr_review::R(movesOut) {
+        if {[dict get $rec classification] in {blunder mistake miss}} {
+            lappend want [dict get $rec ply]
+        }
+    }
+    set want [lsort -integer -unique $want]
+    if {[llength $want] > 10} { set want [lrange $want 0 9] }
+    catch { ::cr_ui::log "prose: [llength $want] moments" }
+    foreach wp $want {
+        set m [::cr_review::moveByPly $wp]
         if {$m eq ""} continue
         # The reply that punished the move is in the next analysed position: its
         # PV starts from the board after the move, so it is the refutation. Attach
@@ -820,6 +856,20 @@ proc ::cr_llm::applyProse {} {
                 set cur [sc_pos getComment]
                 catch { sc_pos setComment "[string trim $cur] - [::cr_llm::cleanProse [dict get $J(texts) $key]]" }
             }
+        }
+        # Every phase with figures gets its block, whether or not the model
+        # returned prose for it: a missing endgame comment looked like a bug.
+        foreach ph {opening middlegame endgame} {
+            if {[dict exists $J(texts) [list phase $ph]]} continue
+            set st ""
+            catch { set st [dict get $::cr_review::R(phaseStats) $ph] }
+            if {$st eq ""} continue
+            set anchor [dict get $st to_ply]
+            if {[catch { sc_move ply $anchor }]} continue
+            if {[sc_pos location] != $anchor} continue
+            set cur [sc_pos getComment]
+            set block [::cr_llm::phaseBlock $ph $st ""]
+            catch { sc_pos setComment [string trim "$cur\n\n$block"] }
         }
         sc_move ply 0
         set cur [sc_pos getComment]

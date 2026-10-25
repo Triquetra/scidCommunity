@@ -406,10 +406,7 @@ proc ::cr_review::verifyIndices {} {
 # ---- analysis -> per-ply records -------------------------------------------
 
 proc ::cr_review::evalToCp {score type} {
-    if {$type eq "mate"} {
-        if {$score > 0} { return [expr {10000 - $score * 10}] }
-        return [expr {-10000 - $score * 10}]
-    }
+    if {$type eq "mate"} { return [::crclass::mateToCp $score] }
     return $score
 }
 
@@ -724,12 +721,18 @@ proc ::cr_review::applyVerification {} {
 
 # ---- writeback -------------------------------------------------------------
 
+# The score as scid writes it in a PGN comment. Mate uses the token scid's own
+# score graph understands ("[%eval #3]"); everything past twenty pawns is
+# decisive rather than a number a reader can use, and Stockfish reports
+# tablebase wins as centipawns in the thousands, so those clamp instead of
+# printing "+88.01".
 proc ::cr_review::fmtEval {cp} {
-    if {abs($cp) >= 9000} {
-        set n [expr {(10000 - abs($cp)) / 10}]
+    if {abs($cp) >= 90000} {
+        set n [expr {(100000 - abs($cp)) / 100}]
         if {$n < 1} { set n 1 }
-        return [expr {$cp > 0 ? "M$n" : "-M$n"}]
+        return [expr {$cp > 0 ? "#$n" : "#-$n"}]
     }
+    if {abs($cp) >= 2000} { return [format "%+.2f" [expr {$cp > 0 ? 20.0 : -20.0}]] }
     return [format "%+.2f" [expr {$cp / 100.0}]]
 }
 

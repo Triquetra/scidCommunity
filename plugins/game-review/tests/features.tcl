@@ -226,10 +226,43 @@ puts "\n== phase block =="
 set st [dict create from_ply 11 to_ply 31 plies 21 accuracy_white 82.1 accuracy_black 64.4 acpl_white 18 acpl_black 45]
 set blk [::cr_llm::phaseBlock middlegame $st "The middlegame began level."]
 check "block opens with the marker" [expr {[string first "\[Phase middlegame\]" $blk] == 0}] "got '$blk'"
-check "block carries plies and figures" [expr {[string first "plies 11-31 - accuracy W 82.1% B 64.4%, acpl W 18 B 45." $blk] >= 0}] "got '$blk'"
+check "block carries plies and figures" [expr {[string first "plies 11-31 - accuracy W 82.1% B 64.4%, acpl (average centipawn loss) W 18 B 45." $blk] >= 0}] "got '$blk'"
 check "prose follows on its own line" [expr {[string first "\nThe middlegame began level." $blk] >= 0}] "got '$blk'"
 set bad [regexp {[^\x01-\x7e\n]} $blk]
 check "block is ascii" [expr {$bad == 0}] "got '$blk'"
+
+# --------------------------------------------------- scores: mate vs tablebase --
+puts "\n== mate and tablebase scores =="
+set mateFmt [::cr_review::fmtEval [::cr_review::evalToCp 3 mate]]
+check "mate renders as scid's #N token" [expr {$mateFmt eq "#3"}] "got '$mateFmt'"
+set negMate [::cr_review::fmtEval [::cr_review::evalToCp -2 mate]]
+check "negative mate renders #-N" [expr {$negMate eq "#-2"}] "got '$negMate'"
+set tb [::cr_review::fmtEval 9165]
+check "a tablebase score clamps instead of printing +91.65" [expr {$tb eq "+20.00"}] "got '$tb'"
+set normal [::cr_review::fmtEval 995]
+check "an ordinary score is unchanged" [expr {$normal eq "+9.95"}] "got '$normal'"
+check "tablebase range is not a mate" [expr {![::crclass::isMateCp 9165]}] "9165 treated as mate"
+check "mate sentinel is a mate" [expr {[::crclass::isMateCp [::crclass::mateToCp 4]]}] "mateToCp not recognised"
+
+# ------------------------------------------------------- great in a lost game --
+puts "\n== a forced move in a lost position is not great =="
+set args {-base best -isBest 1 -cpLoss 5 -fenBefore "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"     -fenAfter "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"     -sideToMove w -playerEvalBeforeCp -363 -playerEvalAfterCp -392 -ply 40     -legalMoveCount 4 -candidatePlayerCps {0 -250} -pvAfterPlayed {} -inBook "" -playedUci e2e4 -winDrop 1}
+set clsLost [::crclass::refineClassification {*}$args]
+check "no great when the mover is already lost" [expr {$clsLost ne "great"}] "got '$clsLost'"
+set args2 [string map {-playerEvalBeforeCp\ -363\ -playerEvalAfterCp\ -392 -playerEvalBeforeCp\ 30\ -playerEvalAfterCp\ 30} $args]
+set clsOk [::crclass::refineClassification {*}$args2]
+check "still great while the game is in doubt" [expr {$clsOk eq "great"}] "got '$clsOk'"
+
+# --------------------------------------------------------- fork and net material --
+puts "\n== punishment facts =="
+set fenA "r4rk1/pb5p/2n1R1p1/2pp4/6N1/2PB4/PP3PPP/2R3K1 b - - 0 21"
+set fenB "4k3/pb5p/2n3p1/2pp4/8/2PB4/PP3PPP/2R3K1 w - - 0 25"
+set fenFork "4r1k1/pb5p/2n3p1/2pp4/6N1/2PB4/PP3PPP/2R3K1 w - - 0 23"
+set sw [::crfacts::materialSwing $fenA $fenB]
+check "net material names the exchange" [expr {[string first "White won the exchange (a rook for a knight)" $sw] >= 0}] "got '$sw'"
+set fk [::crfacts::forkLine $fenFork g4f6]
+check "the fork is recognised" [expr {[string first "fork" $fk] >= 0 && [string first "rook on e8" $fk] >= 0}] "got '$fk'"
+check "a rook move is not a fork" [expr {[::crfacts::forkLine $fenA a8e8] eq ""}] "got '[::crfacts::forkLine $fenA a8e8]'"
 
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

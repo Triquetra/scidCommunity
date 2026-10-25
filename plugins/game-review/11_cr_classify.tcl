@@ -8,8 +8,11 @@ namespace eval ::crclass {
     # classifier.ts:33 and :39 - bump when the port is re-synced upstream.
     variable SCORING_VERSION 9
     variable BOOK_PLIES 12
-    # classifier.ts:44 - |cp| >= 9000 means "this is a mate score".
-    variable MATE_CP_THRESHOLD 9000
+    # Mate scores live far outside the centipawn range on purpose: Stockfish
+    # reports tablebase wins as centipawns in the thousands (9165, 7836), so a
+    # "big number means mate" rule mislabels them. Mate is encoded as
+    # +/-(100000 - 100*moves), which no evaluation can reach.
+    variable MATE_CP_THRESHOLD 90000
 
     # classification.ts:CLASS_WEIGHT, used by the key-moment ranking.
     variable CLASS_WEIGHT
@@ -46,8 +49,8 @@ proc ::crclass::isMateCp {cp} {
 }
 
 proc ::crclass::mateToCp {mate} {
-    if {$mate > 0} { return [expr {10000 - $mate * 10}] }
-    return [expr {-10000 - $mate * 10}]
+    if {$mate > 0} { return [expr {100000 - $mate * 100}] }
+    return [expr {-100000 - $mate * 100}]
 }
 
 proc ::crclass::normalizeEval {cp mate sideToMove} {
@@ -337,7 +340,13 @@ proc ::crclass::refineClassification {args} {
             # ... but not when the move is just picking up a piece the opponent
             # left hanging: that is an obvious recapture, however wide the
             # MultiPV gap, and calling it "great" teaches nothing.
-            if {$top - $second >= 200 && ![isFreeCapture $A(fenBefore) $A(playedUci)]} {
+            # A wide gap only means something if the mover is still in the game:
+            # when every alternative is already losing, the "only move" is a
+            # forced retreat, not a great move - and taking material the opponent
+            # left hanging is obvious, not great.
+            if {$top - $second >= 200 && $A(playerEvalAfterCp) >= -200 \
+                && $A(playerEvalAfterCp) >= $A(playerEvalBeforeCp) - 20 \
+                && ![isFreeCapture $A(fenBefore) $A(playedUci)]} {
                 return great
             }
         }
