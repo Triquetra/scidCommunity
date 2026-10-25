@@ -317,6 +317,7 @@ menuText E OptionsMovesHighlightLastMoveArrow "Show Arrow" 0 {Show a Arrow with 
 menuText E OptionsMovesHighlightLastMoveNag "Show annotation symbols" 0
 menuText E OptionsMovesHighlightLastMoveEval "Show evaluation symbols" 0
 menuText E OptionsMoves "Moves" 0 {Move entry options}
+menuText E OptionsGamelist "Game list" 0 {Game list options}
 menuText E OptionsMovesAnimate "Animation Time" 1 \
   {Set the amount of time used to animate moves}
 menuText E OptionsMovesDelay "Autoplay Time Delay..." 1 \
@@ -333,6 +334,7 @@ menuText E OptionsMovesKey "Keyboard Completion" 0 \
 menuText E OptionsMovesShowVarArrows "Show Arrows for Game Variations" 0 {Turn on/off arrows showing moves in variations}
 menuText E OptionsMovesShowEngineVariationArrows "Show multi-PV Engine Arrows" 0 {Turn on/off arrows showing engine PV lines in multiPV mode}
 menuText E OptionsMovesGlossOfDanger "Color Coded Gloss of Danger" 0 {Turn on/off color coded gloss of danger}
+translate E OptionsGlistWheelRows {Rows per wheel notch}
 translate E OptionsMovesTreeDepth {Default Tree Window Plies}
 translate E OptionsMovesEnginePvLength {Engine PV display length}
 menuText E OptionsNumbers "Number Format" 0 {Select the number format}

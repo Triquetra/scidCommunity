@@ -98,6 +98,14 @@ proc ::preferences::moves { t } {
     pack $t.pvlen -side top -anchor w -pady "2 0"
 }
 
+proc ::preferences::gamelist { t } {
+    ttk::label $t.wlbl -text [tr OptionsGlistWheelRows] -anchor w
+    pack $t.wlbl -anchor w
+    ttk::spinbox $t.wspeed -from 1 -to 10 -increment 1 -width 4 \
+        -textvariable ::glistWheelRows
+    pack $t.wspeed -anchor w -pady {2 0}
+}
+
 proc ::preferences::updateScrollBar { w } {
   set l [winfo reqwidth $w.f]
   set h [winfo reqheight $w.f]
@@ -140,6 +148,7 @@ proc ::preferences::Open { {toggle ""} } {
   lappend configList [tr OptionsRecent] ::recentFiles::configure
   lappend configList [tr OptionsSounds] ::utils::sound::OptionsDialog
   lappend configList [tr OptionsMoves] ::preferences::moves
+  lappend configList [tr OptionsGamelist] ::preferences::gamelist
   lappend configList [tr ConfigureInformant] configInformant
   lappend configList [tr OptionsFICS] configFICS
   set maxlen 0

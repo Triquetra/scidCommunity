@@ -939,7 +939,7 @@ proc glist.create {{w} {layout} {reset_layout false}} {
   set ::glistYScroll($w.glist) [$w.glist cget -yscrollcommand]
   $w.glist configure -yscrollcommand "glist.yscroll_ $w.glist"
   $w.ybar configure -command "glist.ybar_ $w.glist"
-  bindMouseWheel $w.glist "glist.ybar_ $w.glist"
+  glist.bindWheel $w.glist
   bind $w.glist <$::COMMAND-f> "event generate $w <<FindBarShow>>"
 
   # Find widget
@@ -1675,6 +1675,69 @@ proc glist.sortStore_ {w layout} {
 }
 
 # Scrollbar
+## Mouse wheel speed for the game list.
+##
+## bindMouseWheel (misc.tcl) turns one wheel notch into a single row, and every
+## notch makes "glist.loadvalues_" re-query the visible window through
+## "sc_base gameslist" - so one row per notch reads as a stuck list on a large
+## database. glist.ybar_ already understands "scroll N units"; only the binding
+## has to change, and only for game-list widgets: the board uses the same
+## binding for its move Back/Forward and keeps it.
+
+options.store ::glistWheelRows 3
+
+namespace eval ::glist {
+    variable wheelAcc
+    array set wheelAcc {}
+}
+
+# Rows moved per notch: the Options value, clamped to something sane.
+proc glist.wheelRows {} {
+    set n 3
+    catch { set n $::glistWheelRows }
+    if {![string is integer -strict $n] || $n < 1} { set n 1 }
+    if {$n > 10} { set n 10 }
+    return $n
+}
+
+# dir: -1 = towards the top, +1 = towards the bottom
+proc glist.wheelScroll {w dir} {
+    catch { glist.ybar_ $w scroll [expr {$dir * [glist.wheelRows]}] units }
+}
+
+# win32 reports %D as +/-120 per notch, or a multiple when the wheel is spun
+# fast. Precision touchpads send fractions of a notch, which the core binding
+# truncates to zero and drops - hence the per-widget accumulator.
+proc glist.wheel {w delta} {
+    if {![info exists ::glist::wheelAcc($w)]} { set ::glist::wheelAcc($w) 0 }
+    set ::glist::wheelAcc($w) [expr {$::glist::wheelAcc($w) + $delta}]
+    set notch [expr {int($::glist::wheelAcc($w) / 120.0)}]
+    if {$notch == 0} { return }
+    set ::glist::wheelAcc($w) [expr {$::glist::wheelAcc($w) - $notch * 120}]
+    glist.wheelScroll $w [expr {-$notch}]
+}
+
+# aqua delivers a small direction value, not a 120-unit delta.
+proc glist.wheelDir {w delta} {
+    glist.wheelScroll $w [expr {-$delta}]
+}
+
+proc glist.bindWheel {bindtag} {
+    switch -- [tk windowingsystem] {
+        x11 {
+            bind $bindtag <Button-4> {glist.wheelScroll %W -1 ; break}
+            bind $bindtag <Button-5> {glist.wheelScroll %W +1 ; break}
+            bind $bindtag <MouseWheel> {glist.wheel %W %D ; break}
+        }
+        aqua {
+            bind $bindtag <MouseWheel> {glist.wheelDir %W %D ; break}
+        }
+        default {
+            bind $bindtag <MouseWheel> {glist.wheel %W %D ; break}
+        }
+    }
+}
+
 proc glist.ybar_ {w cmd {n 0} {units ""}} {
   if { $cmd == "-1" || $cmd == "+1" } {
     #MouseWheel
