@@ -70,6 +70,22 @@ PGN OUTPUT
   (turn that on in settings). [%eval] tokens are written so scid's score
   graph redraws from the PGN.
 
+  Where the coach's text lands:
+
+    header comment (ply 0)  the game review (accuracy, estimated Elo, label
+                            tally), the game summary, the opening line and the
+                            level line - everything that is about the whole
+                            game
+    end of each phase       [Phase opening] / [Phase middlegame] /
+                            [Phase endgame], then that phase's plies, accuracy
+                            and acpl, then its paragraph. The last phase sits on
+                            the game's last ply. Each block is replaced, not
+                            stacked, when the same game is reviewed again.
+
+  Phase boundaries come from the position (material, back rank, pawn
+  structure), never from the opening book, so which book is installed cannot
+  move a paragraph from one phase to another.
+
 COACH (Ollama)
   Set endpoint, API key and model in Review settings.
     local Ollama:      http://localhost:11434   (no key)

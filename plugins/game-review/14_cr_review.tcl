@@ -716,7 +716,10 @@ proc ::cr_review::stripOurLabels {text} {
     set pat {\[(?:Brilliant|Great|Best|Excellent|Good|Book|Forced|Inaccuracy|Mistake|Miss|Blunder)\][^[]*}
     regsub -all $pat $text "" t
     regsub -all {\[%eval [^\]]*\]} $t "" t2
-    return [string trim $t2]
+    # A phase block is ours too: marker, figures and prose. Without this the
+    # next review would stack a second paragraph on the same ply.
+    regsub -all {\[Phase (?:opening|middlegame|endgame)\][^[]*} $t2 "" t3
+    return [string trim $t3]
 }
 
 proc ::cr_review::moveComment {m} {

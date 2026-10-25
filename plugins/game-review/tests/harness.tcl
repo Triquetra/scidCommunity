@@ -232,5 +232,41 @@ check "cloud run labels 13 a blunder" [expr {[lindex $labelsC 12] eq "blunder"}]
 check "cloud run did not start the analysis engine" [expr {[lsearch -regexp $::ENGINE_LOG {^20 Go}] < 0}] "log: $::ENGINE_LOG"
 check "cloud run still wrote the comment" [string match {\[Blunder\]*} [expr {[info exists ::CMT(13)] ? $::CMT(13) : ""}]] "got '[expr {[info exists ::CMT(13)] ? $::CMT(13) : ""}]'"
 
+puts "\n== phase prose lands at the end of its phase =="
+# The coach finished: a summary and two phase paragraphs are waiting to be
+# written. Phase blocks must go to the last ply of their own phase, and the
+# header must keep the game review without repeating them.
+set ::CMT(10) {[Inaccuracy] 13...Bxe4 was better [%eval +0.44]}
+set ::CMT(16) {[Best] [%eval +2.10]}
+set ::cr_review::R(phaseStats) [dict create \
+    opening [dict create from_ply 1 to_ply 10 plies 10 accuracy_white 82.1 accuracy_black 64.4 acpl_white 18 acpl_black 45] \
+    middlegame [dict create from_ply 11 to_ply 16 plies 6 accuracy_white 55.0 accuracy_black 40.2 acpl_white 60 acpl_black 90] \
+    endgame ""]
+array set ::cr_llm::J {game 1 done 0 total 3}
+set ::cr_llm::J(texts) [dict create]
+dict set ::cr_llm::J(texts) [list phase opening] "The opening began level and stayed level."
+dict set ::cr_llm::J(texts) [list phase middlegame] "White converted the phase after the rook trade."
+dict set ::cr_llm::J(texts) [list summary 0] "SUMMARY: The game turned on move 21, when a rook was won.\nLEVEL: Both sides played at club level; Black should have checked whether the piece was defended.\nOPENING: NONE"
+::cr_llm::applyProse
+set c10 $::CMT(10)
+set c16 $::CMT(16)
+set c0 $::CMT(0)
+check "phase block on the last opening ply" [string match {*\[Phase opening\]*} $c10] "got '$c10'"
+check "phase block carries its figures" [string match {*plies 1-10*} $c10] "got '$c10'"
+check "phase block keeps the move comment" [string match {*\[Inaccuracy\]*} $c10] "got '$c10'"
+check "second phase on its own last ply" [string match {*\[Phase middlegame\]*} $c16] "got '$c16'"
+check "header keeps the summary" [string match {*The game turned on move 21*} $c0] "got '$c0'"
+check "header no longer repeats the phases" [expr {![string match {*Phase review*} $c0] && ![string match {*\[Phase*} $c0]}] "got '$c0'"
+set stripped [::cr_review::stripOurLabels $c10]
+check "a re-review strips the phase block" [expr {![string match {*\[Phase*} $stripped]}] "got '$stripped'"
+check "stripping also removes the label and the eval" [expr {![string match {*Inaccuracy*} $stripped] && ![string match {*%eval*} $stripped]}] "got '$stripped'"
+check "header line survived stripping" [expr {[string trim $stripped] eq ""}] "got '$stripped'"
+
+puts "\n== level line does not ask for a habit =="
+set sp [::cr_llm::summaryPrompt]
+check "no 'single habit' instruction" [expr {[string first "single habit" $sp] < 0}] "prompt still asks for a habit"
+check "states that one game cannot show a habit" [expr {[string first "cannot show a habit" $sp] >= 0}] "no ban on the word"
+check "asks for an improvement in this game" [expr {[string first "in THIS game" $sp] >= 0}] "no single-game framing"
+
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

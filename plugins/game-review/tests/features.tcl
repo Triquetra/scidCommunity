@@ -221,5 +221,15 @@ set ps2 [::crclass::phaseSplit $recs 40]
 check "a book boundary argument changes nothing" [expr {[dict get [dict get $ps2 middlegame] from_ply] == $mid7}] "got [dict get [dict get $ps2 middlegame] from_ply]"
 check "opening phase covers plies 1-6" [expr {[dict get [dict get $ps opening] from_ply] == 1 && [dict get [dict get $ps opening] to_ply] == 6}] "got [dict get $ps opening]"
 
+# ------------------------------------------------------- phase block format --
+puts "\n== phase block =="
+set st [dict create from_ply 11 to_ply 31 plies 21 accuracy_white 82.1 accuracy_black 64.4 acpl_white 18 acpl_black 45]
+set blk [::cr_llm::phaseBlock middlegame $st "The middlegame began level."]
+check "block opens with the marker" [expr {[string first "\[Phase middlegame\]" $blk] == 0}] "got '$blk'"
+check "block carries plies and figures" [expr {[string first "plies 11-31 - accuracy W 82.1% B 64.4%, acpl W 18 B 45." $blk] >= 0}] "got '$blk'"
+check "prose follows on its own line" [expr {[string first "\nThe middlegame began level." $blk] >= 0}] "got '$blk'"
+set bad [regexp {[^\x01-\x7e\n]} $blk]
+check "block is ascii" [expr {$bad == 0}] "got '$blk'"
+
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

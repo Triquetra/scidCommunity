@@ -192,6 +192,19 @@ proc ::cr_llm::cleanProse {text} {
     return [::cr_llm::sanFix [::cr_llm::asciiSafe $text]]
 }
 
+# The comment written at the end of a phase: a marker the next review can find
+# and replace, the phase's own figures (the reader should not have to open the
+# report to know what the paragraph is about), then the prose.
+proc ::cr_llm::phaseBlock {ph st text} {
+    set block "\[Phase $ph\] plies [dict get $st from_ply]-[dict get $st to_ply] - "
+    append block [format "accuracy W %.1f%% B %.1f%%, acpl W %d B %d." \
+        [dict get $st accuracy_white] [dict get $st accuracy_black] \
+        [dict get $st acpl_white] [dict get $st acpl_black]]
+    set prose [string trim [::cr_llm::cleanProse $text]]
+    if {$prose ne ""} { append block "\n" $prose }
+    return $block
+}
+
 # ---- game summary ----------------------------------------------------------
 #
 # Colour-neutral, and built from the same facts Patzer uses: the turning point,
@@ -316,7 +329,7 @@ proc ::cr_llm::punishmentFacts {turn} {
     if {$turn eq ""} { return $out }
     # What actually punished the move: the reply that followed, whether it
     # attacked the piece that had just moved, and how the punished side answered.
-    # This is the evidence for the habit the LEVEL line names - the engine's
+    # This is the evidence for the judgement the LEVEL line makes - the engine's
     # alternative is NOT the lesson, and claiming a missed capture was "forcing"
     # when it was not misleads the coach.
     
@@ -585,7 +598,7 @@ Rules:
 - No lists, no headings, no preamble, no markdown.
 - Answer in exactly three labelled lines, each starting at the beginning of a line:
 SUMMARY: at most three sentences, sixty words total, and preferably two. The FIRST sentence must name the move the game turned on AND its consequence in outcome terms - what it cost on the board, such as a queen for a rook or a lost piece - in that same sentence. Never spend a sentence on the mechanism; the reader has the scoresheet. Shape: the game turned on move 9, when Black's queen took the pawn on e4 and was won for a rook. Do not mention an error that did not change the result.
-LEVEL: one sentence on the strength of play this game shows. Start from FACTS marked \"measured level\", naming each side's level in words; then name the single habit that would lift the weaker side, stated generally - a pattern to watch for, not the move that decided this game. Do not retell the game and do not repeat the turning point.
+LEVEL: one sentence on the strength of play this game shows. Start from FACTS marked \"measured level\", naming each side's level in words; then name the single thing that would most have improved the weaker side's play in THIS game, stated concretely (for example, checking that a piece is defended before committing it). One game cannot show a habit or a pattern, so never use those words and never describe one. Do not retell the game and do not repeat the turning point.
 OPENING: at most two sentences on the opening. If FACTS gives no opening name, write exactly NONE and say nothing else about it.
 FACTS:
 $facts"
@@ -784,6 +797,21 @@ proc ::cr_llm::applyProse {} {
             lassign $key kind ply
             if {$kind eq "phase"} {
                 set ::cr_review::R(phase,$ply) [dict get $J(texts) $key]
+                # A phase paragraph belongs at the end of its own phase: the
+                # last ply it covers, which for the last phase is the last ply
+                # of the game. There it reads as both a closing remark and the
+                # heading for the phase that follows, and the reader stepping
+                # through the game meets it where the events it describes are
+                # on screen.
+                set st ""
+                catch { set st [dict get $::cr_review::R(phaseStats) $ply] }
+                if {$st eq ""} continue
+                set anchor [dict get $st to_ply]
+                if {[catch { sc_move ply $anchor }]} continue
+                if {[sc_pos location] != $anchor} continue
+                set cur [sc_pos getComment]
+                set block [::cr_llm::phaseBlock $ply $st [dict get $J(texts) $key]]
+                catch { sc_pos setComment [string trim "$cur\n\n$block"] }
                 continue
             }
             if {$kind eq "moment"} {
@@ -802,17 +830,14 @@ proc ::cr_llm::applyProse {} {
             set ::cr_review::R(summaryLevel) [dict get $sm level]
             set ::cr_review::R(summaryOpening) [dict get $sm opening]
         }
-        set phs {}
-        foreach ph {opening middlegame endgame} {
-            if {[dict exists $J(texts) [list phase $ph]]} {
-                lappend phs "$ph: [::cr_llm::cleanProse [dict get $J(texts) [list phase $ph]]]"
-            }
-        }
+        # The game review and the summary stay in the header: they are about the
+        # whole game, which is what the top of the scoresheet is. The phase
+        # paragraphs have gone to their own phases (above), so they are not
+        # repeated here.
         set body [string trim $cur]
         if {[dict get $sm summary] ne ""} { append body "\n\n" [dict get $sm summary] }
         if {[dict get $sm opening] ne ""} { append body "\n\nOpening: " [dict get $sm opening] }
         if {[dict get $sm level] ne ""} { append body "\nLevel: " [dict get $sm level] }
-        if {[llength $phs]} { append body "\n\nPhase review: [join $phs { }]" }
         catch { sc_pos setComment [string trim $body] }
         sc_move ply $ply0
     } err]} {
