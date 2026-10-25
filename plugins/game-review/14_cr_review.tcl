@@ -538,6 +538,12 @@ proc ::cr_review::classifyAll {} {
         if {[llength $cAfter]}  { set eaCp [lindex [lindex $cAfter 0] 0] }
         set ebWhite [expr {$sideB eq "w" ? $ebCp : -$ebCp}]
         set eaWhite [expr {$sideB eq "w" ? -$eaCp : $eaCp}]
+        # The move just played may have been checkmate: then the search after it
+        # returns nothing and eaWhite would be 0, which reads as a level position
+        # to everything downstream.
+        if {[::crclass::isMatePosition $fenAfter]} {
+            set eaWhite [expr {$sideW eq "white" ? 100000 : -100000}]
+        }
 
         # player-perspective evals (for the rules)
         set pb [expr {$sideW eq "white" ? $ebWhite : -$ebWhite}]

@@ -49,7 +49,8 @@ proc ::crclass::isMateCp {cp} {
 }
 
 proc ::crclass::mateToCp {mate} {
-    if {$mate > 0} { return [expr {100000 - $mate * 100}] }
+    # 0 means the mate has just been delivered (the mating move itself)
+    if {$mate >= 0} { return [expr {100000 - $mate * 100}] }
     return [expr {-100000 - $mate * 100}]
 }
 
@@ -626,4 +627,22 @@ proc ::crclass::phaseSplit {moves args} {
         dict set out endgame ""
     }
     return $out
+}
+
+# True when the position is checkmate (the side to move has no legal move and is
+# in check). A record for the move that delivered mate has nothing to search, so
+# without this the engine pass leaves 0.00 behind - which reads as "level" in the
+# phase balance and prints "[%eval +0.00]" next to "#".
+proc ::crclass::isMatePosition {fen} {
+    if {[llength [info commands ::crboard::fromFen]] == 0} { return 0 }
+    set pos ""
+    catch { set pos [::crboard::fromFen $fen] }
+    if {$pos eq ""} { return 0 }
+    set side [lindex [split $fen] 1]
+    set legal 1
+    catch { set legal [llength [::crboard::legalMoves $pos]] }
+    if {$legal != 0} { return 0 }
+    set check 0
+    catch { set check [::crboard::inCheck $pos $side] }
+    return $check
 }

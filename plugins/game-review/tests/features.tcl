@@ -274,5 +274,12 @@ set gNd7 [::crfacts::gainsOf $fenD2 b8d7 b]
 check "Nc6 develops" [expr {[lsearch -exact $gNc6 "develops a piece"] >= 0}] "got '$gNc6'"
 check "Nd7 develops too" [expr {[lsearch -exact $gNd7 "develops a piece"] >= 0}] "got '$gNd7'"
 
+puts "\n== a mating move is not a level position =="
+check "checkmate detected" [expr {[::crclass::isMatePosition "R5k1/5ppp/8/8/8/8/5PPP/6K1 b - - 0 1"] == 1}] "mate FEN not recognised"
+check "stalemate is not mate" [expr {[::crclass::isMatePosition "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1"] == 0}] "stalemate treated as mate"
+check "ordinary position is not mate" [expr {[::crclass::isMatePosition "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"] == 0}] "start position treated as mate"
+set mateCp [::crclass::mateToCp 0]
+check "a mating move formats as #1" [expr {[::cr_review::fmtEval $mateCp] eq "#1"}] "got '[::cr_review::fmtEval $mateCp]'"
+
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]
