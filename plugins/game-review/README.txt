@@ -157,6 +157,10 @@ CLOUD EVALUATIONS  (Review settings -> Cloud evaluations)
   cannot drive the brilliant/great gap rule, so those positions are searched
   locally. No API key is needed. Nothing is sent except the position.
 
+  The progress window opens before the book probe, and the cloud stage reports
+  its own count and how many entries were usable ("Cloud evaluations (9
+  usable) 12/28"), then hands the same window to the engine pass.
+
 DATABASE LINE  (Review settings -> Database line in the report)
   Off by default. When on, one search of the open database for the final
   position adds a line to the coach's facts: how many games reached it and what

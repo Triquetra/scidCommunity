@@ -54,7 +54,14 @@ proc sc_pos {args} {
     }
     return ""
 }
-proc sc_base {args} { return 1 }
+proc sc_base {args} {
+    switch -- [lindex $args 0] {
+        isReadOnly { return 0 }
+        current    { return 1 }
+        numGames   { return 1200 }
+    }
+    return 1
+}
 proc sc_var {args} { return 0 }
 proc undoFeature {args} { return "" }
 namespace eval ::notify {}
@@ -267,6 +274,31 @@ set sp [::cr_llm::summaryPrompt]
 check "no 'single habit' instruction" [expr {[string first "single habit" $sp] < 0}] "prompt still asks for a habit"
 check "states that one game cannot show a habit" [expr {[string first "cannot show a habit" $sp] >= 0}] "no ban on the word"
 check "asks for an improvement in this game" [expr {[string first "in THIS game" $sp] >= 0}] "no single-game framing"
+
+puts "\n== the window opens before the new work =="
+set ::SEQ {}
+rename ::cr_review::log ::cr_review::logOrig
+proc ::cr_review::log {msg} { lappend ::SEQ "log:$msg" ; catch { ::cr_review::logOrig $msg } }
+proc ::cr_ui::progressOpen {args} { lappend ::SEQ "progressOpen [lindex $args 1]" }
+proc ::cr_ui::progressStage {args} { lappend ::SEQ "stage:[lindex $args 0]" }
+set ::LAST_SET ""
+proc ::cr_ui::progressSet {done total msg} { set ::LAST_SET "$msg $done/$total" }
+set ::cr_settings::s(cloud_mode) off
+set ::cr_settings::s(book_mode) eco
+array unset ::cr_review::R ; array set ::cr_review::R {}
+set ::done 0
+::cr_review::start
+if {!$::done} { vwait ::done }
+puts "  sequence: $::SEQ"
+set iOpen [lsearch -regexp $::SEQ {^progressOpen}]
+set iBook [lsearch -regexp $::SEQ {^log:book}]
+check "progress window exists" [expr {$iOpen >= 0}] "seq: $::SEQ"
+check "window opens before the book probe" [expr {$iOpen < $iBook}] "open=$iOpen book=$iBook"
+check "window opens before the engine starts" [expr {$iOpen < [lsearch -regexp $::SEQ {^log:launch}]}] "seq: $::SEQ"
+check "book probe runs with the window up" [expr {[lsearch -regexp $::SEQ {^log:book: }] > [lsearch -regexp $::SEQ {^progressOpen}]}] "seq: $::SEQ"
+check "analysis gets its own stage" [expr {[lsearch -regexp $::SEQ {^stage:Analysing}] > 0}] "seq: $::SEQ"
+::cr_review::onCloudProgress 3 28 9
+check "cloud progress shows the usable count" [expr {[string first "9 usable" $::LAST_SET] >= 0 && [string first "3/28" $::LAST_SET] >= 0}] "got '$::LAST_SET'"
 
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

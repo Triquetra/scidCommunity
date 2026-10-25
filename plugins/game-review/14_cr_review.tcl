@@ -170,8 +170,12 @@ proc ::cr_review::start {} {
     }
     ::cr_review::log "line built: $R(n) plies, [llength $R(positions)] positions"
 
-    # Book boundary: plies up to here are theory, so nothing there is worth
-    # searching - the label is Book by definition.
+    # The window goes up before any of the newly added work starts: the book
+    # probe and the cloud pre-pass take seconds, and a board that does nothing
+    # for that long reads as a hang. Everything after this point reports into
+    # this window.
+    ::cr_review::progressStart
+
     set first [::cr_review::bookSkipStart]
     set info [::cr_review::bookInfo]
     ::cr_review::log "book: source=[dict get $info source], first searched position $first (skip_book=$::cr_settings::s(skip_book))"
@@ -181,6 +185,7 @@ proc ::cr_review::start {} {
     # minutes of local search. What the cloud does not cover is searched locally.
     if {$::cr_settings::s(cloud_mode) ne "off"} {
         ::cr_review::log "cloud pre-pass: mode=$::cr_settings::s(cloud_mode) min depth=$::cr_settings::s(cloud_min_depth) min pvs=$::cr_settings::s(cloud_min_pv)"
+        ::cr_ui::progressStage "Cloud evaluations" [expr {[llength $R(fens)] - $first}]
         ::cr_engine::cloudPrefill [dict create \
             fens $R(fens) startIndex $first \
             mode $::cr_settings::s(cloud_mode) \
@@ -193,14 +198,24 @@ proc ::cr_review::start {} {
     ::cr_review::beginAnalysis {}
 }
 
-proc ::cr_review::onCloudProgress {done total} {
-    catch { ::cr_ui::proseNote "Cloud evaluations: $done/$total" }
+# Open the window on the work that happens before the engine starts, so the
+# user sees the review running rather than a frozen board.
+proc ::cr_review::progressStart {} {
+    catch { ::cr_ui::progressOpen 1 "opening book" }
+    catch { ::cr_ui::progressStage "Opening book" 1 }
+}
+
+proc ::cr_review::onCloudProgress {done total {accepted 0}} {
+    catch { ::cr_ui::progressSet $done $total "Cloud evaluations ($accepted usable)" }
 }
 
 proc ::cr_review::onCloudDone {prefilled stats} {
     variable R
     set R(prefilled) $prefilled
-    catch { ::cr_ui::proseNote "" }
+    if {[info exists ::cr_review::cancel] && $::cr_review::cancel} {
+        catch { ::cr_ui::progressClose }
+        return
+    }
     ::cr_review::beginAnalysis $prefilled
 }
 
@@ -211,7 +226,14 @@ proc ::cr_review::beginAnalysis {prefilled} {
     set work [expr {[llength $R(positions)] - $first - [dict size $prefilled]}]
     if {$work < 0} { set work 0 }
     ::cr_review::log "analysis: $work positions to search, [dict size $prefilled] prefilled"
-    ::cr_ui::progressOpen $work "depth $::cr_settings::s(depth), $R(n) plies, $work positions"
+    if {$work > 0} {
+        ::cr_ui::progressStage "Analysing" $work
+        ::cr_ui::progressSet 0 $work "Analysing"
+    } else {
+        # nothing left to search: all of it was book or came from the cloud
+        ::cr_ui::progressStage "Writing annotations" 1
+        ::cr_ui::progressSet 1 1 "Writing annotations"
+    }
     set rc [::cr_review::launch $prefilled]
     ::cr_review::log "engine launch returned: $rc"
 }

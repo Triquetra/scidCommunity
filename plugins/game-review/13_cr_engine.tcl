@@ -410,7 +410,7 @@ proc ::cr_engine::cloudNext {} {
         return
     }
     set k [lindex $CLOUD(queue) $CLOUD(q)]
-    if {$CLOUD(onProgress) ne ""} { catch { {*}$CLOUD(onProgress) $CLOUD(q) $CLOUD(total) } }
+    if {$CLOUD(onProgress) ne ""} { catch { {*}$CLOUD(onProgress) $CLOUD(q) $CLOUD(total) $CLOUD(accepted) } }
     ::cr_engine::cloudQuery [lindex $CLOUD(fens) $k] [list ::cr_engine::cloudGot $k]
 }
 

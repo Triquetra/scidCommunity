@@ -84,6 +84,7 @@ proc ::cr_ui::installMenus {} {
 proc ::cr_ui::progressOpen {total {subtitle ""}} {
     variable prog
     set ::cr_ui::startMs [clock milliseconds]
+    set ::cr_ui::stageMs [clock milliseconds]
     set ::cr_ui::total $total
     if {[winfo exists .crProgress]} { destroy .crProgress }
     set w .crProgress
@@ -103,7 +104,22 @@ proc ::cr_ui::progressOpen {total {subtitle ""}} {
     pack $w.msg -fill x -padx 10 -pady {10 2}
     pack $w.bar -fill x -padx 10 -pady 2
     pack $w.cancel -anchor e -padx 10 -pady {2 10}
+    update idletasks
     set prog $w
+}
+
+# Move the same window on to a new stage. The window is opened before the book
+# probe and the cloud pre-pass, so those seconds are spent with a visible
+# window and a moving count instead of a frozen board. Each stage gets its own
+# clock for the estimate; the elapsed time shown is for the whole run.
+proc ::cr_ui::progressStage {subtitle total} {
+    set ::cr_ui::stageMs [clock milliseconds]
+    set ::cr_ui::total $total
+    if {![winfo exists .crProgress]} return
+    catch { wm title .crProgress [expr {$subtitle eq "" ? "Game review" : "Game review - $subtitle"}] }
+    catch { .crProgress.bar configure -maximum [expr {$total > 0 ? $total : 1}] -value 0 }
+    catch { .crProgress.msg configure -text "$subtitle..." }
+    update idletasks
 }
 
 proc ::cr_ui::fmtClock {ms} {
@@ -118,7 +134,9 @@ proc ::cr_ui::progressSet {done total msg} {
         set elapsed [expr {[clock milliseconds] - $::cr_ui::startMs}]
         append text "  -  [::cr_ui::fmtClock $elapsed] elapsed"
         if {$done > 0 && $total > $done} {
-            set eta [expr {int($elapsed * ($total - $done) / $done)}]
+            set stageMs [expr {[info exists ::cr_ui::stageMs] ? $::cr_ui::stageMs : $::cr_ui::startMs}]
+            set stageElapsed [expr {[clock milliseconds] - $stageMs}]
+            set eta [expr {int($stageElapsed * ($total - $done) / $done)}]
             append text ", ~[::cr_ui::fmtClock $eta] left"
         }
     }
