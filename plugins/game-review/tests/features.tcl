@@ -264,5 +264,15 @@ set fk [::crfacts::forkLine $fenFork g4f6]
 check "the fork is recognised" [expr {[string first "fork" $fk] >= 0 && [string first "rook on e8" $fk] >= 0}] "got '$fk'"
 check "a rook move is not a fork" [expr {[::crfacts::forkLine $fenA a8e8] eq ""}] "got '[::crfacts::forkLine $fenA a8e8]'"
 
+# --------------------------------------------- better-move reasons are not invented --
+puts "\n== the better-move facts do not invite invention =="
+# after 3...Bg4: Nc6 and Nd7 both develop, so a fact that credits only Nc6 with
+# developing invites "failed to develop as Nc6 would have".
+set fenD2 "rn2kbnr/ppp1pppp/8/3q4/6b1/5N2/PPPPBPPP/RNBQK2R b KQkq - 3 4"
+set gNc6 [::crfacts::gainsOf $fenD2 b8c6 b]
+set gNd7 [::crfacts::gainsOf $fenD2 b8d7 b]
+check "Nc6 develops" [expr {[lsearch -exact $gNc6 "develops a piece"] >= 0}] "got '$gNc6'"
+check "Nd7 develops too" [expr {[lsearch -exact $gNd7 "develops a piece"] >= 0}] "got '$gNd7'"
+
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

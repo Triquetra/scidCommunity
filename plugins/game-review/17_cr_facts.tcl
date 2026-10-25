@@ -898,10 +898,18 @@ proc ::crfacts::forMove {m} {
         foreach g [lrange $bg 0 2] {
             if {[lsearch -exact $pg $g] >= 0} { lappend shared $g } else { lappend extra $g }
         }
+        # The tail must not leave the model to invent a reason. Two cases give
+        # it nothing to work with, and both used to produce one: "failed to
+        # develop as Nc6 would have" was written for a move that develops, and
+        # "would have prevented Ng5" for a pawn push whose own line plays Ng5.
         set tail ""
         if {[llength $shared] && [llength $extra]} {
             set tail ": it also [join $shared { and }], and unlike the move played it [join $extra { and }]"
-        } elseif {[llength $bg]} {
+        } elseif {![llength $bg]} {
+            set tail ": the facts here give no reason for the engine's preference"
+        } elseif {![llength $extra]} {
+            set tail ": it [join [lrange $bg 0 2] {, }], which the move played also does, so the engine's preference is positional and not captured by these facts"
+        } else {
             set tail ": it [join [lrange $bg 0 2] {, }]"
         }
         if {$bsan ne ""} {

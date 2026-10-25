@@ -320,5 +320,12 @@ set pp [::cr_llm::phasePrompt opening]
 check "does not ask for a move-by-move grouping" [expr {[string first "group by side" $pp] < 0}] "prompt still groups by side"
 check "forbids going through the moves in order" [expr {[string first "Never go through the moves in game order" $pp] >= 0}] "no anti-list rule"
 
+puts "\n== prompts forbid inventing a reason =="
+set mrec [lindex $::cr_review::R(movesOut) 12]
+set mp [::cr_llm::momentPrompt $mrec]
+check "moment prompt: no invented reason for the better move" [expr {[string first "do not supply a reason of your own" $mp] >= 0}] "rule missing"
+set pp2 [::cr_llm::phasePrompt opening]
+check "phase prompt: no characterisation beyond facts" [expr {[string first "never call a move a retreat" $pp2] >= 0}] "rule missing"
+
 puts "\nfailures: $::fails"
 exit [expr {$::fails ? 1 : 0}]

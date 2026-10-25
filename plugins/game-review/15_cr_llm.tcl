@@ -144,6 +144,7 @@ Rules:
 - Do not describe what a line shows beyond the moves printed in it, and do not claim a move left something untouched or unprotected unless FACTS says so.
 - Never mention castling, en passant, repetition or the fifty-move rule beyond what the corresponding FACTS lines say.
 - FACTS includes the engine's line; you may refer to moves in that line (and only those) to show what the better move achieves.
+- If FACTS says it gives no reason for the engine's preference, or that the move played achieves the same thing, do not supply a reason of your own: say only that the engine preferred the better move.
 - Do NOT mention centipawns, evaluations, win percentages, accuracy, or any number at all. The reader already sees the score next to the move.
 - Do not repeat the move number and do not use the words $banned.
 - No lists, no headings, no preamble. At most two sentences, plain prose.
@@ -609,7 +610,7 @@ Rules:
 - Use only the FACTS below. Never name a piece, square or move that is not in FACTS.
 - Never quote accuracy, Elo, centipawn or percentage figures, and never list move tallies. The reader sees those beside the moves.
 - Never call a move great, brilliant, best, an inaccuracy, a mistake or a blunder: the scoresheet already labels it. Say what the move did or allowed.
-- Never name a better move without saying what it would have achieved: when FACTS says what the better move achieves, or gives the engine line, use it.
+- Never name a better move without saying what it would have achieved: when FACTS says what the better move achieves, or gives the engine line, use it. If FACTS says it gives no reason for the engine's preference, or that the move played achieves the same thing, do not supply a reason of your own - say only that the engine preferred it.
 - Never invent an opening name, never quote an ECO code, and never remark that a name is missing: the header already carries the code.
 - The game turned on the move in FACTS marked \"the game turned here\". Name it in your first sentence and do not say that any other move turned the game.
 - Do not describe what a line or variation shows beyond the moves in it. If FACTS does not say what a move achieved, say less rather than guessing.
@@ -728,6 +729,7 @@ Rules:
 - Open with one sentence on the state of this phase: who stood better when it began and whether that changed by its end.
 - Then say what changed it, as consequences: one clause per turning event, giving what the move allowed or prevented and what followed from it. Never go through the moves in game order and never chain clauses with then, next or after that.
 - Name a move only where it is the subject of a consequence you are stating. Never tell the reader that a move was played.
+- Describe a move only with what FACTS says it did (moved from x to y, took the piece on z, checks). Never characterise it with a word FACTS does not use - retreat, develop, passive, active, natural, aggressive - and never call a move a retreat because it went backwards.
 - Keep to the balance: if one side was already completely winning in this phase, say what the losing side was playing for rather than listing small errors.
 - Never quote the accuracy, centipawn or ply figures from FACTS, and give no percentages. The reader sees those already.
 - Never compare the two sides' accuracy, even in words: saying one side was more accurate is still a number in disguise.
