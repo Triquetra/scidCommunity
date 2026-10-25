@@ -1722,7 +1722,46 @@ proc glist.wheelDir {w delta} {
     glist.wheelScroll $w [expr {-$delta}]
 }
 
+# Tk 8.7+/9 reports high-resolution touchpads as <TouchpadScroll>, with dx in the
+# high 16 bits of %D and dy in the low 16 (TIP 684). Tk 8.6, which the Windows
+# build links, never sends it - there a touchpad arrives as <MouseWheel> with a
+# fractional %D, which glist.wheel already accumulates. Without this binding a
+# touchpad does nothing at all on a Tk 9 build.
+proc glist.tkPrecise {} {
+    if {[catch {package require Tk} v]} { return 0 }
+    if {[catch {package vsatisfies $v 8.7} ok]} { return 0 }
+    return $ok
+}
+
+# Precise deltas per row. Windows reports them on the same 120-scale as the
+# wheel, macOS in points; 20 is a deliberate compromise and is the one number to
+# change if a swipe feels too slow or too fast on a real device.
+set ::glist::precisePerRow 20
+
+proc glist.precise {w packed} {
+    set dy [expr {$packed & 0xFFFF}]
+    if {$dy >= 0x8000} { set dy [expr {$dy - 0x10000}] }
+    if {$dy == 0} { return }
+    if {![info exists ::glist::wheelAcc($w)]} { set ::glist::wheelAcc($w) 0 }
+    set ::glist::wheelAcc($w) [expr {$::glist::wheelAcc($w) + $dy}]
+    # Truncate towards zero on both sides: Tcl's integer division floors, so a
+    # negative accumulator of half a row would scroll while a positive one of the
+    # same size would not.
+    set acc $::glist::wheelAcc($w)
+    set rows [expr {$acc > 0
+        ? int($acc / $::glist::precisePerRow)
+        : -int(-$acc / $::glist::precisePerRow)}]
+    if {$rows == 0} { return }
+    set ::glist::wheelAcc($w) [expr {$::glist::wheelAcc($w) - $rows * $::glist::precisePerRow}]
+    glist.wheelScroll $w [expr {-$rows}]
+}
+
 proc glist.bindWheel {bindtag} {
+    # "break" matters: ttk::treeview has its own <TouchpadScroll> class binding on
+    # Tk 9, and without it the list would scroll twice.
+    if {[glist.tkPrecise]} {
+        catch { bind $bindtag <TouchpadScroll> {glist.precise %W %D ; break} }
+    }
     switch -- [tk windowingsystem] {
         x11 {
             bind $bindtag <Button-4> {glist.wheelScroll %W -1 ; break}
