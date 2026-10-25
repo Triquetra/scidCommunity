@@ -304,6 +304,7 @@ menuText S OptionsMovesHighlightLastMoveArrow "Mostrar Flechas" 0 {Show Arrow wi
 menuText S OptionsMovesHighlightLastMoveNag "Mostrar símbolos de anotación" 0
 menuText S OptionsMovesHighlightLastMoveEval "Mostrar símbolos de evaluación" 0
 menuText S OptionsMoves "Movimientos" 0 {Opciones de la entrada de movimientos}
+menuText S OptionsGamelist "lista de juegos" 0 {Opciones de lista de juegos}
 menuText S OptionsMovesAnimate "Velocidad de la animación" 1 \
   {Pone el tiempo usado para animar las jugadas}
 menuText S OptionsMovesDelay "Demora del automovimiento..." 0 \
@@ -323,6 +324,7 @@ menuText S OptionsMovesShowVarArrows "Mostrar flechas para las variaciones" 0 \
   {Activa/desactiva mostrar flechas para las variaciones}
 menuText S OptionsMovesShowEngineVariationArrows "Mostrar Flechas para Variantes del Motor" 0 {Activar/desactivar flechas que muestran líneas de variación del motor en modo multiPV}
 menuText S OptionsMovesGlossOfDanger "Brillo de peligro codificado por colores" 0 {Activar/desactivar el brillo de peligro codificado por colores}
+translate S OptionsGlistWheelRows {Filas por muesca de rueda}
 translate S OptionsMovesTreeDepth {Profundidad de movimiento de ventana de árbol predeterminada}
 translate S OptionsMovesEnginePvLength {Longitud de visualización del PV del motor}
 menuText S OptionsNumbers "Formato de números" 11 \

@@ -281,6 +281,7 @@ menuText T OptionsMovesHighlightLastMoveArrow "Ok Göster" 0 {Vurgulu Bir Ok Gö
 menuText T OptionsMovesHighlightLastMoveNag "Açıklama sembollerini göster" 0
 menuText T OptionsMovesHighlightLastMoveEval "Değerlendirme sembollerini göster" 0
 menuText T OptionsMoves "Hareketler" 0 {Giriş seçeneklerini taşı}
+menuText T OptionsGamelist "Oyun listesi" 0 {Oyun listesi seçenekleri}
 menuText T OptionsMovesAnimate "Animasyon Süresi" 1 \
   {Hareketleri canlandırmak için kullanılan süreyi ayarlayın}
 menuText T OptionsMovesDelay "Otomatik Oynatma Süresi Gecikmesi..." 1 \
@@ -297,6 +298,7 @@ menuText T OptionsMovesKey "Klavye Tamamlama" 0 \
 menuText T OptionsMovesShowVarArrows "Varyasyonlar için Okları Göster" 0 {Hareketleri varyasyonlarda gösteren okları açma/kapama}
 menuText T OptionsMovesShowEngineVariationArrows "Motor Varyasyonları için Okları Göster" 0 {MultiPV modunda motor değişim çizgilerini gösteren açma/kapama okları}
 menuText T OptionsMovesGlossOfDanger "Renk Kodlu Tehlike Parlatıcısı" 0 {Renk kodlu tehlike parlaklığını açma/kapama}
+translate T OptionsGlistWheelRows {Tekerlek çentiği başına satır sayısı}
 translate T OptionsMovesTreeDepth {Varsayılan Ağaç Penceresi Taşıma Derinliği}
 translate T OptionsMovesEnginePvLength {Motor PV ekran uzunluğu}
 menuText T OptionsNumbers "Sayı Formatı" 0 {Sayı biçimini seçin}

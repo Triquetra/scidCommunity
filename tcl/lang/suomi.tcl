@@ -316,6 +316,7 @@ menuText U OptionsMovesHighlightLastMoveArrow "Sis. nuoli" 0 {Korostettuun siirt
 menuText U OptionsMovesHighlightLastMoveNag "Näytä annotaatiosymbolit" 0
 menuText U OptionsMovesHighlightLastMoveEval "Näytä arviointisymbolit" 0
 menuText U OptionsMoves "Siirrot" 0 {Siirtojen syöttämiseen liittyvät asetukset}
+menuText U OptionsGamelist "Pelilista" 0 {Peliluettelovaihtoehdot}
 menuText U OptionsMovesAnimate "Animaation nopeus" 1 \
   {Siirtojen animoinnin nopeus}
 menuText U OptionsMovesDelay "Toiston siirtonopeus" 1 \
@@ -332,6 +333,7 @@ menuText U OptionsMovesKey "Automaattinen täydennys" 0 \
 menuText U OptionsMovesShowVarArrows "Muunnelmat nuolin" 0 {Näytä/älä näytä muunnelmia nuolilla laudalla}
 menuText U OptionsMovesShowEngineVariationArrows "Näytä nuolet moottorin muunnelmia varten" 0 {Kytke päälle/pois nuolet, jotka näyttävät moottorin vaihteluviivoja moniPV-tilassa}
 menuText U OptionsMovesGlossOfDanger "Värikoodattu Gloss of Danger" 0 {Kytke päälle/pois päältä värikoodattu vaaran kiilto}
+translate U OptionsGlistWheelRows {Rivit per pyörän lovi}
 translate U OptionsMovesTreeDepth {Oletuspuuikkunan siirtosyvyys}
 translate U OptionsMovesEnginePvLength {Moottorin PV näytön pituus}
 menuText U OptionsNumbers "Numerointi" 0 {Numeroformaatit, 1-3 desimaalipisteellä, 4-6 -pilkulla}

@@ -278,6 +278,7 @@ menuText V OptionsMovesHighlightLastMoveArrow "הצג חץ" 0 {הצג חץ עם 
 menuText V OptionsMovesHighlightLastMoveNag "הצג סמלי הערות" 0
 menuText V OptionsMovesHighlightLastMoveEval "הצג סמלי הערכה" 0
 menuText V OptionsMoves "מהלכים" 0 {הזז אפשרויות כניסה}
+menuText V OptionsGamelist "רשימת משחקים" 0 {אפשרויות רשימת משחקים}
 menuText V OptionsMovesAnimate "זמן אנימציה" 1 \
   {הגדר את משך הזמן המשמש להנפשת מהלכים}
 menuText V OptionsMovesDelay "השהיית זמן להפעלה אוטומטית..." 1 \
@@ -294,6 +295,7 @@ menuText V OptionsMovesKey "השלמת מקלדת" 0 \
 menuText V OptionsMovesShowVarArrows "הצג חצים לווריאציות" 0 {הפעל/כיבוי חצים המציגים מהלכים בווריאציות}
 menuText V OptionsMovesShowEngineVariationArrows "הצג חצים עבור וריאציות מנוע" 0 {הפעל/כיבוי חצים המציגים קווי וריאציה של המנוע במצב multiPV}
 menuText V OptionsMovesGlossOfDanger "מבריק של סכנה בקוד צבע" 0 {הפעל/כבה את מבריק סכנה עם קוד צבע}
+translate V OptionsGlistWheelRows {שורות לכל חריץ גלגל}
 translate V OptionsMovesTreeDepth {עומק הזזת חלון עץ ברירת מחדל}
 translate V OptionsMovesEnginePvLength {אורך תצוגת PV מנוע}
 menuText V OptionsNumbers "פורמט מספר" 0 {בחר את תבנית המספר}

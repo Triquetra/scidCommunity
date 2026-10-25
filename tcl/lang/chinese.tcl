@@ -253,6 +253,7 @@ menuText M OptionsMovesHighlightLastMoveArrow "显示箭头" 0 {显示带高亮�
 menuText M OptionsMovesHighlightLastMoveNag "显示注解符号" 0
 menuText M OptionsMovesHighlightLastMoveEval "显示评估符号" 0
 menuText M OptionsMoves "着法" 0 {着法输入选项}
+menuText M OptionsGamelist "游戏列表" 0 {游戏列表选项}
 menuText M OptionsMovesAnimate "动画时间" 1 \
   {设置用于动画着法的时间}
 menuText M OptionsMovesDelay "自动播放延迟..." 1 \
@@ -269,6 +270,7 @@ menuText M OptionsMovesKey "键盘自动完成" 0 \
 menuText M OptionsMovesShowVarArrows "显示变化箭头" 0 {开启/关闭显示变化中着法的箭头}
 menuText M OptionsMovesShowEngineVariationArrows "显示引擎变化箭头" 0 {开启/关闭在多PV模式下显示引擎变化线的箭头}
 menuText M OptionsMovesGlossOfDanger "危险等级颜色编码" 0 {开启/关闭危险等级颜色编码}
+translate M OptionsGlistWheelRows {每个轮槽的行数}
 translate M OptionsMovesTreeDepth {默认树窗口移动深度}
 translate M OptionsMovesEnginePvLength {发动机PV显示长度}
 menuText M OptionsNumbers "数字格式" 0 {选择数字格式}

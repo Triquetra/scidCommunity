@@ -318,6 +318,7 @@ menuText g OptionsMovesHighlightLastMoveArrow "Показване на стре�
 menuText g OptionsMovesHighlightLastMoveNag "Показване на символи за пояснения" 0
 menuText g OptionsMovesHighlightLastMoveEval "Показване на символи за оценка" 0
 menuText g OptionsMoves "се движи" 0 {Опции за преместване на вход}
+menuText g OptionsGamelist "Списък с игри" 0 {Опции за списък с игри}
 menuText g OptionsMovesAnimate "Време за анимация" 1 \
   {Задайте времето, използвано за анимиране на движенията}
 menuText g OptionsMovesDelay "Закъснение във времето за автоматично пускане..." 1 \
@@ -334,6 +335,7 @@ menuText g OptionsMovesKey "Завършване на клавиатурата" 
 menuText g OptionsMovesShowVarArrows "Показване на стрелки за вариации" 0 {Включете/изключете стрелките, показващи ходове във варианти}
 menuText g OptionsMovesShowEngineVariationArrows "Показване на стрелки за вариации на двигателя" 0 {Включете/изключете стрелките, показващи линии за вариация на двигателя в режим multiPV}
 menuText g OptionsMovesGlossOfDanger "Цветно кодиран блясък на опасност" 0 {Включете/изключете цветно кодирания блясък на опасност}
+translate g OptionsGlistWheelRows {Редове на прорез на колело}
 translate g OptionsMovesTreeDepth {Дълбочина на движение на прозореца на дървото по подразбиране}
 translate g OptionsMovesEnginePvLength {Дължина на PV дисплея на двигателя}
 menuText g OptionsNumbers "Числов формат" 0 {Изберете числовия формат}

@@ -318,6 +318,7 @@ menuText L OptionsMovesHighlightLastMoveArrow "Arată săgeata" 0 {Afișați o s
 menuText L OptionsMovesHighlightLastMoveNag "Afișați simbolurile de adnotare" 0
 menuText L OptionsMovesHighlightLastMoveEval "Afișați simbolurile de evaluare" 0
 menuText L OptionsMoves "Mișcări" 0 {Mutați opțiunile de intrare}
+menuText L OptionsGamelist "Lista de jocuri" 0 {Opțiuni pentru lista de jocuri}
 menuText L OptionsMovesAnimate "Timp de animație" 1 \
   {Setați durata de timp folosită pentru a anima mișcările}
 menuText L OptionsMovesDelay "Întârziere redare automată..." 1 \
@@ -334,6 +335,7 @@ menuText L OptionsMovesKey "Finalizarea tastaturii" 0 \
 menuText L OptionsMovesShowVarArrows "Afișați săgețile pentru variații" 0 {Activați/dezactivați săgețile care arată mișcările în variații}
 menuText L OptionsMovesShowEngineVariationArrows "Afișați săgețile pentru variațiile de motor" 0 {Porniți/opriți săgețile care arată liniile de variație ale motorului în modul multiPV}
 menuText L OptionsMovesGlossOfDanger "Luciu de pericol cu ​​coduri de culoare" 0 {Activați/dezactivați luciul de pericol cu ​​coduri de culoare}
+translate L OptionsGlistWheelRows {Rânduri pe crestătură de roată}
 translate L OptionsMovesTreeDepth {Adâncimea de mutare a ferestrei arborelui implicit}
 translate L OptionsMovesEnginePvLength {Lungimea afișajului motorului PV}
 menuText L OptionsNumbers "Format de număr" 0 {Selectați formatul numărului}

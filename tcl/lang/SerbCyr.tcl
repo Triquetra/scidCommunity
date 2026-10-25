@@ -318,6 +318,7 @@ menuText J OptionsMovesHighlightLastMoveArrow "Прикажи стрелицу" 
 menuText J OptionsMovesHighlightLastMoveNag "Прикажи симболе за евалуацију" 0
 menuText J OptionsMovesHighlightLastMoveEval "Прикажи симболе за евалуацију" 0
 menuText J OptionsMoves "Покрети" 0 {Померите опције уноса}
+menuText J OptionsGamelist "Листа игара" 0 {Опције листе игара}
 menuText J OptionsMovesAnimate "Аниматион Тиме" 1 \
   {Подесите количину времена која се користи за анимирање покрета}
 menuText J OptionsMovesDelay "Временско кашњење аутоматске репродукције..." 1 \
@@ -334,6 +335,7 @@ menuText J OptionsMovesKey "Завршетак тастатуре" 0 \
 menuText J OptionsMovesShowVarArrows "Прикажи стрелице за варијације" 0 {Укључите/искључите стрелице које показују потезе у варијантама}
 menuText J OptionsMovesShowEngineVariationArrows "Прикажи стрелице за варијације мотора" 0 {Укључите/искључите стрелице које показују линије варијације мотора у мултиПВ режиму}
 menuText J OptionsMovesGlossOfDanger "Сјај опасности у боји" 0 {Укључите/искључите сјај опасности у боји}
+translate J OptionsGlistWheelRows {Редови по зарезу точка}
 translate J OptionsMovesTreeDepth {Подразумевана дубина померања прозора стабла}
 translate J OptionsMovesEnginePvLength {Дужина приказа ПВ мотора}
 menuText J OptionsNumbers "Формат броја" 0 {Изаберите формат броја}

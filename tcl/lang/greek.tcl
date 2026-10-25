@@ -309,6 +309,7 @@ menuText G OptionsMovesHighlightLastMoveArrow "Εμφάνιση βέλους" 0 
 menuText G OptionsMovesHighlightLastMoveNag "Εμφάνιση συμβόλων σχολιασμού" 0
 menuText G OptionsMovesHighlightLastMoveEval "Εμφάνιση συμβόλων αξιολόγησης" 0
 menuText G OptionsMoves "Κινήσεις" 0 {Επιλογές εισαγωγής κίνησης}
+menuText G OptionsGamelist "Λίστα παιχνιδιών" 0 {Επιλογές λίστας παιχνιδιών}
 menuText G OptionsMovesAnimate "Χρόνος απεικόνισης κίνησης" 1 \
   {Καθορίστε την διάρκεια απεικόνισης της κίνησης}
 menuText G OptionsMovesDelay "Χρονική καθυστέρηση αυτόματου παιχνιδιού..." 1 \
@@ -325,6 +326,7 @@ menuText G OptionsMovesKey "Ολοκλήρωση πληκτρολογίου" 0 \
 menuText G OptionsMovesShowVarArrows "Εμφάνιση βέλους για βαριάντα" 0 {Ενεργοποίηση/απενεργοποίηση του βέλους που δείχνει τις κινήσεις των βαριαντών}
 menuText G OptionsMovesShowEngineVariationArrows "Εμφάνιση βελών για παραλλαγές κινητήρα" 0 {Ενεργοποιήστε/απενεργοποιήστε τα βέλη που δείχνουν γραμμές μεταβολής κινητήρα σε λειτουργία πολλαπλών φωτοβολταϊκών}
 menuText G OptionsMovesGlossOfDanger "Χρωματική κωδικοποίηση Gloss of Danger" 0 {Ενεργοποιήστε/απενεργοποιήστε τη χρωματική κωδικοποίηση gloss of risk}
+translate G OptionsGlistWheelRows {Σειρές ανά εγκοπή τροχού}
 translate G OptionsMovesTreeDepth {Προεπιλεγμένο Βάθος μετακίνησης παραθύρου δέντρου}
 translate G OptionsMovesEnginePvLength {Μήκος εμφάνισης κύριας βαριάντας μηχανής}
 menuText G OptionsNumbers "Μορφή αριθμών" 0 {Επιλέξτε τη μορφή των αριθμών}

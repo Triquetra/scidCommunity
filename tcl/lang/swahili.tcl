@@ -277,6 +277,7 @@ menuText Z OptionsMovesHighlightLastMoveArrow "Onyesha Mshale" 0 {Onyesha Kishal
 menuText Z OptionsMovesHighlightLastMoveNag "Onyesha alama za maelezo" 0
 menuText Z OptionsMovesHighlightLastMoveEval "Onyesha alama za tathmini" 0
 menuText Z OptionsMoves "Inasonga" 0 {Hamisha chaguzi za kuingia}
+menuText Z OptionsGamelist "Orodha ya mchezo" 0 {Chaguzi za orodha ya mchezo}
 menuText Z OptionsMovesAnimate "Muda wa Uhuishaji" 1 \
   {Weka muda unaotumika kuhuisha miondoko}
 menuText Z OptionsMovesDelay "Kuchelewa kwa Muda wa Kucheza Kiotomatiki..." 1 \
@@ -293,6 +294,7 @@ menuText Z OptionsMovesKey "Kukamilika kwa Kibodi" 0 \
 menuText Z OptionsMovesShowVarArrows "Onyesha Vishale kwa Tofauti" 0 {Washa/zima vishale vinavyoonyesha mienendo katika tofauti}
 menuText Z OptionsMovesShowEngineVariationArrows "Onyesha Vishale kwa Tofauti za Injini" 0 {Washa/zima vishale vinavyoonyesha njia tofauti za injini katika hali ya multiPV}
 menuText Z OptionsMovesGlossOfDanger "Mwangaza wa Hatari Wenye Msimbo wa Rangi" 0 {Washa/zima gloss yenye msimbo wa rangi ya hatari}
+translate Z OptionsGlistWheelRows {Safu kwa kila noti ya gurudumu}
 translate Z OptionsMovesTreeDepth {Dirisha Chaguomsingi la Kusogeza kwa Miti}
 translate Z OptionsMovesEnginePvLength {Urefu wa onyesho la PV ya injini}
 menuText Z OptionsNumbers "Muundo wa Nambari" 0 {Chagua muundo wa nambari}

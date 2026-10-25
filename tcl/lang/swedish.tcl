@@ -286,6 +286,7 @@ menuText W OptionsMovesHighlightLastMoveArrow "Visa pil" 0 {Visa pil med markeri
 menuText W OptionsMovesHighlightLastMoveNag "Visa kommentarsymboler" 0
 menuText W OptionsMovesHighlightLastMoveEval "Visa utvärderingssymboler" 0
 menuText W OptionsMoves "Drag" 0 {Alternativ för dragangivelse}
+menuText W OptionsGamelist "Spellista" 0 {Alternativ för spellistan}
 menuText W OptionsMovesAnimate "Fördröjning vid manuellt spel" 1 \
   {Ange tid mellan varje drag när dragen görs automatiskt}
 menuText W OptionsMovesDelay "Fördröjning vid automatspel..." 1 \
@@ -302,6 +303,7 @@ menuText W OptionsMovesKey "Tangentkomplettering" 0 \
 menuText W OptionsMovesShowVarArrows "Visa pilar för variationer" 0 {Växlar på/av pilar som visar drag i variationer}
 menuText W OptionsMovesShowEngineVariationArrows "Visa pilar för motorvariationer" 0 {Slå på/av-pilar som visar motorvariationslinjer i multiPV-läge}
 menuText W OptionsMovesGlossOfDanger "Färgkodad Gloss of Danger" 0 {Slå på/av färgkodad glans av fara}
+translate W OptionsGlistWheelRows {Rader per hjulskåra}
 translate W OptionsMovesTreeDepth {Standard trädfönster Flytta djup}
 translate W OptionsMovesEnginePvLength {Motorns PV-displaylängd}
 menuText W OptionsNumbers "Talformat" 3 {Välj hur tal visas}

@@ -284,6 +284,7 @@ menuText R OptionsMovesHighlightLastMoveArrow "Показать стрелку" 
 menuText R OptionsMovesHighlightLastMoveNag "Показать символы аннотаций" 0
 menuText R OptionsMovesHighlightLastMoveEval "Показать символы оценки" 0
 menuText R OptionsMoves "Ходы" 0 {Установки для ходов}
+menuText R OptionsGamelist "Список игр" 0 {Параметры списка игр}
 menuText R OptionsMovesAnimate "Время анимации" 1 \
   {Установить количество времени, используемое для анимации ходов}
 menuText R OptionsMovesDelay "Временная задержка автоигры..." 0 \
@@ -300,6 +301,7 @@ menuText R OptionsMovesKey "Клавиатурное завершение" 0 \
 menuText R OptionsMovesShowVarArrows "Показывать стрелки в вариантах" 0 {Включить/выключить отображение стрелок ходов в вариантах}
 menuText R OptionsMovesShowEngineVariationArrows "Показывать направление для вариантов двигателя" 0 {Стрелки включения/выключения, показывающие линии изменения двигателя в режиме multiPV}
 menuText R OptionsMovesGlossOfDanger "Подсветка угроз" 0 {Вкл./выкл. подсветку угроз}
+translate R OptionsGlistWheelRows {Рядов на выемку колеса}
 translate R OptionsMovesTreeDepth {Глубина перемещения окна дерева по умолчанию}
 translate R OptionsMovesEnginePvLength {Длина дисплея PV двигателя}
 menuText R OptionsNumbers "Числовой формат" 0 {Выбрать числовой формат}

@@ -285,6 +285,7 @@ menuText O OptionsMovesHighlightLastMoveArrow "Vis pil" 0 {Vis pil med utheving}
 menuText O OptionsMovesHighlightLastMoveNag "Vis kommentarsymboler" 0
 menuText O OptionsMovesHighlightLastMoveEval "Vis evalueringssymboler" 0
 menuText O OptionsMoves "Trekk" 0 {Innstillinger for hvordan trekk angis}
+menuText O OptionsGamelist "Spillliste" 0 {Spilllistealternativer}
 menuText O OptionsMovesAnimate "Animation time" 1 \
   {Set the amount of time used to animate moves} ;# ***
 menuText O OptionsMovesDelay "Autospillforsinkelse..." 0 \
@@ -301,6 +302,7 @@ menuText O OptionsMovesKey "Autofullfør" 0 \
 menuText O OptionsMovesShowVarArrows "Vis piler for varianter" 0 {Slå på/av piler som viser bevegelser i varianter}
 menuText O OptionsMovesShowEngineVariationArrows "Vis piler for motorvariasjoner" 0 {Slå på/av-piler som viser motorvariasjonslinjer i multiPV-modus}
 menuText O OptionsMovesGlossOfDanger "Fargekodet Gloss of Danger" 0 {Slå på/av fargekodet gloss of fare}
+translate O OptionsGlistWheelRows {Rader per hjulhakk}
 translate O OptionsMovesTreeDepth {Standard trevindu flyttedybde}
 translate O OptionsMovesEnginePvLength {Motor PV-visningslengde}
 menuText O OptionsNumbers "Tallformat" 0 {Angi tallformat}

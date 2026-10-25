@@ -318,6 +318,7 @@ menuText k OptionsMovesHighlightLastMoveArrow "화살표 표시" 0 {강조표시
 menuText k OptionsMovesHighlightLastMoveNag "기호 표시" 0
 menuText k OptionsMovesHighlightLastMoveEval "평가 표시" 0
 menuText k OptionsMoves "이동" 0 {항목 이동 옵션}
+menuText k OptionsGamelist "게임 목록" 0 {게임 목록 옵션}
 menuText k OptionsMovesAnimate "애니메이션 시간" 1 \
   {움직임을 애니메이션하는 데 사용되는 시간 설정}
 menuText k OptionsMovesDelay "복구속도 지연..." 1 \
@@ -334,6 +335,7 @@ menuText k OptionsMovesKey "키보드 완성" 0 \
 menuText k OptionsMovesShowVarArrows "변형에 대한 화살표 표시" 0 {변형된 동작을 나타내는 방향기/끄기}
 menuText k OptionsMovesShowEngineVariationArrows "엔진 변형에 대한 화살표 표시" 0 {다중 PV 모드에서 엔진 변형 라인을 표시하는 화살기/끄기}
 menuText k OptionsMovesGlossOfDanger "색상으로 구분된 위험의 점" 0 {색상으로 구분된 위험 조명기/끄기}
+translate k OptionsGlistWheelRows {휠 노치당 행}
 translate k OptionsMovesTreeDepth {기본적으로 트리 창 이동 범위}
 translate k OptionsMovesEnginePvLength {엔진 PV 표시 길이}
 menuText k OptionsNumbers "숫자 형식" 0 {숫자 형식 선택}

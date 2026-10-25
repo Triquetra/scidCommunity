@@ -278,6 +278,7 @@ menuText Q OptionsMovesHighlightLastMoveArrow "Показати стрілку" 
 menuText Q OptionsMovesHighlightLastMoveNag "Показати символи анотацій" 0
 menuText Q OptionsMovesHighlightLastMoveEval "Показати символи оцінки" 0
 menuText Q OptionsMoves "рухається" 0 {Перемістити параметри запису}
+menuText Q OptionsGamelist "Game list" 0 {Варіанти списку ігор}
 menuText Q OptionsMovesAnimate "Час анімації" 1 \
   {Встановіть час, який використовується для анімації рухів}
 menuText Q OptionsMovesDelay "Час затримки автовідтворення..." 1 \
@@ -294,6 +295,7 @@ menuText Q OptionsMovesKey "Завершення клавіатури" 0 \
 menuText Q OptionsMovesShowVarArrows "Показати стрілки для варіантів" 0 {Увімкніть/вимкніть стрілки, що показують ходи у варіаціях}
 menuText Q OptionsMovesShowEngineVariationArrows "Показати стрілки для варіантів двигуна" 0 {Увімкнути/вимкнути стрілки, які показують лінії варіації двигуна в режимі multiPV}
 menuText Q OptionsMovesGlossOfDanger "Кольоровий блиск небезпеки" 0 {Увімкніть/вимкніть кольоровий блиск небезпеки}
+translate Q OptionsGlistWheelRows {Рядки на колесо}
 translate Q OptionsMovesTreeDepth {Глибина переміщення вікна дерева за замовчуванням}
 translate Q OptionsMovesEnginePvLength {Довжина PV дисплея двигуна}
 menuText Q OptionsNumbers "Формат числа" 0 {Виберіть формат числа}

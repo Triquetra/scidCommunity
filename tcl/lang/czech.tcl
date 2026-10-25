@@ -279,6 +279,7 @@ menuText C OptionsMovesHighlightLastMoveArrow "vetn Arrow" 0 {Zahrnout ipku se z
 menuText C OptionsMovesHighlightLastMoveNag "Zobrazit symboly komentářů" 0
 menuText C OptionsMovesHighlightLastMoveEval "Zobrazit symboly hodnocen" 0
 menuText C OptionsMoves "Tahy" 0 {Volby pro zadvn tah}
+menuText C OptionsGamelist "Seznam her" 0 {Možnosti seznamu her}
 menuText C OptionsMovesAnimate "as animace" 4 \
   {Nastavit as pouit na animaci tah}
 menuText C OptionsMovesDelay "Prodleva pi automatickm pehrvn..." 1 \
@@ -295,6 +296,7 @@ menuText C OptionsMovesKey "Klvesnicov doplovn" 13 \
 menuText C OptionsMovesShowVarArrows "Zobrazit ipky pro varianty" 0 {Zapnout/vypnout zobrazovn ipek ukazujcch tahy variant}
 menuText C OptionsMovesShowEngineVariationArrows "Zobrazit ipky pro varianty motoru" 0 {Zapnte/vypnte ipky ukazujc ry variace motoru v reimu multiPV}
 menuText C OptionsMovesGlossOfDanger "Barevn kdovan lesk nebezpe" 0 {Zapnout/vypnout barevn oznaen lesk nebezpe}
+translate C OptionsGlistWheelRows {Řady na zářez kola}
 translate C OptionsMovesTreeDepth {Vchoz Hloubka pohybu okna stromu}
 translate C OptionsMovesEnginePvLength {Délka zobrazení PV motoru}
 menuText C OptionsNumbers "Formt sel" 0 {Zvolit formt sel}

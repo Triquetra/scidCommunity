@@ -277,6 +277,7 @@ menuText h OptionsMovesHighlightLastMoveArrow "तीर दिखाओ" 0 {ह
 menuText h OptionsMovesHighlightLastMoveNag "एनोटेशन प्रतीक दिखाएँ" 0
 menuText h OptionsMovesHighlightLastMoveEval "मूल्यांकन चिह्न दिखाएँ" 0
 menuText h OptionsMoves "चालें" 0 {प्रवेश विकल्प ले जाएँ}
+menuText h OptionsGamelist "खेल सूची" 0 {खेल सूची विकल्प}
 menuText h OptionsMovesAnimate "एनिमेशन समय" 1 \
   {चालों को चेतन करने के लिए उपयोग किए जाने वाले समय की मात्रा निर्धारित करें}
 menuText h OptionsMovesDelay "ऑटोप्ले समय विलंब..." 1 \
@@ -293,6 +294,7 @@ menuText h OptionsMovesKey "कीबोर्ड समापन" 0 \
 menuText h OptionsMovesShowVarArrows "विविधताओं के लिए तीर दिखाएँ" 0 {विविधताओं में चाल दिखाने वाले तीरों को चालू/बंद करें}
 menuText h OptionsMovesShowEngineVariationArrows "इंजन विविधताओं के लिए तीर दिखाएँ" 0 {मल्टीपीवी मोड में इंजन वेरिएशन लाइनें दिखाने वाले तीरों को चालू/बंद करें}
 menuText h OptionsMovesGlossOfDanger "रंग कोडित खतरे की चमक" 0 {खतरे के रंग कोडित चमक को चालू/बंद करें}
+translate h OptionsGlistWheelRows {पंक्तियाँ प्रति पहिया पायदान}
 translate h OptionsMovesTreeDepth {डिफ़ॉल्ट ट्री विंडो चाल गहराई}
 translate h OptionsMovesEnginePvLength {इंजन पीवी डिस्प्ले लंबाई}
 menuText h OptionsNumbers "संख्या स्वरूप" 0 {संख्या प्रारूप का चयन करें}

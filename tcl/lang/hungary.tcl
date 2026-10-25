@@ -283,6 +283,7 @@ menuText H OptionsMovesHighlightLastMoveArrow "Nyíl megjelenítése" 0 {Tartalm
 menuText H OptionsMovesHighlightLastMoveNag "Megjegyzési szimbólumok megjelenítése" 0
 menuText H OptionsMovesHighlightLastMoveEval "Az értékelési szimbólumok megjelenítése" 0
 menuText H OptionsMoves "Lépések" 0 {Lépések bevitelének beállításai}
+menuText H OptionsGamelist "Játéklista" 0 {Játéklista opciók}
 menuText H OptionsMovesAnimate "Megelevenítés ideje" 0 \
   {Beállítja az idõt lépések megelevenítéséhez.}
 menuText H OptionsMovesDelay "Automatikus visszajátszás késleltetése..." 0 \
@@ -299,6 +300,7 @@ menuText H OptionsMovesKey "Billentyû-kiegészítés" 0 \
 menuText H OptionsMovesShowVarArrows "Nyilak megjelenítése a variációkhoz" 0 {Kapcsolja be/ki a nyilakat, amelyek különbözõ változatokban mutatják a mozgásokat}
 menuText H OptionsMovesShowEngineVariationArrows "Nyilak megjelenítése a motorváltozatokhoz" 0 {Kapcsolja be/ki a nyilakat, amelyek a motor változási vonalait mutatják többPV módban}
 menuText H OptionsMovesGlossOfDanger "Színkódolt Gloss of Danger" 0 {Kapcsolja be/ki a veszély színkódolt fényét}
+translate H OptionsGlistWheelRows {Sorok kerékbevágásonként}
 translate H OptionsMovesTreeDepth {Alapértelmezett fa ablak mozgási mélység}
 translate H OptionsMovesEnginePvLength {Motor PV kijelző hossza}
 menuText H OptionsNumbers "Számformátum" 1 {Számformátum kiválasztása}

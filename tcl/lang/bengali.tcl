@@ -277,6 +277,7 @@ menuText b OptionsMovesHighlightLastMoveArrow "তীর দেখান" 0 {হ
 menuText b OptionsMovesHighlightLastMoveNag "টীকা চিহ্ন দেখান" 0
 menuText b OptionsMovesHighlightLastMoveEval "মূল্যায়ন চিহ্ন দেখান" 0
 menuText b OptionsMoves "নড়াচড়া করে" 0 {প্রবেশের বিকল্পগুলি সরান}
+menuText b OptionsGamelist "খেলার তালিকা" 0 {গেম তালিকার বিকল্প}
 menuText b OptionsMovesAnimate "অ্যানিমেশন সময়" 1 \
   {চালগুলি অ্যানিমেট করতে ব্যবহৃত সময়ের পরিমাণ সেট করুন}
 menuText b OptionsMovesDelay "অটোপ্লে সময় বিলম্ব..." 1 \
@@ -293,6 +294,7 @@ menuText b OptionsMovesKey "কীবোর্ড সমাপ্তি" 0 \
 menuText b OptionsMovesShowVarArrows "বৈচিত্র্যের জন্য তীর দেখান" 0 {বৈচিত্র্যের চাল দেখানো তীরগুলি চালু/বন্ধ করুন}
 menuText b OptionsMovesShowEngineVariationArrows "ইঞ্জিন বৈচিত্র্যের জন্য তীর দেখান" 0 {মাল্টিপিভি মোডে ইঞ্জিনের বৈচিত্র্যের লাইন দেখানো তীরগুলি চালু/বন্ধ করুন}
 menuText b OptionsMovesGlossOfDanger "কালার কোডেড গ্লস অফ ডেঞ্জার" 0 {বিপদের রঙিন কোডেড গ্লস চালু/বন্ধ করুন}
+translate b OptionsGlistWheelRows {চাকার খাঁজ প্রতি সারি}
 translate b OptionsMovesTreeDepth {ডিফল্ট ট্রি উইন্ডো সরানোর গভীরতা}
 translate b OptionsMovesEnginePvLength {ইঞ্জিন পিভি প্রদর্শনের দৈর্ঘ্য}
 menuText b OptionsNumbers "নম্বর বিন্যাস" 0 {নম্বর বিন্যাস নির্বাচন করুন}

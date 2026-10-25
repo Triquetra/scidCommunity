@@ -282,6 +282,7 @@ menuText P OptionsMovesHighlightLastMoveArrow "Pokaż strzałkę" 0 {Pokaż strz
 menuText P OptionsMovesHighlightLastMoveNag "Pokaż symbole adnotacji" 0
 menuText P OptionsMovesHighlightLastMoveEval "Pokaż symbole oceny" 0
 menuText P OptionsMoves "Posunięcia" 0 {Opcje wprowadzania posunięć}
+menuText P OptionsGamelist "Lista gier" 0 {Opcje listy gier}
 menuText P OptionsMovesAnimate "Czas animacji" 1 \
   {Ustaw czas trwania animacji posunięć}
 menuText P OptionsMovesDelay "Opóźnienie automatycznego odtwarzania..." 1 \
@@ -298,6 +299,7 @@ menuText P OptionsMovesKey "Uzupełnianie z klawiatury" 0 \
 menuText P OptionsMovesShowVarArrows "Pokaż strzałki dla wariantów" 0 {Włącz/wyłącz strzałki pokazujące posunięcia w wariantach}
 menuText P OptionsMovesShowEngineVariationArrows "Pokaż strzałki dla wariantów silnika" 0 {Włącz/wyłącz strzałki pokazujące linie wariantów silnika w trybie multiPV}
 menuText P OptionsMovesGlossOfDanger "Kolorowe oznaczenie zagrożeń" 0 {Włącz/wyłącz kolorowe oznaczenie stopnia zagrożenia}
+translate P OptionsGlistWheelRows {Rzędy na wycięcie koła}
 translate P OptionsMovesTreeDepth {Domyślna liczba półposunięć w oknie drzewa wariantów}
 translate P OptionsMovesEnginePvLength {Długość wyświetlacza PV silnika}
 menuText P OptionsNumbers "Format liczb" 0 {Wybierz format liczb}

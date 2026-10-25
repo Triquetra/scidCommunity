@@ -291,6 +291,7 @@ menuText F OptionsMovesHighlightLastMoveArrow "Afficher Flèche" 0 {Afficher la 
 menuText F OptionsMovesHighlightLastMoveNag "Afficher les symboles d'annotation" 0
 menuText F OptionsMovesHighlightLastMoveEval "Afficher les symboles d'évaluation" 0
 menuText F OptionsMoves "Coups" 2 {Gestion des coups}
+menuText F OptionsGamelist "Liste des jeux" 0 {Options de la liste de jeux}
 menuText F OptionsMovesAnimate "Temps d'animation" 1 \
   {Régler le temps utilisé pour l'animation des coups}
 menuText F OptionsMovesDelay "Délai entre les coups" 3 \
@@ -307,6 +308,7 @@ menuText F OptionsMovesKey "Auto-complétion clavier" 1 \
 menuText F OptionsMovesShowVarArrows "Montrer flèches pour les variantes" 2 {Montrer des flèches pour les prochains coups des variantes existantes}
 menuText F OptionsMovesShowEngineVariationArrows "Afficher les flèches pour les variantes du moteur" 0 {Activer/désactiver les flèches montrant les lignes de variation du moteur en mode multiPV}
 menuText F OptionsMovesGlossOfDanger "Couleur codée Gloss of Danger" 0 {Afficher/Cacher les cases colorées avec le code Gloss of Danger}
+translate F OptionsGlistWheelRows {Rangées par encoche de roue}
 translate F OptionsMovesTreeDepth {Profondeur de déplacement de la fenêtre d'arborescence par défaut}
 translate F OptionsMovesEnginePvLength {Longueur d'affichage PV du moteur}
 menuText F OptionsNumbers "Format numérique" 7 {Sélectionner le format des nombres}

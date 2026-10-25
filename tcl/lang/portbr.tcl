@@ -284,6 +284,7 @@ menuText B OptionsMovesHighlightLastMoveArrow "Mostrar Seta" 0 {Seta de Inclusã
 menuText B OptionsMovesHighlightLastMoveNag "Mostrar símbolos de anotação" 0
 menuText B OptionsMovesHighlightLastMoveEval "Mostrar símbolos de avaliação" 0
 menuText B OptionsMoves "Movimentos" 0 {Opções para entrada dos movimentos}
+menuText B OptionsGamelist "Lista de jogos" 0 {Opções de lista de jogos}
 menuText B OptionsMovesAnimate "Tempo de animação" 1 \
   {Define a quantidade de tempo usada para animar os movimentos} 
 menuText B OptionsMovesDelay "Tempo de atraso p/ Jogo automático..." 1 \
@@ -300,6 +301,7 @@ menuText B OptionsMovesKey "Auto completar" 0 \
 menuText B OptionsMovesShowVarArrows "Mostrar Setas para variantes" 0 {Liga/Desliga as setas que mostram movimentos em variantes}
 menuText B OptionsMovesShowEngineVariationArrows "Mostrar setas para variantes do motor" 0 {Setas liga/desliga mostrando linhas de variação do motor no modo multiPV}
 menuText B OptionsMovesGlossOfDanger "Códigos de Cor para Perigo" 0 {Liga/Desliga os códigos de cor para perigo}
+translate B OptionsGlistWheelRows {Linhas por entalhe de roda}
 translate B OptionsMovesTreeDepth {Profundidade de movimentação da janela de árvore padrão}
 translate B OptionsMovesEnginePvLength {Comprimento do display PV do motor}
 menuText B OptionsNumbers "Formato de Números" 0 {Selecione o formato usado para números}

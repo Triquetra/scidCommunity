@@ -309,6 +309,7 @@ menuText D OptionsMovesHighlightLastMoveArrow "Pfeil anzeigen" 0 {mit einem Pfei
 menuText D OptionsMovesHighlightLastMoveNag "Zugbewertung anzeigen" 0
 menuText D OptionsMovesHighlightLastMoveEval "Stellungsbewertung anzeigen" 0
 menuText D OptionsMoves "Züge" 0 {Zugeingabeoptionen}
+menuText D OptionsGamelist "Spieleliste" 0 {Optionen für die Spielliste}
 menuText D OptionsMovesAnimate "Animation" 0 \
   {Zeit für Zuganimation einstellen}
 menuText D OptionsMovesDelay "Autom. Vorspielen..." 7 \
@@ -325,6 +326,7 @@ menuText D OptionsMovesKey "Autom. Zugergänzung" 10 \
 menuText D OptionsMovesShowVarArrows "Pfeile für Varianten anzeigen" 0 {Zeige Pfeile in Varianten an: ja/nein}
 menuText D OptionsMovesShowEngineVariationArrows "Engine-Varianten-Pfeile" 0 {Schaltet die mehrfarbigen drei Variantenpfeile im multiPV Modus aus}
 menuText D OptionsMovesGlossOfDanger "Bedrohte Figuren einfärben" 0 {Markieren von gefärdeten Figuren ein/ausschalten}
+translate D OptionsGlistWheelRows {Reihen pro Radkerbe}
 translate D OptionsMovesTreeDepth {Standardmäßige Verschiebetiefe des Baumfensters}
 translate D OptionsMovesEnginePvLength {Länge der Motor-PV-Anzeige}
 menuText D OptionsNumbers "Zahlenformat" 5 {Zahlenformat wählen}

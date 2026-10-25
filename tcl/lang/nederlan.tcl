@@ -302,6 +302,7 @@ menuText N OptionsMovesHighlightLastMoveArrow "Pijl tonen" 0 {Show Arrow with Hi
 menuText N OptionsMovesHighlightLastMoveNag "Annotatiesymbolen tonen" 0
 menuText N OptionsMovesHighlightLastMoveEval "Evaluatiesymbolen tonen" 0
 menuText N OptionsMoves "Zetten" 0 {Wijzig optie voor zet-invoer}
+menuText N OptionsGamelist "Spel lijst" 0 {Opties voor de spellijst}
 menuText N OptionsMovesAnimate "Stuk Animatietijd " 1 \
   {Zet animatietijd van de stukkenbewegingen} ;
 menuText N OptionsMovesDelay "Tijdinstelling voor auto-spelen" 10 \
@@ -318,6 +319,7 @@ menuText N OptionsMovesKey "Auto-aanvullen" 0 \
 menuText N OptionsMovesShowVarArrows "Toon Pijlen voor Varianten" 0 {Zet aan/af pijlen om variantenzetten te tonen}
 menuText N OptionsMovesShowEngineVariationArrows "Toon pijlen voor motorvariaties" 0 {Aan/uit-pijlen die de motorvariatielijnen weergeven in de multiPV-modus}
 menuText N OptionsMovesGlossOfDanger "Kleurgecodeerde glans van gevaar" 0 {Schakel de kleurgecodeerde glans van gevaar in/uit}
+translate N OptionsGlistWheelRows {Rijen per wielinkeping}
 translate N OptionsMovesTreeDepth {Standaard boomvenster Verplaatsingsdiepte}
 translate N OptionsMovesEnginePvLength {Motor-PV-weergavelengte}
 menuText N OptionsNumbers "Getalformaat" 5 \

@@ -283,6 +283,7 @@ menuText I OptionsMovesHighlightLastMoveArrow "Mostra freccia" 0 {Mostra una fre
 menuText I OptionsMovesHighlightLastMoveNag "Mostra i simboli di annotazione" 0
 menuText I OptionsMovesHighlightLastMoveEval "Mostra i simboli di valutazione" 0
 menuText I OptionsMoves "Mosse" 0 {Opzioni di immissione delle mosse}
+menuText I OptionsGamelist "Elenco dei giochi" 0 {Opzioni dell'elenco dei giochi}
 menuText I OptionsMovesAnimate "Intervallo di tempo per l'animazione delle mosse" 4 \
   {Definisce l'intervallo di tempo per l'animazione delle mosse}
 menuText I OptionsMovesDelay "Intervallo di tempo per il gioco automatico..." 1 \
@@ -299,6 +300,7 @@ menuText I OptionsMovesKey "Completamento da tastiera" 1 \
 menuText I OptionsMovesShowVarArrows "Mostra frecce per le varianti" 4 {Attiva/disattiva le freccie indicanti le mosse delle varianti}
 menuText I OptionsMovesShowEngineVariationArrows "Mostra Frecce per Varianti del Motore" 0 {Attiva/disattiva frecce che mostrano linee di variazione del motore in modalità multiPV}
 menuText I OptionsMovesGlossOfDanger "Codici di pericolo a colori" 1 {Attiva/disattiva i codici di pericolo a colori}
+translate I OptionsGlistWheelRows {Righe per tacca della ruota}
 translate I OptionsMovesTreeDepth {Profondità di spostamento della finestra dell'albero predefinita}
 translate I OptionsMovesEnginePvLength {Lunghezza visualizzazione PV motore}
 menuText I OptionsNumbers "Formato dei numeri" 13 {Seglie il formato dei numeri}

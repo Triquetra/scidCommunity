@@ -296,6 +296,7 @@ menuText K OptionsMovesHighlightLastMoveArrow "Mostra fletxa" 0 {Inclou fletxa a
 menuText K OptionsMovesHighlightLastMoveNag "Mostra símbols d'anotació" 0
 menuText K OptionsMovesHighlightLastMoveEval "Mostra símbols d'avaluació" 0
 menuText K OptionsMoves "Jugades" 0 {Opcions d'entrada de jugades}
+menuText K OptionsGamelist "Llista de jocs" 0 {Opcions de llista de jocs}
 menuText K OptionsMovesAnimate "Velocitat d'animació" 1 \
   {Posa el temps d'animació entre jugades}
 menuText K OptionsMovesDelay "Retard de la jugada automàtica..." 0 \
@@ -312,6 +313,7 @@ menuText K OptionsMovesKey "Teclat Intel·ligent" 0 \
 menuText K OptionsMovesShowVarArrows "Mostra fletxes per a les variants" 0 {Activa o desactiva la mostra de fletxes per a les variants sobre el tauler}
 menuText K OptionsMovesShowEngineVariationArrows "Mostra les fletxes per a les variacions del motor" 0 {Activar/desactivar les fletxes que mostren les línies de variació del motor en mode multiPV}
 menuText K OptionsMovesGlossOfDanger "Marques de perill de colors" 0 {Activa o desactiva les marques de perill de colors}
+translate K OptionsGlistWheelRows {Files per ranura de roda}
 translate K OptionsMovesTreeDepth {Profunditat de moviment de la finestra de l'arbre per defecte}
 translate K OptionsMovesEnginePvLength {Longitud de visualització del motor PV}
 menuText K OptionsNumbers "Format de números" 11 {Selecciona el format de números}

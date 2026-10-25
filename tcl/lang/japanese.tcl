@@ -318,6 +318,7 @@ menuText A OptionsMovesHighlightLastMoveArrow "矢印を表示" 0 {ハイライ�
 menuText A OptionsMovesHighlightLastMoveNag "注釈記号を表示" 0
 menuText A OptionsMovesHighlightLastMoveEval "評価記号を表示" 0
 menuText A OptionsMoves "移動" 0 {移動エントリオプション}
+menuText A OptionsGamelist "ゲームリスト" 0 {ゲームリストのオプション}
 menuText A OptionsMovesAnimate "アニメーション時間" 1 \
   {動きのアニメーション化に使用する時間を設定します}
 menuText A OptionsMovesDelay "自動再生時間の遅延..." 1 \
@@ -334,6 +335,7 @@ menuText A OptionsMovesKey "キーボード補完" 0 \
 menuText A OptionsMovesShowVarArrows "バリエーションの矢印を表示" 0 {バリエーションの動きを示す矢印のオン/オフを切り替えます}
 menuText A OptionsMovesShowEngineVariationArrows "エンジンのバリエーションを矢印で表示" 0 {マルチPVモードでエンジン変動ラインを表示する矢印をオン/オフにします}
 menuText A OptionsMovesGlossOfDanger "色分けされた危険の光沢" 0 {色分けされた危険の光沢をオン/オフにする}
+translate A OptionsGlistWheelRows {ホイールノッチあたりの列数}
 translate A OptionsMovesTreeDepth {デフォルトのツリーウィンドウの移動深さ}
 translate A OptionsMovesEnginePvLength {エンジンPV表示長}
 menuText A OptionsNumbers "数値の形式" 0 {数値形式を選択します}
