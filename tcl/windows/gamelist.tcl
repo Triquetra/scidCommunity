@@ -939,7 +939,7 @@ proc glist.create {{w} {layout} {reset_layout false}} {
   set ::glistYScroll($w.glist) [$w.glist cget -yscrollcommand]
   $w.glist configure -yscrollcommand "glist.yscroll_ $w.glist"
   $w.ybar configure -command "glist.ybar_ $w.glist"
-  bindMouseWheel $w.glist "glist.ybar_ $w.glist"
+  glist.bindWheel $w.glist
   bind $w.glist <$::COMMAND-f> "event generate $w <<FindBarShow>>"
 
   # Find widget
@@ -1158,6 +1158,10 @@ proc glist.destroy_ {{w}} {
   unset ::glistYScroll($w)
   unset ::glistFindBar($w)
   unset -nocomplain ::glistMultiSel($w)
+  # The accumulator is keyed on the widget path, and layout_apply destroys and
+  # recreates $w.glist at that same path: a stale fraction would otherwise
+  # carry over and make the recreated list scroll on its first small delta.
+  unset -nocomplain ::glist::wheelAcc($w)
 }
 
 proc glist.update_ {{w} {base}} {
@@ -1675,6 +1679,110 @@ proc glist.sortStore_ {w layout} {
 }
 
 # Scrollbar
+## Mouse wheel speed for the game list.
+##
+## bindMouseWheel (misc.tcl) turns one wheel notch into a single row, and every
+## notch makes "glist.loadvalues_" re-query the visible window through
+## "sc_base gameslist" - so one row per notch reads as a stuck list on a large
+## database. glist.ybar_ already understands "scroll N units"; only the binding
+## has to change, and only for game-list widgets: the board uses the same
+## binding for its move Back/Forward and keeps it.
+
+options.store ::glistWheelRows 3
+
+namespace eval ::glist {
+    variable wheelAcc
+    array set wheelAcc {}
+}
+
+# Rows moved per notch: the Options value, clamped to something sane.
+proc glist.wheelRows {} {
+    set n 3
+    catch { set n $::glistWheelRows }
+    if {![string is integer -strict $n] || $n < 1} { set n 1 }
+    if {$n > 10} { set n 10 }
+    return $n
+}
+
+# dir: -1 = towards the top, +1 = towards the bottom
+proc glist.wheelScroll {w dir} {
+    catch { glist.ybar_ $w scroll [expr {$dir * [glist.wheelRows]}] units }
+}
+
+# win32 reports %D as +/-120 per notch, or a multiple when the wheel is spun
+# fast. Precision touchpads send fractions of a notch, which the core binding
+# truncates to zero and drops - hence the per-widget accumulator.
+proc glist.wheel {w delta} {
+    if {![info exists ::glist::wheelAcc($w)]} { set ::glist::wheelAcc($w) 0 }
+    set ::glist::wheelAcc($w) [expr {$::glist::wheelAcc($w) + $delta}]
+    set notch [expr {int($::glist::wheelAcc($w) / 120.0)}]
+    if {$notch == 0} { return }
+    set ::glist::wheelAcc($w) [expr {$::glist::wheelAcc($w) - $notch * 120}]
+    glist.wheelScroll $w [expr {-$notch}]
+}
+
+# aqua delivers a small direction value, not a 120-unit delta.
+proc glist.wheelDir {w delta} {
+    glist.wheelScroll $w [expr {-$delta}]
+}
+
+# Tk 8.7+/9 reports high-resolution touchpads as <TouchpadScroll>, with dx in the
+# high 16 bits of %D and dy in the low 16 (TIP 684). Tk 8.6, which the Windows
+# build links, never sends it - there a touchpad arrives as <MouseWheel> with a
+# fractional %D, which glist.wheel already accumulates. Without this binding a
+# touchpad does nothing at all on a Tk 9 build.
+proc glist.tkPrecise {} {
+    if {[catch {package require Tk} v]} { return 0 }
+    # vcompare, not vsatisfies: a bare "8.7" requirement bounds the major, so
+    # "vsatisfies 9.0 8.7" is 0 and the binding would never register on Tk 9.
+    if {[catch {package vcompare $v 8.7} cmp]} { return 0 }
+    return [expr {$cmp >= 0}]
+}
+
+# Precise deltas per row. Windows reports them on the same 120-scale as the
+# wheel, macOS in points; 20 is a deliberate compromise and is the one number to
+# change if a swipe feels too slow or too fast on a real device.
+set ::glist::precisePerRow 20
+
+proc glist.precise {w packed} {
+    set dy [expr {$packed & 0xFFFF}]
+    if {$dy >= 0x8000} { set dy [expr {$dy - 0x10000}] }
+    if {$dy == 0} { return }
+    if {![info exists ::glist::wheelAcc($w)]} { set ::glist::wheelAcc($w) 0 }
+    set ::glist::wheelAcc($w) [expr {$::glist::wheelAcc($w) + $dy}]
+    # Truncate towards zero on both sides: Tcl's integer division floors, so a
+    # negative accumulator of half a row would scroll while a positive one of the
+    # same size would not.
+    set acc $::glist::wheelAcc($w)
+    set rows [expr {$acc > 0
+        ? int($acc / $::glist::precisePerRow)
+        : -int(-$acc / $::glist::precisePerRow)}]
+    if {$rows == 0} { return }
+    set ::glist::wheelAcc($w) [expr {$::glist::wheelAcc($w) - $rows * $::glist::precisePerRow}]
+    glist.wheelScroll $w [expr {-$rows}]
+}
+
+proc glist.bindWheel {bindtag} {
+    # "break" matters: ttk::treeview has its own <TouchpadScroll> class binding on
+    # Tk 9, and without it the list would scroll twice.
+    if {[glist.tkPrecise]} {
+        catch { bind $bindtag <TouchpadScroll> {glist.precise %W %D ; break} }
+    }
+    switch -- [tk windowingsystem] {
+        x11 {
+            bind $bindtag <Button-4> {glist.wheelScroll %W -1 ; break}
+            bind $bindtag <Button-5> {glist.wheelScroll %W +1 ; break}
+            bind $bindtag <MouseWheel> {glist.wheel %W %D ; break}
+        }
+        aqua {
+            bind $bindtag <MouseWheel> {glist.wheelDir %W %D ; break}
+        }
+        default {
+            bind $bindtag <MouseWheel> {glist.wheel %W %D ; break}
+        }
+    }
+}
+
 proc glist.ybar_ {w cmd {n 0} {units ""}} {
   if { $cmd == "-1" || $cmd == "+1" } {
     #MouseWheel

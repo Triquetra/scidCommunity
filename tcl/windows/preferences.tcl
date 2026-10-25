@@ -98,6 +98,29 @@ proc ::preferences::moves { t } {
     pack $t.pvlen -side top -anchor w -pady "2 0"
 }
 
+# Only 1..10 are meaningful; an empty field has to be allowed while editing or
+# the spinbox cannot be cleared and retyped.
+proc ::preferences::validateWheelRows {new} {
+    if {$new eq ""} { return 1 }
+    if {![string is integer -strict $new]} { return 0 }
+    return [expr {$new >= 1 && $new <= 10}]
+}
+
+proc ::preferences::gamelist { t } {
+    # Show what the scroll code will actually use, even when the stored value was
+    # hand-edited to something invalid.
+    set ::glistWheelRows [glist.wheelRows]
+    ttk::label $t.wlbl -text [tr OptionsGlistWheelRows] -anchor w
+    pack $t.wlbl -anchor w
+    ttk::spinbox $t.wspeed -from 1 -to 10 -increment 1 -width 4 \
+        -textvariable ::glistWheelRows \
+        -validate key -validatecommand {::preferences::validateWheelRows %P}
+    # Leaving the field with nothing in it snaps back to the value in use, so the
+    # number on screen and the number scrolling uses never disagree.
+    bind $t.wspeed <FocusOut> {set ::glistWheelRows [glist.wheelRows]}
+    pack $t.wspeed -anchor w -pady {2 0}
+}
+
 proc ::preferences::updateScrollBar { w } {
   set l [winfo reqwidth $w.f]
   set h [winfo reqheight $w.f]
@@ -140,6 +163,7 @@ proc ::preferences::Open { {toggle ""} } {
   lappend configList [tr OptionsRecent] ::recentFiles::configure
   lappend configList [tr OptionsSounds] ::utils::sound::OptionsDialog
   lappend configList [tr OptionsMoves] ::preferences::moves
+  lappend configList [tr OptionsGamelist] ::preferences::gamelist
   lappend configList [tr ConfigureInformant] configInformant
   lappend configList [tr OptionsFICS] configFICS
   set maxlen 0
