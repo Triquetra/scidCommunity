@@ -225,7 +225,17 @@ proc ::auto_comment::writeRequestFile {body {tag chat}} {
 proc ::auto_comment::chatEndpoint {} {
     switch -- $::auto_comment::provider {
         local  { return "[::auto_comment::baseUrl $::auto_comment::localUrl]/api/chat" }
-        openai { return "[::auto_comment::baseUrl $::auto_comment::openaiUrl]/v1/chat/completions" }
+        openai {
+            set base [::auto_comment::baseUrl $::auto_comment::openaiUrl]
+            # A full endpoint pasted from a provider's documentation is used as
+            # it stands. Appending the path to it again is the classic 404, and
+            # copying the endpoint is what people do.
+            if {[string match -nocase */chat/completions $base]} { return $base }
+            # Gemini's compatibility root carries its own version segment, so it
+            # takes the path without the leading /v1.
+            if {[string match -nocase */v1beta/openai $base]} { return "$base/chat/completions" }
+            return "$base/v1/chat/completions"
+        }
     }
     return ""
 }
@@ -303,6 +313,25 @@ proc ::auto_comment::unescapeJson {text} {
     return [subst -nocommands -novariables [string map [list {\\n} "\n" {\\t} "\t" {\\r} "\r" {\\\"} {"} {\\\\} {\\}] $text]]
 }
 
+# ::auto_comment::replyError
+#   The message inside an API error response, or "" when the body is not one.
+#   OpenAI-compatible endpoints put the text in error.message; the OpenCode
+#   gateway wraps the same object one level deeper, and a few endpoints answer
+#   with a bare string. The text is what the user needs: a missing key, a model
+#   that is on another API, an unpaid plan.
+proc ::auto_comment::replyError {raw} {
+    if {[regexp {"error"\s*:\s*\{} $raw]} {
+        if {[regexp {"message"\s*:\s*"((?:[^"\\]|\\.)*)"} $raw -> msg]} {
+            return [::auto_comment::unescapeJson $msg]
+        }
+        return "API error: [string range [string trim $raw] 0 300]"
+    }
+    if {[regexp {"error"\s*:\s*"((?:[^"\\]|\\.)*)"} $raw -> msg]} {
+        return [::auto_comment::unescapeJson $msg]
+    }
+    return ""
+}
+
 # ::auto_comment::query
 #   One entry point for every caller. Returns the assistant text, or a string
 #   starting with "ERROR:" that the caller shows to the user. "none" is a
@@ -353,10 +382,8 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
     if {!$ok} {
         return "ERROR: request failed (network error or timeout): [string range [string trim $result] 0 300]"
     }
-    if {[regexp {"error"\s*:\s*\{} $result] || [regexp {"error"\s*:\s*"([^"]*)"} $result -> msg]} {
-        if {[info exists msg]} { return "ERROR: $msg" }
-        return "ERROR: [string range [string trim $result] 0 300]"
-    }
+    set err [::auto_comment::replyError $result]
+    if {$err ne ""} { return "ERROR: $err" }
     set text [::auto_comment::finishReply $result]
     if {$text eq ""} {
         return "ERROR: the endpoint returned no text (check the model name)"
@@ -513,7 +540,7 @@ proc ::auto_comment::configureApiKey {} {
         -command [list ::auto_comment::loadModels $w.content.openai.model openai]
     pack $w.content.openai.load -anchor w -pady {0 5}
     ttk::label $w.content.openai.hint -justify left -wraplength 420 -text \
-        "DeepSeek, Gemini's compatibility endpoint, vLLM, a gateway: anything that speaks /v1/chat/completions."
+        "DeepSeek, Gemini's compatibility endpoint, vLLM, a gateway: anything that speaks /v1/chat/completions. Either the base URL or the full endpoint can be pasted."
     pack $w.content.openai.hint -anchor w
 
     # --- Gemini section ---
