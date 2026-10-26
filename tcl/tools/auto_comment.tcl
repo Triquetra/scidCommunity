@@ -1,4 +1,5 @@
 # Copyright (C) 2025-2026 Hugh Whelan
+# Copyright (C) 2026 David Crandall
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 ############################################################
