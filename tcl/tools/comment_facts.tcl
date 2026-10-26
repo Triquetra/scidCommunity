@@ -126,8 +126,15 @@ proc ::facts::hangingPieces {fen color} {
         set att [attackersOf $pos $i $them]
         if {![llength $att]} continue
         set def [attackersOf $pos $i $color]
+        # A king (value 0) can only take an undefended piece; counting it as a
+        # cheap attacker would call every defended piece beside the enemy king
+        # hanging. Undefended pieces are covered by the first test below.
         set minAtt 99
-        foreach a $att { if {[lindex $a 1] < $minAtt} { set minAtt [lindex $a 1] } }
+        foreach a $att {
+            set v [lindex $a 1]
+            if {$v == 0} continue
+            if {$v < $minAtt} { set minAtt $v }
+        }
         if {![llength $def] || $minAtt < [valueOf $p]} {
             lappend out [list [pieceName $p] [::chessboard::sqName $i]]
         }
@@ -272,10 +279,22 @@ proc ::facts::epLine {fen} {
     set pos [::chessboard::fromFen $fen]
     set to [::chessboard::sqIndex $ep]
     if {[lindex [dict get $pos board] $to] ne ""} { return "en passant: none available" }
+    # The ep square is empty, so a piece that can move there is only making
+    # the capture if it is a pawn: a rook or bishop reaching that square is
+    # not an en passant capture.
     set can 0
+    set board [dict get $pos board]
+    set side [dict get $pos side]
     if {![catch {
         foreach m [::chessboard::legalMoves $pos] {
-            if {[string range $m 2 3] eq $ep} { set can 1 ; break }
+            if {[string range $m 2 3] ne $ep} continue
+            set from [::chessboard::sqIndex [string range $m 0 1]]
+            set p [lindex $board $from]
+            if {$p ne "" && [string tolower $p] eq "p" &&
+                [::chessboard::colorOf $p] eq $side} {
+                set can 1
+                break
+            }
         }
     }]} {}
     if {$can} { return "en passant: a pawn can be captured on $ep" }
@@ -352,19 +371,30 @@ proc ::facts::materialLine {fen} {
     set diff [expr {abs($w - $b)}]
     set who [expr {$w > $b ? "White" : "Black"}]
     # "Black is 8 pawns up" is arithmetic the reader reads as a bug when the
-    # queen is simply gone. Name what is actually missing from the board.
+    # queen is simply gone, so name the pieces instead of the points.
     set behind [expr {$w > $b ? "Black" : "White"}]
     set board [dict get [::chessboard::fromFen $fen] board]
-    array set seen {q 0 r 0 b 0 n 0 p 0}
+    # Naming only the trailing side's losses blames it for pieces the leader
+    # has also traded ("Black has lost a queen" when White's queen is gone too
+    # reads as a queen lost for nothing), so report the surplus it lost alone.
+    array set onBoardW {q 0 r 0 b 0 n 0 p 0}
+    array set onBoardB {q 0 r 0 b 0 n 0 p 0}
     foreach p $board {
         if {$p eq ""} continue
-        if {[::chessboard::colorOf $p] ne [expr {$w > $b ? "b" : "w"}]} continue
         set k [string tolower $p]
-        if {[info exists seen($k)]} { incr seen($k) }
+        if {![info exists onBoardW($k)]} continue
+        if {[::chessboard::colorOf $p] eq "w"} {
+            incr onBoardW($k)
+        } else {
+            incr onBoardB($k)
+        }
     }
     set gone {}
     foreach {k n full} {q 1 queen r 2 rook b 2 bishop n 2 knight p 8 pawn} {
-        set short [expr {$n - $seen($k)}]
+        # missing = full set minus what is on the board, so the trailing side's
+        # surplus loss for this type is what the leader still has.
+        set short [expr {$w > $b ? $onBoardW($k) - $onBoardB($k)
+                                 : $onBoardB($k) - $onBoardW($k)}]
         if {$short <= 0} continue
         if {$short == 1} {
             lappend gone "a $full"
@@ -509,6 +539,36 @@ proc ::facts::materialEvalNote {m} {
     return $note
 }
 
+# What the move played nets on its destination square: the piece it took, less
+# what the opponent's best continuation takes back. Negative when the exchange
+# loses material. ::chessboard::see answers "what can be won on this square by
+# whoever is to move", starting with its cheapest attacker - which, after the
+# move, is the opponent, and may be a different capture from the one played.
+proc ::facts::captureNet {fen uci} {
+    set net 0
+    if {[catch {
+        set before [::chessboard::fromFen $fen]
+        set to [::chessboard::sqIndex [string range $uci 2 3]]
+        set board [dict get $before board]
+        set victim [lindex $board $to]
+        set gained 0
+        if {$victim ne ""} {
+            set gained [valueOf $victim]
+        } else {
+            # the ep square is empty; only a pawn moving there captures
+            set from [::chessboard::sqIndex [string range $uci 0 1]]
+            set mover [lindex $board $from]
+            if {$to == [dict get $before ep] && $mover ne "" &&
+                [string tolower $mover] eq "p"} {
+                set gained 1
+            }
+        }
+        set after [::chessboard::makeMove $before $uci]
+        set net [expr {$gained - [::chessboard::see $after $to]}]
+    }]} {}
+    return $net
+}
+
 # What a move achieves, as a short list of phrases. Used for the engine's move
 # ("better was X: it protects ... and develops ...") and, by difference, for the
 # contrast with the move that was actually played.
@@ -525,10 +585,12 @@ proc ::facts::gainsOf {fen uci mover} {
     set theirsBefore [hangingPieces $fen $them]
     set theirsAfter [hangingPieces $fa $them]
 
-    # material won by a capture
+    # Material won by the capture that was played, not by whichever capture on
+    # that square would be cheapest for a hypothetical mover.
     if {[dict get $d capture] ne ""} {
-        if {[catch { set v [::chessboard::see $before [::chessboard::sqIndex [dict get $d to]]] }]} { set v 0 }
-        if {$v >= 1} { lappend out "wins the [dict get $d capture] on [dict get $d to]" }
+        if {[captureNet $fen $uci] >= 1} {
+            lappend out "wins the [dict get $d capture] on [dict get $d to]"
+        }
     }
 
     # pieces of ours that stop being hangable
@@ -716,7 +778,10 @@ proc ::facts::motifLines {m} {
     } else {
         set escapes {}
     }
-    if {$isHangingAtTo && !$wasHangingAtFrom} {
+    # A piece that took something of equal or greater value is not "left
+    # hanging" when the recapture only trades it back.
+    set net [captureNet $fb $played]
+    if {$isHangingAtTo && !$wasHangingAtFrom && $net < 0} {
         lappend newHangs [list [dict get $p piece] $toSq]
     }
     set hitSquares {}
@@ -809,15 +874,20 @@ proc ::facts::moveWhy {m} {
     }
     set d [describeMove $fb [dict get $m played]]
     if {[dict get $d mate]} { return "it is checkmate" }
+    # A trade that gives back what the move took is not "left for the opponent":
+    # only a negative net makes the destination square a mistake.
+    set net [captureNet $fb [dict get $m played]]
     # what the side to move can win now that the move is on the board
     set t [biggestTarget $fa]
     if {$t ne "" && [dict get $t value] >= 3} {
-        return "it leaves the [dict get $t piece] on [dict get $t square] for the opponent to take"
+        if {[dict get $t square] ne [dict get $d to] || $net < 0} {
+            return "it leaves the [dict get $t piece] on [dict get $t square] for the opponent to take"
+        }
     }
     set mover [expr {[dict get $d side] eq "White" ? "w" : "b"}]
     set mine [hangingPieces $fa $mover]
     foreach e $mine {
-        if {[lindex $e 1] eq [dict get $d to]} {
+        if {[lindex $e 1] eq [dict get $d to] && $net < 0} {
             return "it puts the [lindex $e 0] on [lindex $e 1] where it can be taken"
         }
     }
@@ -958,8 +1028,8 @@ proc ::facts::forMove {m} {
         } else {
             lappend lines "better was $bwhat$tail"
         }
-        if {[llength $line]} {
-            lappend lines "the line after that better move runs [join $line { }]"
+        if {[llength $line] > 1} {
+            lappend lines "the line after that better move runs [join [lrange $line 1 end] { }]"
         }
     } elseif {[llength $line] > 1} {
         lappend lines "the line after the move played runs [join [lrange $line 1 end] { }]"
@@ -989,9 +1059,13 @@ proc ::facts::forMove {m} {
     if {[dict exists $m rep_count]} {
         lappend ruleLines [repetitionLine [dict get $m rep_count]]
     } else {
+        # ply counts the move being commented, one-based (phaseMoveLine derives
+        # the move number from it), so the position before it is ply-1 plies
+        # into the game. Replaying $ply would reach the position after the move,
+        # whose side to move never matches, and the line was silently dropped.
         set ply [expr {[dict exists $m ply] ? [dict get $m ply] : 0}]
-        set rc [repFromMainline $fb $ply]
-        if {$rc ne ""} { lappend ruleLines [repetitionLine $rc] }
+        set rc [repFromMainline $fb [expr {$ply > 0 ? $ply - 1 : 0}]]
+        lappend ruleLines [repetitionLine $rc]
     }
     foreach l $ruleLines { if {$l ne ""} { lappend lines $l } }
     # (rule lines are all non-empty by construction now)

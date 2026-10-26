@@ -106,7 +106,8 @@ Black has king on g8, and 3 pawns
 castling: White has no castling rights; Black has no castling rights
 en passant: none available
 fifty-move rule: 0 plies since the last capture or pawn move; 100 more plies would allow a draw claim
-material: White is 5 points up, and Black has lost a queen and 2 rooks}
+repetition: not available for this position
+material: White is 5 points up, and Black has lost a rook}
 
 # Rule state is stated in the negative too: a fact that is merely absent is
 # what lets a comment invent it.
@@ -135,11 +136,68 @@ set ep [::facts::forMove [moveDict {rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKB
 check "an available en passant capture is named" \
     [string match {*en passant: a pawn can be captured on d6*} $ep]
 
+# Repetition from the game requires sc_game; the position before move N is
+# reached after N-1 plies, and the block must state the count it can compute.
+proc sc_game {args} {
+    if {[lindex $args 0] eq "UCI_mainLine"} {
+        return {position startpos moves g1f3 g8f6 f3g1 f6g8 g1f3 g8f6 f3g1 f6g8 e2e4}
+    }
+    return ""
+}
+set startpos {rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1}
+checkEq "repetition counts the position the move was played in" \
+    [::facts::repFromMainline $startpos 8] 3
+set repMove [dict create fen_before $startpos played e2e4 side white ply 9 classification good]
+check "the block states a repetition it can count" \
+    [string match {*repetition: this position has occurred 3 times*} [::facts::forMove $repMove]]
+set offLine [dict create fen_before {4k3/8/8/8/8/8/8/4K3 w - - 0 1} played e1d2 side white ply 9 classification good]
+check "an uncountable repetition is stated, not omitted" \
+    [string match {*repetition: not available for this position*} [::facts::forMove $offLine]]
+rename sc_game {}
+
+# En passant is only available to a pawn, even when another piece can reach the
+# ep square.
+checkEq "a rook reaching the ep square is not an en passant capture" \
+    [::facts::epLine {4k3/8/8/8/4P3/r7/8/4K3 b - e3 0 1}] {en passant: none available}
+
+# A king can only take an undefended piece; counting it as a cheap attacker
+# called every defended piece beside the enemy king hanging.
+checkEq "a defended piece beside the enemy king is not hanging" \
+    [::facts::hangingPieces {8/8/8/8/8/6k1/5R2/4K3 w - - 0 1} w] {}
+checkEq "an undefended piece beside the enemy king is hanging" \
+    [::facts::hangingPieces {8/8/8/8/8/8/6k1/4K2R b - - 0 1} w] [list [list rook h1]]
+
+# A capture is judged by what the move played nets, not by the cheapest
+# attacker on that square.
+set lost {8/4k3/5n2/3p4/2P5/8/8/3RK3 w - - 0 1}
+checkEq "the rook capture loses a point" [::facts::captureNet $lost d1d5] -1
+check "it is not reported as winning the pawn" \
+    [expr {[lsearch -exact [::facts::gainsOf $lost d1d5 w] {wins the pawn on d5}] < 0}]
+set clean {4k3/8/8/8/4p3/8/8/4R1K1 w - - 0 1}
+checkEq "a clean capture still nets the pawn" [::facts::captureNet $clean e1e4] 1
+checkEq "moving a rook to the ep square is not a capture" \
+    [::facts::captureNet {4k3/8/8/8/4P3/r7/8/4K3 b - e3 0 1} a3e3] 0
+
+# An exchange that wins material is not "left hanging"; one that loses it is.
+set good {6kr/8/8/4B3/8/8/8/4K3 w - - 0 1}
+set mGood [dict create fen_before $good played e5h8 side white ply 13 classification good]
+checkEq "Bxh8 Kxh8 wins two points" [::facts::captureNet $good e5h8] 2
+check "a winning exchange is not called hanging" \
+    [expr {![string match {*hanging*} [::facts::motifLines $mGood]]}]
+set bad {4k3/8/3p4/4p3/8/8/8/4R1K1 w - - 0 1}
+set mBad [dict create fen_before $bad played e1e5 side white ply 13 classification mistake]
+checkEq "Rxe5 dxe5 loses four points" [::facts::captureNet $bad e1e5] -4
+check "a losing exchange is still called hanging" \
+    [string match {*it leaves the rook on e5 hanging*} [::facts::motifLines $mBad]]
+
 # Material is stated as what is missing from the board, not as an arithmetic
 # difference the reader has to reconcile with the position.
 set mat [::facts::forMove [moveDict {rnbqkb1r/ppp2ppp/5n2/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5} e4d5]]
 check "one point of material is not \"1 points\"" \
     [string match {*material: White is 1 point up, and Black has lost a pawn*} $mat]
+check "material names only what the trailing side lost that the leader did not" \
+    [string match {*material: White is 1 point up, and Black has lost a pawn*} \
+        [::facts::materialLine {4k3/pppp1ppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1}]]
 
 set alt [::facts::forMove [moveDict \
     {rnbqkb1r/ppp2ppp/5n2/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5} e4d5 \
@@ -148,8 +206,10 @@ check "the move played is credited with what it achieved" \
     [string match {*what the move played achieved: it takes the pressure off*} $alt]
 check "the engine's alternative names the mover and the difference" \
     [string match {*better was Nc3 - White's knight on b1 moves to c3: it also*} $alt]
-check "the engine's line is included" \
-    [string match {*the line after that better move runs b1c3 e7e5 g1f3*} $alt]
+check "the engine's line is included, starting after the better move" \
+    [string match {*the line after that better move runs e7e5 g1f3*} $alt]
+check "the better move is not repeated in its own continuation" \
+    [expr {![string match {*runs b1c3*} $alt]}]
 
 set dis [::facts::forMove [moveDict \
     {r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 5} f3e5 \
