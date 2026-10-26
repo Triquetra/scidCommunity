@@ -99,6 +99,47 @@ check "opencode section offers models" \
     [expr {[llength [$w.content.opencode.model cget -values]] > 0}] \
     [$w.content.opencode.model cget -values]
 
+# ------------------------------------------------------- staying on the screen --
+# The switch resizes the dialog in place, so the position it already has is the
+# one it grows from. A user who left the dialog near the bottom edge would lose
+# the OK row below the screen, and on a small display the tallest section is
+# already close to the usable height. Both are capped the way fitWindow caps a
+# new dialog.
+puts "\n== a switch near the bottom edge keeps the OK row on the screen =="
+set scrH [winfo screenheight $w]
+set scrW [winfo screenwidth $w]
+wm geometry $w "[winfo width $w]x[winfo height $w]+40+[expr {$scrH - [winfo height $w] - 60}]"
+update
+check "the dialog starts out above the bottom edge" \
+    [expr {[winfo rooty $w] + [winfo height $w] <= $scrH}] \
+    "top [winfo rooty $w] height [winfo height $w] screen $scrH"
+
+foreach p {opencode openai gemini none} {
+    set ::auto_comment::provider $p
+    ::auto_comment::syncProviderSections $w
+    update
+    set bottom [expr {[winfo rooty $w] + [winfo height $w]}]
+    check "the $p switch keeps the dialog above the bottom edge" \
+        [expr {$bottom <= $scrH - 40}] "bottom $bottom screen $scrH"
+    check "the $p switch keeps the dialog inside the screen height" \
+        [expr {[winfo height $w] <= $scrH - 80}] \
+        "height [winfo height $w] screen $scrH"
+    check "the $p switch keeps the dialog inside the screen width" \
+        [expr {[winfo width $w] <= $scrW - 40}] \
+        "width [winfo width $w] screen $scrW"
+}
+# and back to a middle position: the ordinary case must not be moved around
+set ::auto_comment::provider none
+::auto_comment::syncProviderSections $w
+update
+wm geometry $w "[winfo width $w]x[winfo height $w]+40+[expr {int(($scrH - [winfo height $w]) / 2)}]"
+update
+set before [winfo rooty $w]
+set ::auto_comment::provider opencode
+::auto_comment::syncProviderSections $w
+update
+checkEq "a switch that fits does not move the dialog" [winfo rooty $w] $before
+
 # ------------------------------------ moving an existing setup to a channel --
 # A user who has a Gemini key stored must be able to pick another provider
 # without losing it: the provider list is the path, and the keys are per

@@ -567,7 +567,30 @@ proc ::auto_comment::syncProviderSections {w} {
         # Size only: Tk keeps the window where it is. Passing a position read
         # back from winfo would hand the window manager its own coordinates and
         # let the dialog drift on every provider change.
-        wm geometry $w "[winfo reqwidth $w]x[winfo reqheight $w]"
+        set wd [winfo reqwidth $w]
+        set ht [winfo reqheight $w]
+        # fitWindow caps a new dialog on the screen; this path grows one that is
+        # already up, so it has to cap the same way. Without it a switch made
+        # near the bottom edge grows the window downward and takes the OK row
+        # off the screen - measured at 1633 on a 1440-tall desktop, 193px below
+        # the edge - and the tallest section is already 654px against the 688px
+        # a 1366x768 display leaves after fitWindow's margins.
+        set maxW [expr {[winfo screenwidth $w] - 40}]
+        set maxH [expr {[winfo screenheight $w] - 80}]
+        if {$wd > $maxW} { set wd $maxW }
+        if {$ht > $maxH} { set ht $maxH }
+        # Capping the height is not enough on its own: the window keeps its top,
+        # so a capped dialog can still hang past the bottom edge. Lift it by the
+        # overlap it would have, which leaves a dialog that fits exactly where
+        # the user put it and needs no assumption about the window decoration.
+        set limit [expr {[winfo screenheight $w] - 40}]
+        set over [expr {[winfo rooty $w] + $ht - $limit}]
+        if {$over > 0} {
+            set y [expr {max(0, [winfo y $w] - $over)}]
+            wm geometry $w "${wd}x${ht}+[winfo x $w]+${y}"
+        } else {
+            wm geometry $w "${wd}x${ht}"
+        }
     }
 }
 
