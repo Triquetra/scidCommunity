@@ -110,7 +110,6 @@ proc ::analysis_auto_comment::batch_generate {{engineId ""}} {
 proc ::analysis_auto_comment::run_batch {{engineId ""}} {
     # One readiness check for every provider: it names what is missing instead
     # of assuming a cloud key is what is wanted.
-    set provider $::auto_comment::provider
     set why [::auto_comment::providerReady]
     if {$why ne ""} {
         set answer [tk_messageBox -icon question -type yesno \

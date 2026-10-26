@@ -521,6 +521,15 @@ proc ::auto_comment::syncProviderSections {w} {
             pack forget $frame
         }
     }
+    # The sections are very different heights, so a switch from "none" to a
+    # five-widget section would otherwise leave the dialog sized for two lines.
+    # Size only: re-centring here would make the window jump on every change.
+    if {[winfo exists $w] && [winfo ismapped $w]} {
+        update idletasks
+        set x [winfo x $w]
+        set y [winfo y $w]
+        wm geometry $w "[winfo reqwidth $w]x[winfo reqheight $w]+$x+$y"
+    }
 }
 
 # ::auto_comment::configureApiKey
