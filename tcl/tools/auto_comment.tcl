@@ -240,6 +240,18 @@ proc ::auto_comment::writeRequestFile {body {tag chat}} {
     return -code error "cannot create a request file in $dir"
 }
 
+# ::auto_comment::writeCurlConfig
+#   Write the auth header to a curl config file and return its path.
+#
+#   The key must not go in curl's arguments: any local user can read another
+#   process's argv with ps or /proc, which would undo the 0600 options file.
+#   "header = ..." in a config file is the documented way to pass it without
+#   an argument, and the file is created owner-only by writeRequestFile.
+proc ::auto_comment::writeCurlConfig {header {tag auth}} {
+    set value [string map [list "\\" "\\\\" "\"" "\\\""] $header]
+    return [::auto_comment::writeRequestFile "header = \"$value\"\n" $tag]
+}
+
 # ::auto_comment::chatEndpoint
 #   The URL a chat request goes to for the selected provider.
 proc ::auto_comment::chatEndpoint {} {
@@ -423,14 +435,22 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
 
     set args [list curl -s --connect-timeout 15 --max-time 180 \
         -H {Content-Type: application/json} -X POST --data-binary @$tmpfile]
+    set authfile ""
     set auth [::auto_comment::chatAuth]
-    if {$auth ne ""} { lappend args -H $auth }
+    if {$auth ne ""} {
+        if {[catch {set authfile [::auto_comment::writeCurlConfig $auth]} err]} {
+            catch {file delete -force $tmpfile}
+            return "ERROR: cannot write the request: $err"
+        }
+        lappend args --config $authfile
+    }
     lappend args $url
 
     set result ""
     set ok 0
     if {![catch {exec {*}$args 2>@1} result]} { set ok 1 }
     catch { file delete -force $tmpfile }
+    if {$authfile ne ""} { catch {file delete -force $authfile} }
     if {!$ok} {
         return "ERROR: request failed (network error or timeout): [string range [string trim $result] 0 300]"
     }
@@ -1190,17 +1210,26 @@ proc ::auto_comment::fetchUrlModels {base key {modelsUrl ""}} {
     set ids {}
     foreach {target re} [::auto_comment::modelListTargets $base $modelsUrl] {
         set cmd [list curl -s --max-time 10 -H {Accept: application/json}]
+        set authfile ""
         if {$key ne ""} {
-            # the key only rides an https (or loopback) connection
+            # the key only rides an https (or loopback) connection, and never
+            # rides in argv
             if {[::auto_comment::cleartextKeyError $target $key] eq ""} {
-                lappend cmd -H "Authorization: Bearer $key"
+                if {![catch {set authfile [::auto_comment::writeCurlConfig \
+                        "Authorization: Bearer $key"]} err]} {
+                    lappend cmd --config $authfile
+                } else {
+                    ::auto_comment::logDebug "Auto Comment: cannot write the auth file: $err"
+                }
             } else {
                 ::auto_comment::logDebug "Auto Comment: not sending the API key to $target: not https"
             }
         }
         lappend cmd $target
         set raw ""
-        if {[catch {exec {*}$cmd 2>@1} raw]} { continue }
+        set failed [catch {exec {*}$cmd 2>@1} raw]
+        if {$authfile ne ""} { catch {file delete -force $authfile} }
+        if {$failed} { continue }
         foreach {all id} [regexp -all -inline $re $raw] { lappend ids $id }
         if {[llength $ids]} { break }
     }
@@ -1371,15 +1400,21 @@ proc ::auto_comment::queryDeepSeek {prompt} {
     set jsonBody "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$escapedPrompt\"}\],\"stream\":false,\"temperature\":1.0}"
 
     set tmpfile [::auto_comment::writeRequestFile $jsonBody req]
+    set authfile ""
+    if {[catch {set authfile [::auto_comment::writeCurlConfig \
+            "Authorization: Bearer $::auto_comment::deepseekApiKey"]} err]} {
+        catch {file delete -force $tmpfile}
+        return "ERROR: cannot write the request: $err"
+    }
 
     set result ""
     set ok 0
 
     if {![catch {exec curl -s --connect-timeout 15 --max-time 180 \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $::auto_comment::deepseekApiKey" \
+            --config $authfile \
             -X POST \
-            -d @$tmpfile \
+            --data-binary @$tmpfile \
             $url 2>@1} result]} {
         set ok 1
     } else {
@@ -1387,6 +1422,7 @@ proc ::auto_comment::queryDeepSeek {prompt} {
     }
 
     catch {file delete -force $tmpfile}
+    catch {file delete -force $authfile}
 
     if {!$ok} {
         return "ERROR: DeepSeek request failed (network error or timeout): [string range [string trim $result] 0 300]"

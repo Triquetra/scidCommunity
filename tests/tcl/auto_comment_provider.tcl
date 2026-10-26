@@ -252,6 +252,83 @@ checkEq "lowercase SAN repaired" \
     [::auto_comment::finishReply {{"choices":[{"message":{"content":"the knight goes nf3"}}]}}] \
     {the knight goes Nf3}
 
+# --------------------------------------------- the key never rides in argv ----
+puts "\n== auth goes to curl in a file, never in its arguments =="
+
+# Replace exec so nothing leaves the machine, and record what curl would have
+# been given. A key in argv is readable by any local user via ps or /proc.
+rename exec ::real_exec
+set ::lastArgv {}
+set ::lastCfg ""
+set ::lastCfgText ""
+set ::lastCfgMode 0
+set ::fakeReply "{}"
+proc exec {args} {
+    set ::lastArgv $args
+    set idx [lsearch -exact $args --config]
+    if {$idx >= 0} {
+        set ::lastCfg [lindex $args [expr {$idx + 1}]]
+        if {![catch {
+            set fh [open $::lastCfg r]
+            set ::lastCfgText [read $fh]
+            close $fh
+            file stat $::lastCfg st
+            set ::lastCfgMode [expr {$st(mode) & 0o777}]
+        }]} {}
+    }
+    return $::fakeReply
+}
+
+set ::auto_comment::provider openai
+set ::auto_comment::openaiUrl "https://api.example.com"
+set ::auto_comment::openaiKey "sk-secret-value"
+set ::auto_comment::openaiModel "m"
+set ::fakeReply {{"choices":[{"message":{"content":"Fine."}}]}}
+set ::lastArgv {}
+set ::lastCfg ""
+set ::reply [::auto_comment::queryChat "hi" 50]
+checkEq "the request still returns its text" $reply {Fine.}
+check "a config file carried the header" [expr {[lsearch -exact $::lastArgv --config] >= 0}] $::lastArgv
+check "the key is not in argv" \
+    [expr {[string first "sk-secret-value" [join $::lastArgv " "]] < 0}] $::lastArgv
+checkEq "the config holds the bearer header" $::lastCfgText \
+    "header = \"Authorization: Bearer sk-secret-value\"\n"
+if {$::tcl_platform(platform) eq "windows"} {
+    puts "  skip auth-file permissions are not a POSIX mode on this platform"
+} else {
+    checkEq "the auth file is owner-only" [format %04o $::lastCfgMode] 0600
+}
+check "the auth file is deleted after the request" \
+    [expr {$::lastCfg ne "" && ![file exists $::lastCfg]}] $::lastCfg
+
+# the OpenCode channel uses the same transport and must behave the same way
+set ::auto_comment::provider opencode
+set ::auto_comment::opencodeKey "oc-secret-value"
+set ::auto_comment::opencodeModel "glm-5.3-flash"
+set ::lastArgv {}
+::auto_comment::queryChat "hi" 50
+check "opencode key is not in argv" \
+    [expr {[string first "oc-secret-value" [join $::lastArgv " "]] < 0}] $::lastArgv
+
+# and so does the native DeepSeek path
+set ::auto_comment::provider deepseek
+set ::auto_comment::deepseekApiKey "ds-secret-value"
+set ::auto_comment::deepseekModel "deepseek-v4-pro"
+set ::lastArgv {}
+::auto_comment::queryDeepSeek "hi"
+check "deepseek key is not in argv" \
+    [expr {[string first "ds-secret-value" [join $::lastArgv " "]] < 0}] $::lastArgv
+
+# loading a model list sends the key too
+set ::fakeReply {{"object":"list","data":[{"id":"model-a"},{"id":"model-b"}]}}
+set ::lastArgv {}
+set models [::auto_comment::fetchUrlModels "https://api.example.com" "sk-secret-value"]
+checkEq "the model list came back" $models {model-a model-b}
+check "the model-list key is not in argv" \
+    [expr {[string first "sk-secret-value" [join $::lastArgv " "]] < 0}] $::lastArgv
+check "the model-list auth file is deleted" \
+    [expr {![file exists $::lastCfg]}] $::lastCfg
+
 # ------------------------------------------------------- gateway model filter --
 puts "\n== gateway model filter =="
 set gatewayIds {glm-5.3 kimi-k3 minimax-m3 deepseek-v4-pro mistral-large-4 qwen3.8-max \
