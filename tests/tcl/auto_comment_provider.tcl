@@ -223,6 +223,15 @@ checkEq "escapes decoded" \
     [::auto_comment::replyText {{"choices":[{"message":{"content":"line1\nline2 \"q\" and \\ slash"}}]}}] \
     "line1\nline2 \"q\" and \\ slash"
 
+# A backslash escaped for JSON must survive as a backslash, not be re-read as
+# an escape: this is what the string map in front of subst used to break.
+checkEq "escaped backslash before n stays literal" \
+    [::auto_comment::replyText {{"choices":[{"message":{"content":"path C:\\new here"}}]}}] \
+    {path C:\new here}
+checkEq "two escaped backslashes stay two" \
+    [::auto_comment::replyText {{"choices":[{"message":{"content":"two \\\\ slashes"}}]}}] \
+    {two \\ slashes}
+
 checkEq "no error in a good reply" [::auto_comment::replyError $openaiReply] {}
 checkEq "opencode auth error" \
     [::auto_comment::replyError {{"type":"error","error":{"type":"AuthError","message":"Missing API key."}}}] \

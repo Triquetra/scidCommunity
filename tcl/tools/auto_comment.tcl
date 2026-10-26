@@ -355,8 +355,12 @@ proc ::auto_comment::extractOllamaMessage {raw} {
 
 # ::auto_comment::unescapeJson
 #   Minimal JSON string decoder: the escapes a chat reply actually contains.
+#   subst does the work in one pass. A string map in front of it would have to
+#   key on the already-decoded forms, and did: a content of C:\new matched a
+#   "backslash backslash n" key and became a newline, and two literal
+#   backslashes collapsed into one. Decode each escape exactly once.
 proc ::auto_comment::unescapeJson {text} {
-    return [subst -nocommands -novariables [string map [list {\\n} "\n" {\\t} "\t" {\\r} "\r" {\\\"} {"} {\\\\} {\\}] $text]]
+    return [subst -nocommands -novariables $text]
 }
 
 # ::auto_comment::replyError
