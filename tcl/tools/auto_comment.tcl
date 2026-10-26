@@ -535,9 +535,10 @@ proc ::auto_comment::syncProviderSections {w} {
     # Size only: re-centring here would make the window jump on every change.
     if {[winfo exists $w] && [winfo ismapped $w]} {
         update idletasks
-        set x [winfo x $w]
-        set y [winfo y $w]
-        wm geometry $w "[winfo reqwidth $w]x[winfo reqheight $w]+$x+$y"
+        # Size only: Tk keeps the window where it is. Passing a position read
+        # back from winfo would hand the window manager its own coordinates and
+        # let the dialog drift on every provider change.
+        wm geometry $w "[winfo reqwidth $w]x[winfo reqheight $w]"
     }
 }
 
@@ -714,10 +715,18 @@ proc ::auto_comment::configureApiKey {} {
 #   remember a separate menu action: a key typed and then lost on exit is the
 #   one failure that looks like the feature is broken.
 proc ::auto_comment::saveSettings {w} {
-    if {[catch {options.write} err]} {
+    set saved 0
+    if {[catch {set saved [options.write]} err]} {
         tk_messageBox -icon warning -type ok -title "Auto Comment" \
             -message "Could not save the settings to the options file:\n\n$err" \
             -parent $w
+        return
+    }
+    if {!$saved} {
+        # options.write reports a failed open itself and returns 0. Keep the
+        # dialog: a provider and a key typed and then thrown away with the
+        # window is the silent loss this persistence exists to prevent.
+        return
     }
     destroy $w
 }

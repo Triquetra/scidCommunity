@@ -672,7 +672,12 @@ ConvertOldOptionVariables
 proc options.write {} {
  uplevel #0 {
   set optionF ""
+  # Report the outcome to the caller: a failed open is shown to the user here
+  # and returns 0, so a caller that must not lose the user's edits can refuse
+  # to close its dialog. Errors during the write itself propagate as before.
+  set ok 1
   if {[catch {open [scidConfigFile options] w} optionF]} {
+    set ok 0
     tk_messageBox -title "scidCommunity: Unable to write file" -type ok -icon warning \
         -message "Unable to write options file: [scidConfigFile options]\n$optionF"
   } else {
@@ -856,6 +861,7 @@ proc options.write {} {
     catch {file attributes [scidConfigFile options] -permissions 0600}
     set ::statusBar "Options were saved to: [scidConfigFile options]"
   }
+  set ok
  }
 }
 

@@ -2549,14 +2549,16 @@ set helpText(GameComment) {<h1>Engine Window: Game Comment Button</h1>
   </ul>
   </p>
   
-  <h3>Choosing a model</h3>
+  <h3>Choosing a provider and a model</h3>
   <p>
-  Game Comment needs a model before it can write anything. Press <b>Settings...</b>
-  in the Game Comment dialog once and choose one: Google Gemini or DeepSeek with
-  their own API keys, any OpenAI-compatible endpoint (DeepSeek, a gateway, vLLM),
-  a local server such as Ollama or LM Studio, or OpenCode Console. With no model
-  selected the dialog offers to open these settings; nothing is sent anywhere
-  until a model is chosen. The choice is saved when you press OK.
+  Game Comment needs an AI provider and a model before it can write anything.
+  Press <b>Settings...</b> in the Game Comment dialog once, choose a provider -
+  Google Gemini, DeepSeek, OpenCode Console, an OpenAI-compatible endpoint such as
+  a gateway or vLLM, or a local server such as Ollama or LM Studio - then choose a
+  model for it. With nothing configured the dialog offers to open these settings;
+  no commentary request is sent until a provider and a model are chosen.
+  <b>Load Models</b> asks the provider which models it offers. The choice is saved
+  when you press OK.
   </p>
   
   <h3>Usage</h3>

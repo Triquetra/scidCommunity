@@ -35,9 +35,17 @@ proc options.store {varname {default ""}} {
     if {![info exists $varname]} { set $varname $default }
 }
 set ::savedCount 0
-proc options.write {} { incr ::savedCount }
+set ::saveResult 1
+set ::messages {}
+# The real options.write returns 1 when it wrote, 0 when it reported a failed
+# open itself, and throws only if the write breaks part-way.
+proc options.write {} {
+    incr ::savedCount
+    if {$::saveResult eq "error"} { error "disk full" }
+    return $::saveResult
+}
 proc openURL {url} { set ::openedUrl $url }
-proc tk_messageBox {args} { return ok }
+proc tk_messageBox {args} { lappend ::messages [dict get $args -message] ; return ok }
 set ::language E
 set ::translatePieces 0
 
@@ -96,10 +104,38 @@ puts "\n== OK saves and closes =="
 set ::auto_comment::provider opencode
 set ::auto_comment::opencodeKey "secret"
 set ::savedCount 0
+set ::saveResult 1
 ::auto_comment::saveSettings $w
 update
 check "options.write ran" [expr {$::savedCount == 1}] "count $::savedCount"
 check "the dialog closed" [expr {![winfo exists $w]}]
+
+# A refused write must not take the typed key with it. options.write has
+# already told the user, so the dialog adds nothing and stays open.
+puts "\n== a failed save keeps the dialog and its values =="
+::auto_comment::configureApiKey
+update
+set ::auto_comment::provider opencode
+set ::auto_comment::opencodeKey "typed-but-unsaved"
+set ::saveResult 0
+set ::savedCount 0
+set ::messages {}
+::auto_comment::saveSettings $w
+update
+check "options.write was asked once" [expr {$::savedCount == 1}] "count $::savedCount"
+check "the dialog stayed open" [winfo exists $w]
+check "the key is still there" \
+    [expr {$::auto_comment::opencodeKey eq "typed-but-unsaved"}] $::auto_comment::opencodeKey
+check "no second complaint" [expr {[llength $::messages] == 0}] $::messages
+
+# An unexpected error keeps it open too, and says why.
+set ::saveResult "error"
+set ::messages {}
+::auto_comment::saveSettings $w
+update
+check "the dialog stayed open after an error" [winfo exists $w]
+check "the user was told once" [expr {[llength $::messages] == 1}] $::messages
+destroy $w
 
 # ------------------------------------------------------------ batch dialog ----
 puts "\n== Game Comment dialog =="
