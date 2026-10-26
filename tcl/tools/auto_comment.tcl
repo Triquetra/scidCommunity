@@ -509,10 +509,14 @@ proc ::auto_comment::syncProviderSections {w} {
     if {![winfo exists $w.content]} { return }
     set want $::auto_comment::provider
     if {$want ni {none local openai opencode gemini deepseek}} { set want none }
+    # The "no model yet" note lives in a frame called "note", not "none"; without
+    # this the default provider matched no section and the dialog opened with no
+    # body at all - which is the one state a fresh install is in.
+    set show [expr {$want eq "none" ? "note" : $want}]
     foreach name {note local openai opencode gemini deepseek} {
         set frame $w.content.$name
         if {![winfo exists $frame]} { continue }
-        if {$name eq $want} {
+        if {$name eq $show} {
             # Plain pack, no -before: every section is a child of $w.content, which
             # is itself packed above $w.buttons, so the order inside the content
             # frame is all that matters - and Tk refuses -before across masters.
