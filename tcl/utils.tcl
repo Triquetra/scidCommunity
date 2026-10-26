@@ -1,4 +1,38 @@
 
+# getClipboardText:
+#   Returns the text currently on the system clipboard, with surrounding
+#   whitespace removed. If the CLIPBOARD selection is unavailable, the
+#   PRIMARY selection (the X11 middle-click buffer) is tried. Returns the
+#   empty string if no text could be read. If varName is given, the text is
+#   also stored in that variable, but only when text was found, so callers
+#   can keep an existing value when the clipboard is empty.
+#
+#   Tk's "selection get" asks the clipboard owner for the STRING target by
+#   default, and its man page warns that it never asks for UTF8_STRING
+#   unless told to. On Wayland desktops the clipboard is usually owned by
+#   the compositor or a clipboard manager through XWayland, and those
+#   owners commonly offer UTF8_STRING only and refuse STRING, so a plain
+#   "selection get -selection CLIPBOARD" fails there. Asking for both
+#   targets keeps paste working on those systems. Windows and macOS have a
+#   single native clipboard that answers any target, so STRING is always
+#   tried first and the extra attempt changes nothing there.
+#
+proc ::utils::getClipboardText {{varName ""}} {
+  foreach selection {CLIPBOARD PRIMARY} {
+    foreach type {STRING UTF8_STRING} {
+      if {![catch {selection get -selection $selection -type $type} text]
+            && $text ne ""} {
+        set text [string trim $text]
+        if {$varName ne ""} {
+          upvar 1 $varName var
+          set var $text
+        }
+        return $text
+      }
+    }
+  }
+  return ""
+}
 
 # thousands, percentFormat:
 #   Functions to format integer numbers.

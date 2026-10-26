@@ -92,10 +92,16 @@ proc importPgnGame {} {
 
 proc importClipboardGame {} {
   importPgnGame
-  catch {event generate .importWin.pane.edit.text <<Paste>>}
+  set w .importWin.pane.edit.text
+  catch {event generate $w <<Paste>>}
   # Paste the current selected text automatically if no data was pasted from clipboard:
-  if { [ .importWin.pane.edit.text get 1.0 end ] == "\n" } {
-    catch { .importWin.pane.edit.text insert end [selection get] }
+  # Tk's own paste only asks for the STRING target, which Wayland clipboard
+  # owners may refuse, so fall back to the target-aware helper.
+  if { [ $w get 1.0 end ] == "\n" } {
+    set clipText [::utils::getClipboardText]
+    if {$clipText ne ""} {
+      $w insert end $clipText
+    }
   }
 }
 

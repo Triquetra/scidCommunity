@@ -177,10 +177,8 @@ proc setupBoard {} {
   pack $w.buttons.ok -side right -padx 5
 
   ttk::button .setup.paste -textvar ::tr(PasteFen) -command {
-    if {[catch {set setupFen [selection get -selection CLIPBOARD]} ]} {
-      # PRIMARY is the X selection, unsure about CLIPBOARD
-      if {[catch {set setupFen [selection get -selection PRIMARY]}]} { return }
-    }
+    # Leave any FEN already in the box alone if the clipboard is unreadable.
+    if {[::utils::getClipboardText setupFen] eq ""} { return }
     setSetupBoardToFen %W $setupFen
   }
   ttk::button .setup.clear -textvar ::tr(ClearFen) -command {set setupFen ""}
@@ -397,11 +395,7 @@ proc copyFEN {} {
 #   if the selection does not appear to be a valid FEN string.
 #
 proc pasteFEN {} {
-  set fenStr ""
-  if {[catch {set fenStr [selection get -selection CLIPBOARD]} ]} {
-    catch {set fenStr [selection get -selection PRIMARY]}
-  }
-  set fenStr [string trim $fenStr]
+  set fenStr [::utils::getClipboardText]
 
   set fenExplanation {FEN is the standard text representation of a chess position. As an example, the FEN representation of the standard starting position is:
     "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}
