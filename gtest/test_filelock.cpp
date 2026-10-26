@@ -172,6 +172,33 @@ TEST(FileLock, theLockIsFreedWhenTheHolderDies) {
 }
 #endif
 
+TEST(FileLock, oneDatabaseInTwoSpellingsSharesOneLock) {
+	TempDir dir;
+
+	// CodecSCID5 adds .si5 to a bare name, so these are the same database.
+	const auto dbPath = dir / "alias.si5";
+	scidBaseT dbase;
+	ASSERT_EQ(OK, dbase.open("SCID5", FMODE_Create, dbPath.string().c_str()));
+
+	auto bare = dbPath;
+	bare.replace_extension();
+	scidBaseT other;
+	EXPECT_EQ(ERROR_FileInUse, other.open("SCID5", FMODE_Both, bare.string().c_str()));
+
+	// The same file reached through a . in the middle is the same database too.
+	const auto dotted = (dbPath.parent_path() / "." / dbPath.filename()).string();
+	EXPECT_EQ(ERROR_FileInUse, other.open("SCID5", FMODE_Both, dotted.c_str()));
+
+	// CodecSCID4 strips .si4 before adding it back, so the bare name is the
+	// same database there as well.
+	const auto db4Path = dir / "alias4.si4";
+	scidBaseT base4;
+	ASSERT_EQ(OK, base4.open("SCID4", FMODE_Create, db4Path.string().c_str()));
+	auto bare4 = db4Path;
+	bare4.replace_extension();
+	EXPECT_EQ(ERROR_FileInUse, other.open("SCID4", FMODE_Both, bare4.string().c_str()));
+}
+
 TEST(FileLock, scidBaseHoldsTheLockWhileTheDatabaseIsOpen) {
 	TempDir dir;
 	const auto dbPath = dir / "locklifecycle.si5";

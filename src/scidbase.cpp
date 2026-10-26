@@ -93,7 +93,27 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 	// File-based locking for write modes (skip for MEMORY databases)
 	if (dbtype != ICodecDatabase::MEMORY &&
 	    (fMode == FMODE_WriteOnly || fMode == FMODE_Both || fMode == FMODE_Create)) {
-		auto lockPath = pathFromUtf8(filename);
+		// The codecs accept more than one spelling of the same database:
+		// CodecSCID5 appends .si5 to a name without an extension, and
+		// CodecSCID4 strips .si4 and puts it back. Take the lock on the file
+		// the codec will actually open - otherwise /data/games and
+		// /data/games.si5 would each get their own lock and both could write.
+		// Canonicalising afterwards closes the same hole for a relative path,
+		// a ./ in the middle and a symlinked directory.
+		auto databasePath = [&] {
+			auto path = pathFromUtf8(filename);
+			if (dbtype == ICodecDatabase::SCID4) {
+				if (path.extension() != ".si4")
+					path += ".si4";
+			} else if (dbtype == ICodecDatabase::SCID5) {
+				if (path.extension().empty())
+					path += ".si5";
+			}
+			std::error_code ec;
+			auto canonical = std::filesystem::weakly_canonical(path, ec);
+			return ec ? path : canonical;
+		}();
+		auto lockPath = databasePath;
 		lockPath += ".lock";
 		auto lock = std::make_unique<filelock::Lock>();
 		switch (filelock::acquire(lockPath, *lock)) {
