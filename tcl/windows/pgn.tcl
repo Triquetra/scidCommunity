@@ -221,6 +221,8 @@ namespace eval pgn {
     }
 
     menu $mctxt
+    $mctxt add command -label [tr EditCopyBoard] -command ::copyFEN
+    $mctxt add separator
 
     menu $mctxt.evals1
     $mctxt.evals1 add command -label "Clear" -command {::addNag X}
