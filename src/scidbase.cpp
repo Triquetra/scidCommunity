@@ -157,11 +157,6 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 void scidBaseT::Close() {
 	ASSERT(inUse);
 
-	// Give the database up; the lock is released with the handle. The lock
-	// file stays on disk on purpose: removing it is the one step that cannot
-	// be made safe while another process may be opening it (see filelock.h).
-	lock_.reset();
-
 	for (auto& sortCache : sortCaches_) {
 		delete sortCache.second;
 	}
@@ -183,6 +178,12 @@ void scidBaseT::Close() {
 		delete filters_[i].second;
 	filters_.clear();
 	inUse = false;
+
+	// Only now is the database really free. Releasing the lock any earlier -
+	// in particular before codec_ is destroyed - would remove the lock file
+	// while this process still has the database files open, and the next
+	// process could start writing into them.
+	lock_.reset();
 }
 
 void scidBaseT::clear() {
