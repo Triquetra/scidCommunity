@@ -486,7 +486,7 @@ proc ::auto_comment::configureApiKey {} {
     pack $w.content -fill both -expand 1
 
     ttk::label $w.content.info -text \
-        "Configure your LLM provider and API key(s).\nKeys are stored locally on your machine only.\nUse Options > Save Options to keep settings between sessions." \
+        "Configure your LLM provider and API key(s).\nKeys are stored locally on your machine only.\nOK saves these settings to your options file." \
         -wraplength 420 -justify left
     pack $w.content.info -anchor w -pady {0 10}
 
@@ -595,14 +595,35 @@ proc ::auto_comment::configureApiKey {} {
     ttk::frame $w.buttons -padding {15 5}
     pack $w.buttons -fill x
 
-    ttk::button $w.buttons.ok -text "OK" -command "destroy $w"
+    ttk::button $w.buttons.ok -text "OK" -command [list ::auto_comment::saveSettings $w]
     pack $w.buttons.ok -side right -padx 5
 
-    bind $w <Return> "destroy $w"
+    bind $w <Return> [list ::auto_comment::saveSettings $w]
     bind $w <Escape> "destroy $w"
 
     ::auto_comment::syncProviderSections $w
     ::auto_comment::fitWindow $w
+}
+
+# ::auto_comment::saveSettings
+#   Persist the provider settings and close the dialog.
+#
+#   These variables live in this namespace, and options.dat is loaded before
+#   tcl/tools/auto_comment.tcl exists, so a file holding only
+#   "set ::auto_comment::provider ..." would fail to load ("parent namespace
+#   doesn't exist") at the next start. options.write is the whole-file saver
+#   behind Options > Save Options: it writes "namespace eval" for every
+#   registered namespace first, so the namespace exists by the time the value
+#   is set. Using it here is also why the dialog no longer asks the user to
+#   remember a separate menu action: a key typed and then lost on exit is the
+#   one failure that looks like the feature is broken.
+proc ::auto_comment::saveSettings {w} {
+    if {[catch {options.write} err]} {
+        tk_messageBox -icon warning -type ok -title "Auto Comment" \
+            -message "Could not save the settings to the options file:\n\n$err" \
+            -parent $w
+    }
+    destroy $w
 }
 
 # ::auto_comment::fetchLichessEval
