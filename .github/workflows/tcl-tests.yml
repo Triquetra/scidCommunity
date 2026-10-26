@@ -10,22 +10,26 @@ permissions:
   contents: read
 
 jobs:
-  auto-comment-provider:
-    name: auto_comment provider layer
+  tcl-harnesses:
+    name: Tcl harnesses (tclsh only)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      # tclsh is all this needs: the transport, URL and parsing tests are pure
-      # Tcl, and Tk is stubbed inside the test file.
+      # tclsh is all these need: the transport, URL and parsing tests are pure
+      # Tcl, Tk is stubbed inside the provider file, and the options test lifts
+      # one procedure out of tcl/options.tcl.
       - name: Install Tcl
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq tcl
 
-      - name: Run the harness
+      - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl
+
+      - name: Options file save
+        run: tclsh tests/tcl/options_write.tcl
 
   auto-comment-dialogs:
     name: auto_comment dialogs under Tk
