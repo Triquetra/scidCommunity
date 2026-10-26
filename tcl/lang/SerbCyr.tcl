@@ -925,8 +925,6 @@ menuText J PgnHelp "Помоћ" 0
 menuText J PgnHelpPgn "ПГН Хелп" 0
 menuText J PgnHelpIndex "Индекс" 0
 translate J PgnWindowTitle {Нотација - игра %u}
-translate J CopyFen {Копирај ФЕН}
-translate J CopyFenAfter {Копирај ФЕН после %s}
 
 # Notation pane (PGN window) button tooltips:
 translate J TBLookupTooltip {Тражење базе таблица на Лицхесс-у}

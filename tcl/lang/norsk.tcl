@@ -894,8 +894,6 @@ menuText O PgnHelp "Hjelp" 0
 menuText O PgnHelpPgn "PGN-hjelp" 0
 menuText O PgnHelpIndex "Innholdsfortegnelse" 0
 translate O PgnWindowTitle {Game Notation - game %u} ;# ***
-translate O CopyFen {Kopier FEN}
-translate O CopyFenAfter {Kopier FEN etter %s}
 
 # Notation pane (PGN window) button tooltips:
 translate O TBLookupTooltip {Tabellbaseoppslag på Lichess}

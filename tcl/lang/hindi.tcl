@@ -884,8 +884,6 @@ menuText h PgnHelp "मदद" 0
 menuText h PgnHelpPgn "पीजीएन सहायता" 0
 menuText h PgnHelpIndex "अनुक्रमणिका" 0
 translate h PgnWindowTitle {संकेतन - खेल %u}
-translate h CopyFen {FEN कॉपी करें}
-translate h CopyFenAfter {%s के बाद FEN कॉपी करें}
 
 # Notation pane (PGN window) button tooltips:
 translate h TBLookupTooltip {लाइकेस पर टेबलबेस लुकअप}

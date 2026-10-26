@@ -895,8 +895,6 @@ menuText W PgnHelp "Hjälp" 0
 menuText W PgnHelpPgn "PGN-hjälp" 0
 menuText W PgnHelpIndex "Index" 0
 translate W PgnWindowTitle {PGN-version av partiet %u} 
-translate W CopyFen {Kopiera FEN}
-translate W CopyFenAfter {Kopiera FEN efter %s}
 
 # Notation pane (PGN window) button tooltips:
 translate W TBLookupTooltip {Tablebase Lookup på Lichess}

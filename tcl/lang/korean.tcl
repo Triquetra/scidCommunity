@@ -925,8 +925,6 @@ menuText k PgnHelp "돕다" 0
 menuText k PgnHelpPgn "PGN 도움말" 0
 menuText k PgnHelpIndex "색깔" 0
 translate k PgnWindowTitle {표법 - 게임%u}
-translate k CopyFen {FEN 복사}
-translate k CopyFenAfter {%s 뒤에 FEN 복사}
 
 # Notation pane (PGN window) button tooltips:
 translate k TBLookupTooltip {Lichess에 대한 테이블베이스 조회}

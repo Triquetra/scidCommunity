@@ -916,8 +916,6 @@ menuText G PgnHelp "Βοήθεια" 0
 menuText G PgnHelpPgn "Βοήθεια για PGN" 0
 menuText G PgnHelpIndex "Κατάλογος" 0
 translate G PgnWindowTitle {Σημείωση - παρτίδα %u}
-translate G CopyFen {Αντιγραφή FEN}
-translate G CopyFenAfter {Αντιγράψτε το FEN μετά το %s}
 
 # Notation pane (PGN window) button tooltips:
 translate G TBLookupTooltip {Αναζήτηση στο Tablebase στο Lichess}

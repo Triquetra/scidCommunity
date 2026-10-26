@@ -914,8 +914,6 @@ menuText N PgnHelp "Help" 0
 menuText N PgnHelpPgn "PGN help" 0
 menuText N PgnHelpIndex "Inhoud" 0
 translate N PgnWindowTitle {Partij Notatie - partij %u} ;
-translate N CopyFen {Kopieer FEN}
-translate N CopyFenAfter {Kopieer FEN na %s}
 
 # Notation pane (PGN window) button tooltips:
 translate N TBLookupTooltip {Tablebase opzoeken op Lichess}

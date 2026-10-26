@@ -885,8 +885,6 @@ menuText V PgnHelp "עֶזרָה" 0
 menuText V PgnHelpPgn "עזרה של PGN" 0
 menuText V PgnHelpIndex "מַדָד" 0
 translate V PgnWindowTitle {סימון - משחק %u}
-translate V CopyFen {העתק את FEN}
-translate V CopyFenAfter {העתק FEN לאחר %s}
 
 # Notation pane (PGN window) button tooltips:
 translate V TBLookupTooltip {בדיקת טבלה ב-Lichess}

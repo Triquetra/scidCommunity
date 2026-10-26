@@ -221,6 +221,8 @@ namespace eval pgn {
     }
 
     menu $mctxt
+    $mctxt add command -label [tr EditCopyBoard] -command ::copyFEN
+    $mctxt add separator
 
     menu $mctxt.evals1
     $mctxt.evals1 add command -label "Clear" -command {::addNag X}
@@ -259,19 +261,6 @@ namespace eval pgn {
     $mctxt add cascade -label "!  ?  ..." -menu $mctxt.evals1
     $mctxt add cascade -label "+-  +/-  ..." -menu $mctxt.evals2
     $mctxt add command -label "[tr WindowsComment]" -command {::makeCommentWin}
-
-    # Copy FEN for the move under the pointer, below the tear-off line:
-    set fenAt 0
-    if {[$mctxt type 0] eq "tearoff"} { set fenAt 1 }
-    set move [::pgn::moveAt $win $x $y]
-    if {[llength $move] == 0} {
-      $mctxt insert $fenAt command -label [tr CopyFen] -state disabled
-    } else {
-      lassign $move moveNum san
-      $mctxt insert $fenAt command -label [format [tr CopyFenAfter] $san] \
-          -command [list ::pgn::copyFen $moveNum]
-    }
-    $mctxt insert [expr {$fenAt + 1}] separator
 
     tk_popup $mctxt $x $y
   }
@@ -317,149 +306,6 @@ namespace eval pgn {
   ################################################################################
   proc HideBoard {} {
     destroy .pgnPopup
-  }
-
-  ################################################################################
-  # ::pgn::moveAt
-  #
-  #    Returns {move san} for the move under the given screen coordinates, where
-  #    move is the 1-based PGN position of that move, or "" when the pointer is
-  #    not over a move.
-  #
-  #    The colour display tags every move (m_<n>), so there the move is a tag
-  #    lookup. The plain display has no tags at all, so the move is found by
-  #    matching the game's moves against the text at the click.
-  #
-  ################################################################################
-  proc moveAt {win x y} {
-    set x [expr {$x - [winfo rootx $win]}]
-    set y [expr {$y - [winfo rooty $win]}]
-    set idx [$win index @$x,$y]
-
-    foreach tag [$win tag names $idx] {
-      if {[regexp {^m_([0-9]+)$} $tag -> moveNum]} {
-        return [list $moveNum [string trim [$win get "$tag.first" "$tag.last"]]]
-      }
-    }
-    return [moveAtOffset [$win get 1.0 end] [string length [$win get 1.0 $idx]]]
-  }
-
-  ################################################################################
-  # ::pgn::moveAtOffset
-  #
-  #    Finds the move at a character offset in the plain notation text. The
-  #    game's positions are listed in PGN order by sc_base getGame, which is the
-  #    same order the text is written in and the order the colour display numbers
-  #    its m_<n> tags by; the moves are matched in that order. A match is skipped
-  #    when it sits inside a {comment} or does not stand alone: a comment can
-  #    quote a move played later, and a header value can contain a move's text.
-  #
-  ################################################################################
-  proc moveAtOffset {text off} {
-    set moves ""
-    catch {
-      set moves [sc_base getGame [sc_base current] [sc_game number] live]
-    }
-    if {[llength $moves] < 2} { return "" }
-
-    set ranges [commentRanges $text]
-    set pos 0
-
-    set found ""
-    set moveNum 0
-    foreach position [lrange $moves 1 end] {
-      incr moveNum
-      set san [string trim [lindex $position 5]]
-      if {$san eq ""} { continue }
-      set from $pos
-      while {1} {
-        set at [string first $san $text $from]
-        if {$at < 0} { break }
-        if {[inComment $ranges $at] || ![isMoveToken $text $at $san]} {
-          set from [expr {$at + 1}]
-          continue
-        }
-        break
-      }
-      if {$at < 0 || $at > $off} { break }
-      set found [list $moveNum $san]
-      set pos [expr {$at + [string length $san]}]
-    }
-    return $found
-  }
-
-  ################################################################################
-  # ::pgn::isMoveToken
-  #
-  #    1 when the SAN match at offset $at in $text stands alone, so that a move
-  #    quoted inside a tag value or glued to other text is not counted.
-  #
-  ################################################################################
-  proc isMoveToken {text at san} {
-    set okBefore " \n\t.()"
-    set okAfter " \n\t{}()!?"
-    append okAfter [format %c 36]
-
-    set before ""
-    if {$at > 0} { set before [string index $text [expr {$at - 1}]] }
-    if {$before ne "" && [string first $before $okBefore] < 0} { return 0 }
-
-    set end [expr {$at + [string length $san]}]
-    set after ""
-    if {$end < [string length $text]} {
-      set after [string index $text $end]
-    }
-    if {$after ne "" && [string first $after $okAfter] < 0} { return 0 }
-
-    return 1
-  }
-
-  ################################################################################
-  # ::pgn::commentRanges
-  #
-  #    The {start end} character ranges of the {comments} in a plain notation
-  #    text.
-  #
-  ################################################################################
-  proc commentRanges {text} {
-    set ranges ""
-    set from 0
-    while {[set open [string first "\{" $text $from]] >= 0} {
-      set close [string first "\}" $text [expr {$open + 1}]]
-      if {$close < 0} { break }
-      lappend ranges [list $open $close]
-      set from [expr {$close + 1}]
-    }
-    return $ranges
-  }
-
-  proc inComment {ranges at} {
-    foreach range $ranges {
-      if {$at >= [lindex $range 0] && $at <= [lindex $range 1]} { return 1 }
-    }
-    return 0
-  }
-
-  ################################################################################
-  # ::pgn::copyFen
-  #
-  #    Puts the FEN of the position after the given move on the clipboard. The
-  #    current position is restored afterwards, as in ::pgn::ShowBoard, so the
-  #    board does not move.
-  #
-  ################################################################################
-  proc copyFen {moveNum} {
-    set offSet [sc_pos pgnOffset]
-    set fen ""
-    catch {
-      sc_move pgn $moveNum
-      set fen [sc_pos fen]
-    }
-    catch { sc_move pgn $offSet }
-    if {$fen eq ""} { return }
-
-    clipboard clear
-    clipboard append $fen
   }
 
   ################################################################################

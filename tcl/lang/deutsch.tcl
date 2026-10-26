@@ -924,8 +924,6 @@ menuText D PgnHelp "Hilfe" 0
 menuText D PgnHelpPgn "PGN-Hilfe" 0
 menuText D PgnHelpIndex "Index" 0
 translate D PgnWindowTitle {Partienotation - Partie %u}
-translate D CopyFen {FEN kopieren}
-translate D CopyFenAfter {FEN nach %s kopieren}
 
 # Notation pane (PGN window) button tooltips:
 translate D TBLookupTooltip {Tablebase-Suche auf Lichess}

@@ -885,8 +885,6 @@ menuText Q PgnHelp "Довідка" 0
 menuText Q PgnHelpPgn "Довідка PGN" 0
 menuText Q PgnHelpIndex "Індекс" 0
 translate Q PgnWindowTitle {Позначення - гра %u}
-translate Q CopyFen {Копіювати FEN}
-translate Q CopyFenAfter {Копіювати FEN після %s}
 
 # Notation pane (PGN window) button tooltips:
 translate Q TBLookupTooltip {Таблиця пошуку в Lichess}
