@@ -14,9 +14,10 @@ namespace eval ::auto_comment {
     #           endpoint, vLLM, LM Studio, a gateway...
     #   gemini  Google's native API   (kept until Game Comment is retired)
     #   deepseek DeepSeek's native API (kept until Game Comment is retired)
-    # The default stays "gemini" until the dialogs offer the other values and
-    # "none" is safe to be the default; that flip is the last commit of this
-    # change, so every commit before it behaves exactly as before.
+    # The default is "none": a review is complete without prose, and a machine
+    # with no model should behave exactly like one whose owner has not chosen a
+    # model yet. Nothing is sent anywhere until someone picks a provider, and an
+    # existing install keeps whatever it already stored.
     options.store ::auto_comment::provider "gemini"
 
     # Local (Ollama-style) settings
@@ -280,10 +281,14 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
 #   retrieved from the provider.
 #
 proc ::auto_comment::modelChoices {provider} {
-    if {$provider eq "deepseek"} {
-        return {deepseek-v4-pro deepseek-flash}
+    switch -- $provider {
+        deepseek { return {deepseek-v4-pro deepseek-flash} }
+        gemini {
+            return {gemini-3.6-flash gemini-3.5-flash-lite gemini-2.5-flash gemini-2.5-flash-lite}
+        }
     }
-    return {gemini-3.6-flash gemini-3.5-flash-lite gemini-2.5-flash gemini-2.5-flash-lite}
+    # local and openai list what the endpoint reports; nothing is guessed
+    return {}
 }
 
 # ::auto_comment::syncModelCombo
@@ -293,10 +298,11 @@ proc ::auto_comment::modelChoices {provider} {
 #
 proc ::auto_comment::syncModelCombo {combo} {
     if {![winfo exists $combo]} { return }
-    if {$::auto_comment::provider eq "deepseek"} {
-        set var ::auto_comment::deepseekModel
-    } else {
-        set var ::auto_comment::model
+    switch -- $::auto_comment::provider {
+        local    { set var ::auto_comment::localModel }
+        openai   { set var ::auto_comment::openaiModel }
+        deepseek { set var ::auto_comment::deepseekModel }
+        default  { set var ::auto_comment::model }
     }
     $combo configure -textvariable $var \
         -values [::auto_comment::modelChoices $::auto_comment::provider]
@@ -311,6 +317,26 @@ proc ::auto_comment::openSettings {combo} {
     if {[winfo exists .autoCommentConfig]} {
         bind .autoCommentConfig <Destroy> \
             "+if {![winfo exists .autoCommentConfig]} { ::auto_comment::syncModelCombo $combo }"
+    }
+}
+
+# ::auto_comment::syncProviderSections
+#   Show only the section that belongs to the selected provider. Five sets of
+#   fields packed at once is unreadable, and the dialog is the only place a user
+#   finds out that a local model needs no key.
+proc ::auto_comment::syncProviderSections {w} {
+    if {![winfo exists $w.content]} { return }
+    set want $::auto_comment::provider
+    if {$want ni {none local openai gemini deepseek}} { set want none }
+    foreach name {note local openai gemini deepseek} {
+        set frame $w.content.$name
+        if {![winfo exists $frame]} { continue }
+        if {$name eq $want} {
+            # keep the sections above the buttons whatever order they were packed in
+            pack $frame -fill x -pady {0 10} -before $w.buttons
+        } else {
+            pack forget $frame
+        }
     }
 }
 
@@ -341,8 +367,54 @@ proc ::auto_comment::configureApiKey {} {
     ttk::label $w.content.provlbl -text "LLM Provider:"
     pack $w.content.provlbl -anchor w
     ttk::combobox $w.content.provider -textvariable ::auto_comment::provider \
-        -values {gemini deepseek} -state readonly -width 15
+        -values [::auto_comment::providerList] -state readonly -width 18
     pack $w.content.provider -anchor w -pady {0 10}
+    bind $w.content.provider <<ComboboxSelected>> \
+        [list ::auto_comment::syncProviderSections $w]
+
+    # --- none ---
+    ttk::label $w.content.note -justify left -wraplength 420 -text \
+        "No model selected.\nGame comments are written without AI prose; the review itself still runs."
+
+    # --- Local (Ollama-style) ---
+    ttk::labelframe $w.content.local -text "Local model" -padding 10
+    ttk::label $w.content.local.urllbl -text "Endpoint:"
+    pack $w.content.local.urllbl -anchor w
+    ttk::entry $w.content.local.url -width 50 -textvariable ::auto_comment::localUrl
+    pack $w.content.local.url -fill x -pady {0 5}
+    ttk::label $w.content.local.modellbl -text "Model:"
+    pack $w.content.local.modellbl -anchor w
+    ttk::combobox $w.content.local.model -width 30 -textvariable ::auto_comment::localModel \
+        -values [::auto_comment::modelChoices local]
+    pack $w.content.local.model -anchor w -pady {0 5}
+    ttk::button $w.content.local.load -text "Load Models" \
+        -command [list ::auto_comment::loadModels $w.content.local.model local]
+    pack $w.content.local.load -anchor w -pady {0 5}
+    ttk::label $w.content.local.hint -justify left -wraplength 420 -text \
+        "Works with Ollama, LM Studio and any server that answers /api/chat. No key and no GPU required: a small model is enough."
+    pack $w.content.local.hint -anchor w
+
+    # --- OpenAI-compatible ---
+    ttk::labelframe $w.content.openai -text "Cloud / OpenAI-compatible" -padding 10
+    ttk::label $w.content.openai.urllbl -text "Endpoint:"
+    pack $w.content.openai.urllbl -anchor w
+    ttk::entry $w.content.openai.url -width 50 -textvariable ::auto_comment::openaiUrl
+    pack $w.content.openai.url -fill x -pady {0 5}
+    ttk::label $w.content.openai.keylbl -text "API key (leave empty if the endpoint needs none):"
+    pack $w.content.openai.keylbl -anchor w
+    ttk::entry $w.content.openai.key -width 50 -textvariable ::auto_comment::openaiKey -show "*"
+    pack $w.content.openai.key -fill x -pady {0 5}
+    ttk::label $w.content.openai.modellbl -text "Model:"
+    pack $w.content.openai.modellbl -anchor w
+    ttk::combobox $w.content.openai.model -width 30 -textvariable ::auto_comment::openaiModel \
+        -values [::auto_comment::modelChoices openai]
+    pack $w.content.openai.model -anchor w -pady {0 5}
+    ttk::button $w.content.openai.load -text "Load Models" \
+        -command [list ::auto_comment::loadModels $w.content.openai.model openai]
+    pack $w.content.openai.load -anchor w -pady {0 5}
+    ttk::label $w.content.openai.hint -justify left -wraplength 420 -text \
+        "DeepSeek, Gemini's compatibility endpoint, vLLM, a gateway: anything that speaks /v1/chat/completions."
+    pack $w.content.openai.hint -anchor w
 
     # --- Gemini section ---
     ttk::labelframe $w.content.gemini -text "Google Gemini" -padding 10
@@ -402,6 +474,7 @@ proc ::auto_comment::configureApiKey {} {
     bind $w <Return> "destroy $w"
     bind $w <Escape> "destroy $w"
 
+    ::auto_comment::syncProviderSections $w
     ::auto_comment::fitWindow $w
 }
 
@@ -831,19 +904,59 @@ proc ::auto_comment::fetchDeepSeekModels {} {
 #   Populates a model combobox with the current models from the given provider.
 #   Warns the user if the fetch fails (e.g. missing API key or no network).
 #
+# ::auto_comment::fetchUrlModels
+#   Ask an endpoint what models it has. /v1/models first (OpenAI-compatible),
+#   then Ollama's /api/tags for a server that only speaks the native API. Model
+#   lists include embedding models, so the caller must let the user choose.
+proc ::auto_comment::fetchUrlModels {base key} {
+    set base [string trimright $base /]
+    if {$base eq ""} { return {} }
+    set ids {}
+    foreach {path re} [list "/v1/models" {"id"\s*:\s*"([^"]+)"} \
+                              "/api/tags"  {"name"\s*:\s*"([^"]+)"}] {
+        set cmd [list curl -s --max-time 10 -H {Accept: application/json}]
+        if {$key ne ""} { lappend cmd -H "Authorization: Bearer $key" }
+        lappend cmd "$base$path"
+        set raw ""
+        if {[catch {exec {*}$cmd 2>@1} raw]} { continue }
+        foreach {all id} [regexp -all -inline $re $raw] { lappend ids $id }
+        if {[llength $ids]} { break }
+    }
+    return [lsort -unique $ids]
+}
+
 proc ::auto_comment::loadModels {combo provider} {
-    if {$provider eq "deepseek"} {
-        set label "DeepSeek"
-        set models [::auto_comment::fetchDeepSeekModels]
-    } else {
-        set label "Gemini"
-        set models [::auto_comment::fetchGeminiModels]
+    switch -- $provider {
+        deepseek {
+            set label "DeepSeek"
+            set models [::auto_comment::fetchDeepSeekModels]
+        }
+        local {
+            set label "the local server"
+            set models [::auto_comment::fetchUrlModels $::auto_comment::localUrl ""]
+        }
+        openai {
+            set label "the endpoint"
+            set models [::auto_comment::fetchUrlModels $::auto_comment::openaiUrl $::auto_comment::openaiKey]
+        }
+        default {
+            set label "Gemini"
+            set models [::auto_comment::fetchGeminiModels]
+        }
     }
     if {[llength $models] > 0} {
         $combo configure -values $models
+        # an empty model field is why a review would say "no model selected":
+        # take the first one the endpoint offers so that cannot happen silently
+        if {[$combo cget -textvariable] ne ""} {
+            set var [$combo cget -textvariable]
+            if {![info exists $var] || [set $var] eq ""} {
+                set $var [lindex $models 0]
+            }
+        }
     } else {
         tk_messageBox -icon warning -type ok -title "Auto Comment" \
-            -message "Could not retrieve the $label model list.\n\nCheck your API key and internet connection." \
+            -message "Could not retrieve a model list from $label.\n\nCheck the endpoint, the API key and the internet connection." \
             -parent .
     }
 }
