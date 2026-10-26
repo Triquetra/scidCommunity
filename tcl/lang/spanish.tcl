@@ -941,6 +941,8 @@ menuText S PgnHelp "Ayuda" 1
 menuText S PgnHelpPgn "Ayuda de PGN" 9
 menuText S PgnHelpIndex "Índice de la ayuda" 0
 translate S PgnWindowTitle {Planilla - partida %u}
+translate S CopyFen {Copiar FEN}
+translate S CopyFenAfter {Copiar FEN después de %s}
 
 # Notation pane (PGN window) button tooltips:
 translate S TBLookupTooltip {Búsqueda de bases de datos en Lichess}

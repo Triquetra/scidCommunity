@@ -860,6 +860,8 @@ menuText M PgnHelp "帮助" 0
 menuText M PgnHelpPgn "PGN Help" 0
 menuText M PgnHelpIndex "索引" 0
 translate M PgnWindowTitle {Notation - game %u}
+translate M CopyFen {复制 FEN}
+translate M CopyFenAfter {在 %s 之后复制 FEN}
 
 # Notation pane (PGN window) button tooltips:
 translate M TBLookupTooltip {Lichess 上的表库查找}

@@ -925,6 +925,8 @@ menuText A PgnHelp "ヘルプ" 0
 menuText A PgnHelpPgn "PGN ヘルプ" 0
 menuText A PgnHelpIndex "索引" 0
 translate A PgnWindowTitle {表記 - ゲーム %u}
+translate A CopyFen {FENをコピーする}
+translate A CopyFenAfter {%s の後に FEN をコピーします}
 
 # Notation pane (PGN window) button tooltips:
 translate A TBLookupTooltip {Lichess でのテーブルベース ルックアップ}

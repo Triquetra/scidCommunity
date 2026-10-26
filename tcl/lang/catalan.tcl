@@ -910,6 +910,8 @@ menuText K PgnHelp "Ajut" 1
 menuText K PgnHelpPgn "Ajut de PGN" 9
 menuText K PgnHelpIndex "Índex de l'ajut" 0
 translate K PgnWindowTitle {Planilla - partida %u}
+translate K CopyFen {Copia FEN}
+translate K CopyFenAfter {Copieu FEN després de %s}
 
 # Notation pane (PGN window) button tooltips:
 translate K TBLookupTooltip {Cerca de base de taula a Lichess}

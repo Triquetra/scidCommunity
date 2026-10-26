@@ -884,6 +884,8 @@ menuText b PgnHelp "সাহায্য" 0
 menuText b PgnHelpPgn "PGN সাহায্য" 0
 menuText b PgnHelpIndex "সূচক" 0
 translate b PgnWindowTitle {স্বরলিপি - খেলা %u}
+translate b CopyFen {FEN অনুলিপি করুন}
+translate b CopyFenAfter {%s পরে FEN কপি করুন}
 
 # Notation pane (PGN window) button tooltips:
 translate b TBLookupTooltip {লিচেসে টেবিলবেস লুকআপ}

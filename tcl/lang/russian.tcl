@@ -891,6 +891,8 @@ menuText R PgnHelp "Помощь" 0
 menuText R PgnHelpPgn "Помощь по PGN" 0
 menuText R PgnHelpIndex "Индекс" 0
 translate R PgnWindowTitle {Нотация - партия %u}
+translate R CopyFen {Копировать FEN}
+translate R CopyFenAfter {Скопировать FEN после %s}
 
 # Notation pane (PGN window) button tooltips:
 translate R TBLookupTooltip {Поиск в базе таблиц на Lichess}

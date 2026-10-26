@@ -884,6 +884,8 @@ menuText Z PgnHelp "Msaada" 0
 menuText Z PgnHelpPgn "Msaada wa PGN" 0
 menuText Z PgnHelpIndex "Kielezo" 0
 translate Z PgnWindowTitle {Nukuu - mchezo %u}
+translate Z CopyFen {Nakili FEN}
+translate Z CopyFenAfter {Nakili FEN baada ya %s}
 
 # Notation pane (PGN window) button tooltips:
 translate Z TBLookupTooltip {Utaftaji wa Jedwali kwenye Lichess}

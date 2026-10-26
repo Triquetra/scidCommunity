@@ -925,6 +925,8 @@ menuText L PgnHelp "Ajutor" 0
 menuText L PgnHelpPgn "Ajutor PGN" 0
 menuText L PgnHelpIndex "Index" 0
 translate L PgnWindowTitle {Notație - joc %u}
+translate L CopyFen {Copiați FEN}
+translate L CopyFenAfter {Copiați FEN după %s}
 
 # Notation pane (PGN window) button tooltips:
 translate L TBLookupTooltip {Căutare pe bază de tabele pe Lichess}

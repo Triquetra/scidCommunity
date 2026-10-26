@@ -897,6 +897,8 @@ menuText B PgnHelp "Ajuda" 0
 menuText B PgnHelpPgn "Ajuda PGN" 0
 menuText B PgnHelpIndex "Índice" 0
 translate B PgnWindowTitle {Notação do Jogo - jogo %u} 
+translate B CopyFen {Copiar FEN}
+translate B CopyFenAfter {Copie FEN após %s}
 
 # Notation pane (PGN window) button tooltips:
 translate B TBLookupTooltip {Pesquisa de base de tabela no Lichess}

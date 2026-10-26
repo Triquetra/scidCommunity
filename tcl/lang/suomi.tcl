@@ -923,6 +923,8 @@ menuText U PgnHelp "Ohje" 0
 menuText U PgnHelpPgn "PGN-ohje" 0
 menuText U PgnHelpIndex "Aakkosellinen" 0
 translate U PgnWindowTitle {Siirrot - peli %u}
+translate U CopyFen {Kopioi FEN}
+translate U CopyFenAfter {Kopioi FEN %s jälkeen}
 
 # Notation pane (PGN window) button tooltips:
 translate U TBLookupTooltip {Tablebase-haku Lichessissä}

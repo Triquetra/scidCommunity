@@ -889,6 +889,8 @@ menuText C PgnHelp "Npovda" 0
 menuText C PgnHelpPgn "Npovda - Okno PGN " 16
 menuText C PgnHelpIndex "Index npovdy" 0
 translate C PgnWindowTitle {Zpis partie - partie %u}
+translate C CopyFen {Zkopírujte FEN}
+translate C CopyFenAfter {Kopírovat FEN po %s}
 
 # Notation pane (PGN window) button tooltips:
 translate C TBLookupTooltip {Tablebase Lookup na Lichess}

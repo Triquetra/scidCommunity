@@ -895,6 +895,8 @@ menuText I PgnHelp "Aiuto" 0
 menuText I PgnHelpPgn "Aiuto PGN" 0
 menuText I PgnHelpIndex "Indice" 0
 translate I PgnWindowTitle {Notazione - partita %u}
+translate I CopyFen {Copia FEN}
+translate I CopyFenAfter {Copia FEN dopo %s}
 
 # Notation pane (PGN window) button tooltips:
 translate I TBLookupTooltip {Ricerca nella base tabella su Lichess}

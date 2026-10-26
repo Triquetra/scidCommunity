@@ -925,6 +925,8 @@ menuText g PgnHelp "Помощ" 0
 menuText g PgnHelpPgn "Помощ за PGN" 0
 menuText g PgnHelpIndex "Индекс" 0
 translate g PgnWindowTitle {Нотация - игра %u}
+translate g CopyFen {Копирайте FEN}
+translate g CopyFenAfter {Копирайте FEN след %s}
 
 # Notation pane (PGN window) button tooltips:
 translate g TBLookupTooltip {Търсене в таблична база на Lichess}

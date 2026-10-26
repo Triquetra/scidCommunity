@@ -892,6 +892,8 @@ menuText H PgnHelp "Segítség" 0
 menuText H PgnHelpPgn "Segítség PGN-hez" 9
 menuText H PgnHelpIndex "Tartalom" 0
 translate H PgnWindowTitle {Játszmajegyzés - %u. játszma}
+translate H CopyFen {Másolja a FEN-t}
+translate H CopyFenAfter {FEN másolása %s után}
 
 # Notation pane (PGN window) button tooltips:
 translate H TBLookupTooltip {Táblázatbázis keresés a Lichess-en}

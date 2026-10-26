@@ -888,6 +888,8 @@ menuText T PgnHelp "Yardım" 0
 menuText T PgnHelpPgn "PGN Yardımı" 0
 menuText T PgnHelpIndex "Dizin" 0
 translate T PgnWindowTitle {Gösterim - oyun %u}
+translate T CopyFen {FEN'i kopyala}
+translate T CopyFenAfter {%s'den sonra FEN'i kopyala}
 
 # Notation pane (PGN window) button tooltips:
 translate T TBLookupTooltip {Lichess'te Tablo Tabanı Araması}
