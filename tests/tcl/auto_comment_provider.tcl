@@ -145,6 +145,19 @@ foreach {label url want} {
     checkEq "models for $label" [::auto_comment::modelsUrl $url] $want
 }
 
+puts "\n== model-list lookup targets =="
+set t1 [::auto_comment::modelListTargets "https://api.deepseek.com" ]
+checkEq "two targets, url and regex each" [llength $t1] 4
+checkEq "first target is /v1/models" [lindex $t1 0] {https://api.deepseek.com/v1/models}
+checkEq "its regex asks for ids" [lindex $t1 1] {"id"\s*:\s*"([^"]+)"}
+checkEq "second target is the ollama path" [lindex $t1 2] {https://api.deepseek.com/api/tags}
+checkEq "single target when a URL is given" \
+    [llength [::auto_comment::modelListTargets "" "https://opencode.ai/inference/v1/models"]] 2
+checkEq "the explicit URL is used verbatim" \
+    [lindex [::auto_comment::modelListTargets "" "https://opencode.ai/inference/v1/models"] 0] \
+    {https://opencode.ai/inference/v1/models}
+checkEq "no base and no URL means nothing to try" [::auto_comment::modelListTargets ""] {}
+
 # -------------------------------------------------------------------- request --
 puts "\n== request bodies =="
 set ::auto_comment::provider opencode

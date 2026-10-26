@@ -1148,25 +1148,33 @@ proc ::auto_comment::fetchDeepSeekModels {} {
 #   Populates a model combobox with the current models from the given provider.
 #   Warns the user if the fetch fails (e.g. missing API key or no network).
 #
+# ::auto_comment::modelListTargets
+#   Where to look for a model list, as a flat list of alternating url and regex
+#   pairs. Split out of fetchUrlModels so the shape can be checked without a
+#   network: "foreach {target re}" flattens, so each field is its own element.
+proc ::auto_comment::modelListTargets {base {modelsUrl ""}} {
+    # A flat list of alternating url and regex: "foreach {target re}" reads it,
+    # so lappend each field separately. A list of two-element lists would make
+    # the whole pair one target and the request would go to a nonsense URL.
+    if {$modelsUrl ne ""} {
+        # An explicit URL wins: a gateway's model list is not always a child of
+        # its chat root (OpenCode serves .../inference/v1/models while chat lives
+        # under .../inference/openai/v1/...).
+        return [list $modelsUrl {"id"\s*:\s*"([^"]+)"}]
+    }
+    set base [::auto_comment::baseUrl $base]
+    if {$base eq ""} { return {} }
+    return [list [::auto_comment::modelsUrl $base] {"id"\s*:\s*"([^"]+)"} \
+                 "$base/api/tags"              {"name"\s*:\s*"([^"]+)"}]
+}
+
 # ::auto_comment::fetchUrlModels
 #   Ask an endpoint what models it has. /v1/models first (OpenAI-compatible),
 #   then Ollama's /api/tags for a server that only speaks the native API. Model
 #   lists include embedding models, so the caller must let the user choose.
 proc ::auto_comment::fetchUrlModels {base key {modelsUrl ""}} {
-    set base [::auto_comment::baseUrl $base]
-    if {$base eq "" && $modelsUrl eq ""} { return {} }
-    # An explicit URL wins: a gateway's model list is not always a child of its
-    # chat root (OpenCode serves .../inference/v1/models, while chat lives under
-    # .../inference/openai/v1/...).
-    set tries {}
-    if {$modelsUrl ne ""} {
-        lappend tries [list $modelsUrl {"id"\s*:\s*"([^"]+)"}]
-    } else {
-        lappend tries [list [::auto_comment::modelsUrl $base] {"id"\s*:\s*"([^"]+)"}] \
-                      [list "$base/api/tags" {"name"\s*:\s*"([^"]+)"}]
-    }
     set ids {}
-    foreach {target re} $tries {
+    foreach {target re} [::auto_comment::modelListTargets $base $modelsUrl] {
         set cmd [list curl -s --max-time 10 -H {Accept: application/json}]
         if {$key ne ""} {
             # the key only rides an https (or loopback) connection
