@@ -325,15 +325,25 @@ proc ::facts::repetitionLine {count} {
 # so the caller can say "not available" instead of guessing.
 proc ::facts::repFromMainline {fen ply} {
     if {[llength [info commands sc_game]] == 0} { return "" }
+    # sc_game UCI_mainLine returns a Tcl list whose first element is the whole
+    # header ("position startpos moves" or "position fen <fen> moves") and whose
+    # remaining elements are the moves. Splitting it as a string breaks that
+    # first element into tokens, so ["moves"] was never found and the count was
+    # always "not available".
     if {[catch { set ml [sc_game UCI_mainLine] }]} { return "" }
-    set parts [split $ml]
-    set idx [lsearch -exact $parts "moves"]
-    if {$idx < 0} { return "" }
-    set startFen {rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1}
-    if {[lindex $parts 1] eq "fen"} {
-        set startFen [join [lrange $parts 2 [expr {$idx - 1}]] " "]
+    if {![llength $ml]} { return "" }
+    # A null move in the game re-emits a header in the middle of the list; the
+    # replay below stops on it (makeMove rejects it) and reports "not available"
+    # rather than counting plies that do not exist on the board.
+    set header [lindex $ml 0]
+    set moves [lrange $ml 1 end]
+    if {[regexp {^position fen (.+) moves$} $header -> startFen]} {
+        # played from a set-up board
+    } elseif {$header eq "position startpos moves"} {
+        set startFen {rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1}
+    } else {
+        return ""
     }
-    set moves [lrange $parts [expr {$idx + 1}] end]
     set pos [::chessboard::fromFen $startFen]
     set seen [dict create]
     dict incr seen [sig [::chessboard::toFen $pos]]
@@ -391,6 +401,9 @@ proc ::facts::materialLine {fen} {
     }
     set gone {}
     foreach {k n full} {q 1 queen r 2 rook b 2 bishop n 2 knight p 8 pawn} {
+        # More than a full set of a type means a promotion, and then the other
+        # side's deficit of that type proves nothing about a capture.
+        if {($w > $b ? $onBoardW($k) : $onBoardB($k)) > $n} { continue }
         # missing = full set minus what is on the board, so the trailing side's
         # surplus loss for this type is what the leader still has.
         set short [expr {$w > $b ? $onBoardW($k) - $onBoardB($k)
@@ -478,17 +491,6 @@ proc ::facts::mobility {fen color} {
     return $out
 }
 
-proc ::facts::castled {fen color} {
-    set pos [::chessboard::fromFen $fen]
-    set board [dict get $pos board]
-    set kingSq [expr {$color eq "w" ? 6 : 62}]
-    set kingSq2 [expr {$color eq "w" ? 2 : 58}]
-    foreach sq [list $kingSq $kingSq2] {
-        if {[string tolower [lindex $board $sq]] eq "k" && [::chessboard::colorOf [lindex $board $sq]] eq $color} { return 1 }
-    }
-    return 0
-}
-
 # When material and the engine disagree about who is better, say so and say
 # why: a two-pawn lead that the engine scores against you is development and
 # king safety, and that is exactly the kind of thing a reader cannot see from
@@ -507,19 +509,14 @@ proc ::facts::materialEvalNote {m} {
     set evWho [expr {$ea > 0 ? "White" : "Black"}]
     set dw [development [dict get $m fen_after] w]
     set db [development [dict get $m fen_after] b]
-    set cw [castled [dict get $m fen_after] w]
-    set cb [castled [dict get $m fen_after] b]
     set why {}
     if {$dw != $db} {
         set ahead [expr {$dw > $db ? "White" : "Black"}]
         set gap [expr {abs($dw - $db)}]
         lappend why "$ahead has $gap more pieces developed"
     }
-    if {$cw != $cb} {
-        set done [expr {$cw ? "White" : "Black"}]
-        set not [expr {$cw ? "Black" : "White"}]
-        lappend why "$done has castled while $not has not"
-    }
+    # No castling clause: a king on g1 may have walked there after losing the
+    # right to castle, and a FEN cannot tell the two apart.
     # Activity: the part development and castling do not cover.
     if {[dict exists $m fen_after]} {
         set mw [mobility [dict get $m fen_after] w]
@@ -563,8 +560,15 @@ proc ::facts::captureNet {fen uci} {
                 set gained 1
             }
         }
+        # A promotion is material gained even though nothing was captured, and
+        # SEE values the promoted piece when it is taken back. The pawn leaves
+        # the board, the promoted piece arrives: count the difference.
+        set promoted 0
+        if {[string length $uci] > 4} {
+            set promoted [expr {[valueOf [string index $uci 4]] - [valueOf p]}]
+        }
         set after [::chessboard::makeMove $before $uci]
-        set net [expr {$gained - [::chessboard::see $after $to]}]
+        set net [expr {$gained + $promoted - [::chessboard::see $after $to]}]
     }]} {}
     return $net
 }
@@ -1062,10 +1066,15 @@ proc ::facts::forMove {m} {
         # ply counts the move being commented, one-based (phaseMoveLine derives
         # the move number from it), so the position before it is ply-1 plies
         # into the game. Replaying $ply would reach the position after the move,
-        # whose side to move never matches, and the line was silently dropped.
-        set ply [expr {[dict exists $m ply] ? [dict get $m ply] : 0}]
-        set rc [repFromMainline $fb [expr {$ply > 0 ? $ply - 1 : 0}]]
-        lappend ruleLines [repetitionLine $rc]
+        # whose side to move never matches. Without ply there is no way to know
+        # where the position is in the game, and replaying zero moves would
+        # answer for the start position instead.
+        if {[dict exists $m ply] && [dict get $m ply] > 0} {
+            set ply [dict get $m ply]
+            lappend ruleLines [repetitionLine [repFromMainline $fb [expr {$ply - 1}]]]
+        } else {
+            lappend ruleLines [repetitionLine ""]
+        }
     }
     foreach l $ruleLines { if {$l ne ""} { lappend lines $l } }
     # (rule lines are all non-empty by construction now)
@@ -1080,34 +1089,83 @@ proc ::facts::forMove {m} {
 # that says "the rook was taken" when the sequence was a fork winning the
 # exchange teaches the wrong lesson: the capture was not the point.
 
-proc ::facts::_swingWord {n} {
-    switch -- $n {
-        1 { return "a pawn" }
-        2 { return "the exchange (a rook for a knight)" }
-        3 { return "a piece" }
-        5 { return "a rook" }
-        9 { return "a queen" }
+# Pieces per type and side, as {w,q 1 w,r 2 ... b,p 8}: the raw material of a
+# position, from which a swing can name what actually changed hands.
+proc ::facts::pieceCounts {fen} {
+    array set c {w,q 0 w,r 0 w,b 0 w,n 0 w,p 0 b,q 0 b,r 0 b,b 0 b,n 0 b,p 0}
+    foreach p [dict get [::chessboard::fromFen $fen] board] {
+        if {$p eq ""} continue
+        set k [string tolower $p]
+        set side [expr {[string is upper $p] ? "w" : "b"}]
+        if {[info exists c($side,$k)]} { incr c($side,$k) }
     }
-    return "$n points of material"
+    return [array get c]
 }
 
-# Net material won and lost between two positions, from the point of view of the
-# side that came out ahead. Returns "" when nothing changed.
+proc ::facts::_countPhrase {pairs} {
+    set words {}
+    foreach {k n} $pairs {
+        set name [pieceName $k]
+        if {$n == 1} { lappend words "a $name" } else { lappend words "$n ${name}s" }
+    }
+    if {![llength $words]} { return "" }
+    if {[llength $words] == 1} { return [lindex $words 0] }
+    return "[join [lrange $words 0 end-1] {, }] and [lindex $words end]"
+}
+
+# Net material won and lost between two positions, from the point of view of
+# the side that came out ahead. The value difference is always reported; the
+# pieces are named only from the counts, because a two-point swing is not
+# necessarily a rook for a knight - it can be two pawns.
 proc ::facts::materialSwing {fenA fenB} {
-    set a ""
-    set b ""
-    catch { lassign [::chessboard::material [::chessboard::fromFen $fenA]] wa ba ; set a [list $wa $ba] }
-    catch { lassign [::chessboard::material [::chessboard::fromFen $fenB]] wb bb ; set b [list $wb $bb] }
-    if {$a eq "" || $b eq ""} { return "" }
-    lassign $a wa ba
-    lassign $b wb bb
-    set lostW [expr {$wa - $wb}]
-    set lostB [expr {$ba - $bb}]
-    set delta [expr {$lostB - $lostW}]
+    # The value difference comes from total material, which a promotion changes
+    # correctly (a pawn becomes a queen); the piece lists below only describe
+    # what left the board.
+    set wa 0 ; set ba 0 ; set wb 0 ; set bb 0
+    set ok 1
+    if {[catch {
+        lassign [::chessboard::material [::chessboard::fromFen $fenA]] wa ba
+        lassign [::chessboard::material [::chessboard::fromFen $fenB]] wb bb
+    }]} { set ok 0 }
+    if {!$ok} { return "" }
+    set delta [expr {($ba - $bb) - ($wa - $wb)}]
     if {$delta == 0} { return "" }
+
+    set a "" ; set b ""
+    catch { set a [pieceCounts $fenA] }
+    catch { set b [pieceCounts $fenB] }
+    if {$a eq "" || $b eq ""} { return "" }
+    array set A $a ; array set B $b
+
+    set lostW {} ; set lostB {} ; set appeared 0
+    foreach k {q r b n p} {
+        set d [expr {$A(w,$k) - $B(w,$k)}]
+        if {$d > 0} { lappend lostW $k $d } elseif {$d < 0} { set appeared 1 }
+        set d [expr {$A(b,$k) - $B(b,$k)}]
+        if {$d > 0} { lappend lostB $k $d } elseif {$d < 0} { set appeared 1 }
+    }
     set side [expr {$delta > 0 ? "White" : "Black"}]
-    set n [expr {abs($delta)}]
-    return "$side won [_swingWord $n]"
+    set points [expr {abs($delta)}]
+
+    # A piece that appeared where a pawn used to be was promoted, not won, so
+    # "won X for Y" would name the wrong pieces; the points are still right.
+    if {$appeared} {
+        set word [expr {$points == 1 ? "point" : "points"}]
+        return "$side came out $points $word of material ahead"
+    }
+
+    set won  [expr {$delta > 0 ? $lostB : $lostW}]
+    set gave [expr {$delta > 0 ? $lostW : $lostB}]
+
+    # A rook for a knight is worth exactly two points and is the common shape,
+    # but name it only when the counts show that trade.
+    if {[llength $won] == 2 && [llength $gave] == 2 &&
+        [lindex $won 0] eq "r" && [lindex $gave 0] eq "n" &&
+        [lindex $won 1] == 1 && [lindex $gave 1] == 1} {
+        return "$side won the exchange (a rook for a knight)"
+    }
+    if {![llength $gave]} { return "$side won [_countPhrase $won]" }
+    return "$side won [_countPhrase $won] for [_countPhrase $gave]"
 }
 
 # A fork in its useful sense: the move gives check AND attacks another piece
