@@ -18,7 +18,7 @@ namespace eval ::auto_comment {
     # with no model should behave exactly like one whose owner has not chosen a
     # model yet. Nothing is sent anywhere until someone picks a provider, and an
     # existing install keeps whatever it already stored.
-    options.store ::auto_comment::provider "gemini"
+    options.store ::auto_comment::provider "none"
 
     # Local (Ollama-style) settings
     options.store ::auto_comment::localUrl "http://localhost:11434"
