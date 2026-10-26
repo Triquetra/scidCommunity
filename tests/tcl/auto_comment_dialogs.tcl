@@ -99,8 +99,40 @@ check "opencode section offers models" \
     [expr {[llength [$w.content.opencode.model cget -values]] > 0}] \
     [$w.content.opencode.model cget -values]
 
+# ------------------------------------ moving an existing setup to a channel --
+# A user who has a Gemini key stored must be able to pick another provider
+# without losing it: the provider list is the path, and the keys are per
+# provider.
+puts "\n== an existing Gemini setup can move to another channel =="
+set ::auto_comment::provider gemini
+set ::auto_comment::apiKey "stored-gemini-key"
+set ::auto_comment::openaiKey ""
+set ::auto_comment::openaiModel ""
+::auto_comment::syncProviderSections $w
+update
+checkEq "it starts on the stored provider" [visibleSections $w] {gemini}
+
+set ::auto_comment::provider openai
+event generate $w.content.provider <<ComboboxSelected>>
+update
+checkEq "picking openai shows the openai section" [visibleSections $w] {openai}
+
+set ::auto_comment::openaiUrl "https://api.deepseek.com"
+set ::auto_comment::openaiKey "new-key"
+set ::auto_comment::openaiModel "glm-5.3-flash"
+set ::savedCount 0
+set ::saveResult 1
+::auto_comment::saveSettings $w
+update
+check "the dialog closed" [expr {![winfo exists $w]}]
+checkEq "the provider that was saved is the new one" $::auto_comment::provider openai
+checkEq "the Gemini key is still there" $::auto_comment::apiKey {stored-gemini-key}
+checkEq "the new channel kept its own key" $::auto_comment::openaiKey {new-key}
+
 # ---------------------------------------------------------------- saving ------
 puts "\n== OK saves and closes =="
+::auto_comment::configureApiKey
+update
 set ::auto_comment::provider opencode
 set ::auto_comment::opencodeKey "secret"
 set ::savedCount 0
@@ -161,6 +193,12 @@ if {[catch {::analysis_auto_comment::batch_generate ""} err]} {
     ::auto_comment::syncModelCombo $bw.content.model
     checkEq "no model means an empty suggestion list" \
         [$bw.content.model cget -values] {}
+    checkEq "and no model name is shown" [$bw.content.model get] {}
+
+    set ::auto_comment::provider gemini
+    ::auto_comment::syncModelCombo $bw.content.model
+    checkEq "gemini still shows its own model" \
+        [$bw.content.model get] $::auto_comment::model
     destroy $bw
 }
 

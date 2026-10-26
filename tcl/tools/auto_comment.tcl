@@ -42,6 +42,11 @@ namespace eval ::auto_comment {
     variable opencodeBase      "https://opencode.ai/inference/openai"
     variable opencodeModelsUrl "https://opencode.ai/inference/v1/models"
 
+    # Scratch model for "none": the dialogs bind their model field to one
+    # variable per provider, and without this the empty provider kept showing
+    # Gemini's model name next to "LLM Provider: none". Never persisted.
+    variable noModel ""
+
     # Gemini settings
     options.store ::auto_comment::apiKey ""
     options.store ::auto_comment::model "gemini-3.6-flash"
@@ -503,12 +508,16 @@ proc ::auto_comment::modelChoices {provider} {
 #
 proc ::auto_comment::syncModelCombo {combo} {
     if {![winfo exists $combo]} { return }
+    # "none" - and any value a hand-edited options file might hold - binds to a
+    # scratch variable, so the model field stays empty instead of showing
+    # Gemini's model beside "LLM Provider: none".
     switch -- $::auto_comment::provider {
         local    { set var ::auto_comment::localModel }
         openai   { set var ::auto_comment::openaiModel }
         opencode { set var ::auto_comment::opencodeModel }
+        gemini   { set var ::auto_comment::model }
         deepseek { set var ::auto_comment::deepseekModel }
-        default  { set var ::auto_comment::model }
+        default  { set var ::auto_comment::noModel }
     }
     $combo configure -textvariable $var \
         -values [::auto_comment::modelChoices $::auto_comment::provider]
@@ -581,7 +590,7 @@ proc ::auto_comment::configureApiKey {} {
     pack $w.content -fill both -expand 1
 
     ttk::label $w.content.info -text \
-        "Configure your LLM provider and API key(s).\nKeys are stored locally on your machine only.\nOK saves these settings to your options file." \
+        "Configure your LLM provider and API key(s).\nEach provider keeps its own key and model, so you can pick a different one above at any time without losing the settings you already have.\nKeys are stored locally on your machine only.\nOK saves these settings to your options file." \
         -wraplength 420 -justify left
     pack $w.content.info -anchor w -pady {0 10}
 
