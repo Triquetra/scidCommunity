@@ -147,6 +147,7 @@ sudo make install
 
 - **[Hugh Whelan](https://github.com/whelanh)** — maintainer
 - **[Venkat Krishnamurthy](https://github.com/kayvee42)** — focuses on the macOS version (build, packaging and platform fixes) and redesigned the PGN Window buttons
+- **[David Crandall](https://github.com/Triquetra)** — AI provider channels for Game Comment (local, OpenAI-compatible and OpenCode models) and the game review feature in progress
 
 
 ### Acknowledgements
