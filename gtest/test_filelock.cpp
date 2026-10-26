@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <iterator>
 #include <string>
 
 #ifndef _WIN32
@@ -56,6 +57,11 @@ void writeFile(const std::filesystem::path& path, std::string_view text) {
 	file << text;
 }
 
+std::string readFile(const std::filesystem::path& path) {
+	std::ifstream file(path, std::ios::binary);
+	return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+}
+
 } // namespace
 
 TEST(FileLock, acquireTakesTheLockAndReleaseFreesIt) {
@@ -75,6 +81,10 @@ TEST(FileLock, acquireTakesTheLockAndReleaseFreesIt) {
 
 	first.release();
 	EXPECT_FALSE(first.held());
+	// Giving the database up removes the file, so an older Scid - which treats
+	// the file's existence as the lock - can open it again.
+	EXPECT_FALSE(std::filesystem::exists(lockPath));
+
 	EXPECT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, second));
 	EXPECT_TRUE(second.held());
 }
@@ -103,28 +113,40 @@ TEST(FileLock, movingTheLockKeepsIt) {
 	EXPECT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, other));
 }
 
-TEST(FileLock, aLeftoverLockFileDoesNotBlock) {
+TEST(FileLock, aCrashedLockFileIsReclaimed) {
 	TempDir dir;
+	const auto lockPath = dir / "db.si4.lock";
 
-	// What an older Scid wrote, and what a crash or a kill can leave: the file
-	// is there and nobody holds it. Existence no longer means anything.
-	const std::string_view leftovers[] = {
-	    std::string_view(),
-	    std::string_view("scid-lock v1\npid=4294967294\nhost=some-old-machine\n"),
-	    std::string_view("garbage\n"),
+	// What a crash or a kill leaves behind: this version's marker, and nobody
+	// holding it. The kernel lock is free, so the database can be opened.
+	writeFile(lockPath, filelock::detail::kMarker);
+
+	filelock::Lock lock;
+	EXPECT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, lock));
+	EXPECT_TRUE(lock.held());
+
+	lock.release();
+	EXPECT_FALSE(std::filesystem::exists(lockPath));
+}
+
+TEST(FileLock, anOlderVersionsLockFileIsRespected) {
+	TempDir dir;
+	const std::string_view old[] = {
+	    std::string_view(),          // what an older Scid creates: empty
+	    std::string_view("garbage"), // something that is not our marker
 	};
 	int n = 0;
-	for (const auto record : leftovers) {
-		const auto lockPath = dir / ("db" + std::to_string(n++) + ".si4.lock");
-		writeFile(lockPath, record);
+	for (const auto content : old) {
+		const auto lockPath = dir / ("old" + std::to_string(n++) + ".si4.lock");
+		writeFile(lockPath, content);
 
+		// An older Scid holds a database by leaving the file there, so the
+		// file could mean a running old version; nothing here can tell that
+		// apart from one that crashed, so the old answer stands.
 		filelock::Lock lock;
-		EXPECT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, lock));
-
-		// The file stays on disk after the database is closed, on purpose:
-		// removing it is the step that cannot be made safe.
-		lock.release();
-		EXPECT_TRUE(std::filesystem::exists(lockPath));
+		EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath, lock));
+		EXPECT_FALSE(lock.held());
+		EXPECT_EQ(std::string(content), readFile(lockPath)); // left untouched
 	}
 }
 
@@ -212,8 +234,8 @@ TEST(FileLock, scidBaseHoldsTheLockWhileTheDatabaseIsOpen) {
 	EXPECT_EQ(ERROR_FileInUse, other.open("SCID5", FMODE_Both, dbPath.string().c_str()));
 
 	dbase.Close();
-	// The lock file is not removed on close; it must not be in the way either.
-	EXPECT_TRUE(std::filesystem::exists(lockPath));
+	// Closing removes the file, which is what keeps a downgrade working.
+	EXPECT_FALSE(std::filesystem::exists(lockPath));
 
 	ASSERT_EQ(OK, other.open("SCID5", FMODE_Both, dbPath.string().c_str()));
 	other.Close();
