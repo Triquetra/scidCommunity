@@ -146,12 +146,84 @@ proc ::auto_comment::providerReady {} {
     return "unknown provider: $::auto_comment::provider"
 }
 
+# ::auto_comment::baseUrl
+#   Normalise an API base the user typed. Both forms of the same endpoint are
+#   accepted - "https://api.openai.com" and "https://api.openai.com/v1" - so a
+#   caller can always append its own "/v1/..." path without doubling the version
+#   segment. Trailing slashes are dropped too.
+proc ::auto_comment::baseUrl {url} {
+    set base [string trim [string trimright $url /]]
+    regsub -nocase {/v1$} $base "" base
+    return [string trimright $base /]
+}
+
+# ::auto_comment::urlHost
+#   The host of an http(s) URL, without userinfo, port or brackets. "" when the
+#   string is not an absolute URL.
+proc ::auto_comment::urlHost {url} {
+    if {![regexp -nocase {^[a-z][a-z0-9+.-]*://([^/?#]*)} [string trim $url] -> auth]} {
+        return ""
+    }
+    set auth [string range $auth [expr {[string last "@" $auth] + 1}] end]
+    if {[string match {\[*} $auth]} {
+        return [string range $auth 0 [string first "\]" $auth]]
+    }
+    return [lindex [split $auth ":"] 0]
+}
+
+# ::auto_comment::isLoopbackHost
+#   True for a host that never leaves this machine. vLLM and LM Studio answer on
+#   http://localhost:8000, so loopback is the one place a cleartext request is
+#   not a leak.
+proc ::auto_comment::isLoopbackHost {host} {
+    set h [string tolower [string trim $host]]
+    if {[string match {\[*} $h]} { set h [string range $h 1 end-1] }
+    if {$h in {localhost 127.0.0.1 ::1}} { return 1 }
+    return [regexp {^127\.[0-9]+\.[0-9]+\.[0-9]+$} $h]
+}
+
+# ::auto_comment::cleartextKeyError
+#   "" when it is safe to send an API key to $url, otherwise the reason to
+#   refuse. A key over http to a remote host would go out in clear text; the
+#   endpoint may still be used without a key (the dialog says to leave it empty
+#   when the endpoint needs none).
+proc ::auto_comment::cleartextKeyError {url key} {
+    if {$key eq ""} { return "" }
+    if {[regexp -nocase {^https://} [string trim $url]]} { return "" }
+    if {[::auto_comment::isLoopbackHost [::auto_comment::urlHost $url]]} { return "" }
+    return "refusing to send the API key in clear text to \"$url\": use https, or clear the key when the endpoint needs none"
+}
+
+# ::auto_comment::writeRequestFile
+#   Write a request body to a fresh file and return its path. The name is
+#   unpredictable and the file is created exclusively, so a file or symlink
+#   pre-created in a shared temp directory cannot redirect a write: the request
+#   body carries game data.
+proc ::auto_comment::writeRequestFile {body {tag chat}} {
+    set dir [::auto_comment::getTempDir]
+    for {set attempt 0} {$attempt < 10} {incr attempt} {
+        set name "auto_comment_${tag}_[pid]_[clock seconds]_[clock clicks]_[expr {int(rand() * 1000000)}].json"
+        set path [file join $dir $name]
+        if {[catch {set fd [open $path {WRONLY CREAT EXCL}]}]} { continue }
+        if {[catch {
+            puts -nonewline $fd $body
+            close $fd
+        } err]} {
+            catch {close $fd}
+            catch {file delete -force $path}
+            return -code error $err
+        }
+        return $path
+    }
+    return -code error "cannot create a request file in $dir"
+}
+
 # ::auto_comment::chatEndpoint
 #   The URL a chat request goes to for the selected provider.
 proc ::auto_comment::chatEndpoint {} {
     switch -- $::auto_comment::provider {
-        local  { return "[string trimright $::auto_comment::localUrl /]/api/chat" }
-        openai { return "[string trimright $::auto_comment::openaiUrl /]/v1/chat/completions" }
+        local  { return "[::auto_comment::baseUrl $::auto_comment::localUrl]/api/chat" }
+        openai { return "[::auto_comment::baseUrl $::auto_comment::openaiUrl]/v1/chat/completions" }
     }
     return ""
 }
@@ -179,10 +251,14 @@ proc ::auto_comment::chatBody {prompt {maxTokens 300}} {
 #   The Authorization header value, or "" when the endpoint needs no key. A local
 #   server must never be sent someone's cloud key.
 proc ::auto_comment::chatAuth {} {
-    if {$::auto_comment::provider eq "openai" && $::auto_comment::openaiKey ne ""} {
-        return "Authorization: Bearer $::auto_comment::openaiKey"
+    if {$::auto_comment::provider ne "openai" || $::auto_comment::openaiKey eq ""} {
+        return ""
     }
-    return ""
+    # a key must never ride a cleartext connection to another host
+    if {[::auto_comment::cleartextKeyError $::auto_comment::openaiUrl $::auto_comment::openaiKey] ne ""} {
+        return ""
+    }
+    return "Authorization: Bearer $::auto_comment::openaiKey"
 }
 
 # ::auto_comment::replyText
@@ -239,15 +315,12 @@ proc ::auto_comment::query {prompt {maxTokens 300}} {
 proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
     set reason [::auto_comment::providerReady]
     if {$reason ne ""} { return "ERROR: $reason" }
+    set refuse [::auto_comment::cleartextKeyError $::auto_comment::openaiUrl $::auto_comment::openaiKey]
+    if {$refuse ne ""} { return "ERROR: $refuse" }
     set url [::auto_comment::chatEndpoint]
     set body [::auto_comment::chatBody $prompt $maxTokens]
 
-    set tmpfile [file join [::auto_comment::getTempDir] "auto_comment_chat.json"]
-    if {[catch {
-        set fd [open $tmpfile w]
-        puts -nonewline $fd $body
-        close $fd
-    } err]} {
+    if {[catch {set tmpfile [::auto_comment::writeRequestFile $body chat]} err]} {
         return "ERROR: cannot write the request: $err"
     }
 
@@ -897,8 +970,13 @@ proc ::auto_comment::fetchGeminiModels {} {
 proc ::auto_comment::fetchDeepSeekModels {} {
     set url "$::auto_comment::deepseekApiBase/models"
     set result ""
-    if {[catch {exec curl -s --max-time 15 \
-            -H "Authorization: Bearer $::auto_comment::deepseekApiKey" \
+    set headers {}
+    if {[::auto_comment::cleartextKeyError $url $::auto_comment::deepseekApiKey] eq ""} {
+        lappend headers -H "Authorization: Bearer $::auto_comment::deepseekApiKey"
+    } else {
+        ::auto_comment::logDebug "Auto Comment: not sending the API key to $url: not https"
+    }
+    if {[catch {exec curl -s --max-time 15 {*}$headers \
             $url 2>@1} result]} {
         ::auto_comment::logDebug "Auto Comment: fetchDeepSeekModels curl error: $result"
         return {}
@@ -920,13 +998,20 @@ proc ::auto_comment::fetchDeepSeekModels {} {
 #   then Ollama's /api/tags for a server that only speaks the native API. Model
 #   lists include embedding models, so the caller must let the user choose.
 proc ::auto_comment::fetchUrlModels {base key} {
-    set base [string trimright $base /]
+    set base [::auto_comment::baseUrl $base]
     if {$base eq ""} { return {} }
     set ids {}
     foreach {path re} [list "/v1/models" {"id"\s*:\s*"([^"]+)"} \
                               "/api/tags"  {"name"\s*:\s*"([^"]+)"}] {
         set cmd [list curl -s --max-time 10 -H {Accept: application/json}]
-        if {$key ne ""} { lappend cmd -H "Authorization: Bearer $key" }
+        if {$key ne ""} {
+            # the key only rides an https (or loopback) connection
+            if {[::auto_comment::cleartextKeyError $base $key] eq ""} {
+                lappend cmd -H "Authorization: Bearer $key"
+            } else {
+                ::auto_comment::logDebug "Auto Comment: not sending the API key to $base: not https"
+            }
+        }
         lappend cmd "$base$path"
         set raw ""
         if {[catch {exec {*}$cmd 2>@1} raw]} { continue }
@@ -990,10 +1075,7 @@ proc ::auto_comment::queryGemini {prompt} {
     set escaped [::auto_comment::escapeJson $prompt]
     set jsonBody "{\"contents\":\[{\"parts\":\[{\"text\":\"$escaped\"}\]}\]}"
 
-    set tmpfile [file join [::auto_comment::getTempDir] "auto_comment_req.json"]
-    set fd [open $tmpfile w]
-    puts -nonewline $fd $jsonBody
-    close $fd
+    set tmpfile [::auto_comment::writeRequestFile $jsonBody req]
 
     set result ""
     set ok 0
@@ -1074,10 +1156,7 @@ proc ::auto_comment::queryDeepSeek {prompt} {
     set escapedPrompt [::auto_comment::escapeJson $prompt]
     set jsonBody "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$escapedPrompt\"}\],\"stream\":false,\"temperature\":1.0}"
 
-    set tmpfile [file join [::auto_comment::getTempDir] "auto_comment_req.json"]
-    set fd [open $tmpfile w]
-    puts -nonewline $fd $jsonBody
-    close $fd
+    set tmpfile [::auto_comment::writeRequestFile $jsonBody req]
 
     set result ""
     set ok 0
