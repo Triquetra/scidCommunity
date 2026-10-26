@@ -593,6 +593,7 @@ translate L ErrNotOpen {Aceasta nu este o bază de date deschisă.}
 translate L ErrReadOnly {Această bază de date este doar pentru citire; nu poate fi alterat.}
 translate L ErrSearchInterrupted {Căutarea a fost întreruptă; rezultatele sunt incomplete.}
 translate L ErrNoClockComments {Nu au fost găsite comentarii la ceas [%clk] în acest joc.    Adăugați orele de ceas prin fereastra de comentarii (Ctrl+E) pentru a utiliza această funcție.}
+translate L ErrFileInUse {Eroare: fișierul este deja în uz. Vă rugăm să închideți orice altă aplicație care utilizează această bază de date.}
 
 # Drag and drop
 translate L DndCannotOpenUri {Nu se poate deschide URI}

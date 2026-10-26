@@ -557,6 +557,7 @@ translate P ErrNotOpen {To nie jest otwarta baza.}
 translate P ErrReadOnly {Ta baza jest tylko do odczytu; nie można jej zmienić.}
 translate P ErrSearchInterrupted {Wyszukiwanie przerwano; wyniki są niepełne.}
 translate P ErrNoClockComments {W tej partii nie znaleziono komentarzy zegara [%clk]. Aby użyć tej funkcji, dodaj czasy zegara w oknie komentarzy (Ctrl+E).}
+translate P ErrFileInUse {Błąd: plik jest już używany. Zamknij każdą inną aplikację korzystającą z tej bazy danych.}
 
 # Drag and drop
 translate P DndCannotOpenUri {Nie można otworzyć adresu URI}

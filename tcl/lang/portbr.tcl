@@ -561,6 +561,7 @@ translate B ErrNotOpen {Esta base não está aberta.}
 translate B ErrReadOnly {Esta base  apenas para leitura; não pode ser alterada.} 
 translate B ErrSearchInterrupted {Pesquisa interrompida; os resultados estão incompletos.} 
 translate B ErrNoClockComments {Nenhum comentário de relógio [%clk] foi encontrado neste jogo. Adicione horários de relógio através da janela de comentários (Ctrl+E) para usar este recurso.}
+translate B ErrFileInUse {Erro: o arquivo já está em uso. Feche qualquer outro aplicativo que use este banco de dados.}
 
 # Drag and drop
 translate B DndCannotOpenUri {Não é possível abrir o URI}

@@ -560,6 +560,7 @@ translate H ErrNotOpen {Ez az adatbázis nincs megnyitva.}
 translate H ErrReadOnly {Ez az adatbázis csak olvasható; nem lehet megváltoztatni.}
 translate H ErrSearchInterrupted {Keresés megszakítva; az eredmények hiányosak.}
 translate H ErrNoClockComments {Ebben a játékban nem találhatók [%clk] órára vonatkozó megjegyzések.    A funkció használatához adja hozzá az óraidõt a Megjegyzés ablakon keresztül (Ctrl+E).}
+translate H ErrFileInUse {Hiba: a fájl már használatban van. Kérjük, zárjon be minden más alkalmazást, amely ezt az adatbázist használja.}
 
 # Drag and drop
 translate H DndCannotOpenUri {Az URI nem nyitható meg}

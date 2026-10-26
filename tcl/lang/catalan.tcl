@@ -575,6 +575,7 @@ translate K ErrNotOpen {La base de dades no está oberta.}
 translate K ErrReadOnly {Aquesta base de dades es només de lectura; no pot ser modificada.}
 translate K ErrSearchInterrupted {Recerca aturada; els resultats den ser incomplets.}
 translate K ErrNoClockComments {No s'han trobat comentaris de rellotge [%clk] en aquest joc.    Afegiu hores de rellotge mitjançant la finestra de comentaris (Ctrl+E) per utilitzar aquesta funció.}
+translate K ErrFileInUse {Error: el fitxer ja està en ús. Tanqueu qualsevol altra aplicació que utilitzi aquesta base de dades.}
 
 # Drag and drop
 translate K DndCannotOpenUri {No es pot obrir l'URI}

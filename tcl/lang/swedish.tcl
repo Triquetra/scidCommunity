@@ -563,6 +563,7 @@ translate W ErrNotOpen {Databasen är inte öppen.}
 translate W ErrReadOnly {Databasen är skrivskyddad. Du kan inte ändra i den.}
 translate W ErrSearchInterrupted {Sökningen avbröts; resultatet är inte fullständigt.}
 translate W ErrNoClockComments {Inga [%clk] klockkommentarer hittades i det här spelet.    Lägg till klocktider via kommentarsfönstret (Ctrl+E) för att använda den här funktionen.}
+translate W ErrFileInUse {Fel: filen används redan. Stäng alla andra program som använder denna databas.}
 
 # Drag and drop
 translate W DndCannotOpenUri {Det går inte att öppna URI}

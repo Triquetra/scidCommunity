@@ -588,6 +588,7 @@ translate D ErrReadOnly \
 translate D ErrSearchInterrupted \
   {Suche wurde unterbrochen; Ergebnisse sind unvollständig.}
 translate D ErrNoClockComments {In diesem Spiel wurden keine [%clk] Uhrkommentare gefunden.    Fügen Sie Uhrzeiten über das Kommentarfenster (Strg+E) hinzu, um diese Funktion zu nutzen.}
+translate D ErrFileInUse {Fehler: Die Datei wird bereits verwendet. Bitte schließen Sie alle anderen Anwendungen, die diese Datenbank verwenden.}
 
 # Drag and drop
 translate D DndCannotOpenUri {URI kann nicht geöffnet werden}

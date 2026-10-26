@@ -593,6 +593,7 @@ translate k ErrNotOpen {이는 공개 데이터베이스가 아닙니다.}
 translate k ErrReadOnly {이 데이터베이스는 선두입니다. 대응할 수 없습니다.}
 translate k ErrSearchInterrupted {중단되었습니다. 결과가 잘못되었습니다.}
 translate k ErrNoClockComments {이 게임에는 [%clk] 시계 댓글이 없습니다.  이 기능을 사용하려면 설명 창(Ctrl+E)을 통해 감시 시간을 추가하세요.}
+translate k ErrFileInUse {오류: 파일이 이미 사용 중입니다. 이 데이터베이스를 사용하는 다른 응용 프로그램을 닫으십시오.}
 
 # Drag and drop
 translate k DndCannotOpenUri {URI를 열 수 없습니다.}

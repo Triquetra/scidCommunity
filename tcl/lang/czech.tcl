@@ -556,6 +556,7 @@ translate C ErrNotOpen {To nen oteven databze.}
 translate C ErrReadOnly {Tato databze je jen ke ten; neme bt zmnna.}
 translate C ErrSearchInterrupted {Hledn bylo perueno; vsledky nejsou kompletn.}
 translate C ErrNoClockComments {V tto he nebyly nalezeny dn komente hodin [%clk].    Chcete-li pout tuto funkci, pidejte hodiny prostednictvm okna Komente (Ctrl+E).}
+translate C ErrFileInUse {Chyba: soubor se již používá. Zavřete všechny ostatní aplikace používající tuto databázi.}
 
 # Drag and drop
 translate C DndCannotOpenUri {Nelze otevřít URI}

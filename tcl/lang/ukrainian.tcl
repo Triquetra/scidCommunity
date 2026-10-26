@@ -553,6 +553,7 @@ translate Q ErrNotOpen {Це не відкрита база даних.}
 translate Q ErrReadOnly {Ця база даних доступна лише для читання; це не можна змінити.}
 translate Q ErrSearchInterrupted {Пошук було перервано; результати неповні.}
 translate Q ErrNoClockComments {У цій грі не знайдено коментарів щодо годинника [%clk].  Щоб скористатися цією функцією, додайте час за допомогою вікна коментарів (Ctrl+E).}
+translate Q ErrFileInUse {Помилка: файл уже використовується. Закрийте будь-яку іншу програму, яка використовує цю базу даних.}
 
 # Drag and drop
 translate Q DndCannotOpenUri {Неможливо відкрити URI}

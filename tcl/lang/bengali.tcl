@@ -552,6 +552,7 @@ translate b ErrNotOpen {এটি একটি খোলা ডাটাবে�
 translate b ErrReadOnly {এই ডাটাবেস শুধুমাত্র পঠনযোগ্য; এটা পরিবর্তন করা যাবে না।}
 translate b ErrSearchInterrupted {অনুসন্ধান ব্যাহত হয়েছিল; ফলাফল অসম্পূর্ণ।}
 translate b ErrNoClockComments {এই গেমটিতে কোনো [%clk] ঘড়ির মন্তব্য পাওয়া যায়নি।  এই বৈশিষ্ট্যটি ব্যবহার করতে মন্তব্য উইন্ডো (Ctrl+E) এর মাধ্যমে ঘড়ির সময় যোগ করুন।}
+translate b ErrFileInUse {ত্রুটি: ফাইলটি ইতিমধ্যেই ব্যবহার করা হচ্ছে৷ এই ডাটাবেস ব্যবহার করে অন্য কোনো অ্যাপ্লিকেশন বন্ধ করুন.}
 
 # Drag and drop
 translate b DndCannotOpenUri {URI খুলতে পারে না}

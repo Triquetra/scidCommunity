@@ -552,6 +552,7 @@ translate Z ErrNotOpen {Hii si hifadhidata iliyo wazi.}
 translate Z ErrReadOnly {Hifadhidata hii ni ya kusoma tu; haiwezi kubadilishwa.}
 translate Z ErrSearchInterrupted {Utafutaji ulikatizwa; matokeo hayajakamilika.}
 translate Z ErrNoClockComments {Hakuna maoni ya saa [%clk] yaliyopatikana katika mchezo huu.  Ongeza saa za saa kupitia Dirisha la Maoni (Ctrl+E) ili kutumia kipengele hiki.}
+translate Z ErrFileInUse {Hitilafu: faili tayari inatumika. Tafadhali funga programu nyingine yoyote kwa kutumia hifadhidata hii.}
 
 # Drag and drop
 translate Z DndCannotOpenUri {Haiwezi kufungua URI}
