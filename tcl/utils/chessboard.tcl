@@ -419,6 +419,7 @@ proc ::chessboard::see {pos sq} {
     variable PIECE_VALUE
     set best ""
     set bestVal 99
+    set bestPromo 0
     set board [dict get $pos board]
     set ep [dict get $pos ep]
     foreach m [legalMoves $pos] {
@@ -432,11 +433,27 @@ proc ::chessboard::see {pos sq} {
             set victim p
         }
         set val $PIECE_VALUE([string tolower $mover])
-        if {$val < $bestVal} { set bestVal $val ; set best $m }
+        # Among equally cheap capturers, a promotion is worth more: the side
+        # to move would choose the queen.
+        set promo 0
+        if {[string length $m] > 4} {
+            set promo $PIECE_VALUE([string tolower [string index $m 4]])
+        }
+        if {$val < $bestVal || ($val == $bestVal && $promo > $bestPromo)} {
+            set bestVal $val
+            set bestPromo $promo
+            set best $m
+        }
     }
     if {$best eq ""} { return 0 }
     set victim [lindex $board [sqIndex [string range $best 2 3]]]
     if {$victim eq ""} { set victim p }
     set gain $PIECE_VALUE([string tolower $victim])
+    # A pawn that promotes while capturing gains the promoted piece as well as
+    # the victim; without this a promoting recapture is undervalued (Patzer's
+    # staticExchange does not price it, so this is a deliberate difference).
+    if {$bestPromo > 0} {
+        incr gain [expr {$bestPromo - $PIECE_VALUE(p)}]
+    }
     return [expr {max(0, $gain - [see [makeMove $pos $best] $sq])}]
 }

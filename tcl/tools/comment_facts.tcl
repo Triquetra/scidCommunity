@@ -417,7 +417,9 @@ proc ::facts::materialLine {fen} {
     }
     set pts [expr {$diff == 1 ? "point" : "points"}]
     if {[llength $gone]} {
-        return "material: $who is $diff $pts up, and $behind has lost [join [lrange $gone 0 1] { and }]"
+        # "is missing", not "has lost": a game may start from a set-up board, and
+        # then the pieces were never on the board to be lost.
+        return "material: $who is $diff $pts up, and $behind is missing [join [lrange $gone 0 1] { and }]"
     }
     return "material: $who is $diff $pts up"
 }

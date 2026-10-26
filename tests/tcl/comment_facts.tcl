@@ -80,6 +80,9 @@ checkEq "SEE of an undefended rook" [seeOf {4k2r/8/8/8/8/8/8/R6R w - - 0 1} h8] 
 checkEq "SEE of a rook the king defends" [seeOf {6kr/8/8/8/8/8/8/R6R w - - 0 1} h8] 0
 checkEq "SEE of a pawn capture" [seeOf {4k3/8/8/3n4/4P3/8/8/4K3 w - - 0 1} d5] 3
 checkEq "SEE nets the recapture" [seeOf {3qk3/8/8/3n4/4P3/8/8/4K3 w - - 0 1} d5] 2
+# A pawn that takes on the last rank promotes while capturing: the rook is
+# worth 5 to the pawn, plus the 8 it becomes, less the queen taken back.
+checkEq "SEE counts a promoting recapture" [seeOf {4k3/8/8/8/8/8/1pN5/R3K3 b - - 0 1} a1] 4
 
 # ------------------------------------------------------------------- facts --
 
@@ -107,7 +110,7 @@ castling: White has no castling rights; Black has no castling rights
 en passant: none available
 fifty-move rule: 0 plies since the last capture or pawn move; 100 more plies would allow a draw claim
 repetition: not available for this position
-material: White is 5 points up, and Black has lost a rook}
+material: White is 5 points up, and Black is missing a rook}
 
 # Rule state is stated in the negative too: a fact that is merely absent is
 # what lets a comment invent it.
@@ -192,6 +195,9 @@ set clean {4k3/8/8/8/4p3/8/8/4R1K1 w - - 0 1}
 checkEq "a clean capture still nets the pawn" [::facts::captureNet $clean e1e4] 1
 checkEq "moving a rook to the ep square is not a capture" \
     [::facts::captureNet {4k3/8/8/8/4P3/r7/8/4K3 b - e3 0 1} a3e3] 0
+# Rxa1 wins a bishop, but bxa1=Q and Nxa1 make the whole sequence lose a point.
+checkEq "a capture that lets a pawn promote and be taken back loses" \
+    [::facts::captureNet {4k3/8/8/8/8/8/1pN5/b3K2R w - - 0 1} h1a1] -1
 # A promotion gains material even though the capture is recaptured: rook (+5)
 # plus queen for pawn (+8) less the queen taken back (-9) is +4.
 checkEq "a promoting capture counts the new piece" \
@@ -217,15 +223,16 @@ check "a losing exchange is still called hanging" \
 # difference the reader has to reconcile with the position.
 set mat [::facts::forMove [moveDict {rnbqkb1r/ppp2ppp/5n2/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5} e4d5]]
 check "one point of material is not \"1 points\"" \
-    [string match {*material: White is 1 point up, and Black has lost a pawn*} $mat]
+    [string match {*material: White is 1 point up, and Black is missing a pawn*} $mat]
 check "material names only what the trailing side lost that the leader did not" \
-    [string match {*material: White is 1 point up, and Black has lost a pawn*} \
+    [string match {*material: White is 1 point up, and Black is missing a pawn*} \
         [::facts::materialLine {4k3/pppp1ppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1}]]
 # White has a promoted second queen and Black still has its own: Black has not
 # lost a queen, so no queen may be named.
 set promoted {{materialLine} {4k2q/8/8/8/8/8/8/QQ2K3 w - - 0 1}}
-check "an extra queen from promotion is not a loss for the opponent" \
-    [expr {![string match {*lost a queen*} [::facts::materialLine {4k2q/8/8/8/8/8/8/QQ2K3 w - - 0 1}]]}]
+checkEq "an extra queen from promotion is not a loss for the opponent" \
+    [::facts::materialLine {4k2q/8/8/8/8/8/8/QQ2K3 w - - 0 1}] \
+    {material: White is 9 points up}
 
 set alt [::facts::forMove [moveDict \
     {rnbqkb1r/ppp2ppp/5n2/3pp3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5} e4d5 \
