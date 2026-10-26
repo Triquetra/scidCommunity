@@ -284,5 +284,18 @@ set inv [lsearch -all -inline -regexp [split $bare "\n"] {^(White|Black) has }]
 checkEq "the inventory names only what is on the board" [join $inv "|"] \
     {White has king on e1|Black has king on e8}
 
+# A fork built on a discovered check belongs to the piece that gives the check,
+# not to the piece that moved.
+set discovered [::facts::forkLine {k7/1R6/2B5/4q3/8/8/8/7K w - - 0 1} b7b5]
+check "a discovered check is not credited to the moved piece" \
+    [string match {*discovered check*} $discovered] $discovered
+check "the moved piece's target is still named" \
+    [string match {*rook on b5 attacks the queen on e5*} $discovered] $discovered
+check "the piece giving the check is named" \
+    [string match {*bishop on c6 checks the king*} $discovered] $discovered
+set direct [::facts::forkLine {7k/8/8/8/8/8/K7/3qR3 w - - 0 1} e1h1]
+check "a direct check and attack is still a fork" \
+    [string match {*fork: the rook on h1 checks the king and attacks the queen on d1*} $direct] $direct
+
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

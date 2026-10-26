@@ -1210,5 +1210,26 @@ proc ::facts::forkLine {fenBefore uci} {
     }
     if {![llength $targets]} { return "" }
     set me "[string tolower [::facts::pieceName $piece]] on [::chessboard::sqName $toSq]"
-    return "the punishment is a fork: the $me checks the king and attacks [join $targets { and }]"
+    # The check may be the moved piece's own, or a discovered one from a piece
+    # it uncovered; crediting the moved piece with a check it does not give is
+    # a false fact either way.
+    set direct 0
+    catch { set direct [::facts::attacksFrom $pos2 $toSq $ksq] }
+    if {$direct} {
+        return "the punishment is a fork: the $me checks the king and attacks [join $targets { and }]"
+    }
+    set checker ""
+    for {set sq 0} {$sq < 64} {incr sq} {
+        if {$sq == $toSq} continue
+        set p [::chessboard::pieceAt $bd2 $sq]
+        if {$p eq ""} continue
+        if {[::chessboard::colorOf $p] ne $mover} continue
+        set hit 0
+        catch { set hit [::facts::attacksFrom $pos2 $sq $ksq] }
+        if {!$hit} continue
+        set checker "the [string tolower [::facts::pieceName $p]] on [::chessboard::sqName $sq]"
+        break
+    }
+    if {$checker eq ""} { return "" }
+    return "the punishment is a discovered check: the $me attacks [join $targets { and }] while $checker checks the king"
 }
