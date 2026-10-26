@@ -22,13 +22,13 @@
 #include "codec_scid4.h"
 #include "codec_scid5.h"
 #include "common.h"
+#include "filelock.h"
 #include "misc.h"
 #include "sortcache.h"
 #include "stored.h"
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
-#include <fstream>
 #include <unordered_map>
 
 std::pair<ICodecDatabase*, errorT>
@@ -93,19 +93,38 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 	// File-based locking for write modes (skip for MEMORY databases)
 	if (dbtype != ICodecDatabase::MEMORY &&
 	    (fMode == FMODE_WriteOnly || fMode == FMODE_Both || fMode == FMODE_Create)) {
-		auto lockPath = pathFromUtf8(filename);
+		// The codecs accept more than one spelling of the same database:
+		// CodecSCID5 appends .si5 to a name without an extension, and
+		// CodecSCID4 strips .si4 and puts it back. Take the lock on the file
+		// the codec will actually open - otherwise /data/games and
+		// /data/games.si5 would each get their own lock and both could write.
+		// Canonicalising afterwards closes the same hole for a relative path,
+		// a ./ in the middle and a symlinked directory.
+		auto databasePath = [&] {
+			auto path = pathFromUtf8(filename);
+			if (dbtype == ICodecDatabase::SCID4) {
+				if (path.extension() != ".si4")
+					path += ".si4";
+			} else if (dbtype == ICodecDatabase::SCID5) {
+				if (path.extension().empty())
+					path += ".si5";
+			}
+			std::error_code ec;
+			auto canonical = std::filesystem::weakly_canonical(path, ec);
+			return ec ? path : canonical;
+		}();
+		auto lockPath = databasePath;
 		lockPath += ".lock";
-		std::error_code ec;
-		if (std::filesystem::exists(lockPath, ec)) {
+		auto lock = std::make_unique<filelock::Lock>();
+		switch (filelock::acquire(lockPath, *lock)) {
+		case filelock::Status::InUse:
 			return ERROR_FileInUse;
-		}
-		// Create the lock file
-		std::ofstream lockStream(lockPath);
-		if (!lockStream) {
+		case filelock::Status::Error:
 			return ERROR_FileWrite;
+		case filelock::Status::Acquired:
+			break;
 		}
-		lockStream.close();
-		lockFile_ = std::move(lockPath);
+		lock_ = std::move(lock);
 	}
 
 	auto [db, err] = ICodecDatabase::open(dbtype, fMode, filename, progress,
@@ -128,12 +147,8 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 	} else {
 		idx->Close();
 		nb_->Clear();
-		// Clean up lock file on failure
-		if (!lockFile_.empty()) {
-			std::error_code ec;
-			std::filesystem::remove(lockFile_, ec);
-			lockFile_.clear();
-		}
+		// Release the database: the lock goes with it.
+		lock_.reset();
 	}
 
 	return err;
@@ -141,13 +156,6 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 
 void scidBaseT::Close() {
 	ASSERT(inUse);
-
-	// Remove lock file if present
-	if (!lockFile_.empty()) {
-		std::error_code ec;
-		std::filesystem::remove(lockFile_, ec);
-		lockFile_.clear();
-	}
 
 	for (auto& sortCache : sortCaches_) {
 		delete sortCache.second;
@@ -170,6 +178,12 @@ void scidBaseT::Close() {
 		delete filters_[i].second;
 	filters_.clear();
 	inUse = false;
+
+	// Only now is the database really free. Releasing the lock any earlier -
+	// in particular before codec_ is destroyed - would remove the lock file
+	// while this process still has the database files open, and the next
+	// process could start writing into them.
+	lock_.reset();
 }
 
 void scidBaseT::clear() {
