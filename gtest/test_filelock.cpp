@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2026  David Crandall
+* Copyright (C) 2026  Hugh Whelan
 
 * This file is part of Scid (Shane's Chess Information Database).
 *
@@ -23,10 +24,12 @@
 #include <gtest/gtest.h>
 #include <string>
 
-namespace {
+#ifndef _WIN32
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
 
-/// A pid that cannot belong to a running process on either platform.
-constexpr unsigned long kDeadPid = 4294967294UL;
+namespace {
 
 class TempDir {
 	std::filesystem::path path_;
@@ -48,107 +51,128 @@ public:
 	std::filesystem::path operator/(std::string_view name) const { return path_ / name; }
 };
 
-void writeRecord(const std::filesystem::path& path, std::string_view record) {
+void writeFile(const std::filesystem::path& path, std::string_view text) {
 	std::ofstream file(path, std::ios::binary | std::ios::trunc);
-	file << record;
-}
-
-std::string readFile(const std::filesystem::path& path) {
-	std::ifstream file(path, std::ios::binary);
-	return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	file << text;
 }
 
 } // namespace
 
-TEST(FileLock, acquireWritesOwnerRecordAndReleaseRemovesFile) {
+TEST(FileLock, acquireTakesTheLockAndReleaseFreesIt) {
 	TempDir dir;
 	const auto lockPath = dir / "db.si4.lock";
 
-	ASSERT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath));
-	ASSERT_TRUE(std::filesystem::exists(lockPath));
-	const auto record = readFile(lockPath);
-	EXPECT_NE(std::string::npos, record.find("\npid=" + std::to_string(filelock::detail::currentPid())));
-	EXPECT_NE(std::string::npos, record.find("\nhost=" + filelock::detail::hostname()));
-
-	filelock::release(lockPath);
-	EXPECT_FALSE(std::filesystem::exists(lockPath));
-	filelock::release(lockPath); // releasing twice is not an error
-}
-
-TEST(FileLock, liveOwnerIsReportedAsInUse) {
-	TempDir dir;
-	const auto lockPath = dir / "db.si4.lock";
-
-	ASSERT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath));
-	// This very process owns it, and it is still running: the second attempt
-	// must be refused, not reclaimed.
-	EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath));
+	filelock::Lock first;
+	ASSERT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, first));
+	EXPECT_TRUE(first.held());
 	EXPECT_TRUE(std::filesystem::exists(lockPath));
-	EXPECT_NE(std::string::npos,
-	          readFile(lockPath).find("\npid=" + std::to_string(filelock::detail::currentPid())));
 
-	filelock::release(lockPath);
+	// A second holder, even in the same process, is refused: that is the
+	// second-instance case the lock exists for.
+	filelock::Lock second;
+	EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath, second));
+	EXPECT_FALSE(second.held());
+
+	first.release();
+	EXPECT_FALSE(first.held());
+	EXPECT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, second));
+	EXPECT_TRUE(second.held());
 }
 
-TEST(FileLock, lockOfDeadProcessIsReclaimed) {
-	if (filelock::detail::hostname().empty())
-		GTEST_SKIP() << "hostname unavailable, remote owners cannot be verified";
-
+TEST(FileLock, movingTheLockKeepsIt) {
 	TempDir dir;
 	const auto lockPath = dir / "db.si4.lock";
-	writeRecord(lockPath, std::string(filelock::detail::kFormat) + "\npid=" +
-	                          std::to_string(kDeadPid) + "\nhost=" +
-	                          filelock::detail::hostname() + "\n");
 
-	ASSERT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath));
-	const auto record = readFile(lockPath);
-	EXPECT_NE(std::string::npos, record.find("\npid=" + std::to_string(filelock::detail::currentPid())));
+	filelock::Lock original;
+	ASSERT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, original));
 
-	filelock::release(lockPath);
+	filelock::Lock moved = std::move(original);
+	EXPECT_FALSE(original.held());
+	EXPECT_TRUE(moved.held());
+
+	filelock::Lock other;
+	EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath, other));
+
+	filelock::Lock assigned;
+	assigned = std::move(moved);
+	EXPECT_FALSE(moved.held());
+	EXPECT_TRUE(assigned.held());
+	EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath, other));
+
+	assigned.release();
+	EXPECT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, other));
 }
 
-TEST(FileLock, lockOfLiveProcessWithReusedPidIsNotReclaimed) {
-	if (filelock::detail::hostname().empty())
-		GTEST_SKIP() << "hostname unavailable, remote owners cannot be verified";
-
-	// A live pid that is not the process that wrote the record (this test's
-	// own pid stands in for a recycled pid): refusing is the safe answer.
-	TempDir dir;
-	const auto lockPath = dir / "db.si4.lock";
-	writeRecord(lockPath, std::string(filelock::detail::kFormat) + "\npid=" +
-	                          std::to_string(filelock::detail::currentPid()) + "\nhost=" +
-	                          filelock::detail::hostname() + "\n");
-
-	EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath));
-	EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath));
-}
-
-TEST(FileLock, lockOfAnotherHostIsNotReclaimed) {
-	TempDir dir;
-	const auto lockPath = dir / "db.si4.lock";
-	const auto record = std::string(filelock::detail::kFormat) + "\npid=" +
-	                    std::to_string(kDeadPid) + "\nhost=some-other-machine\n";
-	writeRecord(lockPath, record);
-
-	EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath));
-	EXPECT_EQ(record, readFile(lockPath)); // the foreign lock is left untouched
-}
-
-TEST(FileLock, recordWithoutOwnerKeepsLegacyBehaviour) {
+TEST(FileLock, aLeftoverLockFileDoesNotBlock) {
 	TempDir dir;
 
-	// Empty lock file: what older Scid versions left behind, and what a crash
-	// between creating and filling the file would leave. Neither is provably
-	// stale, so both keep the previous "in use" answer.
-	for (const std::string_view record : {std::string_view(), std::string_view("garbage\n")}) {
-		const auto lockPath = dir / ("db" + std::to_string(record.size()) + ".si4.lock");
-		writeRecord(lockPath, record);
-		EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath));
-		EXPECT_EQ(std::string(record), readFile(lockPath));
+	// What an older Scid wrote, and what a crash or a kill can leave: the file
+	// is there and nobody holds it. Existence no longer means anything.
+	const std::string_view leftovers[] = {
+	    std::string_view(),
+	    std::string_view("scid-lock v1\npid=4294967294\nhost=some-old-machine\n"),
+	    std::string_view("garbage\n"),
+	};
+	int n = 0;
+	for (const auto record : leftovers) {
+		const auto lockPath = dir / ("db" + std::to_string(n++) + ".si4.lock");
+		writeFile(lockPath, record);
+
+		filelock::Lock lock;
+		EXPECT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, lock));
+
+		// The file stays on disk after the database is closed, on purpose:
+		// removing it is the step that cannot be made safe.
+		lock.release();
+		EXPECT_TRUE(std::filesystem::exists(lockPath));
 	}
 }
 
-TEST(FileLock, scidBaseCreatesAndRemovesItsLock) {
+#ifndef _WIN32
+TEST(FileLock, theLockIsFreedWhenTheHolderDies) {
+	TempDir dir;
+	const auto lockPath = dir / "db.si4.lock";
+
+	// The child takes the lock and then dies without releasing it, the way a
+	// crash or a kill leaves things. The kernel must free it.
+	int acquiredPipe[2] = {-1, -1};
+	int diePipe[2] = {-1, -1};
+	ASSERT_EQ(0, ::pipe(acquiredPipe));
+	ASSERT_EQ(0, ::pipe(diePipe));
+
+	const pid_t pid = ::fork();
+	ASSERT_GE(pid, 0);
+	if (pid == 0) {
+		::close(acquiredPipe[0]);
+		::close(diePipe[1]);
+		filelock::Lock lock;
+		const char acquired = (filelock::acquire(lockPath, lock) == filelock::Status::Acquired) ? 1 : 0;
+		(void)!::write(acquiredPipe[1], &acquired, 1);
+		char go = 0;
+		(void)!::read(diePipe[0], &go, 1);
+		::_exit(0); // no release, no destructor: this is the crash
+	}
+
+	::close(acquiredPipe[1]);
+	::close(diePipe[0]);
+
+	char acquired = 0;
+	ASSERT_EQ(1, static_cast<int>(::read(acquiredPipe[0], &acquired, 1)));
+	ASSERT_EQ(1, acquired);
+
+	filelock::Lock lock;
+	EXPECT_EQ(filelock::Status::InUse, filelock::acquire(lockPath, lock));
+
+	(void)!::write(diePipe[1], "x", 1);
+	int status = 0;
+	::waitpid(pid, &status, 0);
+	EXPECT_TRUE(WIFEXITED(status));
+
+	EXPECT_EQ(filelock::Status::Acquired, filelock::acquire(lockPath, lock));
+}
+#endif
+
+TEST(FileLock, scidBaseHoldsTheLockWhileTheDatabaseIsOpen) {
 	TempDir dir;
 	const auto dbPath = dir / "locklifecycle.si5";
 	const auto lockPath = dbPath.string() + ".lock";
@@ -161,9 +185,9 @@ TEST(FileLock, scidBaseCreatesAndRemovesItsLock) {
 	EXPECT_EQ(ERROR_FileInUse, other.open("SCID5", FMODE_Both, dbPath.string().c_str()));
 
 	dbase.Close();
-	EXPECT_FALSE(std::filesystem::exists(lockPath));
+	// The lock file is not removed on close; it must not be in the way either.
+	EXPECT_TRUE(std::filesystem::exists(lockPath));
 
-	// The lock is gone, so the database can be opened again.
 	ASSERT_EQ(OK, other.open("SCID5", FMODE_Both, dbPath.string().c_str()));
 	other.Close();
 }

@@ -95,7 +95,8 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 	    (fMode == FMODE_WriteOnly || fMode == FMODE_Both || fMode == FMODE_Create)) {
 		auto lockPath = pathFromUtf8(filename);
 		lockPath += ".lock";
-		switch (filelock::acquire(lockPath)) {
+		auto lock = std::make_unique<filelock::Lock>();
+		switch (filelock::acquire(lockPath, *lock)) {
 		case filelock::Status::InUse:
 			return ERROR_FileInUse;
 		case filelock::Status::Error:
@@ -103,7 +104,7 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 		case filelock::Status::Acquired:
 			break;
 		}
-		lockFile_ = std::move(lockPath);
+		lock_ = std::move(lock);
 	}
 
 	auto [db, err] = ICodecDatabase::open(dbtype, fMode, filename, progress,
@@ -126,12 +127,8 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 	} else {
 		idx->Close();
 		nb_->Clear();
-		// Clean up lock file on failure
-		if (!lockFile_.empty()) {
-			std::error_code ec;
-			std::filesystem::remove(lockFile_, ec);
-			lockFile_.clear();
-		}
+		// Release the database: the lock goes with it.
+		lock_.reset();
 	}
 
 	return err;
@@ -140,11 +137,10 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 void scidBaseT::Close() {
 	ASSERT(inUse);
 
-	// Remove lock file if present
-	if (!lockFile_.empty()) {
-		filelock::release(lockFile_);
-		lockFile_.clear();
-	}
+	// Give the database up; the lock is released with the handle. The lock
+	// file stays on disk on purpose: removing it is the one step that cannot
+	// be made safe while another process may be opening it (see filelock.h).
+	lock_.reset();
 
 	for (auto& sortCache : sortCaches_) {
 		delete sortCache.second;

@@ -1,5 +1,6 @@
 /*
 * Copyright (C) 2026  David Crandall
+* Copyright (C) 2026  Hugh Whelan
 
 * This file is part of Scid (Shane's Chess Information Database).
 *
@@ -19,13 +20,7 @@
 #pragma once
 
 #include <cerrno>
-#include <cstdio>
 #include <filesystem>
-#include <fstream>
-#include <iterator>
-#include <limits>
-#include <string>
-#include <string_view>
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -36,224 +31,157 @@
 #endif
 #include <windows.h>
 #else // POSIX (Linux, macOS)
-#include <csignal>
+#include <fcntl.h>
+#include <sys/file.h>
 #include <unistd.h>
 #endif
 
 /**
  * Exclusive lock used to keep two processes from writing the same database.
  *
- * The lock is an advisory file next to the database (`<database>.lock`): the
- * process that creates it owns the database and removes it on close. A plain
- * "does the file exist?" test is not enough, because the file survives every
- * close path that never runs - a crash, a SIGKILL or Task Manager kill, a lost
- * session - and from then on every open fails until someone deletes it by
- * hand. The lock file therefore records who created it (pid + hostname), so a
- * leftover lock whose owner no longer exists on this machine can be detected
- * and reclaimed.
+ * The lock is advisory and the operating system holds it: the process opens
+ * `<database>.lock` and asks the kernel to lock the file, and keeps that handle
+ * open for as long as it owns the database. Because the kernel owns the lock,
+ * it is released however the process ends - a clean exit, a crash, a SIGKILL,
+ * Task Manager - so an unclean exit cannot leave a database unopenable, and no
+ * pid or host name has to be trusted to decide whether the previous owner is
+ * still there.
  *
- * The rule is deliberately conservative: anything that cannot be *proven*
- * stale counts as in use. A lock owned by another machine, a lock written by a
- * version that recorded no owner, and a lock whose file cannot be read all
- * keep the old behaviour (refuse to open), so this can never hand the same
- * database to two writers.
+ * The lock file is created if it is missing and deliberately never removed:
+ * unlinking a file that another process may have just opened is the one step
+ * that cannot be made atomic with a lock on that file. Its existence therefore
+ * means nothing - only the lock does - and a leftover file from an older
+ * version, a crash or a kill blocks nothing.
+ *
+ * Two limits are worth knowing. Only the same machine is excluded: a lock is
+ * enforced by the local kernel, so it depends on the filesystem honouring
+ * locks when the database lives on a network share (NFSv4 and SMB do; some
+ * FUSE mounts do not). And it is advisory, like the existence check it
+ * replaces: a program that does not ask for the lock can still write the file.
  */
 namespace filelock {
 
 enum class Status {
-	Acquired, ///< the lock file is ours; the caller owns the database
+	Acquired, ///< the lock is ours; the caller owns the database
 	InUse,    ///< another process owns the database
-	Error,    ///< the lock file could not be created
+	Error,    ///< the lock file could not be opened or locked
 };
 
-namespace detail {
+/**
+ * A held lock. Move-only; releasing it (or destroying it) gives the database
+ * up. Keep it alive for as long as the database is open.
+ */
+class Lock {
+public:
+	Lock() = default;
+	~Lock() { release(); }
 
-constexpr std::string_view kFormat = "scid-lock v1";
-constexpr size_t kMaxRecordSize = 4096;
-
-/// Name of this machine; empty if it cannot be determined.
-inline std::string hostname() {
-#ifdef _WIN32
-	char buf[MAX_COMPUTERNAME_LENGTH + 1] = {0};
-	DWORD len = static_cast<DWORD>(sizeof(buf));
-	return ::GetComputerNameA(buf, &len) ? std::string(buf, len) : std::string();
-#else
-	char buf[256] = {0};
-	return (::gethostname(buf, sizeof(buf) - 1) == 0) ? std::string(buf) : std::string();
-#endif
-}
-
-/// Pid of this process.
-inline unsigned long currentPid() {
-#ifdef _WIN32
-	return static_cast<unsigned long>(::GetCurrentProcessId());
-#else
-	return static_cast<unsigned long>(::getpid());
-#endif
-}
-
-/// True if the process may still be running; unknown pids and pids owned by
-/// another user (EPERM / access denied) count as alive.
-inline bool processIsAlive(unsigned long pid) {
-	if (pid == 0)
-		return true;
-#ifdef _WIN32
-	const HANDLE handle = ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
-	if (handle == nullptr) {
-		// The only failure that proves the process is gone is "no such pid".
-		return ::GetLastError() != ERROR_INVALID_PARAMETER;
+	Lock(Lock&& other) noexcept { moveFrom(other); }
+	Lock& operator=(Lock&& other) noexcept {
+		if (this != &other) {
+			release();
+			moveFrom(other);
+		}
+		return *this;
 	}
-	DWORD exitCode = 0;
-	const bool alive =
-	    (::GetExitCodeProcess(handle, &exitCode) != 0) && (exitCode == STILL_ACTIVE);
-	::CloseHandle(handle);
-	return alive;
-#else
-	// A pid outside pid_t's range cannot exist on this platform, and casting a
-	// negative value to pid_t would turn kill() into a process-group check.
-	if (pid > static_cast<unsigned long>(std::numeric_limits<pid_t>::max()))
-		return false;
-	if (::kill(static_cast<pid_t>(pid), 0) == 0)
-		return true;
-	return errno != ESRCH;
-#endif
-}
+	Lock(const Lock&) = delete;
+	Lock& operator=(const Lock&) = delete;
 
-struct Owner {
-	std::string host;
-	unsigned long pid = 0;
+	bool held() const {
+#ifdef _WIN32
+		return handle_ != INVALID_HANDLE_VALUE;
+#else
+		return fd_ >= 0;
+#endif
+	}
+
+	void release() {
+#ifdef _WIN32
+		if (handle_ != INVALID_HANDLE_VALUE) {
+			OVERLAPPED overlapped = {};
+			::UnlockFileEx(handle_, 0, 1, 0, &overlapped);
+			::CloseHandle(handle_);
+			handle_ = INVALID_HANDLE_VALUE;
+		}
+#else
+		if (fd_ >= 0) {
+			::flock(fd_, LOCK_UN);
+			::close(fd_);
+			fd_ = -1;
+		}
+#endif
+	}
+
+private:
+	void moveFrom(Lock& other) noexcept {
+#ifdef _WIN32
+		handle_ = other.handle_;
+		other.handle_ = INVALID_HANDLE_VALUE;
+#else
+		fd_ = other.fd_;
+		other.fd_ = -1;
+#endif
+	}
+
+#ifdef _WIN32
+	HANDLE handle_ = INVALID_HANDLE_VALUE;
+#else
+	int fd_ = -1;
+#endif
+
+	friend Status acquire(const std::filesystem::path&, Lock&);
 };
-
-/// Parse a lock record. Returns false for a record this version did not write
-/// (empty file, older Scid, foreign content).
-inline bool parseOwner(std::string_view record, Owner& owner) {
-	if (record.substr(0, kFormat.size()) != kFormat)
-		return false;
-
-	auto valueOf = [&record](std::string_view key) {
-		const auto pos = record.find(key);
-		if (pos == std::string_view::npos)
-			return std::string();
-		const auto start = pos + key.size();
-		auto end = record.find('\n', start);
-		if (end == std::string_view::npos)
-			end = record.size();
-		std::string value(record.substr(start, end - start));
-		while (!value.empty() && (value.back() == '\r' || value.back() == ' '))
-			value.pop_back();
-		return value;
-	};
-
-	const auto pid = valueOf("\npid=");
-	const auto host = valueOf("\nhost=");
-	if (pid.empty() || host.empty())
-		return false;
-
-	unsigned long value = 0;
-	for (const char c : pid) {
-		if (c < '0' || c > '9')
-			return false;
-		value = value * 10 + static_cast<unsigned long>(c - '0');
-	}
-	if (value == 0)
-		return false;
-
-	owner.pid = value;
-	owner.host = host;
-	return true;
-}
-
-enum class Create { Created, Exists, Failed };
-
-/// Create the lock file only if it does not exist, then write the owner record
-/// into it. "x" is C11's exclusive-create mode: two processes racing here can
-/// never both succeed.
-inline Create writeExclusive(const std::filesystem::path& lockPath, std::string_view record) {
-	std::FILE* file = nullptr;
-#ifdef _WIN32
-	if (::_wfopen_s(&file, lockPath.c_str(), L"wx") != 0)
-		file = nullptr;
-#else
-	file = std::fopen(lockPath.c_str(), "wx");
-#endif
-	if (file == nullptr) {
-		std::error_code ec;
-		return std::filesystem::exists(lockPath, ec) ? Create::Exists : Create::Failed;
-	}
-
-	const bool ok = std::fwrite(record.data(), 1, record.size(), file) == record.size();
-	std::fclose(file);
-	if (!ok) {
-		// Do not leave a record-less lock behind: that would look like a lock
-		// of an older Scid version and block every later open.
-		std::error_code ec;
-		std::filesystem::remove(lockPath, ec);
-		return Create::Failed;
-	}
-	return Create::Created;
-}
-
-/// Read the owner record of an existing lock file.
-inline bool readOwner(const std::filesystem::path& lockPath, Owner& owner) {
-	std::ifstream file(lockPath, std::ios::binary);
-	if (!file)
-		return false;
-
-	std::string record(kMaxRecordSize, '\0');
-	file.read(record.data(), static_cast<std::streamsize>(record.size()));
-	record.resize(static_cast<size_t>(file.gcount()));
-	return parseOwner(record, owner);
-}
-
-} // namespace detail
 
 /**
  * Take the database lock.
  *
  * @param lockPath: path of the lock file (the database path plus ".lock").
+ * @param lock: receives the lock on success; anything it held before is
+ *              released first.
  * @returns Status::Acquired if the lock is ours, Status::InUse if another
  *          process owns the database, Status::Error if the lock file could not
- *          be written.
+ *          be opened or locked for any other reason.
  */
-inline Status acquire(const std::filesystem::path& lockPath) {
-	const auto me = detail::Owner{detail::hostname(), detail::currentPid()};
-	const auto record = std::string(detail::kFormat) + "\npid=" + std::to_string(me.pid) +
-	                    "\nhost=" + me.host + "\n";
+inline Status acquire(const std::filesystem::path& lockPath, Lock& lock) {
+	lock.release();
 
-	// Three attempts: one to win the lock, one to reclaim a stale lock, one to
-	// retry if the stale lock was removed by a competing process in between.
-	for (int attempt = 0; attempt < 3; ++attempt) {
-		switch (detail::writeExclusive(lockPath, record)) {
-		case detail::Create::Created:
-			return Status::Acquired;
-		case detail::Create::Failed:
-			return Status::Error;
-		case detail::Create::Exists:
-			break;
-		}
+#ifdef _WIN32
+	const HANDLE handle =
+	    ::CreateFileW(lockPath.c_str(), GENERIC_READ | GENERIC_WRITE,
+	                  FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, OPEN_ALWAYS,
+	                  FILE_ATTRIBUTE_NORMAL, nullptr);
+	if (handle == INVALID_HANDLE_VALUE)
+		return Status::Error;
 
-		// The lock exists. Reclaim it only if its owner provably no longer
-		// exists on this machine; everything else stays "in use".
-		detail::Owner owner;
-		if (!detail::readOwner(lockPath, owner))
-			return Status::InUse;
-		if (me.host.empty() || owner.host != me.host)
-			return Status::InUse;
-		if (detail::processIsAlive(owner.pid))
-			return Status::InUse;
-
-		std::error_code ec;
-		std::filesystem::remove(lockPath, ec);
-		if (ec)
-			return Status::InUse;
+	OVERLAPPED overlapped = {};
+	if (!::LockFileEx(handle, LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY, 0, 1, 0,
+	                  &overlapped)) {
+		const DWORD err = ::GetLastError();
+		::CloseHandle(handle);
+		return err == ERROR_LOCK_VIOLATION ? Status::InUse : Status::Error;
 	}
-	return Status::InUse;
-}
+	lock.handle_ = handle;
+#else
+	int fd = -1;
+	do {
+		fd = ::open(lockPath.c_str(), O_RDWR | O_CREAT | O_CLOEXEC, 0666);
+	} while (fd < 0 && errno == EINTR);
+	if (fd < 0)
+		return Status::Error;
 
-/// Remove the database lock. Safe to call when the file is already gone.
-inline void release(const std::filesystem::path& lockPath) {
-	std::error_code ec;
-	std::filesystem::remove(lockPath, ec);
+	int err = 0;
+	do {
+		err = ::flock(fd, LOCK_EX | LOCK_NB) == 0 ? 0 : errno;
+	} while (err == EINTR);
+	if (err != 0) {
+		::close(fd);
+		// Both names mean "someone else holds it" on the platforms we build for.
+		return (err == EWOULDBLOCK || err == EAGAIN) ? Status::InUse : Status::Error;
+	}
+	lock.fd_ = fd;
+#endif
+
+	return Status::Acquired;
 }
 
 } // namespace filelock

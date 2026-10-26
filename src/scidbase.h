@@ -38,6 +38,10 @@
 
 class SortCache;
 
+namespace filelock {
+class Lock;
+}
+
 const gamenumT INVALID_GAMEID = 0xffffffff;
 
 struct scidBaseT {
@@ -437,7 +441,10 @@ private:
 	std::vector<std::pair<std::string, SortCache*>> sortCaches_;
 	mutable std::unordered_map<idNumberT, eloT> peakEloCache_;
 	errorT err_open_ = OK;
-	std::filesystem::path lockFile_;
+	// Held for as long as this object owns the database; see filelock.h.
+	// Declared by pointer so this widely included header stays free of the
+	// platform headers the lock needs.
+	std::unique_ptr<filelock::Lock> lock_;
 
 private:
 	errorT openHelper(ICodecDatabase::Codec dbtype, fileModeT mode,
