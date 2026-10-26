@@ -196,15 +196,17 @@ proc ::auto_comment::cleartextKeyError {url key} {
 
 # ::auto_comment::writeRequestFile
 #   Write a request body to a fresh file and return its path. The name is
-#   unpredictable and the file is created exclusively, so a file or symlink
-#   pre-created in a shared temp directory cannot redirect a write: the request
-#   body carries game data.
+#   unpredictable and the file is created exclusively and owner-only, so neither
+#   a pre-created file or symlink nor another local account can reach the body:
+#   it carries the prompt, and the prompt carries game data.
 proc ::auto_comment::writeRequestFile {body {tag chat}} {
     set dir [::auto_comment::getTempDir]
     for {set attempt 0} {$attempt < 10} {incr attempt} {
         set name "auto_comment_${tag}_[pid]_[clock seconds]_[clock clicks]_[expr {int(rand() * 1000000)}].json"
         set path [file join $dir $name]
-        if {[catch {set fd [open $path {WRONLY CREAT EXCL}]}]} { continue }
+        # EXCL prevents substitution, 0600 prevents reading: a shared /tmp uses
+        # 0644 by default, which is world-readable while curl runs.
+        if {[catch {set fd [open $path {WRONLY CREAT EXCL} 0600]}]} { continue }
         if {[catch {
             puts -nonewline $fd $body
             close $fd
@@ -251,14 +253,23 @@ proc ::auto_comment::chatBody {prompt {maxTokens 300}} {
 #   The Authorization header value, or "" when the endpoint needs no key. A local
 #   server must never be sent someone's cloud key.
 proc ::auto_comment::chatAuth {} {
-    if {$::auto_comment::provider ne "openai" || $::auto_comment::openaiKey eq ""} {
-        return ""
+    switch -- $::auto_comment::provider {
+        opencode {
+            if {$::auto_comment::opencodeKey eq ""} { return "" }
+            # the OpenCode endpoint is always https, so no cleartext case exists
+            return "Authorization: Bearer $::auto_comment::opencodeKey"
+        }
+        openai {
+            if {$::auto_comment::openaiKey eq ""} { return "" }
+            # queryChat refuses this case before it gets here; keeping the check
+            # means a future caller cannot send the key over cleartext either.
+            if {[::auto_comment::cleartextKeyError $::auto_comment::openaiUrl $::auto_comment::openaiKey] ne ""} {
+                return ""
+            }
+            return "Authorization: Bearer $::auto_comment::openaiKey"
+        }
     }
-    # a key must never ride a cleartext connection to another host
-    if {[::auto_comment::cleartextKeyError $::auto_comment::openaiUrl $::auto_comment::openaiKey] ne ""} {
-        return ""
-    }
-    return "Authorization: Bearer $::auto_comment::openaiKey"
+    return ""
 }
 
 # ::auto_comment::replyText
@@ -315,8 +326,13 @@ proc ::auto_comment::query {prompt {maxTokens 300}} {
 proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
     set reason [::auto_comment::providerReady]
     if {$reason ne ""} { return "ERROR: $reason" }
-    set refuse [::auto_comment::cleartextKeyError $::auto_comment::openaiUrl $::auto_comment::openaiKey]
-    if {$refuse ne ""} { return "ERROR: $refuse" }
+    # Only the OpenAI-compatible channel sends a user key to a user-typed URL.
+    # Gating on the provider keeps unrelated saved settings from rejecting a
+    # local request the user never pointed at that endpoint.
+    if {$::auto_comment::provider eq "openai"} {
+        set refuse [::auto_comment::cleartextKeyError $::auto_comment::openaiUrl $::auto_comment::openaiKey]
+        if {$refuse ne ""} { return "ERROR: $refuse" }
+    }
     set url [::auto_comment::chatEndpoint]
     set body [::auto_comment::chatBody $prompt $maxTokens]
 
@@ -325,7 +341,7 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
     }
 
     set args [list curl -s --connect-timeout 15 --max-time 180 \
-        -H {Content-Type: application/json} -X POST -d @$tmpfile]
+        -H {Content-Type: application/json} -X POST --data-binary @$tmpfile]
     set auth [::auto_comment::chatAuth]
     if {$auth ne ""} { lappend args -H $auth }
     lappend args $url
