@@ -22,13 +22,13 @@
 #include "codec_scid4.h"
 #include "codec_scid5.h"
 #include "common.h"
+#include "filelock.h"
 #include "misc.h"
 #include "sortcache.h"
 #include "stored.h"
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
-#include <fstream>
 #include <unordered_map>
 
 std::pair<ICodecDatabase*, errorT>
@@ -95,16 +95,14 @@ errorT scidBaseT::openHelper(ICodecDatabase::Codec dbtype, fileModeT fMode,
 	    (fMode == FMODE_WriteOnly || fMode == FMODE_Both || fMode == FMODE_Create)) {
 		auto lockPath = pathFromUtf8(filename);
 		lockPath += ".lock";
-		std::error_code ec;
-		if (std::filesystem::exists(lockPath, ec)) {
+		switch (filelock::acquire(lockPath)) {
+		case filelock::Status::InUse:
 			return ERROR_FileInUse;
-		}
-		// Create the lock file
-		std::ofstream lockStream(lockPath);
-		if (!lockStream) {
+		case filelock::Status::Error:
 			return ERROR_FileWrite;
+		case filelock::Status::Acquired:
+			break;
 		}
-		lockStream.close();
 		lockFile_ = std::move(lockPath);
 	}
 
@@ -144,8 +142,7 @@ void scidBaseT::Close() {
 
 	// Remove lock file if present
 	if (!lockFile_.empty()) {
-		std::error_code ec;
-		std::filesystem::remove(lockFile_, ec);
+		filelock::release(lockFile_);
 		lockFile_.clear();
 	}
 
