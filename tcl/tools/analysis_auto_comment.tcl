@@ -73,7 +73,7 @@ proc ::analysis_auto_comment::batch_generate {{engineId ""}} {
     ttk::label $w.content.modellbl -text "LLM Provider:"
     pack $w.content.modellbl -anchor w
     ttk::combobox $w.content.provider -textvariable ::auto_comment::provider \
-        -values {gemini deepseek} -state readonly -width 15
+        -values [::auto_comment::providerList] -state readonly -width 18
     pack $w.content.provider -anchor w -pady {0 5}
 
     ttk::label $w.content.model2lbl -text "Model:"
@@ -108,19 +108,13 @@ proc ::analysis_auto_comment::batch_generate {{engineId ""}} {
 }
 
 proc ::analysis_auto_comment::run_batch {{engineId ""}} {
-    # Check API keys first (reuse auto_comment logic)
-    set provider $::auto_comment::provider
-    set needKey 0
-    if {$provider eq "deepseek"} {
-        if {$::auto_comment::deepseekApiKey eq ""} { set needKey 1 }
-    } else {
-        if {$::auto_comment::apiKey eq ""} { set needKey 1 }
-    }
-
-    if {$needKey} {
+    # One readiness check for every provider: it names what is missing instead
+    # of assuming a cloud key is what is wanted.
+    set why [::auto_comment::providerReady]
+    if {$why ne ""} {
         set answer [tk_messageBox -icon question -type yesno \
-            -title "Auto Comment" \
-            -message "No API key configured for [string totitle $provider].\n\nWould you like to configure it now?" \
+            -title "Game Comment" \
+            -message "This needs a model first: $why.\n\nOpen the settings now?" \
             -parent .]
         if {$answer eq "yes"} {
             ::auto_comment::configureApiKey
@@ -420,13 +414,11 @@ proc ::analysis_auto_comment::run_batch {{engineId ""}} {
                 set prompt "${prefix}\n${prompt}"
             }
 
-            # Query LLM
+            # Query LLM. The batch prompt asks for the move commentary AND a
+            # game summary, and a reasoning model spends part of the budget
+            # before it writes: the per-move default is far too small here.
             set commentary ""
-            if {$provider eq "deepseek"} {
-                set commentary [::auto_comment::queryDeepSeek $prompt]
-            } else {
-                set commentary [::auto_comment::queryGemini $prompt]
-            }
+            set commentary [::auto_comment::query $prompt 1200]
 
             ::analysis_auto_comment::logDebug "\n--- LLM Response Received ---"
             ::analysis_auto_comment::logDebug "Commentary length: [string length $commentary] characters"

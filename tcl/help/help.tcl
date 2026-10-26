@@ -2549,6 +2549,18 @@ set helpText(GameComment) {<h1>Engine Window: Game Comment Button</h1>
   </ul>
   </p>
   
+  <h3>Choosing a provider and a model</h3>
+  <p>
+  Game Comment needs an AI provider and a model before it can write anything.
+  Press <b>Settings...</b> in the Game Comment dialog once, choose a provider -
+  Google Gemini, DeepSeek, OpenCode Console, an OpenAI-compatible endpoint such as
+  a gateway or vLLM, or a local server such as Ollama or LM Studio - then choose a
+  model for it. With nothing configured the dialog offers to open these settings;
+  no commentary request is sent until a provider and a model are chosen.
+  <b>Load Models</b> asks the provider which models it offers. The choice is saved
+  when you press OK.
+  </p>
+  
   <h3>Usage</h3>
   <p>
   This feature is ideal for quickly adding educational notes to a game you've already
@@ -2556,7 +2568,7 @@ set helpText(GameComment) {<h1>Engine Window: Game Comment Button</h1>
   explanations align with your specific engine analysis.
   </p>
   
-  <p><footer>(Updated: scidCommunity, September 2026)</footer></p>
+  <p><footer>(Updated: scidCommunity, October 2026)</footer></p>
 }
 
 

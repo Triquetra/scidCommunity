@@ -1,14 +1,51 @@
 # Copyright (C) 2025-2026 Hugh Whelan
+# Copyright (C) 2026 David Crandall
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 ############################################################
 ### Auto Comment - AI-generated chess commentary
-### Queries engine evaluation APIs and uses an LLM (Gemini
-### or DeepSeek) to generate natural language commentary.
+### Queries engine evaluation APIs and uses an LLM (Gemini,
+### DeepSeek, an OpenAI-compatible endpoint, a local model,
+### or OpenCode Console) to generate natural language
+### commentary.
 
 namespace eval ::auto_comment {
-    # LLM provider: "gemini" or "deepseek"
-    options.store ::auto_comment::provider "gemini"
+    # LLM provider, one value for every path:
+    #   none    no model at all - no request is ever made
+    #   local   any Ollama-style server (ollama, LM Studio's Ollama endpoint)
+    #   openai  any OpenAI-compatible endpoint: DeepSeek, Gemini's compatibility
+    #           endpoint, vLLM, LM Studio, a gateway...
+    #   opencode OpenCode Console's model gateway, which is OpenAI-compatible
+    #   gemini  Google's native API   (kept until Game Comment is retired)
+    #   deepseek DeepSeek's native API (kept until Game Comment is retired)
+    # The default is "none": a review is complete without prose, and a machine
+    # with no model should behave exactly like one whose owner has not chosen a
+    # model yet. Nothing is sent anywhere until someone picks a provider, and an
+    # existing install keeps whatever it already stored.
+    options.store ::auto_comment::provider "none"
+
+    # Local (Ollama-style) settings
+    options.store ::auto_comment::localUrl "http://localhost:11434"
+    options.store ::auto_comment::localModel ""
+
+    # OpenAI-compatible settings
+    options.store ::auto_comment::openaiUrl "https://api.deepseek.com"
+    options.store ::auto_comment::openaiKey ""
+    options.store ::auto_comment::openaiModel ""
+
+    # OpenCode Console settings. The gateway itself is a commercial service, so
+    # both roots live here where a rename or a path change is one line.
+    # Its model list is a sibling of the chat root, not a child of it:
+    # .../inference/v1/models answers, .../inference/openai/v1/models does not.
+    options.store ::auto_comment::opencodeKey ""
+    options.store ::auto_comment::opencodeModel ""
+    variable opencodeBase      "https://opencode.ai/inference/openai"
+    variable opencodeModelsUrl "https://opencode.ai/inference/v1/models"
+
+    # Scratch model for "none": the dialogs bind their model field to one
+    # variable per provider, and without this the empty provider kept showing
+    # Gemini's model name next to "LLM Provider: none". Never persisted.
+    variable noModel ""
 
     # Gemini settings
     options.store ::auto_comment::apiKey ""
@@ -91,16 +128,377 @@ proc ::auto_comment::fitWindow {w {minW 0} {minH 0}} {
     wm geometry $w "${reqW}x${reqH}+${x}+${y}"
 }
 
+# ::auto_comment::providerList
+#   The values the settings combo offers, in the order it shows them.
+proc ::auto_comment::providerList {} {
+    return {none local openai opencode gemini deepseek}
+}
+
+# ::auto_comment::providerReady
+#   Empty when the selected provider has what it needs, otherwise the reason it
+#   cannot run - shown to the user instead of a request that silently fails.
+proc ::auto_comment::providerReady {} {
+    switch -- $::auto_comment::provider {
+        none     { return "no model selected" }
+        local {
+            if {$::auto_comment::localUrl eq ""} { return "no local endpoint set" }
+            if {$::auto_comment::localModel eq ""} { return "no local model selected" }
+            return ""
+        }
+        openai {
+            if {$::auto_comment::openaiUrl eq ""} { return "no endpoint set" }
+            if {$::auto_comment::openaiModel eq ""} { return "no model selected" }
+            return ""
+        }
+        opencode {
+            # the gateway requires the header for every paid model, so a missing
+            # key is a refusal here rather than a 401 from the endpoint
+            if {$::auto_comment::opencodeKey eq ""} { return "no OpenCode key set" }
+            if {$::auto_comment::opencodeModel eq ""} { return "no OpenCode model selected" }
+            return ""
+        }
+        gemini {
+            if {$::auto_comment::apiKey eq ""} { return "no Gemini key set" }
+            if {$::auto_comment::model eq ""} { return "no Gemini model selected" }
+            return ""
+        }
+        deepseek {
+            if {$::auto_comment::deepseekApiKey eq ""} { return "no DeepSeek key set" }
+            if {$::auto_comment::deepseekModel eq ""} { return "no DeepSeek model selected" }
+            return ""
+        }
+    }
+    return "unknown provider: $::auto_comment::provider"
+}
+
+# ::auto_comment::baseUrl
+#   Normalise an API base the user typed. Both forms of the same endpoint are
+#   accepted - "https://api.openai.com" and "https://api.openai.com/v1" - so a
+#   caller can always append its own "/v1/..." path without doubling the version
+#   segment. Trailing slashes are dropped too.
+proc ::auto_comment::baseUrl {url} {
+    set base [string trim [string trimright $url /]]
+    regsub -nocase {/v1$} $base "" base
+    return [string trimright $base /]
+}
+
+# ::auto_comment::urlHost
+#   The host of an http(s) URL, without userinfo, port or brackets. "" when the
+#   string is not an absolute URL.
+proc ::auto_comment::urlHost {url} {
+    if {![regexp -nocase {^[a-z][a-z0-9+.-]*://([^/?#]*)} [string trim $url] -> auth]} {
+        return ""
+    }
+    set auth [string range $auth [expr {[string last "@" $auth] + 1}] end]
+    if {[string match {\[*} $auth]} {
+        return [string range $auth 0 [string first "\]" $auth]]
+    }
+    return [lindex [split $auth ":"] 0]
+}
+
+# ::auto_comment::isLoopbackHost
+#   True for a host that never leaves this machine. vLLM and LM Studio answer on
+#   http://localhost:8000, so loopback is the one place a cleartext request is
+#   not a leak.
+proc ::auto_comment::isLoopbackHost {host} {
+    set h [string tolower [string trim $host]]
+    if {[string match {\[*} $h]} { set h [string range $h 1 end-1] }
+    if {$h in {localhost 127.0.0.1 ::1}} { return 1 }
+    return [regexp {^127\.[0-9]+\.[0-9]+\.[0-9]+$} $h]
+}
+
+# ::auto_comment::cleartextKeyError
+#   "" when it is safe to send an API key to $url, otherwise the reason to
+#   refuse. A key over http to a remote host would go out in clear text; the
+#   endpoint may still be used without a key (the dialog says to leave it empty
+#   when the endpoint needs none).
+proc ::auto_comment::cleartextKeyError {url key} {
+    if {$key eq ""} { return "" }
+    if {[regexp -nocase {^https://} [string trim $url]]} { return "" }
+    if {[::auto_comment::isLoopbackHost [::auto_comment::urlHost $url]]} { return "" }
+    return "refusing to send the API key in clear text to \"$url\": use https, or clear the key when the endpoint needs none"
+}
+
+# ::auto_comment::writeRequestFile
+#   Write a request body to a fresh file and return its path. The name is
+#   unpredictable and the file is created exclusively and owner-only, so neither
+#   a pre-created file or symlink nor another local account can reach the body:
+#   it carries the prompt, and the prompt carries game data.
+proc ::auto_comment::writeRequestFile {body {tag chat}} {
+    set dir [::auto_comment::getTempDir]
+    for {set attempt 0} {$attempt < 10} {incr attempt} {
+        set name "auto_comment_${tag}_[pid]_[clock seconds]_[clock clicks]_[expr {int(rand() * 1000000)}].json"
+        set path [file join $dir $name]
+        # EXCL prevents substitution, 0600 prevents reading: a shared /tmp uses
+        # 0644 by default, which is world-readable while curl runs.
+        if {[catch {set fd [open $path {WRONLY CREAT EXCL} 0600]}]} { continue }
+        if {[catch {
+            puts -nonewline $fd $body
+            close $fd
+        } err]} {
+            catch {close $fd}
+            catch {file delete -force $path}
+            return -code error $err
+        }
+        return $path
+    }
+    return -code error "cannot create a request file in $dir"
+}
+
+# ::auto_comment::writeCurlConfig
+#   Write the auth header to a curl config file and return its path.
+#
+#   The key must not go in curl's arguments: any local user can read another
+#   process's argv with ps or /proc, which would undo the 0600 options file.
+#   "header = ..." in a config file is the documented way to pass it without
+#   an argument, and the file is created owner-only by writeRequestFile.
+proc ::auto_comment::writeCurlConfig {header {tag auth}} {
+    set value [string map [list "\\" "\\\\" "\"" "\\\""] $header]
+    return [::auto_comment::writeRequestFile "header = \"$value\"\n" $tag]
+}
+
+# ::auto_comment::chatEndpoint
+#   The URL a chat request goes to for the selected provider.
+proc ::auto_comment::chatEndpoint {} {
+    switch -- $::auto_comment::provider {
+        local  { return "[::auto_comment::baseUrl $::auto_comment::localUrl]/api/chat" }
+        openai {
+            set base [::auto_comment::baseUrl $::auto_comment::openaiUrl]
+            # A full endpoint pasted from a provider's documentation is used as
+            # it stands. Appending the path to it again is the classic 404, and
+            # copying the endpoint is what people do.
+            if {[string match -nocase */chat/completions $base]} { return $base }
+            # Gemini's compatibility root carries its own version segment, so it
+            # takes the path without the leading /v1.
+            if {[string match -nocase */v1beta/openai $base]} { return "$base/chat/completions" }
+            return "$base/v1/chat/completions"
+        }
+        opencode { return "$::auto_comment::opencodeBase/v1/chat/completions" }
+    }
+    return ""
+}
+
+# ::auto_comment::modelsUrl
+#   The model-list URL that belongs to a chat base. Accepts the same forms as
+#   chatEndpoint - a base with or without /v1, or the full endpoint, which is
+#   what gets pasted - and keeps Gemini's compatibility root on its own version
+#   segment, because /v1/models does not exist below it.
+proc ::auto_comment::modelsUrl {url} {
+    set base [string trim $url]
+    regsub -nocase {/chat/completions$} $base "" base
+    set base [::auto_comment::baseUrl $base]
+    if {[string match -nocase */v1beta/openai $base]} { return "$base/models" }
+    return "$base/v1/models"
+}
+
+# ::auto_comment::providerModel
+#   The model id for the selected chat provider. Each generic provider keeps its
+#   own model, so switching channels does not overwrite the other one's choice.
+proc ::auto_comment::providerModel {} {
+    switch -- $::auto_comment::provider {
+        local    { return $::auto_comment::localModel }
+        openai   { return $::auto_comment::openaiModel }
+        opencode { return $::auto_comment::opencodeModel }
+    }
+    return ""
+}
+
+# ::auto_comment::chatBody
+#   The request body for the selected provider. Ollama's native API takes
+#   "options num_predict"; OpenAI-compatible ones take "max_tokens". Both take a
+#   single user message.
+proc ::auto_comment::chatBody {prompt {maxTokens 300}} {
+    set esc [::auto_comment::escapeJson $prompt]
+    switch -- $::auto_comment::provider {
+        local {
+            set model [::auto_comment::escapeJson $::auto_comment::localModel]
+            return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"options\":{\"num_predict\":$maxTokens}}"
+        }
+        openai -
+        opencode {
+            set model [::auto_comment::escapeJson [::auto_comment::providerModel]]
+            return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"max_tokens\":$maxTokens}"
+        }
+    }
+    return ""
+}
+
+# ::auto_comment::chatAuth
+#   The Authorization header value, or "" when the endpoint needs no key. A local
+#   server must never be sent someone's cloud key.
+proc ::auto_comment::chatAuth {} {
+    switch -- $::auto_comment::provider {
+        opencode {
+            if {$::auto_comment::opencodeKey eq ""} { return "" }
+            # the OpenCode endpoint is always https, so no cleartext case exists
+            return "Authorization: Bearer $::auto_comment::opencodeKey"
+        }
+        openai {
+            if {$::auto_comment::openaiKey eq ""} { return "" }
+            # queryChat refuses this case before it gets here; keeping the check
+            # means a future caller cannot send the key over cleartext either.
+            if {[::auto_comment::cleartextKeyError $::auto_comment::openaiUrl $::auto_comment::openaiKey] ne ""} {
+                return ""
+            }
+            return "Authorization: Bearer $::auto_comment::openaiKey"
+        }
+    }
+    return ""
+}
+
+# ::auto_comment::replyText
+#   Pull the assistant text out of a chat response. OpenAI-compatible endpoints
+#   answer in choices[0].message.content; Ollama in message.content. Both are
+#   read here so the caller does not care which provider produced the reply.
+proc ::auto_comment::replyText {raw} {
+    set text [::auto_comment::extractOpenAIChoice $raw]
+    if {$text eq ""} { set text [::auto_comment::extractOllamaMessage $raw] }
+    return $text
+}
+
+proc ::auto_comment::extractOpenAIChoice {raw} {
+    if {![regexp {"choices"\s*:\s*\[} $raw]} { return "" }
+    if {[regexp {"content"\s*:\s*"((?:[^"\\]|\\.)*)"} $raw -> text]} {
+        return [::auto_comment::unescapeJson $text]
+    }
+    return ""
+}
+
+proc ::auto_comment::extractOllamaMessage {raw} {
+    if {![regexp {"message"\s*:\s*\{.*?"content"\s*:\s*"((?:[^"\\]|\\.)*)"} $raw -> text]} {
+        return ""
+    }
+    return [::auto_comment::unescapeJson $text]
+}
+
+# ::auto_comment::unescapeJson
+#   Minimal JSON string decoder: the escapes a chat reply actually contains.
+#   subst does the work in one pass. A string map in front of it would have to
+#   key on the already-decoded forms, and did: a content of C:\new matched a
+#   "backslash backslash n" key and became a newline, and two literal
+#   backslashes collapsed into one. Decode each escape exactly once.
+proc ::auto_comment::unescapeJson {text} {
+    return [subst -nocommands -novariables $text]
+}
+
+# ::auto_comment::replyError
+#   The message inside an API error response, or "" when the body is not one.
+#   OpenAI-compatible endpoints put the text in error.message; the OpenCode
+#   gateway wraps the same object one level deeper, and a few endpoints answer
+#   with a bare string. The text is what the user needs: a missing key, a model
+#   that is on another API, an unpaid plan.
+proc ::auto_comment::replyError {raw} {
+    if {[regexp {"error"\s*:\s*\{} $raw]} {
+        if {[regexp {"message"\s*:\s*"((?:[^"\\]|\\.)*)"} $raw -> msg]} {
+            return [::auto_comment::unescapeJson $msg]
+        }
+        return "API error: [string range [string trim $raw] 0 300]"
+    }
+    if {[regexp {"error"\s*:\s*"((?:[^"\\]|\\.)*)"} $raw -> msg]} {
+        return [::auto_comment::unescapeJson $msg]
+    }
+    return ""
+}
+
+# ::auto_comment::query
+#   One entry point for every caller. Returns the assistant text, or a string
+#   starting with "ERROR:" that the caller shows to the user. "none" is a
+#   refusal, not a failure: nothing is sent, and the caller is expected to have
+#   offered the user a way to turn the coach on.
+proc ::auto_comment::query {prompt {maxTokens 300}} {
+    switch -- $::auto_comment::provider {
+        none     { return "ERROR: no model selected (open Game Comment and press Settings...)" }
+        gemini   { return [::auto_comment::queryGemini $prompt] }
+        deepseek { return [::auto_comment::queryDeepSeek $prompt] }
+        local -
+        openai -
+        opencode { return [::auto_comment::queryChat $prompt $maxTokens] }
+    }
+    return "ERROR: unknown provider: $::auto_comment::provider"
+}
+
+# ::auto_comment::queryChat
+#   The transport for both generic providers: one request shape per provider,
+#   written to a temp file and handed to curl, exactly like the native DeepSeek
+#   path so Windows (curl.exe) and Unix behave the same.
+proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
+    set reason [::auto_comment::providerReady]
+    if {$reason ne ""} { return "ERROR: $reason" }
+    # Only the OpenAI-compatible channel sends a user key to a user-typed URL.
+    # Gating on the provider keeps unrelated saved settings from rejecting a
+    # local request the user never pointed at that endpoint.
+    if {$::auto_comment::provider eq "openai"} {
+        set refuse [::auto_comment::cleartextKeyError $::auto_comment::openaiUrl $::auto_comment::openaiKey]
+        if {$refuse ne ""} { return "ERROR: $refuse" }
+    }
+    set url [::auto_comment::chatEndpoint]
+    set body [::auto_comment::chatBody $prompt $maxTokens]
+
+    if {[catch {set tmpfile [::auto_comment::writeRequestFile $body chat]} err]} {
+        return "ERROR: cannot write the request: $err"
+    }
+
+    set args [list curl -s --connect-timeout 15 --max-time 180 \
+        -H {Content-Type: application/json} -X POST --data-binary @$tmpfile]
+    set authfile ""
+    set auth [::auto_comment::chatAuth]
+    if {$auth ne ""} {
+        if {[catch {set authfile [::auto_comment::writeCurlConfig $auth]} err]} {
+            catch {file delete -force $tmpfile}
+            return "ERROR: cannot write the request: $err"
+        }
+        lappend args --config $authfile
+    }
+    lappend args $url
+
+    set result ""
+    set ok 0
+    if {![catch {exec {*}$args 2>@1} result]} { set ok 1 }
+    catch { file delete -force $tmpfile }
+    if {$authfile ne ""} { catch {file delete -force $authfile} }
+    if {!$ok} {
+        return "ERROR: request failed (network error or timeout): [string range [string trim $result] 0 300]"
+    }
+    set err [::auto_comment::replyError $result]
+    if {$err ne ""} { return "ERROR: $err" }
+    set text [::auto_comment::finishReply $result]
+    if {$text eq ""} {
+        return "ERROR: the endpoint returned no text (check the model name)"
+    }
+    return $text
+}
+
+# ::auto_comment::finishReply
+#   Turn a raw response into the text a caller writes: extract it, then apply the
+#   same normalisation the native providers use. The prompt asks for plain text;
+#   a model that ignores that must not be able to put "nf3" or "**bold**" into
+#   the PGN.
+proc ::auto_comment::finishReply {raw} {
+    return [string trim [::auto_comment::cleanupText [::auto_comment::replyText $raw]]]
+}
+
 # ::auto_comment::modelChoices
 #   Returns the fallback list of model ids for the given provider.  These are
 #   only defaults; the "Load Models" button replaces them with the live list
 #   retrieved from the provider.
 #
 proc ::auto_comment::modelChoices {provider} {
-    if {$provider eq "deepseek"} {
-        return {deepseek-v4-pro deepseek-flash}
+    switch -- $provider {
+        deepseek { return {deepseek-v4-pro deepseek-flash} }
+        gemini {
+            return {gemini-3.6-flash gemini-3.5-flash-lite gemini-2.5-flash gemini-2.5-flash-lite}
+        }
+        opencode {
+            # Chat-completions models the gateway serves to other clients. GPT
+            # and Grok are Responses, Claude and most Qwen are Messages, Jev is
+            # SystemOne, and the free tier answers OpenCode itself (403 here):
+            # listing any of those would only produce a failed request. "Load
+            # Models" asks the gateway and filters the same way.
+            return {glm-5.3-flash deepseek-v4.1-flash minimax-m3 kimi-k2.6 mistral-large-4}
+        }
     }
-    return {gemini-3.6-flash gemini-3.5-flash-lite gemini-2.5-flash gemini-2.5-flash-lite}
+    # local and openai list what the endpoint reports; nothing is guessed
+    return {}
 }
 
 # ::auto_comment::syncModelCombo
@@ -110,10 +508,16 @@ proc ::auto_comment::modelChoices {provider} {
 #
 proc ::auto_comment::syncModelCombo {combo} {
     if {![winfo exists $combo]} { return }
-    if {$::auto_comment::provider eq "deepseek"} {
-        set var ::auto_comment::deepseekModel
-    } else {
-        set var ::auto_comment::model
+    # "none" - and any value a hand-edited options file might hold - binds to a
+    # scratch variable, so the model field stays empty instead of showing
+    # Gemini's model beside "LLM Provider: none".
+    switch -- $::auto_comment::provider {
+        local    { set var ::auto_comment::localModel }
+        openai   { set var ::auto_comment::openaiModel }
+        opencode { set var ::auto_comment::opencodeModel }
+        gemini   { set var ::auto_comment::model }
+        deepseek { set var ::auto_comment::deepseekModel }
+        default  { set var ::auto_comment::noModel }
     }
     $combo configure -textvariable $var \
         -values [::auto_comment::modelChoices $::auto_comment::provider]
@@ -128,6 +532,65 @@ proc ::auto_comment::openSettings {combo} {
     if {[winfo exists .autoCommentConfig]} {
         bind .autoCommentConfig <Destroy> \
             "+if {![winfo exists .autoCommentConfig]} { ::auto_comment::syncModelCombo $combo }"
+    }
+}
+
+# ::auto_comment::syncProviderSections
+#   Show only the section that belongs to the selected provider. Five sets of
+#   fields packed at once is unreadable, and the dialog is the only place a user
+#   finds out that a local model needs no key.
+proc ::auto_comment::syncProviderSections {w} {
+    if {![winfo exists $w.content]} { return }
+    set want $::auto_comment::provider
+    if {$want ni {none local openai opencode gemini deepseek}} { set want none }
+    # The "no model yet" note lives in a frame called "note", not "none"; without
+    # this the default provider matched no section and the dialog opened with no
+    # body at all - which is the one state a fresh install is in.
+    set show [expr {$want eq "none" ? "note" : $want}]
+    foreach name {note local openai opencode gemini deepseek} {
+        set frame $w.content.$name
+        if {![winfo exists $frame]} { continue }
+        if {$name eq $show} {
+            # Plain pack, no -before: every section is a child of $w.content, which
+            # is itself packed above $w.buttons, so the order inside the content
+            # frame is all that matters - and Tk refuses -before across masters.
+            pack $frame -fill x -pady {0 10}
+        } else {
+            pack forget $frame
+        }
+    }
+    # The sections are very different heights, so a switch from "none" to a
+    # five-widget section would otherwise leave the dialog sized for two lines.
+    # Size only: re-centring here would make the window jump on every change.
+    if {[winfo exists $w] && [winfo ismapped $w]} {
+        update idletasks
+        # Size only: Tk keeps the window where it is. Passing a position read
+        # back from winfo would hand the window manager its own coordinates and
+        # let the dialog drift on every provider change.
+        set wd [winfo reqwidth $w]
+        set ht [winfo reqheight $w]
+        # fitWindow caps a new dialog on the screen; this path grows one that is
+        # already up, so it has to cap the same way. Without it a switch made
+        # near the bottom edge grows the window downward and takes the OK row
+        # off the screen - measured at 1633 on a 1440-tall desktop, 193px below
+        # the edge - and the tallest section is already 654px against the 688px
+        # a 1366x768 display leaves after fitWindow's margins.
+        set maxW [expr {[winfo screenwidth $w] - 40}]
+        set maxH [expr {[winfo screenheight $w] - 80}]
+        if {$wd > $maxW} { set wd $maxW }
+        if {$ht > $maxH} { set ht $maxH }
+        # Capping the height is not enough on its own: the window keeps its top,
+        # so a capped dialog can still hang past the bottom edge. Lift it by the
+        # overlap it would have, which leaves a dialog that fits exactly where
+        # the user put it and needs no assumption about the window decoration.
+        set limit [expr {[winfo screenheight $w] - 40}]
+        set over [expr {[winfo rooty $w] + $ht - $limit}]
+        if {$over > 0} {
+            set y [expr {max(0, [winfo y $w] - $over)}]
+            wm geometry $w "${wd}x${ht}+[winfo x $w]+${y}"
+        } else {
+            wm geometry $w "${wd}x${ht}"
+        }
     }
 }
 
@@ -150,7 +613,7 @@ proc ::auto_comment::configureApiKey {} {
     pack $w.content -fill both -expand 1
 
     ttk::label $w.content.info -text \
-        "Configure your LLM provider and API key(s).\nKeys are stored locally on your machine only.\nUse Options > Save Options to keep settings between sessions." \
+        "Configure your LLM provider and API key(s).\nEach provider keeps its own key and model, so you can pick a different one above at any time without losing the settings you already have.\nKeys are stored locally on your machine only.\nOK saves these settings to your options file." \
         -wraplength 420 -justify left
     pack $w.content.info -anchor w -pady {0 10}
 
@@ -158,8 +621,76 @@ proc ::auto_comment::configureApiKey {} {
     ttk::label $w.content.provlbl -text "LLM Provider:"
     pack $w.content.provlbl -anchor w
     ttk::combobox $w.content.provider -textvariable ::auto_comment::provider \
-        -values {gemini deepseek} -state readonly -width 15
+        -values [::auto_comment::providerList] -state readonly -width 18
     pack $w.content.provider -anchor w -pady {0 10}
+    bind $w.content.provider <<ComboboxSelected>> \
+        [list ::auto_comment::syncProviderSections $w]
+
+    # --- none ---
+    ttk::label $w.content.note -justify left -wraplength 420 -text \
+        "No model selected.\nGame comments are written without AI prose; the review itself still runs."
+
+    # --- Local (Ollama-style) ---
+    ttk::labelframe $w.content.local -text "Local model" -padding 10
+    ttk::label $w.content.local.urllbl -text "Endpoint:"
+    pack $w.content.local.urllbl -anchor w
+    ttk::entry $w.content.local.url -width 50 -textvariable ::auto_comment::localUrl
+    pack $w.content.local.url -fill x -pady {0 5}
+    ttk::label $w.content.local.modellbl -text "Model:"
+    pack $w.content.local.modellbl -anchor w
+    ttk::combobox $w.content.local.model -width 30 -textvariable ::auto_comment::localModel \
+        -values [::auto_comment::modelChoices local]
+    pack $w.content.local.model -anchor w -pady {0 5}
+    ttk::button $w.content.local.load -text "Load Models" \
+        -command [list ::auto_comment::loadModels $w.content.local.model local]
+    pack $w.content.local.load -anchor w -pady {0 5}
+    ttk::label $w.content.local.hint -justify left -wraplength 420 -text \
+        "Works with Ollama, LM Studio and any server that answers /api/chat. No key and no GPU required: a small model is enough."
+    pack $w.content.local.hint -anchor w
+
+    # --- OpenAI-compatible ---
+    ttk::labelframe $w.content.openai -text "Cloud / OpenAI-compatible" -padding 10
+    ttk::label $w.content.openai.urllbl -text "Endpoint:"
+    pack $w.content.openai.urllbl -anchor w
+    ttk::entry $w.content.openai.url -width 50 -textvariable ::auto_comment::openaiUrl
+    pack $w.content.openai.url -fill x -pady {0 5}
+    ttk::label $w.content.openai.keylbl -text "API key (leave empty if the endpoint needs none):"
+    pack $w.content.openai.keylbl -anchor w
+    ttk::entry $w.content.openai.key -width 50 -textvariable ::auto_comment::openaiKey -show "*"
+    pack $w.content.openai.key -fill x -pady {0 5}
+    ttk::label $w.content.openai.modellbl -text "Model:"
+    pack $w.content.openai.modellbl -anchor w
+    ttk::combobox $w.content.openai.model -width 30 -textvariable ::auto_comment::openaiModel \
+        -values [::auto_comment::modelChoices openai]
+    pack $w.content.openai.model -anchor w -pady {0 5}
+    ttk::button $w.content.openai.load -text "Load Models" \
+        -command [list ::auto_comment::loadModels $w.content.openai.model openai]
+    pack $w.content.openai.load -anchor w -pady {0 5}
+    ttk::label $w.content.openai.hint -justify left -wraplength 420 -text \
+        "DeepSeek, Gemini's compatibility endpoint, vLLM, a gateway: anything that speaks /v1/chat/completions. Either the base URL or the full endpoint can be pasted."
+    pack $w.content.openai.hint -anchor w
+
+    # --- OpenCode Console ---
+    ttk::labelframe $w.content.opencode -text "OpenCode Console" -padding 10
+    ttk::label $w.content.opencode.keylbl -text "API key:"
+    pack $w.content.opencode.keylbl -anchor w
+    ttk::entry $w.content.opencode.key -width 50 -textvariable ::auto_comment::opencodeKey -show "*"
+    pack $w.content.opencode.key -fill x -pady {0 5}
+    ttk::label $w.content.opencode.modellbl -text "Model:"
+    pack $w.content.opencode.modellbl -anchor w
+    ttk::combobox $w.content.opencode.model -width 30 -textvariable ::auto_comment::opencodeModel \
+        -values [::auto_comment::modelChoices opencode]
+    pack $w.content.opencode.model -anchor w -pady {0 5}
+    ttk::button $w.content.opencode.load -text "Load Models" \
+        -command [list ::auto_comment::loadModels $w.content.opencode.model opencode]
+    pack $w.content.opencode.load -anchor w -pady {0 5}
+    ttk::button $w.content.opencode.open -text "Get an API Key" -command {
+        openURL "https://opencode.ai/console"
+    }
+    pack $w.content.opencode.open -anchor w -pady {0 5}
+    ttk::label $w.content.opencode.hint -justify left -wraplength 420 -text \
+        "OpenCode's model gateway: paid models or a Go plan. Free models only answer OpenCode itself, so they are not listed. Only chat-completions models work here; copy any other model id from the console."
+    pack $w.content.opencode.hint -anchor w
 
     # --- Gemini section ---
     ttk::labelframe $w.content.gemini -text "Google Gemini" -padding 10
@@ -213,13 +744,43 @@ proc ::auto_comment::configureApiKey {} {
     ttk::frame $w.buttons -padding {15 5}
     pack $w.buttons -fill x
 
-    ttk::button $w.buttons.ok -text "OK" -command "destroy $w"
+    ttk::button $w.buttons.ok -text "OK" -command [list ::auto_comment::saveSettings $w]
     pack $w.buttons.ok -side right -padx 5
 
-    bind $w <Return> "destroy $w"
+    bind $w <Return> [list ::auto_comment::saveSettings $w]
     bind $w <Escape> "destroy $w"
 
+    ::auto_comment::syncProviderSections $w
     ::auto_comment::fitWindow $w
+}
+
+# ::auto_comment::saveSettings
+#   Persist the provider settings and close the dialog.
+#
+#   These variables live in this namespace, and options.dat is loaded before
+#   tcl/tools/auto_comment.tcl exists, so a file holding only
+#   "set ::auto_comment::provider ..." would fail to load ("parent namespace
+#   doesn't exist") at the next start. options.write is the whole-file saver
+#   behind Options > Save Options: it writes "namespace eval" for every
+#   registered namespace first, so the namespace exists by the time the value
+#   is set. Using it here is also why the dialog no longer asks the user to
+#   remember a separate menu action: a key typed and then lost on exit is the
+#   one failure that looks like the feature is broken.
+proc ::auto_comment::saveSettings {w} {
+    set saved 0
+    if {[catch {set saved [options.write]} err]} {
+        tk_messageBox -icon warning -type ok -title "Auto Comment" \
+            -message "Could not save the settings to the options file:\n\n$err" \
+            -parent $w
+        return
+    }
+    if {!$saved} {
+        # options.write reports a failed open itself and returns 0. Keep the
+        # dialog: a provider and a key typed and then thrown away with the
+        # window is the silent loss this persistence exists to prevent.
+        return
+    }
+    destroy $w
 }
 
 # ::auto_comment::fetchLichessEval
@@ -630,8 +1191,13 @@ proc ::auto_comment::fetchGeminiModels {} {
 proc ::auto_comment::fetchDeepSeekModels {} {
     set url "$::auto_comment::deepseekApiBase/models"
     set result ""
-    if {[catch {exec curl -s --max-time 15 \
-            -H "Authorization: Bearer $::auto_comment::deepseekApiKey" \
+    set headers {}
+    if {[::auto_comment::cleartextKeyError $url $::auto_comment::deepseekApiKey] eq ""} {
+        lappend headers -H "Authorization: Bearer $::auto_comment::deepseekApiKey"
+    } else {
+        ::auto_comment::logDebug "Auto Comment: not sending the API key to $url: not https"
+    }
+    if {[catch {exec curl -s --max-time 15 {*}$headers \
             $url 2>@1} result]} {
         ::auto_comment::logDebug "Auto Comment: fetchDeepSeekModels curl error: $result"
         return {}
@@ -648,19 +1214,120 @@ proc ::auto_comment::fetchDeepSeekModels {} {
 #   Populates a model combobox with the current models from the given provider.
 #   Warns the user if the fetch fails (e.g. missing API key or no network).
 #
+# ::auto_comment::modelListTargets
+#   Where to look for a model list, as a flat list of alternating url and regex
+#   pairs. Split out of fetchUrlModels so the shape can be checked without a
+#   network: "foreach {target re}" flattens, so each field is its own element.
+proc ::auto_comment::modelListTargets {base {modelsUrl ""}} {
+    # A flat list of alternating url and regex: "foreach {target re}" reads it,
+    # so lappend each field separately. A list of two-element lists would make
+    # the whole pair one target and the request would go to a nonsense URL.
+    if {$modelsUrl ne ""} {
+        # An explicit URL wins: a gateway's model list is not always a child of
+        # its chat root (OpenCode serves .../inference/v1/models while chat lives
+        # under .../inference/openai/v1/...).
+        return [list $modelsUrl {"id"\s*:\s*"([^"]+)"}]
+    }
+    set base [::auto_comment::baseUrl $base]
+    if {$base eq ""} { return {} }
+    return [list [::auto_comment::modelsUrl $base] {"id"\s*:\s*"([^"]+)"} \
+                 "$base/api/tags"              {"name"\s*:\s*"([^"]+)"}]
+}
+
+# ::auto_comment::fetchUrlModels
+#   Ask an endpoint what models it has. /v1/models first (OpenAI-compatible),
+#   then Ollama's /api/tags for a server that only speaks the native API. Model
+#   lists include embedding models, so the caller must let the user choose.
+proc ::auto_comment::fetchUrlModels {base key {modelsUrl ""}} {
+    set ids {}
+    foreach {target re} [::auto_comment::modelListTargets $base $modelsUrl] {
+        set cmd [list curl -s --max-time 10 -H {Accept: application/json}]
+        set authfile ""
+        if {$key ne ""} {
+            # the key only rides an https (or loopback) connection, and never
+            # rides in argv
+            if {[::auto_comment::cleartextKeyError $target $key] eq ""} {
+                if {![catch {set authfile [::auto_comment::writeCurlConfig \
+                        "Authorization: Bearer $key"]} err]} {
+                    lappend cmd --config $authfile
+                } else {
+                    ::auto_comment::logDebug "Auto Comment: cannot write the auth file: $err"
+                }
+            } else {
+                ::auto_comment::logDebug "Auto Comment: not sending the API key to $target: not https"
+            }
+        }
+        lappend cmd $target
+        set raw ""
+        set failed [catch {exec {*}$cmd 2>@1} raw]
+        if {$authfile ne ""} { catch {file delete -force $authfile} }
+        if {$failed} { continue }
+        foreach {all id} [regexp -all -inline $re $raw] { lappend ids $id }
+        if {[llength $ids]} { break }
+    }
+    return [lsort -unique $ids]
+}
+
+# ::auto_comment::chatCompletionsOnly
+#   Drop the models an OpenAI-compatible gateway serves through another API
+#   family, because /chat/completions cannot reach them: GPT and Grok are
+#   Responses, Claude and most Qwen are Messages, Jev is SystemOne. The live
+#   model list does not say which family a model is on, so this keys on the
+#   documented table (opencode.ai/v2/docs/console/models). It fails open: an
+#   unknown new model stays in the list.
+#
+#   The free tier is dropped as well: those models answer OpenCode itself and
+#   return 403 to any other client, key or no key.
+proc ::auto_comment::chatCompletionsOnly {ids} {
+    set out {}
+    foreach id $ids {
+        if {$id in {test big-pickle}} { continue }
+        if {[string match "*-free" $id]} { continue }
+        if {[regexp {^(gpt-|claude-|gemini-|grok-|muse-|jev-)} $id]} { continue }
+        if {[string match "qwen*" $id] && $id ne "qwen3.8-max"} { continue }
+        lappend out $id
+    }
+    return $out
+}
+
 proc ::auto_comment::loadModels {combo provider} {
-    if {$provider eq "deepseek"} {
-        set label "DeepSeek"
-        set models [::auto_comment::fetchDeepSeekModels]
-    } else {
-        set label "Gemini"
-        set models [::auto_comment::fetchGeminiModels]
+    switch -- $provider {
+        deepseek {
+            set label "DeepSeek"
+            set models [::auto_comment::fetchDeepSeekModels]
+        }
+        local {
+            set label "the local server"
+            set models [::auto_comment::fetchUrlModels $::auto_comment::localUrl ""]
+        }
+        openai {
+            set label "the endpoint"
+            set models [::auto_comment::fetchUrlModels $::auto_comment::openaiUrl $::auto_comment::openaiKey]
+        }
+        opencode {
+            set label "OpenCode Console"
+            set models [::auto_comment::chatCompletionsOnly \
+                [::auto_comment::fetchUrlModels "" $::auto_comment::opencodeKey \
+                    $::auto_comment::opencodeModelsUrl]]
+        }
+        default {
+            set label "Gemini"
+            set models [::auto_comment::fetchGeminiModels]
+        }
     }
     if {[llength $models] > 0} {
         $combo configure -values $models
+        # an empty model field is why a review would say "no model selected":
+        # take the first one the endpoint offers so that cannot happen silently
+        if {[$combo cget -textvariable] ne ""} {
+            set var [$combo cget -textvariable]
+            if {![info exists $var] || [set $var] eq ""} {
+                set $var [lindex $models 0]
+            }
+        }
     } else {
         tk_messageBox -icon warning -type ok -title "Auto Comment" \
-            -message "Could not retrieve the $label model list.\n\nCheck your API key and internet connection." \
+            -message "Could not retrieve a model list from $label.\n\nCheck the endpoint, the API key and the internet connection." \
             -parent .
     }
 }
@@ -683,10 +1350,7 @@ proc ::auto_comment::queryGemini {prompt} {
     set escaped [::auto_comment::escapeJson $prompt]
     set jsonBody "{\"contents\":\[{\"parts\":\[{\"text\":\"$escaped\"}\]}\]}"
 
-    set tmpfile [file join [::auto_comment::getTempDir] "auto_comment_req.json"]
-    set fd [open $tmpfile w]
-    puts -nonewline $fd $jsonBody
-    close $fd
+    set tmpfile [::auto_comment::writeRequestFile $jsonBody req]
 
     set result ""
     set ok 0
@@ -767,19 +1431,22 @@ proc ::auto_comment::queryDeepSeek {prompt} {
     set escapedPrompt [::auto_comment::escapeJson $prompt]
     set jsonBody "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$escapedPrompt\"}\],\"stream\":false,\"temperature\":1.0}"
 
-    set tmpfile [file join [::auto_comment::getTempDir] "auto_comment_req.json"]
-    set fd [open $tmpfile w]
-    puts -nonewline $fd $jsonBody
-    close $fd
+    set tmpfile [::auto_comment::writeRequestFile $jsonBody req]
+    set authfile ""
+    if {[catch {set authfile [::auto_comment::writeCurlConfig \
+            "Authorization: Bearer $::auto_comment::deepseekApiKey"]} err]} {
+        catch {file delete -force $tmpfile}
+        return "ERROR: cannot write the request: $err"
+    }
 
     set result ""
     set ok 0
 
     if {![catch {exec curl -s --connect-timeout 15 --max-time 180 \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $::auto_comment::deepseekApiKey" \
+            --config $authfile \
             -X POST \
-            -d @$tmpfile \
+            --data-binary @$tmpfile \
             $url 2>@1} result]} {
         set ok 1
     } else {
@@ -787,6 +1454,7 @@ proc ::auto_comment::queryDeepSeek {prompt} {
     }
 
     catch {file delete -force $tmpfile}
+    catch {file delete -force $authfile}
 
     if {!$ok} {
         return "ERROR: DeepSeek request failed (network error or timeout): [string range [string trim $result] 0 300]"

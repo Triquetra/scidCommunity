@@ -1,0 +1,49 @@
+name: Tcl Tests
+
+on:
+  push:
+    branches: [github]
+  pull_request:
+    branches: [github]
+
+permissions:
+  contents: read
+
+jobs:
+  tcl-harnesses:
+    name: Tcl harnesses (tclsh only)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      # tclsh is all these need: the transport, URL and parsing tests are pure
+      # Tcl, Tk is stubbed inside the provider file, and the options test lifts
+      # one procedure out of tcl/options.tcl.
+      - name: Install Tcl
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tcl
+
+      - name: Provider layer
+        run: tclsh tests/tcl/auto_comment_provider.tcl
+
+      - name: Options file save
+        run: tclsh tests/tcl/options_write.tcl
+
+  auto-comment-dialogs:
+    name: auto_comment dialogs under Tk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      # This one builds real widgets, so it needs Tk and a display. Xvfb
+      # supplies the display; nothing is drawn anywhere the user can see.
+      - name: Install Tcl, Tk and Xvfb
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tcl tk xvfb
+
+      - name: Run the harness
+        run: xvfb-run -a wish tests/tcl/auto_comment_dialogs.tcl

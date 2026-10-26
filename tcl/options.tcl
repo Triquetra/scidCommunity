@@ -672,9 +672,23 @@ ConvertOldOptionVariables
 proc options.write {} {
  uplevel #0 {
   set optionF ""
-  if {[catch {open [scidConfigFile options] w} optionF]} {
+  # Write a temporary file and rename it over the options file once it is
+  # complete, the way options.writeVar already does. Opening the real file "w"
+  # truncated it before a byte was written, so an error part-way through (a
+  # full disk, most obviously) left every saved preference lost rather than
+  # just the setting being changed.
+  #
+  # Report the outcome to the caller: a failed write is shown to the user here
+  # and returns 0, so a caller that must not lose the user's edits can refuse
+  # to close its dialog. An error raised by the body itself still propagates,
+  # with the options file untouched and a stray *.tmp[pid] left behind.
+  set ok 1
+  set realFile [scidConfigFile options]
+  set tmpFile "${realFile}.tmp[pid]"
+  if {[catch {open $tmpFile w} optionF]} {
+    set ok 0
     tk_messageBox -title "scidCommunity: Unable to write file" -type ok -icon warning \
-        -message "Unable to write options file: [scidConfigFile options]\n$optionF"
+        -message "Unable to write options file: $realFile\n$optionF"
   } else {
     puts $optionF "# Scid options file"
     puts $optionF "# Version: $scidVersion"
@@ -852,11 +866,37 @@ proc options.write {} {
       }
     }
 
-    close $optionF
-    catch {file attributes [scidConfigFile options] -permissions 0600}
-    set ::statusBar "Options were saved to: [scidConfigFile options]"
+    set writeErr [options.finishWrite $optionF $tmpFile $realFile]
+    if {$writeErr ne ""} {
+        set ok 0
+        tk_messageBox -title "scidCommunity: Unable to write file" -type ok -icon warning \
+            -message "Unable to write options file: $realFile\n$writeErr"
+    } else {
+        set ::statusBar "Options were saved to: $realFile"
+    }
   }
+  set ok
  }
+}
+
+# options.finishWrite:
+#   Close a fully written temporary options file and move it over the real one.
+#   The rename is what makes the save atomic: until it succeeds the previous
+#   file is still the one on disk, so a failure cannot lose every saved
+#   preference. Returns "" on success, or the error message; the temporary file
+#   is removed either way.
+proc options.finishWrite {fh tmpFile realFile} {
+  set err ""
+  if {[catch {
+    close $fh
+    catch {file attributes $tmpFile -permissions 0600}
+    file rename -force $tmpFile $realFile
+  } err]} {
+    catch {close $fh}
+    catch {file delete -force $tmpFile}
+    return $err
+  }
+  return ""
 }
 
 # options.writeVar:
