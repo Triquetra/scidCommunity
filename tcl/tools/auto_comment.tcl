@@ -3,8 +3,10 @@
 
 ############################################################
 ### Auto Comment - AI-generated chess commentary
-### Queries engine evaluation APIs and uses an LLM (Gemini
-### or DeepSeek) to generate natural language commentary.
+### Queries engine evaluation APIs and uses an LLM (Gemini,
+### DeepSeek, an OpenAI-compatible endpoint, a local model,
+### or OpenCode Console) to generate natural language
+### commentary.
 
 namespace eval ::auto_comment {
     # LLM provider, one value for every path:
@@ -12,6 +14,7 @@ namespace eval ::auto_comment {
     #   local   any Ollama-style server (ollama, LM Studio's Ollama endpoint)
     #   openai  any OpenAI-compatible endpoint: DeepSeek, Gemini's compatibility
     #           endpoint, vLLM, LM Studio, a gateway...
+    #   opencode OpenCode Console's model gateway, which is OpenAI-compatible
     #   gemini  Google's native API   (kept until Game Comment is retired)
     #   deepseek DeepSeek's native API (kept until Game Comment is retired)
     # The default is "none": a review is complete without prose, and a machine
@@ -28,6 +31,15 @@ namespace eval ::auto_comment {
     options.store ::auto_comment::openaiUrl "https://api.deepseek.com"
     options.store ::auto_comment::openaiKey ""
     options.store ::auto_comment::openaiModel ""
+
+    # OpenCode Console settings. The gateway itself is a commercial service, so
+    # both roots live here where a rename or a path change is one line.
+    # Its model list is a sibling of the chat root, not a child of it:
+    # .../inference/v1/models answers, .../inference/openai/v1/models does not.
+    options.store ::auto_comment::opencodeKey ""
+    options.store ::auto_comment::opencodeModel ""
+    variable opencodeBase      "https://opencode.ai/inference/openai"
+    variable opencodeModelsUrl "https://opencode.ai/inference/v1/models"
 
     # Gemini settings
     options.store ::auto_comment::apiKey ""
@@ -113,7 +125,7 @@ proc ::auto_comment::fitWindow {w {minW 0} {minH 0}} {
 # ::auto_comment::providerList
 #   The values the settings combo offers, in the order it shows them.
 proc ::auto_comment::providerList {} {
-    return {none local openai gemini deepseek}
+    return {none local openai opencode gemini deepseek}
 }
 
 # ::auto_comment::providerReady
@@ -130,6 +142,13 @@ proc ::auto_comment::providerReady {} {
         openai {
             if {$::auto_comment::openaiUrl eq ""} { return "no endpoint set" }
             if {$::auto_comment::openaiModel eq ""} { return "no model selected" }
+            return ""
+        }
+        opencode {
+            # the gateway requires the header for every paid model, so a missing
+            # key is a refusal here rather than a 401 from the endpoint
+            if {$::auto_comment::opencodeKey eq ""} { return "no OpenCode key set" }
+            if {$::auto_comment::opencodeModel eq ""} { return "no OpenCode model selected" }
             return ""
         }
         gemini {
@@ -236,6 +255,32 @@ proc ::auto_comment::chatEndpoint {} {
             if {[string match -nocase */v1beta/openai $base]} { return "$base/chat/completions" }
             return "$base/v1/chat/completions"
         }
+        opencode { return "$::auto_comment::opencodeBase/v1/chat/completions" }
+    }
+    return ""
+}
+
+# ::auto_comment::modelsUrl
+#   The model-list URL that belongs to a chat base. Accepts the same forms as
+#   chatEndpoint - a base with or without /v1, or the full endpoint, which is
+#   what gets pasted - and keeps Gemini's compatibility root on its own version
+#   segment, because /v1/models does not exist below it.
+proc ::auto_comment::modelsUrl {url} {
+    set base [string trim $url]
+    regsub -nocase {/chat/completions$} $base "" base
+    set base [::auto_comment::baseUrl $base]
+    if {[string match -nocase */v1beta/openai $base]} { return "$base/models" }
+    return "$base/v1/models"
+}
+
+# ::auto_comment::providerModel
+#   The model id for the selected chat provider. Each generic provider keeps its
+#   own model, so switching channels does not overwrite the other one's choice.
+proc ::auto_comment::providerModel {} {
+    switch -- $::auto_comment::provider {
+        local    { return $::auto_comment::localModel }
+        openai   { return $::auto_comment::openaiModel }
+        opencode { return $::auto_comment::opencodeModel }
     }
     return ""
 }
@@ -251,8 +296,9 @@ proc ::auto_comment::chatBody {prompt {maxTokens 300}} {
             set model [::auto_comment::escapeJson $::auto_comment::localModel]
             return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"options\":{\"num_predict\":$maxTokens}}"
         }
-        openai {
-            set model [::auto_comment::escapeJson $::auto_comment::openaiModel]
+        openai -
+        opencode {
+            set model [::auto_comment::escapeJson [::auto_comment::providerModel]]
             return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"max_tokens\":$maxTokens}"
         }
     }
@@ -339,11 +385,12 @@ proc ::auto_comment::replyError {raw} {
 #   offered the user a way to turn the coach on.
 proc ::auto_comment::query {prompt {maxTokens 300}} {
     switch -- $::auto_comment::provider {
-        none     { return "ERROR: no model selected (Options: Game Comment)" }
+        none     { return "ERROR: no model selected (open Game Comment and press Settings...)" }
         gemini   { return [::auto_comment::queryGemini $prompt] }
         deepseek { return [::auto_comment::queryDeepSeek $prompt] }
         local -
-        openai   { return [::auto_comment::queryChat $prompt $maxTokens] }
+        openai -
+        opencode { return [::auto_comment::queryChat $prompt $maxTokens] }
     }
     return "ERROR: unknown provider: $::auto_comment::provider"
 }
@@ -411,6 +458,14 @@ proc ::auto_comment::modelChoices {provider} {
         gemini {
             return {gemini-3.6-flash gemini-3.5-flash-lite gemini-2.5-flash gemini-2.5-flash-lite}
         }
+        opencode {
+            # Chat-completions models the gateway serves to other clients. GPT
+            # and Grok are Responses, Claude and most Qwen are Messages, Jev is
+            # SystemOne, and the free tier answers OpenCode itself (403 here):
+            # listing any of those would only produce a failed request. "Load
+            # Models" asks the gateway and filters the same way.
+            return {glm-5.3-flash deepseek-v4.1-flash minimax-m3 kimi-k2.6 mistral-large-4}
+        }
     }
     # local and openai list what the endpoint reports; nothing is guessed
     return {}
@@ -426,6 +481,7 @@ proc ::auto_comment::syncModelCombo {combo} {
     switch -- $::auto_comment::provider {
         local    { set var ::auto_comment::localModel }
         openai   { set var ::auto_comment::openaiModel }
+        opencode { set var ::auto_comment::opencodeModel }
         deepseek { set var ::auto_comment::deepseekModel }
         default  { set var ::auto_comment::model }
     }
@@ -452,8 +508,8 @@ proc ::auto_comment::openSettings {combo} {
 proc ::auto_comment::syncProviderSections {w} {
     if {![winfo exists $w.content]} { return }
     set want $::auto_comment::provider
-    if {$want ni {none local openai gemini deepseek}} { set want none }
-    foreach name {note local openai gemini deepseek} {
+    if {$want ni {none local openai opencode gemini deepseek}} { set want none }
+    foreach name {note local openai opencode gemini deepseek} {
         set frame $w.content.$name
         if {![winfo exists $frame]} { continue }
         if {$name eq $want} {
@@ -542,6 +598,28 @@ proc ::auto_comment::configureApiKey {} {
     ttk::label $w.content.openai.hint -justify left -wraplength 420 -text \
         "DeepSeek, Gemini's compatibility endpoint, vLLM, a gateway: anything that speaks /v1/chat/completions. Either the base URL or the full endpoint can be pasted."
     pack $w.content.openai.hint -anchor w
+
+    # --- OpenCode Console ---
+    ttk::labelframe $w.content.opencode -text "OpenCode Console" -padding 10
+    ttk::label $w.content.opencode.keylbl -text "API key:"
+    pack $w.content.opencode.keylbl -anchor w
+    ttk::entry $w.content.opencode.key -width 50 -textvariable ::auto_comment::opencodeKey -show "*"
+    pack $w.content.opencode.key -fill x -pady {0 5}
+    ttk::label $w.content.opencode.modellbl -text "Model:"
+    pack $w.content.opencode.modellbl -anchor w
+    ttk::combobox $w.content.opencode.model -width 30 -textvariable ::auto_comment::opencodeModel \
+        -values [::auto_comment::modelChoices opencode]
+    pack $w.content.opencode.model -anchor w -pady {0 5}
+    ttk::button $w.content.opencode.load -text "Load Models" \
+        -command [list ::auto_comment::loadModels $w.content.opencode.model opencode]
+    pack $w.content.opencode.load -anchor w -pady {0 5}
+    ttk::button $w.content.opencode.open -text "Get an API Key" -command {
+        openURL "https://opencode.ai/console"
+    }
+    pack $w.content.opencode.open -anchor w -pady {0 5}
+    ttk::label $w.content.opencode.hint -justify left -wraplength 420 -text \
+        "OpenCode's model gateway: paid models or a Go plan. Free models only answer OpenCode itself, so they are not listed. Only chat-completions models work here; copy any other model id from the console."
+    pack $w.content.opencode.hint -anchor w
 
     # --- Gemini section ---
     ttk::labelframe $w.content.gemini -text "Google Gemini" -padding 10
@@ -1061,28 +1139,59 @@ proc ::auto_comment::fetchDeepSeekModels {} {
 #   Ask an endpoint what models it has. /v1/models first (OpenAI-compatible),
 #   then Ollama's /api/tags for a server that only speaks the native API. Model
 #   lists include embedding models, so the caller must let the user choose.
-proc ::auto_comment::fetchUrlModels {base key} {
+proc ::auto_comment::fetchUrlModels {base key {modelsUrl ""}} {
     set base [::auto_comment::baseUrl $base]
-    if {$base eq ""} { return {} }
+    if {$base eq "" && $modelsUrl eq ""} { return {} }
+    # An explicit URL wins: a gateway's model list is not always a child of its
+    # chat root (OpenCode serves .../inference/v1/models, while chat lives under
+    # .../inference/openai/v1/...).
+    set tries {}
+    if {$modelsUrl ne ""} {
+        lappend tries [list $modelsUrl {"id"\s*:\s*"([^"]+)"}]
+    } else {
+        lappend tries [list [::auto_comment::modelsUrl $base] {"id"\s*:\s*"([^"]+)"}] \
+                      [list "$base/api/tags" {"name"\s*:\s*"([^"]+)"}]
+    }
     set ids {}
-    foreach {path re} [list "/v1/models" {"id"\s*:\s*"([^"]+)"} \
-                              "/api/tags"  {"name"\s*:\s*"([^"]+)"}] {
+    foreach {target re} $tries {
         set cmd [list curl -s --max-time 10 -H {Accept: application/json}]
         if {$key ne ""} {
             # the key only rides an https (or loopback) connection
-            if {[::auto_comment::cleartextKeyError $base $key] eq ""} {
+            if {[::auto_comment::cleartextKeyError $target $key] eq ""} {
                 lappend cmd -H "Authorization: Bearer $key"
             } else {
-                ::auto_comment::logDebug "Auto Comment: not sending the API key to $base: not https"
+                ::auto_comment::logDebug "Auto Comment: not sending the API key to $target: not https"
             }
         }
-        lappend cmd "$base$path"
+        lappend cmd $target
         set raw ""
         if {[catch {exec {*}$cmd 2>@1} raw]} { continue }
         foreach {all id} [regexp -all -inline $re $raw] { lappend ids $id }
         if {[llength $ids]} { break }
     }
     return [lsort -unique $ids]
+}
+
+# ::auto_comment::chatCompletionsOnly
+#   Drop the models an OpenAI-compatible gateway serves through another API
+#   family, because /chat/completions cannot reach them: GPT and Grok are
+#   Responses, Claude and most Qwen are Messages, Jev is SystemOne. The live
+#   model list does not say which family a model is on, so this keys on the
+#   documented table (opencode.ai/v2/docs/console/models). It fails open: an
+#   unknown new model stays in the list.
+#
+#   The free tier is dropped as well: those models answer OpenCode itself and
+#   return 403 to any other client, key or no key.
+proc ::auto_comment::chatCompletionsOnly {ids} {
+    set out {}
+    foreach id $ids {
+        if {$id in {test big-pickle}} { continue }
+        if {[string match "*-free" $id]} { continue }
+        if {[regexp {^(gpt-|claude-|gemini-|grok-|muse-|jev-)} $id]} { continue }
+        if {[string match "qwen*" $id] && $id ne "qwen3.8-max"} { continue }
+        lappend out $id
+    }
+    return $out
 }
 
 proc ::auto_comment::loadModels {combo provider} {
@@ -1098,6 +1207,12 @@ proc ::auto_comment::loadModels {combo provider} {
         openai {
             set label "the endpoint"
             set models [::auto_comment::fetchUrlModels $::auto_comment::openaiUrl $::auto_comment::openaiKey]
+        }
+        opencode {
+            set label "OpenCode Console"
+            set models [::auto_comment::chatCompletionsOnly \
+                [::auto_comment::fetchUrlModels "" $::auto_comment::opencodeKey \
+                    $::auto_comment::opencodeModelsUrl]]
         }
         default {
             set label "Gemini"
