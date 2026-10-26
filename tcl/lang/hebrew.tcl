@@ -553,7 +553,6 @@ translate V ErrNotOpen {זה לא מסד נתונים פתוח.}
 translate V ErrReadOnly {מסד נתונים זה הוא לקריאה בלבד; לא ניתן לשנות אותו.}
 translate V ErrSearchInterrupted {החיפוש הופסק; התוצאות אינן שלמות.}
 translate V ErrNoClockComments {לא נמצאו הערות לשעון [%clk] במשחק הזה.  הוסף זמני שעון דרך חלון ההערות (Ctrl+E) כדי להשתמש בתכונה זו.}
-translate V ErrFileInUse {שגיאה: הקובץ כבר בשימוש. אנא סגור כל יישום אחר המשתמש במסד נתונים זה. אם התוכנית נסגרה באופן בלתי צפוי, ייתכן שיהיה עליך למחוק את קובץ ה-.lock המשויך למסד הנתונים.}
 
 # Drag and drop
 translate V DndCannotOpenUri {לא ניתן לפתוח את URI}

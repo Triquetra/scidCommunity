@@ -556,7 +556,6 @@ translate T ErrNotOpen {Bu açık bir veritabanı değil.}
 translate T ErrReadOnly {Bu veritabanı salt okunurdur; değiştirilemez.}
 translate T ErrSearchInterrupted {Arama kesintiye uğradı; sonuçlar eksik.}
 translate T ErrNoClockComments {Bu oyunda [%clk] saat yorumu bulunamadı.    Bu özelliği kullanmak için Yorumlar Penceresini (Ctrl+E) kullanarak saat sürelerini ekleyin.}
-translate T ErrFileInUse {Hata: Dosya zaten kullanımda. Lütfen bu veritabanını kullanan diğer uygulamaları kapatın. Program beklenmedik bir şekilde kapatıldıysa veritabanıyla ilişkili .lock dosyasını silmeniz gerekebilir.}
 
 # Drag and drop
 translate T DndCannotOpenUri {URI açılamıyor}

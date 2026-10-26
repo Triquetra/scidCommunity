@@ -593,7 +593,6 @@ translate A ErrNotOpen {これはオープンなデータベースではあり�
 translate A ErrReadOnly {このデータベースは読み取り専用です。変更することはできません。}
 translate A ErrSearchInterrupted {検索は中断されました。結果は不完全です。}
 translate A ErrNoClockComments {このゲームには [%clk] クロック コメントが見つかりませんでした。    この機能を使用するには、コメント ウィンドウ (Ctrl+E) を使用してクロック時間を追加します。}
-translate A ErrFileInUse {エラー: ファイルはすでに使用されています。このデータベースを使用している他のアプリケーションを閉じてください。プログラムが予期せず終了した場合は、データベースに関連付けられた .lock ファイルの削除が必要になる場合があります。}
 
 # Drag and drop
 translate A DndCannotOpenUri {URIを開けません}

@@ -581,7 +581,6 @@ translate N ErrNotOpen {Deze database is niet geopend.} ;
 translate N ErrReadOnly {Deze database is alleen lezen; kan niet veranderd worded.} ;
 translate N ErrSearchInterrupted {Zoeken werd onderbroken; de resultaten zijn onvolledig.} ;
 translate N ErrNoClockComments {Er zijn geen [%clk] klokcommentaren gevonden in dit spel.    Voeg kloktijden toe via het opmerkingenvenster (Ctrl+E) om deze functie te gebruiken.}
-translate N ErrFileInUse {Fout: het bestand is al in gebruik. Sluit alle andere toepassingen die deze database gebruiken. Als het programma onverwacht werd afgesloten, moet u mogelijk het .lock-bestand verwijderen dat aan de database is gekoppeld.}
 
 # Drag and drop
 translate N DndCannotOpenUri {Kan URI niet openen}
