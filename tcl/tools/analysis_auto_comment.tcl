@@ -415,9 +415,11 @@ proc ::analysis_auto_comment::run_batch {{engineId ""}} {
                 set prompt "${prefix}\n${prompt}"
             }
 
-            # Query LLM
+            # Query LLM. The batch prompt asks for the move commentary AND a
+            # game summary, and a reasoning model spends part of the budget
+            # before it writes: the per-move default is far too small here.
             set commentary ""
-            set commentary [::auto_comment::query $prompt]
+            set commentary [::auto_comment::query $prompt 1200]
 
             ::analysis_auto_comment::logDebug "\n--- LLM Response Received ---"
             ::analysis_auto_comment::logDebug "Commentary length: [string length $commentary] characters"

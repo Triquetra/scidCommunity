@@ -268,11 +268,20 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
         if {[info exists msg]} { return "ERROR: $msg" }
         return "ERROR: [string range [string trim $result] 0 300]"
     }
-    set text [string trim [::auto_comment::replyText $result]]
+    set text [::auto_comment::finishReply $result]
     if {$text eq ""} {
         return "ERROR: the endpoint returned no text (check the model name)"
     }
     return $text
+}
+
+# ::auto_comment::finishReply
+#   Turn a raw response into the text a caller writes: extract it, then apply the
+#   same normalisation the native providers use. The prompt asks for plain text;
+#   a model that ignores that must not be able to put "nf3" or "**bold**" into
+#   the PGN.
+proc ::auto_comment::finishReply {raw} {
+    return [string trim [::auto_comment::cleanupText [::auto_comment::replyText $raw]]]
 }
 
 # ::auto_comment::modelChoices
@@ -332,8 +341,10 @@ proc ::auto_comment::syncProviderSections {w} {
         set frame $w.content.$name
         if {![winfo exists $frame]} { continue }
         if {$name eq $want} {
-            # keep the sections above the buttons whatever order they were packed in
-            pack $frame -fill x -pady {0 10} -before $w.buttons
+            # Plain pack, no -before: every section is a child of $w.content, which
+            # is itself packed above $w.buttons, so the order inside the content
+            # frame is all that matters - and Tk refuses -before across masters.
+            pack $frame -fill x -pady {0 10}
         } else {
             pack forget $frame
         }
