@@ -93,6 +93,12 @@ proc ::movelabels::forMover {cp mate stm mover} {
 proc ::movelabels::cpLoss {before after} {
     if {[isMate $before] && [isMate $after]} {
         if {($before > 0) == ($after > 0)} { return 0 }
+        # The signs say who mates, so negative to positive is the mover going
+        # from being mated to mating. A legal move cannot produce that pair (a
+        # mover already mated has no move to play), but cpLoss is "given up":
+        # if the pair ever appears, an improvement must not read as the largest
+        # loss there is.
+        if {$before < 0 && $after > 0} { return 0 }
         return 1000
     }
     return [expr {min(1000, max(0, $before - $after))}]
@@ -102,6 +108,7 @@ proc ::movelabels::cpLoss {before after} {
 proc ::movelabels::winDrop {before after} {
     if {[isMate $before] && [isMate $after]} {
         if {($before > 0) == ($after > 0)} { return 0.0 }
+        if {$before < 0 && $after > 0} { return 0.0 }
         return 100.0
     }
     set drop [expr {[::accuracy::winPercent $before] - [::accuracy::winPercent $after]}]

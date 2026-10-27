@@ -107,6 +107,22 @@ checkEq "the move that delivers mate is not blamed for it" \
 checkEq "being mated by the opponent's move is a blunder" \
     [::movelabels::label 0 [::movelabels::forMover {} 0 w w]] blunder
 
+# Opposite signs are the mover going from being mated to mating. A legal move
+# cannot produce that pair - a mover already mated has no move to play - but
+# cpLoss and winDrop are public and are documented as the amount given up, so an
+# improvement must not read as the maximum loss. The reverse direction, throwing
+# a mate away, still does.
+set mLost [::movelabels::mateToCp -3]
+set mWon [::movelabels::mateToCp 3]
+checkEq "an improvement between mate scores loses nothing" \
+    [::movelabels::cpLoss $mLost $mWon] 0
+checkEq "an improvement between mate scores is no drop" \
+    [::movelabels::winDrop $mLost $mWon] 0.0
+checkEq "and is not labelled a blunder" \
+    [::movelabels::label $mLost $mWon] excellent
+checkEq "losing a mate in a mate-to-mate pair is still a blunder" \
+    [::movelabels::label $mWon $mLost] blunder
+
 # Every mate, however far off, has to stay outside MATE_CP_THRESHOLD: a mate in
 # 101 used to encode to 89900 and be scored on the centipawn curve as if it were
 # an ordinary evaluation.
