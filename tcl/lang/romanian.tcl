@@ -862,6 +862,12 @@ translate L Informant+-- {Albul are un avantaj zdrobitor}
 translate L AutoComment {Comentariu automat}
 translate L AutoCommentTooltip {Generați comentarii AI pentru poziția curentă}
 translate L AnalysisAutoCommentTooltip {Generați comentarii AI pentru întregul joc}
+translate L MoveLabelBest {Cea mai bună}
+translate L MoveLabelExcellent {Excelentă}
+translate L MoveLabelGood {Bună}
+translate L MoveLabelInaccuracy {Imprecizie}
+translate L MoveLabelMistake {Greșeală}
+translate L MoveLabelBlunder {Gafă}
 translate L GameComment {Comentariu joc}
 translate L GameCommentTooltip {Scanează jocul pentru mișcări adnotate și generează un rezumat AI}
 translate L TimeMs {Timp (ms)}

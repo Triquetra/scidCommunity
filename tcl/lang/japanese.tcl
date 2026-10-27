@@ -862,6 +862,12 @@ translate A Informant+-- {白には圧倒的な優位性がある}
 translate A AutoComment {自動コメント}
 translate A AutoCommentTooltip {現在のポジションのAIコメントを生成}
 translate A AnalysisAutoCommentTooltip {ゲーム全体の AI コメントを生成}
+translate A MoveLabelBest {最善}
+translate A MoveLabelExcellent {優秀}
+translate A MoveLabelGood {良い}
+translate A MoveLabelInaccuracy {不正確}
+translate A MoveLabelMistake {ミス}
+translate A MoveLabelBlunder {大悪手}
 translate A GameComment {ゲームコメント}
 translate A GameCommentTooltip {注釈付きの動きのゲームをスキャンし、AI サマリーを生成します}
 translate A TimeMs {時間(ミリ秒)}

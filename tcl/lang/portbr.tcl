@@ -834,6 +834,12 @@ translate B Informant+-- {O jogo  considerado como ganho}
 translate B AutoComment {Comentário automático}
 translate B AutoCommentTooltip {Gere comentários de IA para a posição atual}
 translate B AnalysisAutoCommentTooltip {Gere comentários de IA para todo o jogo}
+translate B MoveLabelBest {Melhor}
+translate B MoveLabelExcellent {Excelente}
+translate B MoveLabelGood {Bom}
+translate B MoveLabelInaccuracy {Imprecisão}
+translate B MoveLabelMistake {Erro}
+translate B MoveLabelBlunder {Erro grave}
 translate B GameComment {Comentário do jogo}
 translate B GameCommentTooltip {Analisa o jogo em busca de movimentos anotados e gere um resumo de IA}
 translate B TimeMs {Tempo (ms)}

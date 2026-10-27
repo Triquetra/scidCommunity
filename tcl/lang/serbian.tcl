@@ -1306,6 +1306,12 @@ translate Y AutoComment {Auto Comment}
 translate Y AutoCommentTooltip {Generate AI commentary for the current position}
 # ====== TODO To be translated ======
 translate Y AnalysisAutoCommentTooltip {Generate AI commentary for the entire game}
+translate Y MoveLabelBest {Najbolji}
+translate Y MoveLabelExcellent {Odličan}
+translate Y MoveLabelGood {Dobar}
+translate Y MoveLabelInaccuracy {Netočnost}
+translate Y MoveLabelMistake {Greška}
+translate Y MoveLabelBlunder {Gruba greška}
 # ====== TODO To be translated ======
 translate Y GameComment {Game Comment}
 # ====== TODO To be translated ======

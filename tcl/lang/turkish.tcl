@@ -825,6 +825,12 @@ translate T Informant+-- {Beyazın ezici bir avantajı var}
 translate T AutoComment {Otomatik Yorum}
 translate T AutoCommentTooltip {Mevcut konum için yapay zeka yorumu oluşturun}
 translate T AnalysisAutoCommentTooltip {Oyunun tamamı için yapay zeka yorumları oluşturun}
+translate T MoveLabelBest {En iyi}
+translate T MoveLabelExcellent {Mükemmel}
+translate T MoveLabelGood {İyi}
+translate T MoveLabelInaccuracy {Kesinsizlik}
+translate T MoveLabelMistake {Hata}
+translate T MoveLabelBlunder {Ağır hata}
 translate T GameComment {Oyun Yorumu}
 translate T GameCommentTooltip {Açıklamalı hareketler için oyunu tarayın ve AI özeti oluşturun}
 translate T TimeMs {Zaman(ms)}

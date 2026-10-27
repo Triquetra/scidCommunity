@@ -847,6 +847,12 @@ translate K Informant+-- {La partida es considerada com guanyada}
 translate K AutoComment {Comentari automàtic}
 translate K AutoCommentTooltip {Genereu comentaris d'IA per a la posició actual}
 translate K AnalysisAutoCommentTooltip {Genera comentaris d'IA per a tot el joc}
+translate K MoveLabelBest {Millor}
+translate K MoveLabelExcellent {Excel·lent}
+translate K MoveLabelGood {Bona}
+translate K MoveLabelInaccuracy {Imprecisió}
+translate K MoveLabelMistake {Error}
+translate K MoveLabelBlunder {Error greu}
 translate K GameComment {Comentari del joc}
 translate K GameCommentTooltip {Escaneja el joc per trobar moviments anotats i genera un resum de l'IA}
 translate K TimeMs {Temps (ms)}

@@ -862,6 +862,12 @@ translate J Informant+-- {Бели имају поразну предност}
 translate J AutoComment {Ауто Цоммент}
 translate J AutoCommentTooltip {Генеришите АИ коментар за тренутну позицију}
 translate J AnalysisAutoCommentTooltip {Генеришите АИ коментар за целу игру}
+translate J MoveLabelBest {Најбољи}
+translate J MoveLabelExcellent {Одличан}
+translate J MoveLabelGood {Добар}
+translate J MoveLabelInaccuracy {Неточност}
+translate J MoveLabelMistake {Грешка}
+translate J MoveLabelBlunder {Груба грешка}
 translate J GameComment {Гаме Цоммент}
 translate J GameCommentTooltip {Скенирајте игру за обележеним потезима и генеришете АИ резиме}
 translate J TimeMs {време(мс)}

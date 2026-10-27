@@ -821,6 +821,12 @@ translate b Informant+-- {সাদা একটি নিষ্পেষণ স
 translate b AutoComment {স্বয়ংক্রিয় মন্তব্য}
 translate b AutoCommentTooltip {বর্তমান অবস্থানের জন্য AI ভাষ্য তৈরি করুন}
 translate b AnalysisAutoCommentTooltip {পুরো গেমের জন্য AI ধারাভাষ্য তৈরি করুন}
+translate b MoveLabelBest {সেরা}
+translate b MoveLabelExcellent {চমৎকার}
+translate b MoveLabelGood {ভালো}
+translate b MoveLabelInaccuracy {অস্পষ্টতা}
+translate b MoveLabelMistake {ভুল}
+translate b MoveLabelBlunder {গুরুতর ভুল}
 translate b GameComment {খেলা মন্তব্য}
 translate b GameCommentTooltip {টীকাযুক্ত পদক্ষেপের জন্য গেম স্ক্যান করুন এবং এআই সারাংশ তৈরি করুন}
 translate b TimeMs {সময়(ms)}

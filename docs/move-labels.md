@@ -1,0 +1,82 @@
+# Move labels
+
+`tcl/tools/move_labels.tcl` turns the engine evaluations around a move into the
+word a reader expects: **best**, **excellent**, **good**, **inaccuracy**,
+**mistake**, **blunder**. It is the decision layer between a score and a
+comment; nothing here searches or calls an engine, the caller supplies the
+evaluations.
+
+```
+::movelabels::label   0 -300          -> blunder
+::movelabels::game    {0 0 0 0 0 -300 -300}   -> excellent excellent excellent excellent blunder excellent
+::movelabels::text    blunder          -> the translated word
+```
+
+## Why win percentage, not centipawns
+
+Losing two pawns in a level position and losing two pawns in an already won one
+are different mistakes, and the same centipawn loss means different things at
+different points on the curve. The ladder is therefore measured on the
+win-percentage curve, and that curve is the one the rest of the tree already
+uses: `::accuracy::winPercent` in `tcl/tools/accuracy.tcl`. The module loads
+that file when it is not loaded yet (the engine window otherwise sources it on
+first use) rather than keeping a second copy of the formula, so a label and the
+accuracy number displayed beside it cannot disagree about the same move.
+
+The thresholds, from Patzer's classifier (MIT):
+
+| Label | Rule |
+| --- | --- |
+| best | the move the engine chose |
+| excellent | win% drop < 2 **and** centipawn loss < 50 |
+| good | win% drop < 5 **and** centipawn loss < 100 |
+| inaccuracy | win% drop < 10 |
+| mistake | win% drop < 20 |
+| blunder | anything larger |
+
+The centipawn guard on the two best labels is what stops a half-pawn loss in a
+won position from being called excellent.
+
+## Mate
+
+A mate is encoded with `::movelabels::mateToCp` at ±100000 (minus 100 per move
+of distance), far outside any score a search can return — Stockfish reports
+tablebase wins as centipawns in the thousands, so "a big number means mate"
+would misread them. On the logistic curve that encoding is a win of 100%, which
+makes throwing away a won mate the largest drop the ladder can see, and keeping
+one no loss at all.
+
+## Using it
+
+| Proc | Purpose |
+| --- | --- |
+| `label {before after {isBest 0}}` | one move, both scores from the mover's point of view |
+| `game {cps {bestPlies {}}}` | a whole game from one evaluation list (White's view, as `::accuracy::calculate` takes it), judging each ply from its own player's side |
+| `forMover {cp mate stm mover}` | an engine score (side to move's view) as the mover sees it |
+| `winDrop`, `cpLoss` | the two measurements the ladder is built on |
+| `mateToCp`, `isMate` | the mate encoding |
+| `text {label}` | the translated word for display |
+
+## Translation
+
+The labels returned by `label` are identifiers: what a PGN, a report or a test
+stores, and they do not change with the UI language. The words a reader sees
+come from `::movelabels::text`, which looks up `MoveLabelBest`,
+`MoveLabelExcellent`, `MoveLabelGood`, `MoveLabelInaccuracy`,
+`MoveLabelMistake` and `MoveLabelBlunder` in `tcl/lang/*.tcl`. A language file
+that has not been updated yet still shows the English word through `tr()`'s
+fallback to the English table.
+
+## Tests
+
+`tclsh tests/tcl/move_labels.tcl` (also run by the Tcl Tests workflow). The
+table pins every boundary of the ladder from both sides together with the drop
+it computes (1.93 points still excellent, 2.02 not; 4.95 good, 5.05 inaccuracy;
+9.99 inaccuracy, 10.08 mistake; 19.99 mistake, 20.76 blunder), a property check
+asserts that a bigger loss never earns a better label, and the mate transitions
+are covered separately.
+
+## Related
+
+- `docs/comment-facts.md` — the deterministic facts a comment is allowed to
+  state, from `tcl/tools/comment_facts.tcl`.

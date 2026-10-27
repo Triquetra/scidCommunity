@@ -129,5 +129,63 @@ set chosen [::movelabels::game $cps {1 4}]
 checkEq "a chosen ply is best" [lindex $chosen 1] best
 checkEq "and the other plies are not" [lindex $chosen 0] excellent
 
+# The label tokens are identifiers; the words a reader sees come from the
+# translation table, and every label must have an entry there.
+checkEq "without a translation table the token is returned" \
+    [::movelabels::text blunder] blunder
+proc tr {tag} { return "T<$tag>" }
+checkEq "the display text comes from the translation table" \
+    [::movelabels::text blunder] {T<MoveLabelBlunder>}
+checkEq "the key is the label in title case" \
+    [::movelabels::text inaccuracy] {T<MoveLabelInaccuracy>}
+rename tr {}
+
+# Translation completeness. A missing key falls back to English through tr(),
+# which is correct behaviour but would silently ship an untranslated label, so
+# every language file is checked for all six. The language tables are procs
+# (setLanguage_<code>) that read application globals, so the keys are read from
+# the files rather than by executing them.
+set langDir [file join $root tcl lang]
+set langFiles {
+    E english.tcl   K catalan.tcl   C czech.tcl     D deutsch.tcl
+    F francais.tcl  G greek.tcl     H hungary.tcl   I italian.tcl
+    N nederlan.tcl  O norsk.tcl     P polish.tcl    B portbr.tcl
+    R russian.tcl   Y serbian.tcl   S spanish.tcl   U suomi.tcl
+    W swedish.tcl   M chinese.tcl   T turkish.tcl   J SerbCyr.tcl
+    A japanese.tcl  L romanian.tcl  V hebrew.tcl    Z swahili.tcl
+    h hindi.tcl     Q ukrainian.tcl b bengali.tcl   k korean.tcl
+    g bulgarian.tcl
+}
+proc langText {file} {
+    set fh [open $file r]
+    fconfigure $fh -encoding utf-8
+    set text [read $fh]
+    close $fh
+    return $text
+}
+set missingAll {}
+foreach {code file} $langFiles {
+    set text [langText [file join $langDir $file]]
+    set missing {}
+    foreach l {Best Excellent Good Inaccuracy Mistake Blunder} {
+        if {![regexp "translate $code MoveLabel$l \{(.+?)\}" $text -> word]
+            || [string trim $word] eq ""} {
+            lappend missing $l
+        }
+    }
+    check "$file defines all six label keys" [expr {![llength $missing]}] "missing: $missing"
+    if {[llength $missing]} { lappend missingAll $file }
+}
+check "no language file is missing a label key" [expr {![llength $missingAll]}] "files: $missingAll"
+
+# Spot checks that the entries are translations and not the English word left
+# behind by a propagation run.
+regexp {translate D MoveLabelBlunder \{(.+?)\}} [langText [file join $langDir deutsch.tcl]] -> de
+checkEq "german blunder" $de {Grober Fehler}
+regexp {translate F MoveLabelMistake \{(.+?)\}} [langText [file join $langDir francais.tcl]] -> fr
+checkEq "french mistake" $fr {Erreur}
+regexp {translate M MoveLabelBlunder \{(.+?)\}} [langText [file join $langDir chinese.tcl]] -> zh
+checkEq "chinese blunder" $zh {严重失误}
+
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

@@ -821,6 +821,12 @@ translate Z Informant+-- {Nyeupe ina faida ya kuponda}
 translate Z AutoComment {Maoni ya Kiotomatiki}
 translate Z AutoCommentTooltip {Tengeneza maoni ya AI kwa nafasi ya sasa}
 translate Z AnalysisAutoCommentTooltip {Tengeneza maoni ya AI kwa mchezo mzima}
+translate Z MoveLabelBest {Bora}
+translate Z MoveLabelExcellent {Bora sana}
+translate Z MoveLabelGood {Nzuri}
+translate Z MoveLabelInaccuracy {Ukosefu wa usahihi}
+translate Z MoveLabelMistake {Kosa}
+translate Z MoveLabelBlunder {Kosa kubwa}
 translate Z GameComment {Maoni ya Mchezo}
 translate Z GameCommentTooltip {Changanua mchezo kwa hatua zilizofafanuliwa na utoe muhtasari wa AI}
 translate Z TimeMs {Saa(ms)}

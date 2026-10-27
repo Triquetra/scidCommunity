@@ -822,6 +822,12 @@ translate Q Informant+-- {Білі мають нищівну перевагу}
 translate Q AutoComment {Автоматичний коментар}
 translate Q AutoCommentTooltip {Створити коментар AI для поточної позиції}
 translate Q AnalysisAutoCommentTooltip {Створюйте коментарі ШІ для всієї гри}
+translate Q MoveLabelBest {Найкращий}
+translate Q MoveLabelExcellent {Відмінний}
+translate Q MoveLabelGood {Добрий}
+translate Q MoveLabelInaccuracy {Неточність}
+translate Q MoveLabelMistake {Помилка}
+translate Q MoveLabelBlunder {Груба помилка}
 translate Q GameComment {Коментар гри}
 translate Q GameCommentTooltip {Скануйте гру на наявність анотованих ходів і створюйте зведення ШІ}
 translate Q TimeMs {Час (мс)}

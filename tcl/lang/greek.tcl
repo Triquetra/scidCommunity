@@ -853,6 +853,12 @@ translate G Informant+-- {Η παρτίδα θεωρείται κερδισμέ�
 translate G AutoComment {Αυτόματο σχόλιο}
 translate G AutoCommentTooltip {Δημιουργήστε σχόλια τεχνητής νοημοσύνης για την τρέχουσα θέση}
 translate G AnalysisAutoCommentTooltip {Δημιουργήστε σχόλια AI για ολόκληρο το παιχνίδι}
+translate G MoveLabelBest {Καλύτερη}
+translate G MoveLabelExcellent {Εξαιρετική}
+translate G MoveLabelGood {Καλή}
+translate G MoveLabelInaccuracy {Ανακρίβεια}
+translate G MoveLabelMistake {Λάθος}
+translate G MoveLabelBlunder {Χοντρό λάθος}
 translate G GameComment {Σχόλιο παιχνιδιού}
 translate G GameCommentTooltip {Σαρώστε το παιχνίδι για σχολιασμένες κινήσεις και δημιουργήστε περίληψη AI}
 translate G TimeMs {Χρόνος(ms)}

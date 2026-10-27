@@ -832,6 +832,12 @@ translate I Informant+-- {La partita è considerata vinta}
 translate I AutoComment {Commento automatico}
 translate I AutoCommentTooltip {Genera commenti AI per la posizione attuale}
 translate I AnalysisAutoCommentTooltip {Genera commenti AI per l'intero gioco}
+translate I MoveLabelBest {Migliore}
+translate I MoveLabelExcellent {Eccellente}
+translate I MoveLabelGood {Buona}
+translate I MoveLabelInaccuracy {Imprecisione}
+translate I MoveLabelMistake {Errore}
+translate I MoveLabelBlunder {Errore grave}
 translate I GameComment {Commento del gioco}
 translate I GameCommentTooltip {Scansiona il gioco per individuare le mosse annotate e generare un riepilogo dell'IA}
 translate I TimeMs {Tempo (ms)}

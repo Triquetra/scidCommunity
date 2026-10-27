@@ -116,6 +116,16 @@ proc ::movelabels::label {before after {isBest 0}} {
     return blunder
 }
 
+# The words a reader sees. The labels above are identifiers - what a PGN, a
+# report or a test stores - and they must not change with the UI language; the
+# display text comes from the translation table (MoveLabelBest and friends in
+# tcl/lang/*.tcl), so a language file that has not been updated yet still shows
+# the English word through tr()'s fallback.
+proc ::movelabels::text {label} {
+    if {[llength [info commands tr]] == 0} { return $label }
+    return [tr "MoveLabel[string totitle $label]"]
+}
+
 # Labels for a whole game from a list of evaluations, one per position from the
 # start (White's point of view, as ::accuracy::calculate takes them), so move i
 # is the pair cps[i], cps[i+1]. `bestPlies` are 0-based ply indexes the engine
