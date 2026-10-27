@@ -314,7 +314,7 @@ proc ::movelabels::refine {label ctx} {
 
     # A sound sacrifice that keeps the game: the piece given up comes back, so
     # the move is brilliant rather than a blunder the engine happens to like.
-    if {$A(is_best) && $A(ply) > $BOOK_PLIES && $A(cp_before) <= 500 && $A(cp_after) >= -50 && $A(cp_loss) <= 20} {
+    if {$A(is_best) && !$inBook && $A(cp_before) <= 500 && $A(cp_after) >= -50 && $A(cp_loss) <= 20} {
         set sacrificed 0
         if {$A(fen_before) ne "" && $A(fen_after) ne ""} {
             # the mover is the side that was to move in fen_before
@@ -332,7 +332,7 @@ proc ::movelabels::refine {label ctx} {
         }
     }
 
-    if {$A(ply) > $BOOK_PLIES} {
+    if {!$inBook} {
         # The only move that keeps the game: a wide gap between the best and
         # the second-best line. Not when the mover is already lost - then the
         # "only move" is a forced retreat - and not when it simply takes what

@@ -214,6 +214,11 @@ checkEq "a blunder in the opening stays a blunder" \
     [::movelabels::refine blunder [rctx ply 5]] blunder
 checkEq "the caller can override the book boundary" \
     [::movelabels::refine excellent [rctx ply 5 in_book 0]] excellent
+# ... and the override reaches the refinements: an early move the caller has
+# taken out of book can still be great, which the raw ply check prevented.
+checkEq "an early move taken out of book can be great" \
+    [::movelabels::refine good [rctx ply 5 in_book 0 is_best 1 cp_before 0 cp_after -10 \
+        candidates {300 50}]] great
 
 # The only move that keeps the game: a wide MultiPV gap.
 checkEq "the only move that holds is great" \
@@ -273,6 +278,11 @@ checkEq "a line that cannot be replayed is not proof either" \
 checkEq "a line that is not legal there is not proof" \
     [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14 \
         fen_before $sacFen fen_after $sacAfter played f3e5 pv_after_played {a2a3}]] good
+# The same override applies to brilliant: "out of book" is the caller's
+# judgement (in_book), not the ply number.
+checkEq "an early sacrifice taken out of book can be brilliant" \
+    [::movelabels::refine good [rctx ply 5 in_book 0 is_best 1 cp_before 20 cp_after 10 \
+        fen_before $sacFen fen_after $sacAfter played f3e5 pv_after_played {c6e5}]] brilliant
 # A legal quiet reply is a different matter: the piece is not being taken back,
 # which is what the rule asks about.
 checkEq "a legal quiet reply leaves the sacrifice sound" \
