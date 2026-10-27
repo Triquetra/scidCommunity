@@ -200,7 +200,14 @@ proc ::facts::describeMove {fen uci} {
     set piece [lindex $board $from]
     set victim [lindex $board $to]
     set ep [dict get $pos ep]
-    if {$victim eq "" && $to == $ep && [string tolower $piece] eq "p"} { set victim "p" }
+    # The captured piece usually stands on the destination square, but an en
+    # passant capture takes a pawn that never stood there: it is beside the
+    # landing square, one rank back for the capturing pawn.
+    set capSq $to
+    if {$victim eq "" && $to == $ep && [string tolower $piece] eq "p"} {
+        set victim "p"
+        set capSq [expr {[dict get $pos side] eq "w" ? $to - 8 : $to + 8}]
+    }
     set after [::chessboard::makeMove $pos $uci]
     set mover [dict get $pos side]
     set them [other $mover]
@@ -211,6 +218,7 @@ proc ::facts::describeMove {fen uci} {
         piece [pieceName $piece] \
         from [::chessboard::sqName $from] to [::chessboard::sqName $to] \
         capture [pieceName $victim] capture_value [valueOf $victim] \
+        capture_sq [::chessboard::sqName $capSq] \
         check $check \
         mate [expr {$check && [llength [::chessboard::legalMoves $after]] == 0}] \
         castle [expr {$kind eq "k" && abs($to - $from) == 2}] \
@@ -229,16 +237,21 @@ proc ::facts::biggestTarget {fen} {
     foreach m [::chessboard::legalMoves $pos] {
         set to [::chessboard::sqIndex [string range $m 2 3]]
         set victim [lindex $board $to]
+        set capSq $to
         if {$victim eq ""} {
             if {$to != [dict get $pos ep]} continue
+            # en passant: the pawn taken stands beside the landing square
             set victim p
+            set capSq [expr {[dict get $pos side] eq "w" ? $to - 8 : $to + 8}]
         }
         if {[lsearch -exact $seen $to] >= 0} continue
         lappend seen $to
         set v [::chessboard::see $pos $to]
         if {$v > $bestVal} {
             set bestVal $v
-            set best [dict create square [::chessboard::sqName $to] piece [pieceName $victim] value $v]
+            set best [dict create square [::chessboard::sqName $to] \
+                capture_sq [::chessboard::sqName $capSq] \
+                piece [pieceName $victim] value $v]
         }
     }
     return $best
@@ -636,7 +649,7 @@ proc ::facts::gainsOf {fen uci mover} {
     # that square would be cheapest for a hypothetical mover.
     if {[dict get $d capture] ne ""} {
         if {[captureNet $fen $uci] >= 1} {
-            lappend out "wins the [dict get $d capture] on [dict get $d to]"
+            lappend out "wins the [dict get $d capture] on [dict get $d capture_sq]"
         }
     }
 
@@ -922,7 +935,7 @@ proc ::facts::movePhrase {d {gerund 0}} {
     set piece [dict get $d piece]
     set verb [expr {$gerund ? "taking" : "takes"}]
     if {[dict get $d capture] ne ""} {
-        return "the $piece $verb the [dict get $d capture] on [dict get $d to]"
+        return "the $piece $verb the [dict get $d capture] on [dict get $d capture_sq]"
     }
     if {$gerund} { return "the $piece moving from [dict get $d from] to [dict get $d to]" }
     return "the $piece moves from [dict get $d from] to [dict get $d to]"
@@ -945,7 +958,7 @@ proc ::facts::moveWhy {m} {
     set t [biggestTarget $fa]
     if {$t ne "" && [dict get $t value] >= 3} {
         if {[dict get $t square] ne [dict get $d to] || $net < 0} {
-            return "it leaves the [dict get $t piece] on [dict get $t square] for the opponent to take"
+            return "it leaves the [dict get $t piece] on [dict get $t capture_sq] for the opponent to take"
         }
     }
     set mover [expr {[dict get $d side] eq "White" ? "w" : "b"}]
@@ -1061,7 +1074,7 @@ proc ::facts::forMove {m} {
         if {[dict get $b castle]} {
             set bwhat "$bside's king castles"
         } elseif {[dict get $b capture] ne ""} {
-            set bwhat "$bside's $bpiece on $bfrom takes the [dict get $b capture] on $bto"
+            set bwhat "$bside's $bpiece on $bfrom takes the [dict get $b capture] on [dict get $b capture_sq]"
         } else {
             set bwhat "$bside's $bpiece on $bfrom moves to $bto"
         }
