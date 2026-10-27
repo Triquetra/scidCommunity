@@ -215,7 +215,7 @@ proc ::movelabels::isFreeCapture {fen uci} {
             # call every pawn capture free - including one that is recaptured.
             set out [expr {[::chessboard::see $pos $to] >= max(1, [pieceValue $victim] - 1)}]
         }
-    }]} {}
+    }]} { set out 1 }
     return $out
 }
 
@@ -246,7 +246,7 @@ proc ::movelabels::isTrivialRecapture {side fenBefore pv fenAfterPlayed} {
             # and reading the difference one way round called it one.
             set out [expr {abs($balanceBefore - [balanceOf [::chessboard::toFen $pos] $side]) <= 1}]
         }
-    }]} {}
+    }]} { set out 1 }
     return $out
 }
 
@@ -295,7 +295,12 @@ proc ::movelabels::refine {label ctx} {
             set stm [lindex [split $A(fen_before)] 1]
             catch { set sacrificed [::chessboard::hangingMaterial $A(fen_before) $A(fen_after) $stm] }
         }
-        if {$sacrificed >= 2 && ![isTrivialRecapture \
+        # Brilliant claims the sacrifice is sound, and the evidence is the line:
+        # with no PV there is nothing to show the piece is not simply taken, so
+        # the claim stays unproven. Both helpers also fail closed (out = 1) when
+        # the board work throws, so an error cannot stand in for evidence either.
+        if {$sacrificed >= 2 && [llength $A(pv_after_played)] \
+            && ![isTrivialRecapture \
                 [lindex [split $A(fen_before)] 1] $A(fen_before) $A(pv_after_played) $A(fen_after)]} {
             return brilliant
         }

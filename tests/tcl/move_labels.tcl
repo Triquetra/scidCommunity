@@ -255,6 +255,18 @@ checkEq "a sound sacrifice is brilliant" \
         fen_before $sacFen fen_after $sacAfter played f3e5 pv_after_played {c6e5}]] brilliant
 checkEq "without the board it cannot be called brilliant" \
     [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14]] good
+# Brilliant is the label that most needs evidence: the rule is that the line
+# does not simply trade the piece back, and with no line there is nothing to
+# check. An absent PV used to read as "not a trade-back" and was promoted.
+checkEq "a sacrifice with no line is not called brilliant" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14 \
+        fen_before $sacFen fen_after $sacAfter played f3e5]] good
+# ... and a line that cannot be replayed is a failed check, not a pass. Nxe5 in
+# SAN instead of UCI made makeMove throw, and the empty catch handler read 0 as
+# "not a trade-back".
+checkEq "a line that cannot be replayed is not proof either" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14 \
+        fen_before $sacFen fen_after $sacAfter played f3e5 pv_after_played {Nxe5}]] good
 
 # A line that trades straight back is not a sacrifice.
 set tradeFen {rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 4}
@@ -272,6 +284,12 @@ checkEq "a rescue that just takes a hanging piece is not great" \
         fen_before $freeFen played h1h8]] good
 checkEq "the same rescue without the free capture is great" \
     [::movelabels::refine good [rctx is_best 1 cp_before -200 cp_after -50]] great
+# The board question has to be answerable in both helpers: a position the core
+# rejects used to leave the answer at 0 ("not a free capture") and let a wide
+# gap stand as great.
+checkEq "an unreadable position does not make a move great" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 0 cp_after -10 \
+        candidates {300 50} fen_before {not/a/fen w} played e2e4]] good
 
 # A defended pawn is not a free capture; an undefended one is.
 check "a defended pawn is not free" \
