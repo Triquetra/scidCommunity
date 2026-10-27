@@ -832,6 +832,11 @@ translate P MoveLabelGood {Dobry}
 translate P MoveLabelInaccuracy {Nieścisłość}
 translate P MoveLabelMistake {Błąd}
 translate P MoveLabelBlunder {Rażący błąd}
+translate P MoveLabelBrilliant {Genialny}
+translate P MoveLabelGreat {Świetny}
+translate P MoveLabelMiss {Przegapiona szansa}
+translate P MoveLabelForced {Wymuszony}
+translate P MoveLabelBook {Teoria}
 translate P GameComment {Komentarz do partii}
 translate P GameCommentTooltip {Przeskanuj partię pod kątem opisanych posunięć i wygeneruj podsumowanie AI}
 translate P TimeMs {Czas (ms)}

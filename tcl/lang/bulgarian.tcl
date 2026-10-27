@@ -868,6 +868,11 @@ translate g MoveLabelGood {Добър}
 translate g MoveLabelInaccuracy {неточност}
 translate g MoveLabelMistake {Грешка}
 translate g MoveLabelBlunder {Груба грешка}
+translate g MoveLabelBrilliant {Блестящ}
+translate g MoveLabelGreat {Отличен ход}
+translate g MoveLabelMiss {Пропусната възможност}
+translate g MoveLabelForced {Принуден}
+translate g MoveLabelBook {Теория}
 translate g GameComment {Коментар на играта}
 translate g GameCommentTooltip {Сканирайте играта за анотирани ходове и генерирайте резюме на AI}
 translate g TimeMs {Време (ms)}

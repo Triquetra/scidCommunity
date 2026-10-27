@@ -866,6 +866,11 @@ translate U MoveLabelGood {Hyvä}
 translate U MoveLabelInaccuracy {Epätarkkuus}
 translate U MoveLabelMistake {Virhe}
 translate U MoveLabelBlunder {Raskas virhe}
+translate U MoveLabelBrilliant {Loistava}
+translate U MoveLabelGreat {Hieno}
+translate U MoveLabelMiss {Menetetty tilaisuus}
+translate U MoveLabelForced {Pakotettu}
+translate U MoveLabelBook {Teoria}
 translate U GameComment {Pelin kommentti}
 translate U GameCommentTooltip {Etsi pelistä selostettuja liikkeitä ja luo tekoälyn yhteenveto}
 translate U TimeMs {Aika (ms)}

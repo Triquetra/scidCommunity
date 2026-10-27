@@ -884,6 +884,11 @@ translate S MoveLabelGood {Buena}
 translate S MoveLabelInaccuracy {Imprecisión}
 translate S MoveLabelMistake {Error}
 translate S MoveLabelBlunder {Error grave}
+translate S MoveLabelBrilliant {Brillante}
+translate S MoveLabelGreat {Muy buena}
+translate S MoveLabelMiss {Ocasión perdida}
+translate S MoveLabelForced {Forzada}
+translate S MoveLabelBook {Teoría}
 translate S GameComment {Comentario del juego}
 translate S GameCommentTooltip {Escanee el juego en busca de movimientos anotados y genere un resumen de IA}
 translate S TimeMs {Tiempo (ms)}

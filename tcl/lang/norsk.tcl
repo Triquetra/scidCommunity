@@ -837,6 +837,11 @@ translate O MoveLabelGood {God}
 translate O MoveLabelInaccuracy {Unøyaktighet}
 translate O MoveLabelMistake {Feil}
 translate O MoveLabelBlunder {Grov feil}
+translate O MoveLabelBrilliant {Strålende}
+translate O MoveLabelGreat {Fremragende}
+translate O MoveLabelMiss {Tapt sjanse}
+translate O MoveLabelForced {Tvunget}
+translate O MoveLabelBook {Teori}
 translate O GameComment {Spillkommentar}
 translate O GameCommentTooltip {Skann spillet for kommenterte trekk og generer AI-sammendrag}
 translate O TimeMs {Tid (ms)}

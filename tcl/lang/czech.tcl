@@ -832,6 +832,11 @@ translate C MoveLabelGood {Dobrý}
 translate C MoveLabelInaccuracy {Nepřesnost}
 translate C MoveLabelMistake {Chyba}
 translate C MoveLabelBlunder {Hrubá chyba}
+translate C MoveLabelBrilliant {Brilantní}
+translate C MoveLabelGreat {Skvělý}
+translate C MoveLabelMiss {Promarněná šance}
+translate C MoveLabelForced {Vynucený}
+translate C MoveLabelBook {Teorie}
 translate C GameComment {Koment ke he}
 translate C GameCommentTooltip {Naskenujte hru pro anotovan pohyby a vygenerujte souhrn AI}
 translate C TimeMs {as (ms)}

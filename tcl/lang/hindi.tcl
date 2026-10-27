@@ -827,6 +827,11 @@ translate h MoveLabelGood {अच्छा}
 translate h MoveLabelInaccuracy {अशुद्धि}
 translate h MoveLabelMistake {गलती}
 translate h MoveLabelBlunder {गंभीर गलती}
+translate h MoveLabelBrilliant {शानदार}
+translate h MoveLabelGreat {बहुत अच्छा}
+translate h MoveLabelMiss {चूक}
+translate h MoveLabelForced {बाध्य}
+translate h MoveLabelBook {सिद्धांत}
 translate h GameComment {खेल टिप्पणी}
 translate h GameCommentTooltip {एनोटेटेड चालों के लिए गेम को स्कैन करें और एआई सारांश तैयार करें}
 translate h TimeMs {समय(एमएस)}

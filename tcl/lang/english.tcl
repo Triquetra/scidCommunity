@@ -867,6 +867,11 @@ translate E MoveLabelGood {Good}
 translate E MoveLabelInaccuracy {Inaccuracy}
 translate E MoveLabelMistake {Mistake}
 translate E MoveLabelBlunder {Blunder}
+translate E MoveLabelBrilliant {Brilliant}
+translate E MoveLabelGreat {Great}
+translate E MoveLabelMiss {Missed chance}
+translate E MoveLabelForced {Forced}
+translate E MoveLabelBook {Book}
 translate E GameComment {Game Comment}
 translate E GameCommentTooltip {Scan game for annotated moves and generate AI summary}
 translate E TimeMs {Time(ms)}

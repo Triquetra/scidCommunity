@@ -803,6 +803,11 @@ translate M MoveLabelGood {良好}
 translate M MoveLabelInaccuracy {不精确}
 translate M MoveLabelMistake {失误}
 translate M MoveLabelBlunder {严重失误}
+translate M MoveLabelBrilliant {精彩}
+translate M MoveLabelGreat {绝佳}
+translate M MoveLabelMiss {错失}
+translate M MoveLabelForced {被迫}
+translate M MoveLabelBook {定式}
 translate M GameComment {游戏评论}
 translate M GameCommentTooltip {扫描游戏中带注释的动作并生成 AI 摘要}
 translate M TimeMs {时间（毫秒）}

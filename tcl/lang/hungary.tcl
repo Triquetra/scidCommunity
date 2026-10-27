@@ -835,6 +835,11 @@ translate H MoveLabelGood {Jó}
 translate H MoveLabelInaccuracy {Pontatlanság}
 translate H MoveLabelMistake {Hiba}
 translate H MoveLabelBlunder {Durva hiba}
+translate H MoveLabelBrilliant {Ragyogó}
+translate H MoveLabelGreat {Nagyszerű}
+translate H MoveLabelMiss {Elszalasztott lehetőség}
+translate H MoveLabelForced {Kényszer}
+translate H MoveLabelBook {Elmélet}
 translate H GameComment {Játék megjegyzés}
 translate H GameCommentTooltip {Keresse meg a játékot megjegyzésekkel ellátott mozdulatok után, és készítsen AI-összefoglalót}
 translate H TimeMs {Idõ (ms)}
