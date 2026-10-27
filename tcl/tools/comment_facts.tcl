@@ -106,8 +106,23 @@ proc ::facts::attackersOf {pos sq byColor} {
         set p [lindex $board $i]
         if {$p eq ""} continue
         if {[::chessboard::colorOf $p] ne $byColor} continue
-        if {[attacksFrom $pos $i $sq]} { lappend out [list [pieceName $p] [valueOf $p]] }
+        if {[attacksFrom $pos $i $sq]} {
+            lappend out [list [pieceName $p] [valueOf $p] $i]
+        }
     }
+    return $out
+}
+
+# Can the piece on `from` legally capture on `to`? A pinned piece attacks
+# geometrically but cannot take, and a claim that a piece is hanging is a claim
+# about captures, so the legality of the move matters here.
+proc ::facts::legalCapture {pos from to side} {
+    set out 0
+    if {![catch {
+        set after [::chessboard::makeMove $pos \
+            "[::chessboard::sqName $from][::chessboard::sqName $to]"]
+        set out [expr {![::chessboard::inCheck $after $side]}]
+    }]} {}
     return $out
 }
 
@@ -123,7 +138,15 @@ proc ::facts::hangingPieces {fen color} {
         if {$p eq ""} continue
         if {[::chessboard::colorOf $p] ne $color} continue
         if {[string tolower $p] eq "k"} continue
-        set att [attackersOf $pos $i $them]
+        # Only a legal capture threatens a piece: a pinned attacker attacks
+        # geometrically but cannot take it. Defenders stay geometric - the
+        # square still holds our piece here, so a defender's recapture can only
+        # be judged after the capture, and counting a pinned defender merely
+        # leaves a piece unmentioned instead of calling it hanging wrongly.
+        set att {}
+        foreach a [attackersOf $pos $i $them] {
+            if {[legalCapture $pos [lindex $a 2] $i $them]} { lappend att $a }
+        }
         if {![llength $att]} continue
         set def [attackersOf $pos $i $color]
         # A king (value 0) can only take an undefended piece; counting it as a
@@ -622,7 +645,13 @@ proc ::facts::gainsOf {fen uci mover} {
         if {[lindex $e 1] eq $fromSq} continue
         if {[lsearch -exact $mineAfter $e] >= 0} continue
         set sq [::chessboard::sqIndex [lindex $e 1]]
-        set stillAttacked [expr {[llength [attackersOf $after $sq $them]] > 0}]
+        set stillAttacked 0
+        foreach a [attackersOf $after $sq $them] {
+            if {[legalCapture $after [lindex $a 2] $sq $them]} {
+                set stillAttacked 1
+                break
+            }
+        }
         if {$stillAttacked} {
             lappend out "protects the [lindex $e 0] on [lindex $e 1]"
         } else {
@@ -828,7 +857,13 @@ proc ::facts::motifLines {m} {
         set stillHit 0
         foreach e $newSaves {
             set sq [::chessboard::sqIndex [lindex $e 1]]
-            if {[llength [attackersOf $afterPos $sq $them]]} { set stillHit 1 ; break }
+            foreach a [attackersOf $afterPos $sq $them] {
+                if {[legalCapture $afterPos [lindex $a 2] $sq $them]} {
+                    set stillHit 1
+                    break
+                }
+            }
+            if {$stillHit} break
         }
         if {$stillHit} {
             lappend lines "it protects [join [namesOf $newSaves] { and }]"

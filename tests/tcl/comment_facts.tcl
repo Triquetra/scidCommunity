@@ -216,6 +216,11 @@ checkEq "a defended piece beside the enemy king is not hanging" \
     [::facts::hangingPieces {8/8/8/8/8/6k1/5R2/4K3 w - - 0 1} w] {}
 checkEq "an undefended piece beside the enemy king is hanging" \
     [::facts::hangingPieces {8/8/8/8/8/8/6k1/4K2R b - - 0 1} w] [list [list rook h1]]
+# A pinned attacker attacks geometrically but cannot capture.
+checkEq "a pinned attacker does not threaten a piece" \
+    [::facts::hangingPieces {4k3/4n3/8/5R2/8/8/8/K3R3 b - - 0 1} w] {}
+checkEq "the same attacker unpinned does threaten it" \
+    [::facts::hangingPieces {4k3/4n3/8/5R2/8/8/8/K1R5 b - - 0 1} w] [list [list rook f5]]
 # A king defending a piece does not make a cheaper attack safe: Bxf2 Kxf2 is a
 # rook won for a bishop, so the rook is still hanging (SEE = 2). This is the
 # opposite of the review suggestion, which would have hidden a real loss.
