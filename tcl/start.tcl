@@ -1076,6 +1076,7 @@ utils/history.tcl
 utils/pane.tcl
 utils/sound.tcl
 utils/string.tcl
+utils/chessboard.tcl
 utils/validate.tcl
 utils/win.tcl
 utils/colorpicker.tcl
@@ -1157,6 +1158,7 @@ tools/lss.tcl
 tools/opening.tcl
 tools/tactics.tcl
 tools/reviewgame.tcl
+tools/comment_facts.tcl
 tools/inputengine.tcl
 tools/novag.tcl
 tools/tablebase.tcl

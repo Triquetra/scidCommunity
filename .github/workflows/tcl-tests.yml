@@ -25,6 +25,9 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq tcl
 
+      - name: Comment facts
+        run: tclsh tests/tcl/comment_facts.tcl
+
       - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl
 
