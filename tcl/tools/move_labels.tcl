@@ -210,7 +210,10 @@ proc ::movelabels::isFreeCapture {fen uci} {
         set to [::chessboard::sqIndex [string range $uci 2 3]]
         set victim [lindex [dict get $pos board] $to]
         if {$victim ne ""} {
-            set out [expr {[::chessboard::see $pos $to] >= [pieceValue $victim] - 1}]
+            # "Nearly the whole value" is the test, but a pawn's value is 1, so
+            # value-1 would be 0 and SEE (which never goes below zero) would
+            # call every pawn capture free - including one that is recaptured.
+            set out [expr {[::chessboard::see $pos $to] >= max(1, [pieceValue $victim] - 1)}]
         }
     }]} {}
     return $out
@@ -238,7 +241,10 @@ proc ::movelabels::isTrivialRecapture {side fenBefore pv fenAfterPlayed} {
             foreach uci [lrange $pv 1 3] {
                 set pos [::chessboard::makeMove $pos $uci]
             }
-            set out [expr {($balanceBefore - [balanceOf [::chessboard::toFen $pos] $side]) <= 1}]
+            # Both directions: the line has to come back to the material it
+            # started with. A line that wins two points is not a trade-back,
+            # and reading the difference one way round called it one.
+            set out [expr {abs($balanceBefore - [balanceOf [::chessboard::toFen $pos] $side]) <= 1}]
         }
     }]} {}
     return $out
@@ -312,21 +318,29 @@ proc ::movelabels::refine {label ctx} {
         }
         # A rescue that turns a lost position into a playable one is the same
         # kind of find.
-        if {$A(is_best) && $A(cp_before) <= -150 && $A(cp_after) >= -50} { return great }
-    }
-
-    # The two scales disagree near the ends of the curve, so a board loss that
-    # big is a blunder even when the win-chance drop rounds under the line.
-    if {!$A(is_best) && $A(ply) > $BOOK_PLIES && $A(cp_loss) >= 300 \
-        && $A(win_drop) >= 12 && abs($A(cp_before)) < 500} {
-        return blunder
+        if {$A(is_best) && $A(cp_before) <= -150 && $A(cp_after) >= -50 \
+            && ($A(played) eq "" || $A(fen_before) eq "" \
+                || ![isFreeCapture $A(fen_before) $A(played)])} {
+            return great
+        }
     }
 
     # A miss is a move that was already an error and gave up a win, rather than
     # merely a worse move: it had a big advantage, or a mate, and no longer has.
+    # Decided BEFORE the blunder upgrade below, because "missed the win" is the
+    # more informative name for exactly that shape - a move from +3.00 to 0.00
+    # is a miss, not a blunder, and the upgrade would otherwise answer first.
     if {[lsearch -exact {inaccuracy mistake blunder} $label] >= 0} {
         if {$A(cp_before) >= 150 && $A(cp_after) < 50} { return miss }
         if {[isMate $A(cp_before)] && $A(cp_before) > 0 && ![isMate $A(cp_after)]} { return miss }
+    }
+
+    # The two scales disagree near the ends of the curve, so a board loss that
+    # big is a blunder even when the win-chance drop rounds under the line. It
+    # applies to what is left once a missed win has been named above.
+    if {!$A(is_best) && $A(ply) > $BOOK_PLIES && $A(cp_loss) >= 300 \
+        && $A(win_drop) >= 12 && abs($A(cp_before)) < 500} {
+        return blunder
     }
     return $label
 }

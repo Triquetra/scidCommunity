@@ -53,7 +53,9 @@ actually learns from:
 
 A board loss of 300cp or more with a win-chance drop of 12 or more is a blunder
 even when the curve rounds under the line: near the ends of the curve the two
-scales disagree, and the board loss is the fact that does not move.
+scales disagree, and the board loss is the fact that does not move. **Precedence:**
+a move that gave up a win is decided first and reported as `miss` — +3.00 to 0.00
+is a missed win, not a blunder — so the blunder upgrade only sees what is left.
 
 `::movelabels::refine {label ctx}` takes the base label and a dict:
 
@@ -68,8 +70,10 @@ scales disagree, and the board loss is the fact that does not move.
 
 The two board questions come from `::chessboard::hangingMaterial` (what the move
 left en prise, net of what it took), `::movelabels::isFreeCapture` (a capture the
-opponent handed over) and `::movelabels::isTrivialRecapture` (the line simply
-trades back).
+opponent handed over) and `::movelabels::isTrivialRecapture` (the line comes back to the
+material it started with, within a pawn, in either direction — a line that wins
+material is not a trade-back). A "free" capture means nearly the whole value of
+the victim, and at least a point, so a recaptured pawn is not one.
 
 ## Mate
 

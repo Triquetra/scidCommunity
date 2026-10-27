@@ -264,6 +264,37 @@ check "a recapture that restores the material is trivial" \
 check "a recapture that leaves material behind is not" \
     [expr {![::movelabels::isTrivialRecapture w $sacFen {c6e5} $sacAfter]}]
 
+# The free-capture exclusion applies to BOTH routes to great, not just the
+# MultiPV gap: a rescue that only grabs a piece the opponent left hanging is
+# still the obvious move.
+checkEq "a rescue that just takes a hanging piece is not great" \
+    [::movelabels::refine good [rctx is_best 1 cp_before -200 cp_after -50 \
+        fen_before $freeFen played h1h8]] good
+checkEq "the same rescue without the free capture is great" \
+    [::movelabels::refine good [rctx is_best 1 cp_before -200 cp_after -50]] great
+
+# A defended pawn is not a free capture; an undefended one is.
+check "a defended pawn is not free" \
+    [expr {![::movelabels::isFreeCapture {4k3/8/2p5/3p4/4P3/8/8/4K3 w - - 0 1} e4d5]}]
+check "an undefended pawn is free" \
+    [::movelabels::isFreeCapture {4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1} e4d5]
+
+# "Trades back" is two-sided: a line that wins a rook on the way is not a
+# trade, and must not be read as one.
+# The opponent takes a pawn, the mover then takes a rook: the line is +4 for
+# the mover, so it is not a trade-back however the difference is signed.
+set winFen {4k2r/8/8/3p4/2P1P3/8/8/4K2R w - - 0 1}
+set winAfter {4k2r/8/8/3p4/2P1P3/8/8/4K2R b - - 0 1}
+check "a line that wins material is not a trade-back" \
+    [expr {![::movelabels::isTrivialRecapture w $winFen {d5e4 h1h8} $winAfter]}]
+
+# Precedence: giving up a win is a miss, not a blunder, even though the board
+# loss also trips the blunder upgrade.
+checkEq "a move from +3 to 0 is a miss, not a blunder" \
+    [::movelabels::refine mistake [rctx cp_before 300 cp_after 0 cp_loss 300 win_drop 20.0]] miss
+checkEq "a big loss in a level position is still a blunder" \
+    [::movelabels::refine mistake [rctx cp_before 100 cp_after -200 cp_loss 300 win_drop 20.0]] blunder
+
 # An ordinary move is left alone.
 checkEq "nothing to refine" [::movelabels::refine good [rctx]] good
 
