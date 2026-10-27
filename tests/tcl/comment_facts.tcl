@@ -139,6 +139,29 @@ set ep [::facts::forMove [moveDict {rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKB
 check "an available en passant capture is named" \
     [string match {*en passant: a pawn can be captured on d6*} $ep]
 
+# An en passant capture takes a pawn that never stood on the landing square, so
+# naming the destination as the victim's square is a false fact: the pawn taken
+# from e5 to d6 is the one on d5.
+check "an en passant capture names the square the pawn was taken from" \
+    [string match {*takes the pawn on d5*} $ep]
+check "and not the landing square" [expr {![string match {*takes the pawn on d6*} $ep]}]
+
+# Same claim where the capture is a real gain, so "wins the pawn" is emitted.
+set epWin [::facts::forMove [moveDict {4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1} e5d6]]
+check "a won en passant pawn is named on its own square" \
+    [string match {*wins the pawn on d5*} $epWin]
+
+# The engine's alternative is described the same way.
+set epAlt [::facts::forMove [moveDict \
+    {4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1} e1d1 best_uci e5d6 best_san exd6]]
+check "an en passant alternative names the captured pawn's square" \
+    [string match {*takes the pawn on d5*} $epAlt]
+
+# A normal capture still names the square it lands on.
+set plain [::facts::forMove [moveDict {4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1} e4d5]]
+check "a normal capture names the destination square" \
+    [string match {*takes the pawn on d5*} $plain]
+
 # Repetition from the game requires sc_game. The real command returns a Tcl
 # list whose first element is the whole header, not a flat command string; the
 # position before move N is reached after N-1 plies.
