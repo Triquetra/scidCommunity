@@ -1158,6 +1158,7 @@ tools/lss.tcl
 tools/opening.tcl
 tools/tactics.tcl
 tools/reviewgame.tcl
+tools/move_labels.tcl
 tools/comment_facts.tcl
 tools/inputengine.tcl
 tools/novag.tcl
