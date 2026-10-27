@@ -860,6 +860,12 @@ translate U Informant+-- {Voittoasema}
 translate U AutoComment {Automaattinen kommentti}
 translate U AutoCommentTooltip {Luo tekoälykommentti nykyiselle sijainnille}
 translate U AnalysisAutoCommentTooltip {Luo tekoälykommentteja koko pelille}
+translate U MoveLabelBest {Paras}
+translate U MoveLabelExcellent {Erinomainen}
+translate U MoveLabelGood {Hyvä}
+translate U MoveLabelInaccuracy {Epätarkkuus}
+translate U MoveLabelMistake {Virhe}
+translate U MoveLabelBlunder {Raskas virhe}
 translate U GameComment {Pelin kommentti}
 translate U GameCommentTooltip {Etsi pelistä selostettuja liikkeitä ja luo tekoälyn yhteenveto}
 translate U TimeMs {Aika (ms)}

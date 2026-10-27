@@ -861,6 +861,12 @@ translate E Informant+-- {White has a crushing advantage}
 translate E AutoComment {Auto Comment}
 translate E AutoCommentTooltip {Generate AI commentary for the current position}
 translate E AnalysisAutoCommentTooltip {Generate AI commentary for the entire game}
+translate E MoveLabelBest {Best}
+translate E MoveLabelExcellent {Excellent}
+translate E MoveLabelGood {Good}
+translate E MoveLabelInaccuracy {Inaccuracy}
+translate E MoveLabelMistake {Mistake}
+translate E MoveLabelBlunder {Blunder}
 translate E GameComment {Game Comment}
 translate E GameCommentTooltip {Scan game for annotated moves and generate AI summary}
 translate E TimeMs {Time(ms)}

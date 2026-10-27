@@ -826,6 +826,12 @@ translate P Informant+-- {Białe mają miażdżącą przewagę}
 translate P AutoComment {Automatyczny komentarz}
 translate P AutoCommentTooltip {Wygeneruj komentarz AI dla bieżącej pozycji}
 translate P AnalysisAutoCommentTooltip {Wygeneruj komentarz AI dla całej partii}
+translate P MoveLabelBest {Najlepszy}
+translate P MoveLabelExcellent {Znakomity}
+translate P MoveLabelGood {Dobry}
+translate P MoveLabelInaccuracy {Nieścisłość}
+translate P MoveLabelMistake {Błąd}
+translate P MoveLabelBlunder {Rażący błąd}
 translate P GameComment {Komentarz do partii}
 translate P GameCommentTooltip {Przeskanuj partię pod kątem opisanych posunięć i wygeneruj podsumowanie AI}
 translate P TimeMs {Czas (ms)}

@@ -862,6 +862,12 @@ translate k Informant+-- {유니폼에는 장점이 있습니다.}
 translate k AutoComment {자동댓글}
 translate k AutoCommentTooltip {현재 위치에 대한 AI 설명 생성}
 translate k AnalysisAutoCommentTooltip {전체 게임에 대한 AI 설명 생성}
+translate k MoveLabelBest {최선}
+translate k MoveLabelExcellent {훌륭함}
+translate k MoveLabelGood {좋음}
+translate k MoveLabelInaccuracy {부정확}
+translate k MoveLabelMistake {실수}
+translate k MoveLabelBlunder {큰 실수}
 translate k GameComment {게임 코멘트}
 translate k GameCommentTooltip {이를 찾기 위해 게임을 검사하고 AI 요약을 생성합니다.}
 translate k TimeMs {시간(ms)}

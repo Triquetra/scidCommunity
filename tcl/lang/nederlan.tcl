@@ -851,6 +851,12 @@ translate N Informant+-- {Deze partij kan als gewonnen beschouwd worden}
 translate N AutoComment {Automatische commentaar}
 translate N AutoCommentTooltip {Genereer AI-commentaar voor de huidige positie}
 translate N AnalysisAutoCommentTooltip {Genereer AI-commentaar voor het hele spel}
+translate N MoveLabelBest {Beste}
+translate N MoveLabelExcellent {Uitstekend}
+translate N MoveLabelGood {Goed}
+translate N MoveLabelInaccuracy {Onnauwkeurigheid}
+translate N MoveLabelMistake {Fout}
+translate N MoveLabelBlunder {Grove fout}
 translate N GameComment {Spelcommentaar}
 translate N GameCommentTooltip {Scan het spel op geannoteerde zetten en genereer een AI-samenvatting}
 translate N TimeMs {Tijd (ms)}

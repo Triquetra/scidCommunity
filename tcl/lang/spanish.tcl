@@ -878,6 +878,12 @@ translate S Informant+-- {La partida es considerada ganada}
 translate S AutoComment {Comentario automático}
 translate S AutoCommentTooltip {Genere comentarios de IA para la posición actual}
 translate S AnalysisAutoCommentTooltip {Genera comentarios de IA para todo el juego.}
+translate S MoveLabelBest {Mejor}
+translate S MoveLabelExcellent {Excelente}
+translate S MoveLabelGood {Buena}
+translate S MoveLabelInaccuracy {Imprecisión}
+translate S MoveLabelMistake {Error}
+translate S MoveLabelBlunder {Error grave}
 translate S GameComment {Comentario del juego}
 translate S GameCommentTooltip {Escanee el juego en busca de movimientos anotados y genere un resumen de IA}
 translate S TimeMs {Tiempo (ms)}

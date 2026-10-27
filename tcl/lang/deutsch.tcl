@@ -861,6 +861,12 @@ translate D Informant+-- {Weiß hat erdrückenden Vorteil}
 translate D AutoComment {Zug Kritik}
 translate D AutoCommentTooltip {Generieren Sie einen KI-Kommentar für die aktuelle Position}
 translate D AnalysisAutoCommentTooltip {Generieren Sie KI-Kommentare für das gesamte Spiel}
+translate D MoveLabelBest {Beste}
+translate D MoveLabelExcellent {Ausgezeichnet}
+translate D MoveLabelGood {Gut}
+translate D MoveLabelInaccuracy {Ungenauigkeit}
+translate D MoveLabelMistake {Fehler}
+translate D MoveLabelBlunder {Grober Fehler}
 translate D GameComment {Partie Kritik}
 translate D GameCommentTooltip {Durchsuchen Sie das Spiel nach kommentierten Zügen und erstellen Sie eine KI-Zusammenfassung}
 translate D TimeMs {Zeit (ms)}

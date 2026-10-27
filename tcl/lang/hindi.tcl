@@ -821,6 +821,12 @@ translate h Informant+-- {सफेद रंग का जबरदस्त �
 translate h AutoComment {ऑटो टिप्पणी}
 translate h AutoCommentTooltip {वर्तमान स्थिति के लिए एआई कमेंट्री तैयार करें}
 translate h AnalysisAutoCommentTooltip {पूरे गेम के लिए AI कमेंट्री जेनरेट करें}
+translate h MoveLabelBest {सर्वश्रेष्ठ}
+translate h MoveLabelExcellent {उत्कृष्ट}
+translate h MoveLabelGood {अच्छा}
+translate h MoveLabelInaccuracy {अशुद्धि}
+translate h MoveLabelMistake {गलती}
+translate h MoveLabelBlunder {गंभीर गलती}
 translate h GameComment {खेल टिप्पणी}
 translate h GameCommentTooltip {एनोटेटेड चालों के लिए गेम को स्कैन करें और एआई सारांश तैयार करें}
 translate h TimeMs {समय(एमएस)}

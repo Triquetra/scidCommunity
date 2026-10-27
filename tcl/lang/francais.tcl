@@ -834,6 +834,12 @@ translate F Informant+-- {La partie est gagnée}
 translate F AutoComment {Commentaire automatique}
 translate F AutoCommentTooltip {Générer des commentaires IA pour la position actuelle}
 translate F AnalysisAutoCommentTooltip {Générez des commentaires IA pour l'ensemble du jeu}
+translate F MoveLabelBest {Meilleur}
+translate F MoveLabelExcellent {Excellent}
+translate F MoveLabelGood {Bon}
+translate F MoveLabelInaccuracy {Imprécision}
+translate F MoveLabelMistake {Erreur}
+translate F MoveLabelBlunder {Gaffe}
 translate F GameComment {Commentaire du jeu}
 translate F GameCommentTooltip {Analysez le jeu pour rechercher des mouvements annotés et générez un résumé de l'IA}
 translate F TimeMs {Temps (ms)}

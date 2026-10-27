@@ -826,6 +826,12 @@ translate C Informant+-- {Partie je povaovna za vyhranou}
 translate C AutoComment {Automatick koment}
 translate C AutoCommentTooltip {Generujte AI koment pro aktuln pozici}
 translate C AnalysisAutoCommentTooltip {Generujte AI koment pro celou hru}
+translate C MoveLabelBest {Nejlepší}
+translate C MoveLabelExcellent {Výborný}
+translate C MoveLabelGood {Dobrý}
+translate C MoveLabelInaccuracy {Nepřesnost}
+translate C MoveLabelMistake {Chyba}
+translate C MoveLabelBlunder {Hrubá chyba}
 translate C GameComment {Koment ke he}
 translate C GameCommentTooltip {Naskenujte hru pro anotovan pohyby a vygenerujte souhrn AI}
 translate C TimeMs {as (ms)}

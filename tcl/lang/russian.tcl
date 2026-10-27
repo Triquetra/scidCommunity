@@ -828,6 +828,12 @@ translate R Informant+-- {Партия считается выигранной}
 translate R AutoComment {Автоматический комментарий}
 translate R AutoCommentTooltip {Создать комментарий AI для текущей позиции}
 translate R AnalysisAutoCommentTooltip {Создавайте комментарии ИИ для всей игры.}
+translate R MoveLabelBest {Лучший}
+translate R MoveLabelExcellent {Отличный}
+translate R MoveLabelGood {Хороший}
+translate R MoveLabelInaccuracy {Неточность}
+translate R MoveLabelMistake {Ошибка}
+translate R MoveLabelBlunder {Грубая ошибка}
 translate R GameComment {Комментарий к игре}
 translate R GameCommentTooltip {Сканируйте игру на предмет аннотированных ходов и сгенерируйте сводку AI.}
 translate R TimeMs {Время (мс)}

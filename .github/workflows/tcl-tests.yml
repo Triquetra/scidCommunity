@@ -28,6 +28,9 @@ jobs:
       - name: Comment facts
         run: tclsh tests/tcl/comment_facts.tcl
 
+      - name: Move labels
+        run: tclsh tests/tcl/move_labels.tcl
+
       - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl
 

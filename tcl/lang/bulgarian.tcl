@@ -862,6 +862,12 @@ translate g Informant+-- {Бялото има смазващо предимст�
 translate g AutoComment {Автоматичен коментар}
 translate g AutoCommentTooltip {Генерирайте AI коментар за текущата позиция}
 translate g AnalysisAutoCommentTooltip {Генерирайте AI коментар за цялата игра}
+translate g MoveLabelBest {Най-добър}
+translate g MoveLabelExcellent {Отличен}
+translate g MoveLabelGood {Добър}
+translate g MoveLabelInaccuracy {неточност}
+translate g MoveLabelMistake {Грешка}
+translate g MoveLabelBlunder {Груба грешка}
 translate g GameComment {Коментар на играта}
 translate g GameCommentTooltip {Сканирайте играта за анотирани ходове и генерирайте резюме на AI}
 translate g TimeMs {Време (ms)}
