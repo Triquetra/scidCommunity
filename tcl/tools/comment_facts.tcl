@@ -567,8 +567,10 @@ proc ::facts::materialEvalNote {m} {
             lappend why "$ahead has [expr {abs($mw - $mb)}] more legal moves"
         }
     }
-    set pawnWord [expr {$matAmt == 1 ? "pawn" : "pawns"}]
-    set note "material says $matWho is $matAmt $pawnWord up, yet the engine still has $evWho ahead"
+    # Material is counted in pawn units, but a five-point lead is a rook, not
+    # five pawns; say points, as materialLine does.
+    set pointWord [expr {$matAmt == 1 ? "point" : "points"}]
+    set note "material says $matWho is $matAmt $pointWord up, yet the engine still has $evWho ahead"
     if {[llength $why] == 1} {
         append note " - [lindex $why 0]"
     } elseif {[llength $why] > 1} {
@@ -789,6 +791,11 @@ proc ::facts::motifLines {m} {
         if {$q eq ""} continue
         if {[::chessboard::colorOf $q] ne $them} continue
         if {![attacksFrom $after $to $i]} continue
+        # A piece can land on a square where it is pinned; it still attacks
+        # geometrically, but it cannot take. The king is the exception: the
+        # check itself is legal and is reported as a check.
+        if {[string tolower $q] ne "k" &&
+            ![legalCapture $after $to $i $mover]} continue
         set defended [expr {[llength [attackersOf $after $i $them]] > 0}]
         if {[string tolower $q] eq "k" || [valueOf $q] > [valueOf [lindex $board $to]] || !$defended} {
             lappend hits [list [pieceName $q] [::chessboard::sqName $i]]
@@ -1256,6 +1263,8 @@ proc ::facts::forkLine {fenBefore uci} {
         set hit 0
         catch { set hit [::facts::attacksFrom $pos2 $toSq $sq] }
         if {!$hit} continue
+        # A moved piece that is itself pinned cannot take the target.
+        if {![::facts::legalCapture $pos2 $toSq $sq $mover]} continue
         lappend targets "the [string tolower [::facts::pieceName $p]] on [::chessboard::sqName $sq]"
         if {[llength $targets] >= 2} break
     }

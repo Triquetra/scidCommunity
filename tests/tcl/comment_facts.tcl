@@ -296,7 +296,7 @@ set dis [::facts::forMove [moveDict \
     {r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 5} f3e5 \
     best_uci c3d5 best_san Nd5 best_pv {c3d5} eval_after_cp -250]]
 check "material and the engine disagreeing is stated, with the reason" \
-    [string match {*material says White is 1 pawn up, yet the engine still has Black ahead*} $dis]
+    [string match {*material says White is 1 point up, yet the engine still has Black ahead*} $dis]
 # A two-point swing is the exchange only when the pieces say so.
 checkEq "a rook for a knight is the exchange" \
     [::facts::materialSwing {r3k3/8/8/8/8/8/4N3/R3K3 w - - 0 1} {4k3/8/8/8/8/8/8/R3K3 w - - 0 1}] \
@@ -342,6 +342,19 @@ check "the piece giving the check is named" \
 set direct [::facts::forkLine {7k/8/8/8/8/8/K7/3qR3 w - - 0 1} e1h1]
 check "a direct check and attack is still a fork" \
     [string match {*fork: the rook on h1 checks the king and attacks the queen on d1*} $direct] $direct
+
+# A piece that lands pinned attacks geometrically but cannot take, so it has
+# no target to report (and no fork to claim).
+set pinAttack {4r1k1/5q2/8/8/8/3N4/8/4K3 w - - 0 1}
+check "a pinned piece does not attack a piece" \
+    [expr {![string match {*attacks the queen on f7*} \
+        [::facts::motifLines [dict create fen_before $pinAttack played d3e5 side white ply 13 classification mistake]]]}]
+set freeAttack {4r1k1/5q2/8/8/8/3N4/4P3/4K3 w - - 0 1}
+check "the same piece unpinned attacks it" \
+    [string match {*attacks the queen on f7*} \
+        [::facts::motifLines [dict create fen_before $freeAttack played d3e5 side white ply 13 classification mistake]]]
+checkEq "a pinned checking piece is not a fork" \
+    [::facts::forkLine {4r3/3k1q2/8/8/8/3N4/8/4K3 w - - 0 1} d3e5] {}
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]
