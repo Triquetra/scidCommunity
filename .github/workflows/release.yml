@@ -13,16 +13,27 @@ on:
         description: 'Create/update GitHub release with artifacts?'
         type: boolean
         default: true
+      macos_runner:
+        description: 'macOS runner image (both are arm64, so the artifact is the same)'
+        type: choice
+        default: 'macos-15'
+        options:
+          - macos-15
+          - macos-26
 
 permissions:
   contents: write
 
 jobs:
   build-macos-app:
-    # macos-latest is the macOS 26 arm64 image, which has had long
-    # runner-capacity queues (jobs cancelled after failing to acquire a
-    # runner). Pin the previous arm64 image instead.
-    runs-on: macos-15
+    # Hosted macOS pools queue independently, and sometimes one is starved for
+    # long enough that a release stalls waiting for a runner: macos-26 (what
+    # macos-latest resolves to) did that on 2026-10-21, and macos-15 on
+    # 2026-10-27 while macos-14 was being retired. Both labels are arm64, so the
+    # app bundle is identical either way; when one pool is starved, re-run this
+    # workflow from the Actions tab with the other label rather than editing
+    # this file. Do not use macos-14: it is unsupported from 2026-11-02.
+    runs-on: ${{ inputs.macos_runner || 'macos-15' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
