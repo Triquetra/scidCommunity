@@ -828,6 +828,11 @@ translate Q MoveLabelGood {Добрий}
 translate Q MoveLabelInaccuracy {Неточність}
 translate Q MoveLabelMistake {Помилка}
 translate Q MoveLabelBlunder {Груба помилка}
+translate Q MoveLabelBrilliant {Блискучий}
+translate Q MoveLabelGreat {Чудовий}
+translate Q MoveLabelMiss {Втрачена можливість}
+translate Q MoveLabelForced {Вимушений}
+translate Q MoveLabelBook {Теорія}
 translate Q GameComment {Коментар гри}
 translate Q GameCommentTooltip {Скануйте гру на наявність анотованих ходів і створюйте зведення ШІ}
 translate Q TimeMs {Час (мс)}

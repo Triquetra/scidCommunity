@@ -868,6 +868,11 @@ translate A MoveLabelGood {良い}
 translate A MoveLabelInaccuracy {不正確}
 translate A MoveLabelMistake {ミス}
 translate A MoveLabelBlunder {大悪手}
+translate A MoveLabelBrilliant {妙手}
+translate A MoveLabelGreat {好手}
+translate A MoveLabelMiss {見逃し}
+translate A MoveLabelForced {強制}
+translate A MoveLabelBook {定跡}
 translate A GameComment {ゲームコメント}
 translate A GameCommentTooltip {注釈付きの動きのゲームをスキャンし、AI サマリーを生成します}
 translate A TimeMs {時間(ミリ秒)}

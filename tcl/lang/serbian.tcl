@@ -1312,6 +1312,11 @@ translate Y MoveLabelGood {Dobar}
 translate Y MoveLabelInaccuracy {Netočnost}
 translate Y MoveLabelMistake {Greška}
 translate Y MoveLabelBlunder {Gruba greška}
+translate Y MoveLabelBrilliant {Briljantan}
+translate Y MoveLabelGreat {Izvanredan}
+translate Y MoveLabelMiss {Propuštena prilika}
+translate Y MoveLabelForced {Prinudan}
+translate Y MoveLabelBook {Teorija}
 # ====== TODO To be translated ======
 translate Y GameComment {Game Comment}
 # ====== TODO To be translated ======

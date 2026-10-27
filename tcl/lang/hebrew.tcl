@@ -828,6 +828,11 @@ translate V MoveLabelGood {טוב}
 translate V MoveLabelInaccuracy {אי-דיוק}
 translate V MoveLabelMistake {טעות}
 translate V MoveLabelBlunder {טעות חמורה}
+translate V MoveLabelBrilliant {מבריק}
+translate V MoveLabelGreat {מצוין מאוד}
+translate V MoveLabelMiss {החמצה}
+translate V MoveLabelForced {כפוי}
+translate V MoveLabelBook {תיאוריה}
 translate V GameComment {הערת משחק}
 translate V GameCommentTooltip {סרוק משחק לאיתור מהלכים מוערים והפק סיכום בינה מלאכותית}
 translate V TimeMs {זמן (ms)}

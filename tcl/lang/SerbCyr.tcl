@@ -868,6 +868,11 @@ translate J MoveLabelGood {Добар}
 translate J MoveLabelInaccuracy {Нетачност}
 translate J MoveLabelMistake {Грешка}
 translate J MoveLabelBlunder {Груба грешка}
+translate J MoveLabelBrilliant {Бриљантан}
+translate J MoveLabelGreat {Изванредан}
+translate J MoveLabelMiss {Пропуштена прилика}
+translate J MoveLabelForced {Принудан}
+translate J MoveLabelBook {Теорија}
 translate J GameComment {Гаме Цоммент}
 translate J GameCommentTooltip {Скенирајте игру за обележеним потезима и генеришете АИ резиме}
 translate J TimeMs {време(мс)}

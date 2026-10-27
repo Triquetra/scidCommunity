@@ -867,6 +867,11 @@ translate D MoveLabelGood {Gut}
 translate D MoveLabelInaccuracy {Ungenauigkeit}
 translate D MoveLabelMistake {Fehler}
 translate D MoveLabelBlunder {Grober Fehler}
+translate D MoveLabelBrilliant {Brillant}
+translate D MoveLabelGreat {Großartig}
+translate D MoveLabelMiss {Verpasste Chance}
+translate D MoveLabelForced {Erzwungen}
+translate D MoveLabelBook {Theorie}
 translate D GameComment {Partie Kritik}
 translate D GameCommentTooltip {Durchsuchen Sie das Spiel nach kommentierten Zügen und erstellen Sie eine KI-Zusammenfassung}
 translate D TimeMs {Zeit (ms)}

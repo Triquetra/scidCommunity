@@ -37,6 +37,40 @@ The thresholds, from Patzer's classifier (MIT):
 The centipawn guard on the two best labels is what stops a half-pawn loss in a
 won position from being called excellent.
 
+## Refinements
+
+The six labels read one score pair. Five more read what the move did to the
+board and what the engine's other lines were, and are the vocabulary a reader
+actually learns from:
+
+| Label | Rule |
+| --- | --- |
+| forced | only one legal move — not a choice, whatever it costs |
+| book | inside the opening (`ply <= 12` by default, `in_book` overrides) and not a mistake |
+| brilliant | the engine's move, out of book, keeps the game (`cp_before <= 500`, `cp_after >= -50`, `cp_loss <= 20`), gives up two points or more that the line does not simply trade back |
+| great | the best move beats the second-best by 200cp or more and the position is still playable — or a rescue from `-150` to `-50`; never for taking a piece the opponent left hanging |
+| miss | already an inaccuracy, mistake or blunder, and it gave up a win: `cp_before >= 150` and `cp_after < 50`, or a mate was there and is gone |
+
+A board loss of 300cp or more with a win-chance drop of 12 or more is a blunder
+even when the curve rounds under the line: near the ends of the curve the two
+scales disagree, and the board loss is the fact that does not move.
+
+`::movelabels::refine {label ctx}` takes the base label and a dict:
+
+| Key | Meaning |
+| --- | --- |
+| `is_best` | the engine chose this move |
+| `cp_before`, `cp_after` | evaluations from the mover's view, mate-encoded |
+| `cp_loss`, `win_drop` | `::movelabels::cpLoss` / `winDrop` of the two |
+| `ply`, `legal_moves`, `in_book` | position context |
+| `candidates` | the engine's top evaluations from the mover's view, best first (MultiPV) |
+| `played`, `fen_before`, `fen_after`, `pv_after_played` | the move and the board, for the sacrifice and free-capture tests |
+
+The two board questions come from `::chessboard::hangingMaterial` (what the move
+left en prise, net of what it took), `::movelabels::isFreeCapture` (a capture the
+opponent handed over) and `::movelabels::isTrivialRecapture` (the line simply
+trades back).
+
 ## Mate
 
 A mate is encoded with `::movelabels::mateToCp` at ±100000 (minus 100 per move
@@ -57,15 +91,17 @@ there is.
 | `forMover {cp mate stm mover}` | an engine score (side to move's view) as the mover sees it |
 | `winDrop`, `cpLoss` | the two measurements the ladder is built on |
 | `mateToCp`, `isMate` | the mate encoding |
+| `refine {label ctx}` | the refined label, from what the move did and the engine's other lines |
+| `isFreeCapture {fen uci}` | takes a piece standing there for free |
+| `isTrivialRecapture {side fen pv fenAfter}` | the line simply trades back |
 | `text {label}` | the translated word for display |
 
 ## Translation
 
 The labels returned by `label` are identifiers: what a PGN, a report or a test
 stores, and they do not change with the UI language. The words a reader sees
-come from `::movelabels::text`, which looks up `MoveLabelBest`,
-`MoveLabelExcellent`, `MoveLabelGood`, `MoveLabelInaccuracy`,
-`MoveLabelMistake` and `MoveLabelBlunder` in `tcl/lang/*.tcl`. A language file
+come from `::movelabels::text`, which looks up `MoveLabel<Label>` in
+`tcl/lang/*.tcl` — eleven keys, from `MoveLabelBest` to `MoveLabelBook`. A language file
 that has not been updated yet still shows the English word through `tr()`'s
 fallback to the English table.
 

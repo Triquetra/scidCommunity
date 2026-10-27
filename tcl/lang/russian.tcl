@@ -834,6 +834,11 @@ translate R MoveLabelGood {Хороший}
 translate R MoveLabelInaccuracy {Неточность}
 translate R MoveLabelMistake {Ошибка}
 translate R MoveLabelBlunder {Грубая ошибка}
+translate R MoveLabelBrilliant {Блестящий}
+translate R MoveLabelGreat {Превосходный}
+translate R MoveLabelMiss {Упущенная возможность}
+translate R MoveLabelForced {Вынужденный}
+translate R MoveLabelBook {Теория}
 translate R GameComment {Комментарий к игре}
 translate R GameCommentTooltip {Сканируйте игру на предмет аннотированных ходов и сгенерируйте сводку AI.}
 translate R TimeMs {Время (мс)}

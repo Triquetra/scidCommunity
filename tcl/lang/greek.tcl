@@ -859,6 +859,11 @@ translate G MoveLabelGood {Καλή}
 translate G MoveLabelInaccuracy {Ανακρίβεια}
 translate G MoveLabelMistake {Λάθος}
 translate G MoveLabelBlunder {Χοντρό λάθος}
+translate G MoveLabelBrilliant {Λαμπρή}
+translate G MoveLabelGreat {Πολύ καλή}
+translate G MoveLabelMiss {Χαμένη ευκαιρία}
+translate G MoveLabelForced {Αναγκαστική}
+translate G MoveLabelBook {Θεωρία}
 translate G GameComment {Σχόλιο παιχνιδιού}
 translate G GameCommentTooltip {Σαρώστε το παιχνίδι για σχολιασμένες κινήσεις και δημιουργήστε περίληψη AI}
 translate G TimeMs {Χρόνος(ms)}

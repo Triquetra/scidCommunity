@@ -827,6 +827,11 @@ translate Z MoveLabelGood {Nzuri}
 translate Z MoveLabelInaccuracy {Ukosefu wa usahihi}
 translate Z MoveLabelMistake {Kosa}
 translate Z MoveLabelBlunder {Kosa kubwa}
+translate Z MoveLabelBrilliant {Bora zaidi}
+translate Z MoveLabelGreat {Nzuri mno}
+translate Z MoveLabelMiss {Nafasi iliyokosekana}
+translate Z MoveLabelForced {Lazima}
+translate Z MoveLabelBook {Nadharia}
 translate Z GameComment {Maoni ya Mchezo}
 translate Z GameCommentTooltip {Changanua mchezo kwa hatua zilizofafanuliwa na utoe muhtasari wa AI}
 translate Z TimeMs {Saa(ms)}

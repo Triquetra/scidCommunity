@@ -838,6 +838,11 @@ translate W MoveLabelGood {Bra}
 translate W MoveLabelInaccuracy {Oprecision}
 translate W MoveLabelMistake {Fel}
 translate W MoveLabelBlunder {Grovt fel}
+translate W MoveLabelBrilliant {Briljant}
+translate W MoveLabelGreat {Fantastisk}
+translate W MoveLabelMiss {Missat tillfälle}
+translate W MoveLabelForced {Tvingat}
+translate W MoveLabelBook {Teori}
 translate W GameComment {Spelkommentar}
 translate W GameCommentTooltip {Skanna spelet efter kommenterade drag och generera AI-sammanfattningar}
 translate W TimeMs {Tid(ms)}

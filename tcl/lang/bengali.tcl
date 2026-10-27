@@ -827,6 +827,11 @@ translate b MoveLabelGood {ভালো}
 translate b MoveLabelInaccuracy {অযথার্থতা}
 translate b MoveLabelMistake {ভুল}
 translate b MoveLabelBlunder {গুরুতর ভুল}
+translate b MoveLabelBrilliant {অসাধারণ}
+translate b MoveLabelGreat {খুব ভালো}
+translate b MoveLabelMiss {সুযোগ হাতছাড়া}
+translate b MoveLabelForced {বাধ্যতামূলক}
+translate b MoveLabelBook {তত্ত্ব}
 translate b GameComment {খেলা মন্তব্য}
 translate b GameCommentTooltip {টীকাযুক্ত পদক্ষেপের জন্য গেম স্ক্যান করুন এবং এআই সারাংশ তৈরি করুন}
 translate b TimeMs {সময়(ms)}

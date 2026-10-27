@@ -853,6 +853,11 @@ translate K MoveLabelGood {Bona}
 translate K MoveLabelInaccuracy {Imprecisió}
 translate K MoveLabelMistake {Error}
 translate K MoveLabelBlunder {Error greu}
+translate K MoveLabelBrilliant {Brillant}
+translate K MoveLabelGreat {Molt bona}
+translate K MoveLabelMiss {Ocasió perduda}
+translate K MoveLabelForced {Forçada}
+translate K MoveLabelBook {Teoria}
 translate K GameComment {Comentari del joc}
 translate K GameCommentTooltip {Escaneja el joc per trobar moviments anotats i genera un resum de l'IA}
 translate K TimeMs {Temps (ms)}

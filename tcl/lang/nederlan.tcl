@@ -857,6 +857,11 @@ translate N MoveLabelGood {Goed}
 translate N MoveLabelInaccuracy {Onnauwkeurigheid}
 translate N MoveLabelMistake {Fout}
 translate N MoveLabelBlunder {Grove fout}
+translate N MoveLabelBrilliant {Briljant}
+translate N MoveLabelGreat {Zeer goed}
+translate N MoveLabelMiss {Gemiste kans}
+translate N MoveLabelForced {Gedwongen}
+translate N MoveLabelBook {Theorie}
 translate N GameComment {Spelcommentaar}
 translate N GameCommentTooltip {Scan het spel op geannoteerde zetten en genereer een AI-samenvatting}
 translate N TimeMs {Tijd (ms)}

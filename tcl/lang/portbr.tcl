@@ -840,6 +840,11 @@ translate B MoveLabelGood {Bom}
 translate B MoveLabelInaccuracy {Imprecisão}
 translate B MoveLabelMistake {Erro}
 translate B MoveLabelBlunder {Erro grave}
+translate B MoveLabelBrilliant {Brilhante}
+translate B MoveLabelGreat {Muito bom}
+translate B MoveLabelMiss {Oportunidade perdida}
+translate B MoveLabelForced {Forçada}
+translate B MoveLabelBook {Teoria}
 translate B GameComment {Comentário do jogo}
 translate B GameCommentTooltip {Analisa o jogo em busca de movimentos anotados e gere um resumo de IA}
 translate B TimeMs {Tempo (ms)}

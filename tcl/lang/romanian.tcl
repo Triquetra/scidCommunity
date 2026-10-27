@@ -868,6 +868,11 @@ translate L MoveLabelGood {Bună}
 translate L MoveLabelInaccuracy {Imprecizie}
 translate L MoveLabelMistake {Greșeală}
 translate L MoveLabelBlunder {Gafă}
+translate L MoveLabelBrilliant {Briliantă}
+translate L MoveLabelGreat {Minunată}
+translate L MoveLabelMiss {Ocazie ratată}
+translate L MoveLabelForced {Forțată}
+translate L MoveLabelBook {Teorie}
 translate L GameComment {Comentariu joc}
 translate L GameCommentTooltip {Scanează jocul pentru mișcări adnotate și generează un rezumat AI}
 translate L TimeMs {Timp (ms)}

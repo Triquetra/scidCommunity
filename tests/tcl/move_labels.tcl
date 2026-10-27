@@ -192,6 +192,81 @@ set chosen [::movelabels::game $cps {1 4}]
 checkEq "a chosen ply is best" [lindex $chosen 1] best
 checkEq "and the other plies are not" [lindex $chosen 0] excellent
 
+# ---- refinements ---------------------------------------------------------
+puts "refinements"
+
+proc rctx {args} {
+    set d [dict create is_best 0 cp_before 0 cp_after 0 cp_loss 0 win_drop 0.0 \
+        ply 20 legal_moves 30 candidates {} played "" fen_before "" fen_after "" \
+        pv_after_played {}]
+    dict for {k v} $args { dict set d $k $v }
+    return $d
+}
+
+# One legal move is not a choice.
+checkEq "a forced move is forced, whatever it costs" \
+    [::movelabels::refine blunder [rctx legal_moves 1 cp_loss 900]] forced
+
+# Opening moves are book, not judgement - but a blunder in the opening is still
+# a blunder, and the caller can say a position is out of book.
+checkEq "an opening move is book" [::movelabels::refine excellent [rctx ply 5]] book
+checkEq "a blunder in the opening stays a blunder" \
+    [::movelabels::refine blunder [rctx ply 5]] blunder
+checkEq "the caller can override the book boundary" \
+    [::movelabels::refine excellent [rctx ply 5 in_book 0]] excellent
+
+# The only move that keeps the game: a wide MultiPV gap.
+checkEq "the only move that holds is great" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 0 cp_after -10 candidates {300 50}]] great
+checkEq "a wide gap in a lost position is a forced retreat, not great" \
+    [::movelabels::refine good [rctx is_best 1 cp_before -400 cp_after -350 candidates {300 -350}]] good
+checkEq "a rescue from a lost position is great" \
+    [::movelabels::refine good [rctx is_best 1 cp_before -200 cp_after -50]] great
+
+# ... but not when it simply takes what the opponent left hanging.
+set freeFen {4k2r/8/8/8/8/8/8/R3K2R w - - 0 1}
+checkEq "taking a piece left hanging is not great" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 0 cp_after -50 \
+        candidates {300 50} fen_before $freeFen played h1h8]] good
+check "a free rook capture is recognised" [::movelabels::isFreeCapture $freeFen h1h8]
+
+# The board loss is the fact that does not move when the two scales disagree.
+checkEq "a three-pawn loss is a blunder even if the curve rounds under" \
+    [::movelabels::refine mistake [rctx cp_loss 350 win_drop 15.0 cp_before 100]] blunder
+checkEq "the same loss in a decided game is not" \
+    [::movelabels::refine mistake [rctx cp_loss 350 win_drop 15.0 cp_before 900 cp_after 850]] mistake
+
+# A miss gave up a win, not just a better position.
+checkEq "throwing away a winning advantage is a miss" \
+    [::movelabels::refine mistake [rctx cp_before 200 cp_after 20]] miss
+checkEq "throwing away a mate is a miss" \
+    [::movelabels::refine blunder [rctx cp_before [::movelabels::mateToCp 3] cp_after 0]] miss
+checkEq "a small concession is not a miss" \
+    [::movelabels::refine mistake [rctx cp_before 100 cp_after 40]] mistake
+
+# A sound sacrifice is brilliant: the piece given up is worth two or more after
+# the move, the engine likes it, and the line does not simply trade back.
+set sacFen {r1bqk2r/pppp1ppp/2n2n2/2b1p3/2B1P3/2N2N2/PPPP1PPP/R1BQK2R w KQkq - 6 5}
+set sacAfter {r1bqk2r/pppp1ppp/2n2n2/2b1N3/2B1P3/2N5/PPPP1PPP/R1BQK2R b KQkq - 0 5}
+check "the sacrifice costs two" \
+    [expr {[::chessboard::hangingMaterial $sacFen $sacAfter w] == 2}]
+checkEq "a sound sacrifice is brilliant" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14 \
+        fen_before $sacFen fen_after $sacAfter played f3e5 pv_after_played {c6e5}]] brilliant
+checkEq "without the board it cannot be called brilliant" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14]] good
+
+# A line that trades straight back is not a sacrifice.
+set tradeFen {rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 4}
+set tradeAfter {rnbqkbnr/ppp2ppp/8/3pN3/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 0 4}
+check "a recapture that restores the material is trivial" \
+    [::movelabels::isTrivialRecapture w $tradeFen {d5e4} $tradeAfter]
+check "a recapture that leaves material behind is not" \
+    [expr {![::movelabels::isTrivialRecapture w $sacFen {c6e5} $sacAfter]}]
+
+# An ordinary move is left alone.
+checkEq "nothing to refine" [::movelabels::refine good [rctx]] good
+
 # The label tokens are identifiers; the words a reader sees come from the
 # translation table, and every label must have an entry there.
 checkEq "without a translation table the token is returned" \
@@ -230,13 +305,14 @@ set missingAll {}
 foreach {code file} $langFiles {
     set text [langText [file join $langDir $file]]
     set missing {}
-    foreach l {Best Excellent Good Inaccuracy Mistake Blunder} {
+    foreach l {Best Excellent Good Inaccuracy Mistake Blunder \
+               Brilliant Great Miss Forced Book} {
         if {![regexp "translate $code MoveLabel$l \{(.+?)\}" $text -> word]
             || [string trim $word] eq ""} {
             lappend missing $l
         }
     }
-    check "$file defines all six label keys" [expr {![llength $missing]}] "missing: $missing"
+    check "$file defines all eleven label keys" [expr {![llength $missing]}] "missing: $missing"
     if {[llength $missing]} { lappend missingAll $file }
 }
 check "no language file is missing a label key" [expr {![llength $missingAll]}] "files: $missingAll"

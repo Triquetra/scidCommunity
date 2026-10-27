@@ -457,3 +457,32 @@ proc ::chessboard::see {pos sq} {
     }
     return [expr {max(0, $gain - [see [makeMove $pos $best] $sq])}]
 }
+
+# Material the side that just moved left en prise, net of what it captured.
+# What a sacrifice costs, as a number: positive means the mover gave up that
+# much, and zero means it gave up nothing (the opponent's best capture wins no
+# more than the move already took).
+proc ::chessboard::hangingMaterial {fenBefore fenAfter stm} {
+    variable PIECE_VALUE
+    set before [fromFen $fenBefore]
+    set after [fromFen $fenAfter]
+    lassign [material $before] wb bb
+    lassign [material $after] wa ba
+    set gained [expr {[string index $stm 0] eq "w" ? $bb - $ba : $wb - $wa}]
+    set ab [dict get $after board]
+    set epA [dict get $after ep]
+    set targets {}
+    foreach m [legalMoves $after] {
+        set to [sqIndex [string range $m 2 3]]
+        if {[lindex $ab $to] ne ""} { lappend targets $to ; continue }
+        if {$to == $epA && [string tolower [lindex $ab [sqIndex [string range $m 0 1]]]] eq "p"} {
+            lappend targets $to
+        }
+    }
+    set biggest 0
+    foreach sq [lsort -unique $targets] {
+        set v [see $after $sq]
+        if {$v > $biggest} { set biggest $v }
+    }
+    return [expr {$biggest - $gained}]
+}

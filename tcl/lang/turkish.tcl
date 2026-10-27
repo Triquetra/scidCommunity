@@ -831,6 +831,11 @@ translate T MoveLabelGood {İyi}
 translate T MoveLabelInaccuracy {İsabetsizlik}
 translate T MoveLabelMistake {Hata}
 translate T MoveLabelBlunder {Ağır hata}
+translate T MoveLabelBrilliant {Muhteşem}
+translate T MoveLabelGreat {Harika}
+translate T MoveLabelMiss {Kaçırılan fırsat}
+translate T MoveLabelForced {Zorunlu}
+translate T MoveLabelBook {Teori}
 translate T GameComment {Oyun Yorumu}
 translate T GameCommentTooltip {Açıklamalı hareketler için oyunu tarayın ve AI özeti oluşturun}
 translate T TimeMs {Zaman(ms)}
