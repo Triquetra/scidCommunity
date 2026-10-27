@@ -92,6 +92,53 @@ check "a mate score is recognised as a mate" [::movelabels::isMate $m3]
 check "a tablebase centipawn score is not a mate" \
     [expr {![::movelabels::isMate 9165]}]
 
+# UCI's `mate 0` is the side to move already mated, so it is the largest loss
+# for that side - and the largest win for the mover who delivered it. Read as a
+# win for the side to move, it made the move that delivered the mate a blunder.
+set m0 [::movelabels::mateToCp 0]
+check "mate 0 is a loss for the side to move" \
+    [expr {$m0 == -100000}] "got $m0"
+checkEq "mate 0 from the mover's own side is a loss" \
+    [::movelabels::forMover {} 0 w w] -100000
+checkEq "mate 0 delivered to the opponent is a win for the mover" \
+    [::movelabels::forMover {} 0 b w] 100000
+checkEq "the move that delivers mate is not blamed for it" \
+    [::movelabels::label $m3 [::movelabels::forMover {} 0 b w]] excellent
+checkEq "being mated by the opponent's move is a blunder" \
+    [::movelabels::label 0 [::movelabels::forMover {} 0 w w]] blunder
+
+# Every mate, however far off, has to stay outside MATE_CP_THRESHOLD: a mate in
+# 101 used to encode to 89900 and be scored on the centipawn curve as if it were
+# an ordinary evaluation.
+set farMates 1
+foreach d {1 2 3 50 99 100 101 102 200 1000 -100 -101 -1000} {
+    set cp [::movelabels::mateToCp $d]
+    if {![::movelabels::isMate $cp]} {
+        set farMates 0
+        puts "    (mate $d encodes to $cp, under the threshold)"
+    }
+}
+check "every mate distance encodes past the mate threshold" $farMates
+set m101 [::movelabels::mateToCp 101]
+check "a mate in 101 is still a mate" [::movelabels::isMate $m101]
+check "a mate in 101 keeps the sign of the mate" \
+    [expr {$m101 > 0 && [::movelabels::mateToCp -101] < 0}]
+checkEq "delivering a mate in 101 is still excellent" \
+    [::movelabels::label [::movelabels::mateToCp 102] $m101] excellent
+checkEq "walking into a mate in 101 is still a blunder" \
+    [::movelabels::label 0 [::movelabels::mateToCp -101]] blunder
+
+# The reported symptom, end to end: the last move of a game delivers mate. The
+# evaluations are White's view, so the position after it is a win of 100% for
+# White - the side to move, Black, is mated, which is UCI's `mate 0` from
+# Black's side of the board.
+set mateGame [list 0 0 0 0 0 0 [::movelabels::mateToCp 2] \
+                  [expr {-[::movelabels::mateToCp 0]}]]
+set mateLabels [::movelabels::game $mateGame]
+checkEq "the move that delivers mate is not blamed" [lindex $mateLabels 6] excellent
+checkEq "the mating move is best when the engine chose it" \
+    [lindex [::movelabels::game $mateGame {6}] 6] best
+
 # UCI scores are from the side to move; the ladder wants the mover's view.
 checkEq "black's move takes the negated score" \
     [::movelabels::forMover 120 {} b b] 120

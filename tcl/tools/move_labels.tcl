@@ -55,9 +55,17 @@ namespace eval ::movelabels {
     variable MATE_CP_THRESHOLD 90000
 }
 
-# Mate distance to centipawns. 0 is a mate already delivered.
+# Mate distance to centipawns. 0 is UCI's `mate 0`, the side to move already
+# mated, so it encodes as the largest loss there is - not as a win. The distance
+# is clamped to the furthest mate that still encodes past MATE_CP_THRESHOLD: a
+# mate in 101 would otherwise land on 89900 and be scored on the centipawn curve
+# as if it were an ordinary evaluation.
 proc ::movelabels::mateToCp {mate} {
-    if {$mate >= 0} { return [expr {100000 - $mate * 100}] }
+    variable MATE_CP_THRESHOLD
+    set limit [expr {(100000 - $MATE_CP_THRESHOLD) / 100}]
+    if {$mate > $limit} { set mate $limit }
+    if {$mate < -$limit} { set mate [expr {-$limit}] }
+    if {$mate > 0} { return [expr {100000 - $mate * 100}] }
     return [expr {-100000 - $mate * 100}]
 }
 

@@ -828,7 +828,7 @@ translate T AnalysisAutoCommentTooltip {Oyunun tamamı için yapay zeka yorumlar
 translate T MoveLabelBest {En iyi}
 translate T MoveLabelExcellent {Mükemmel}
 translate T MoveLabelGood {İyi}
-translate T MoveLabelInaccuracy {Kesinsizlik}
+translate T MoveLabelInaccuracy {İsabetsizlik}
 translate T MoveLabelMistake {Hata}
 translate T MoveLabelBlunder {Ağır hata}
 translate T GameComment {Oyun Yorumu}

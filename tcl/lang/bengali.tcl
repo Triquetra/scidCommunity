@@ -824,7 +824,7 @@ translate b AnalysisAutoCommentTooltip {পুরো গেমের জন্�
 translate b MoveLabelBest {সেরা}
 translate b MoveLabelExcellent {চমৎকার}
 translate b MoveLabelGood {ভালো}
-translate b MoveLabelInaccuracy {অস্পষ্টতা}
+translate b MoveLabelInaccuracy {অযথার্থতা}
 translate b MoveLabelMistake {ভুল}
 translate b MoveLabelBlunder {গুরুতর ভুল}
 translate b GameComment {খেলা মন্তব্য}

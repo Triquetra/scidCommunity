@@ -865,7 +865,7 @@ translate J AnalysisAutoCommentTooltip {Генеришите АИ комента
 translate J MoveLabelBest {Најбољи}
 translate J MoveLabelExcellent {Одличан}
 translate J MoveLabelGood {Добар}
-translate J MoveLabelInaccuracy {Неточност}
+translate J MoveLabelInaccuracy {Нетачност}
 translate J MoveLabelMistake {Грешка}
 translate J MoveLabelBlunder {Груба грешка}
 translate J GameComment {Гаме Цоммент}

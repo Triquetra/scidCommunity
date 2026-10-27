@@ -865,7 +865,7 @@ translate g AnalysisAutoCommentTooltip {Генерирайте AI комента
 translate g MoveLabelBest {Най-добър}
 translate g MoveLabelExcellent {Отличен}
 translate g MoveLabelGood {Добър}
-translate g MoveLabelInaccuracy {Неточность}
+translate g MoveLabelInaccuracy {неточност}
 translate g MoveLabelMistake {Грешка}
 translate g MoveLabelBlunder {Груба грешка}
 translate g GameComment {Коментар на играта}

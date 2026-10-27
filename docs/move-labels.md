@@ -40,11 +40,13 @@ won position from being called excellent.
 ## Mate
 
 A mate is encoded with `::movelabels::mateToCp` at ±100000 (minus 100 per move
-of distance), far outside any score a search can return — Stockfish reports
-tablebase wins as centipawns in the thousands, so "a big number means mate"
-would misread them. On the logistic curve that encoding is a win of 100%, which
-makes throwing away a won mate the largest drop the ladder can see, and keeping
-one no loss at all.
+of distance, with the distance clamped so every mate stays outside
+`MATE_CP_THRESHOLD`), far outside any score a search can return — Stockfish
+reports tablebase wins as centipawns in the thousands, so "a big number means
+mate" would misread them. Distance 0 is UCI's `mate 0`, the side to move already
+mated, and encodes as the largest loss for that side: the move that delivered
+the mate is a win of 100% for the mover, and being mated is the largest drop
+there is.
 
 ## Using it
 
