@@ -1,0 +1,15 @@
+Fresca chess pieces
+===================
+
+  Author  : sadsnake1
+  Source  : https://github.com/lichess-org/lila/tree/master/public/piece/fresca
+  License : CC BY-NC-SA 4.0
+            https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+Obtained from the Lichess source repository (lichess-org/lila) and
+converted from the original 50x50 viewBox SVGs to transparent PNG
+strips compatible with the scidCommunity chess interface.
+
+This licence does not permit commercial use. Any redistribution of these
+images, modified or not, must keep the same attribution and licence (share
+alike). The PNG strips below are a derivative work of the original SVGs.
