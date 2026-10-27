@@ -16,24 +16,25 @@ on:
       macos_runner:
         description: 'macOS runner image (both are arm64, so the artifact is the same)'
         type: choice
-        default: 'macos-15'
+        default: 'macos-26'
         options:
-          - macos-15
           - macos-26
+          - macos-15
 
 permissions:
   contents: write
 
 jobs:
   build-macos-app:
-    # Hosted macOS pools queue independently, and sometimes one is starved for
-    # long enough that a release stalls waiting for a runner: macos-26 (what
-    # macos-latest resolves to) did that on 2026-10-21, and macos-15 on
-    # 2026-10-27 while macos-14 was being retired. Both labels are arm64, so the
-    # app bundle is identical either way; when one pool is starved, re-run this
-    # workflow from the Actions tab with the other label rather than editing
-    # this file. Do not use macos-14: it is unsupported from 2026-11-02.
-    runs-on: ${{ inputs.macos_runner || 'macos-15' }}
+    # Hosted macOS pools queue independently, and either one can be starved long
+    # enough to stall a release: macos-26 did that on 2026-10-21 and macos-15 on
+    # 2026-10-27, while macos-14's retirement pushed traffic onto macos-15.
+    # Default to macos-26 (what macos-latest resolves to, and the image GitHub
+    # keeps best provisioned); both labels are arm64, so the app bundle is
+    # identical either way. A tag push has no inputs and takes this default;
+    # when the pool is starved, re-run from the Actions tab with the other
+    # label. Do not use macos-14: it is unsupported from 2026-11-02.
+    runs-on: ${{ inputs.macos_runner || 'macos-26' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
