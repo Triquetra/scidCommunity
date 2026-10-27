@@ -185,6 +185,24 @@ checkEq "a ply past the main line is not counted" [::facts::repFromMainline $sta
 check "a position past the main line says not available" \
     [string match {*repetition: not available for this position*} \
         [::facts::forMove [dict create fen_before $startpos played e2e4 side white ply 8 classification good]]]
+
+# An en passant square no pawn can use does not make a new position: after
+# 1.e4 e5 2.Nf3 Nf6 3.Ng1 Ng8 the position repeats the one from ply 2.
+proc sc_game {args} {
+    if {[lindex $args 0] eq "UCI_mainLine"} {
+        return [list "position startpos moves" e2e4 e7e5 g1f3 g8f6 f3g1 f6g8]
+    }
+    return ""
+}
+set afterE5 {rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2}
+set sameLater {rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 6}
+checkEq "an unusable ep square is not part of the position" \
+    [::facts::sig $afterE5] [::facts::sig $sameLater]
+checkEq "both occurrences of that position are counted" \
+    [::facts::repFromMainline $afterE5 6] 2
+check "a usable ep square still distinguishes positions" \
+    [expr {[::facts::sig {rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3}] ne \
+           [::facts::sig {rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3}]}]
 rename sc_game {}
 
 # En passant is only available to a pawn, even when another piece can reach the
@@ -198,6 +216,15 @@ checkEq "a defended piece beside the enemy king is not hanging" \
     [::facts::hangingPieces {8/8/8/8/8/6k1/5R2/4K3 w - - 0 1} w] {}
 checkEq "an undefended piece beside the enemy king is hanging" \
     [::facts::hangingPieces {8/8/8/8/8/8/6k1/4K2R b - - 0 1} w] [list [list rook h1]]
+# A king defending a piece does not make a cheaper attack safe: Bxf2 Kxf2 is a
+# rook won for a bishop, so the rook is still hanging (SEE = 2). This is the
+# opposite of the review suggestion, which would have hidden a real loss.
+checkEq "SEE wins the rook for a bishop" \
+    [seeOf {4k3/8/1b6/8/8/3N4/5R2/4K3 b - - 1 1} f2] 2
+check "a piece defended only by its king can still be won" \
+    [string match {*it leaves the rook on f2 hanging*} \
+        [::facts::motifLines [dict create fen_before {4k3/8/1b6/2N5/8/8/5R2/4K3 w - - 0 1} \
+            played c5d3 side white ply 13 classification mistake]]]
 
 # A capture is judged by what the move played nets, not by the cheapest
 # attacker on that square.

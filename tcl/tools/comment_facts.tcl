@@ -264,10 +264,41 @@ proc ::facts::inventoryLine {fen color} {
 # Three things a comment can invent and cannot see: en passant, repetition and
 # the fifty-move clock. All three are computed, never inferred.
 
+# Is a legal en-passant capture available in this position? The ep square
+# alone is not enough: after most double pushes no pawn can use it.
+proc ::facts::epCaptureAvailable {fen} {
+    set ep [lindex [split $fen] 3]
+    if {$ep eq "" || $ep eq "-"} { return 0 }
+    set out 0
+    if {![catch {
+        set pos [::chessboard::fromFen $fen]
+        set to [::chessboard::sqIndex $ep]
+        set board [dict get $pos board]
+        if {[lindex $board $to] eq ""} {
+            set side [dict get $pos side]
+            foreach m [::chessboard::legalMoves $pos] {
+                if {[string range $m 2 3] ne $ep} continue
+                set from [::chessboard::sqIndex [string range $m 0 1]]
+                set p [lindex $board $from]
+                if {$p ne "" && [string tolower $p] eq "p" &&
+                    [::chessboard::colorOf $p] eq $side} {
+                    set out 1
+                    break
+                }
+            }
+        }
+    }]} {}
+    return $out
+}
+
 # A position signature: everything that makes two positions "the same" for
-# repetition. The move counters are deliberately dropped.
+# repetition. The move counters are deliberately dropped, and so is an en
+# passant square no pawn can use: two positions repeat only when the same en
+# passant captures are available (FIDE 9.2), so a double push nobody can answer
+# does not make a new position.
 proc ::facts::sig {fen} {
     lassign [split $fen] board side castle ep
+    if {![epCaptureAvailable $fen]} { set ep "-" }
     return "$board $side $castle $ep"
 }
 
@@ -275,29 +306,9 @@ proc ::facts::sig {fen} {
 # model invent rule states in the first place.
 proc ::facts::epLine {fen} {
     set ep [lindex [split $fen] 3]
-    if {$ep eq "" || $ep eq "-"} { return "en passant: none available" }
-    set pos [::chessboard::fromFen $fen]
-    set to [::chessboard::sqIndex $ep]
-    if {[lindex [dict get $pos board] $to] ne ""} { return "en passant: none available" }
-    # The ep square is empty, so a piece that can move there is only making
-    # the capture if it is a pawn: a rook or bishop reaching that square is
-    # not an en passant capture.
-    set can 0
-    set board [dict get $pos board]
-    set side [dict get $pos side]
-    if {![catch {
-        foreach m [::chessboard::legalMoves $pos] {
-            if {[string range $m 2 3] ne $ep} continue
-            set from [::chessboard::sqIndex [string range $m 0 1]]
-            set p [lindex $board $from]
-            if {$p ne "" && [string tolower $p] eq "p" &&
-                [::chessboard::colorOf $p] eq $side} {
-                set can 1
-                break
-            }
-        }
-    }]} {}
-    if {$can} { return "en passant: a pawn can be captured on $ep" }
+    if {$ep ne "" && $ep ne "-" && [epCaptureAvailable $fen]} {
+        return "en passant: a pawn can be captured on $ep"
+    }
     return "en passant: none available"
 }
 
