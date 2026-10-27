@@ -267,6 +267,17 @@ checkEq "a sacrifice with no line is not called brilliant" \
 checkEq "a line that cannot be replayed is not proof either" \
     [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14 \
         fen_before $sacFen fen_after $sacAfter played f3e5 pv_after_played {Nxe5}]] good
+# ... and "replayable" means legal here, not merely parseable: a2a3 lands on an
+# empty square and, with Black to move, moves the wrong side's pawn, so it used
+# to stand as proof that the sacrifice is not traded back.
+checkEq "a line that is not legal there is not proof" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14 \
+        fen_before $sacFen fen_after $sacAfter played f3e5 pv_after_played {a2a3}]] good
+# A legal quiet reply is a different matter: the piece is not being taken back,
+# which is what the rule asks about.
+checkEq "a legal quiet reply leaves the sacrifice sound" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 20 cp_after 10 ply 14 \
+        fen_before $sacFen fen_after $sacAfter played f3e5 pv_after_played {a7a6}]] brilliant
 
 # A line that trades straight back is not a sacrifice.
 set tradeFen {rnbqkbnr/ppp2ppp/8/3pp3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 4}
@@ -296,6 +307,16 @@ check "a defended pawn is not free" \
     [expr {![::movelabels::isFreeCapture {4k3/8/2p5/3p4/4P3/8/8/4K3 w - - 0 1} e4d5]}]
 check "an undefended pawn is free" \
     [::movelabels::isFreeCapture {4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1} e4d5]
+# An en-passant capture lands on an empty square: the pawn is taken beside the
+# destination, and that is the victim the exchange is priced from.
+check "an undefended en passant capture is free" \
+    [::movelabels::isFreeCapture {4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1} e5d6]
+check "a recaptured en passant capture is not" \
+    [expr {![::movelabels::isFreeCapture {4k3/2p5/8/3pP3/8/8/8/4K3 w - d6 0 1} e5d6]}]
+checkEq "an en passant capture of a hanging pawn is not great" \
+    [::movelabels::refine good [rctx is_best 1 cp_before 0 cp_after -10 \
+        candidates {300 50} played e5d6 \
+        fen_before {4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1}]] good
 
 # "Trades back" is two-sided: a line that wins a rook on the way is not a
 # trade, and must not be read as one.

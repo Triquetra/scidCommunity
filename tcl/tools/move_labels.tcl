@@ -199,6 +199,21 @@ proc ::movelabels::pieceValue {p} {
     return 0
 }
 
+# The piece a UCI move captures, or "" when it captures nothing. An en-passant
+# capture lands on an empty square, so its victim cannot be read from the
+# destination: the pawn is taken beside it, and only a pawn lands there.
+proc ::movelabels::captureVictim {pos uci} {
+    set board [dict get $pos board]
+    set to [::chessboard::sqIndex [string range $uci 2 3]]
+    set victim [lindex $board $to]
+    if {$victim ne ""} { return $victim }
+    if {$to == [dict get $pos ep]} {
+        set mover [lindex $board [::chessboard::sqIndex [string range $uci 0 1]]]
+        if {$mover ne "" && [string tolower $mover] eq "p"} { return p }
+    }
+    return ""
+}
+
 # A capture that takes a piece standing there for free is the obvious move, not
 # a great one: the opponent gave it away on the previous ply.
 proc ::movelabels::isFreeCapture {fen uci} {
@@ -208,7 +223,7 @@ proc ::movelabels::isFreeCapture {fen uci} {
     if {[catch {
         set pos [::chessboard::fromFen $fen]
         set to [::chessboard::sqIndex [string range $uci 2 3]]
-        set victim [lindex [dict get $pos board] $to]
+        set victim [captureVictim $pos $uci]
         if {$victim ne ""} {
             # "Nearly the whole value" is the test, but a pawn's value is 1, so
             # value-1 would be 0 and SEE (which never goes below zero) would
@@ -233,14 +248,25 @@ proc ::movelabels::isTrivialRecapture {side fenBefore pv fenAfterPlayed} {
     if {![llength $pv]} { return 0 }
     set out 0
     if {[catch {
-        set pos [::chessboard::fromFen $fenAfterPlayed]
-        set first [lindex $pv 0]
-        set to [::chessboard::sqIndex [string range $first 2 3]]
-        if {[lindex [dict get $pos board] $to] ne ""} {
-            set pos [::chessboard::makeMove $pos $first]
-            foreach uci [lrange $pv 1 3] {
-                set pos [::chessboard::makeMove $pos $uci]
+        set start [::chessboard::fromFen $fenAfterPlayed]
+        # Only a line that can actually be played from this position is
+        # evidence: an engine line in the wrong notation, or one for another
+        # position, used to be accepted because the first destination was
+        # simply empty. A line that cannot be replayed proves nothing, so it
+        # fails closed with the rest of the board checks.
+        set line [lrange $pv 0 3]
+        set pos $start
+        set legal 1
+        foreach uci $line {
+            if {[lsearch -exact [::chessboard::legalMoves $pos] $uci] < 0} {
+                set legal 0
+                break
             }
+            set pos [::chessboard::makeMove $pos $uci]
+        }
+        if {!$legal} {
+            set out 1
+        } elseif {[captureVictim $start [lindex $line 0]] ne ""} {
             # Both directions: the line has to come back to the material it
             # started with. A line that wins two points is not a trade-back,
             # and reading the difference one way round called it one.
