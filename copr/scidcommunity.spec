@@ -1,10 +1,10 @@
 # Commit hash from github branch
 # (the macros must be defined before Release uses shortcommit)
-%global commit 992f49b7463b4da865278dfa0219f2a2378140af   
+%global commit beb6995ac8cc66e8ed49a54440291149484251c6   
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 Name:           scidcommunity
-Version:        5.1.4.48
+Version:        5.1.4.49
 Release:        3.git%{shortcommit}%{?dist}
 Summary:        Chess database application with play and training functionality
 
@@ -68,6 +68,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/io.github.whel
 %{_metainfodir}/io.github.whelanh.scidCommunity.appdata.xml
 
 %changelog
+* Tue Oct 27, 2025 Hugh Whelan <brickhousedevelopers@gmail.com. - 5.1.4-49
+- "Improved database lock; Fresca pieces added; Paste Fen button fix"
 * Sun Oct 25, 2025 Hugh Whelan <brickhousedevelopers@gmail.com. - 5.1.4-48
 - "Update translations"
 * Sat Oct 24, 2026 Hugh Whelan <brickhousedevelopers@gmail.com> - 5.1.4-47

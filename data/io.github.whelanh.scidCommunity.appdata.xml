@@ -79,6 +79,11 @@
   <content_rating type="oars-1.0" />
 
   <releases>
+ <release version="5.1.4.49" date="2026-10-27">
+      <description>
+        <p>Improved database lock; added Fresca pieces; Paste Fen button fix</p>
+      </description>
+    </release>
  <release version="5.1.4.48" date="2026-10-25">
       <description>
         <p>Update translations</p>
