@@ -344,10 +344,15 @@ proc ::facts::repFromMainline {fen ply} {
     } else {
         return ""
     }
+    # The position after $ply plies can only be on the main line if the main
+    # line is at least that long. Without this check the loop below stops at the
+    # end of the line and a coincidental match there (a variation returning to
+    # the same position, say) was counted as if the ply had been reached.
+    if {$ply > [llength $moves]} { return "" }
     set pos [::chessboard::fromFen $startFen]
     set seen [dict create]
     dict incr seen [sig [::chessboard::toFen $pos]]
-    for {set k 0} {$k < $ply && $k < [llength $moves]} {incr k} {
+    for {set k 0} {$k < $ply} {incr k} {
         if {[catch { set pos [::chessboard::makeMove $pos [lindex $moves $k]] }]} { return "" }
         dict incr seen [sig [::chessboard::toFen $pos]]
     }

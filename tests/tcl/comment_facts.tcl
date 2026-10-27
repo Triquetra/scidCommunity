@@ -171,6 +171,20 @@ proc sc_game {args} {
 }
 checkEq "a set-up board is replayed from its own FEN" \
     [::facts::repFromMainline {4k3/8/8/8/8/8/8/4K3 w - - 0 1} 0] 1
+
+# A ply beyond the main line cannot be reached on it: the replay must not stop
+# early and accept a coincidental match at the end of the line.
+proc sc_game {args} {
+    if {[lindex $args 0] eq "UCI_mainLine"} {
+        return [list "position startpos moves" g1f3 g8f6 f3g1 f6g8]
+    }
+    return ""
+}
+checkEq "a ply on the main line is counted" [::facts::repFromMainline $startpos 4] 2
+checkEq "a ply past the main line is not counted" [::facts::repFromMainline $startpos 8] {}
+check "a position past the main line says not available" \
+    [string match {*repetition: not available for this position*} \
+        [::facts::forMove [dict create fen_before $startpos played e2e4 side white ply 8 classification good]]]
 rename sc_game {}
 
 # En passant is only available to a pawn, even when another piece can reach the
