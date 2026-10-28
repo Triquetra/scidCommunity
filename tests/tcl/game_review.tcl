@@ -21,6 +21,9 @@ proc checkEq {label got want} {
 }
 
 set root [file normalize [file join [file dirname [info script]] .. ..]]
+source [file join $root tcl tools accuracy.tcl]
+source [file join $root tcl tools move_labels.tcl]
+source [file join $root tcl tools score_seed.tcl]
 source [file join $root tcl tools game_review.tcl]
 
 puts "settings"
@@ -92,6 +95,86 @@ checkEq "a line with no moves is ignored" \
 ::review::setValue var_cp 0
 checkEq "only the first eligible alternate" \
     [::review::selectLines {{20 a} {10 b} {5 c}}] {b}
+
+puts "when the move comment may write"
+
+::review::reset
+checkEq "by default it waits for the review depth" [::review::moveCommentPlan 12] 18
+checkEq "at the review depth it writes" [::review::moveCommentPlan 18] now
+checkEq "deeper than the review depth writes too" [::review::moveCommentPlan 22] now
+checkEq "with no depth reported it waits" [::review::moveCommentPlan ""] 18
+::review::setValue move_comment_wait 0
+checkEq "immediate mode writes whatever the engine has" [::review::moveCommentPlan 4] now
+checkEq "and writes even with nothing to report" [::review::moveCommentPlan ""] now
+
+puts "the comment a move carries"
+
+::review::reset
+check "the label and the evaluation" \
+    [string match {*\[%eval -1.20\]*} [::review::commentText blunder -120]]
+check "a label without an evaluation" \
+    [expr {[string first "%eval" [::review::commentText good ""]] < 0}]
+checkEq "an existing comment is kept" \
+    [::review::mergeComment {A fine move.} {[Blunder]}] {A fine move. [Blunder]}
+checkEq "and is not repeated" \
+    [::review::mergeComment {A fine move. [Blunder]} {[Blunder]}] {A fine move. [Blunder]}
+checkEq "an empty comment is just the new text" \
+    [::review::mergeComment {} {[Good]}] {[Good]}
+
+puts "writing one move"
+
+# The sc_* layer is stubbed: the point of these checks is which calls are made,
+# not what scid does with them.
+set ::calls {}
+proc sc_pos {args} {
+    switch -- [lindex $args 0] {
+        location { return $::fakeLoc }
+        getComment { return $::fakeComment }
+        setComment { lappend ::calls [list setComment [lindex $args 1]] ; set ::fakeComment [lindex $args 1] ; return "" }
+    }
+    return ""
+}
+proc sc_move {args} {
+    # A game of ::fakeLen moves: asking for a ply beyond it leaves the game
+    # where it was, which is what the real command does.
+    if {[lindex $args 0] eq "ply"} {
+        if {[lindex $args 1] <= $::fakeLen} { set ::fakeLoc [lindex $args 1] }
+    }
+    if {[lindex $args 0] eq "back"} { incr ::fakeLoc -1 }
+    lappend ::calls [list move [lindex $args 0] [lindex $args 1]]
+    return ""
+}
+proc sc_var {args} {
+    lappend ::calls [list var [lindex $args 0]]
+    if {[lindex $args 0] eq "count"} { return 0 }
+    return ""
+}
+namespace eval ::uci { proc sc_move_add {moves} { lappend ::calls [list add $moves] ; return 0 } }
+
+::review::reset
+::review::setValue var_lines 1
+set ::fakeLen 10
+set ::fakeLoc 5
+set ::fakeComment "Existing note."
+set ::calls {}
+set err [::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}]
+checkEq "it succeeds" $err {}
+check "the comment is written at the move" \
+    [expr {[lsearch -exact $::calls {setComment {Existing note. [blunder] [%eval -1.20]}}] >= 0}]
+check "a variation is created" [expr {[lsearch -exact $::calls {var create}] >= 0}]
+check "with the alternate line" [expr {[lsearch -exact $::calls {add pvAlt}] >= 0}]
+check "and the game is left where it was" [expr {$::fakeLoc == 5}]
+
+# No variations when the setting is off, and none when the move is not there.
+set ::calls {}
+::review::setValue var_lines 0
+::review::writeMove 4 good 20 {{20 pvBest} {10 pvAlt}}
+check "no variation with var_lines 0" [expr {[lsearch -exact $::calls {var create}] < 0}]
+
+set ::fakeLen 3
+set ::fakeLoc 2
+checkEq "a ply that is not in the game is refused" \
+    [::review::writeMove 4 good 20 {}] {ply 4 is not in this game}
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

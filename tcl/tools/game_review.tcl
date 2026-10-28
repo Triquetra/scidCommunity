@@ -23,6 +23,7 @@ namespace eval ::review {
         depth 18
         var_lines 0
         var_cp 0
+        move_comment_wait 1
         threads 0
         hash_mb 128
         skip_book 1
@@ -86,6 +87,9 @@ proc ::review::setValue {key value} {
         var_cp {
             if {$value < 0} { return "var_cp cannot be negative" }
         }
+        move_comment_wait {
+            if {$value < 0 || $value > 1} { return "move_comment_wait is 0 or 1" }
+        }
         threads {
             if {$value < 0} { return "threads cannot be negative" }
         }
@@ -144,6 +148,86 @@ proc ::review::plan {plies bookEnd} {
     set out {}
     set start [startPly $bookEnd]
     for {set i [expr {$start + 1}]} {$i <= $plies} {incr i} { lappend out $i }
+    return $out
+}
+
+# When the Move Comment button may write.
+#
+# The current analysis may be shallower than a review, and a comment written
+# from a depth-12 result is not the comment the user asked for. With
+# move_comment_wait set (the default), the button waits until the running
+# analysis reaches the review depth; without it, it writes whatever the engine
+# has now. Returns "now", or the depth it is waiting for.
+proc ::review::moveCommentPlan {depth_now} {
+    set s [all]
+    set target [dict get $s depth]
+    if {![dict get $s move_comment_wait]} { return now }
+    if {$depth_now ne "" && [string is integer -strict $depth_now] && $depth_now >= $target} {
+        return now
+    }
+    return $target
+}
+
+# The comment a move carries: our label, then the evaluation as [%eval] so the
+# graph and other tools read it back.
+proc ::review::commentText {label eval_cp} {
+    set txt "\[[::movelabels::text $label]\]"
+    if {$eval_cp ne ""} { append txt " " "\[%eval [::seed::label $eval_cp]\]" }
+    return $txt
+}
+
+# Add `new` to a comment unless it is already there, so a second run does not
+# stack labels.
+proc ::review::mergeComment {existing new} {
+    set existing [string trim $existing]
+    if {$new eq ""} { return $existing }
+    if {[string first $new $existing] >= 0} { return $existing }
+    return [string trim "$existing $new"]
+}
+
+# Write one move's comment and its variations into the game. `ply` is the move
+# number in the main line (1-based), `lines` are the engine's lines for the
+# position before it, best first, in centipawns from the mover's view.
+#
+# Nothing else in the game is touched: the move's own comment is merged, the
+# variations branch from the position before it, and the game is left where it
+# was found. Returns "" or the reason nothing was written.
+proc ::review::writeMove {ply label eval_cp lines} {
+    # No `return` inside the catch body: Tcl turns it into TCL_RETURN, the catch
+    # reports a failure and the handler would undo a write that succeeded.
+    set out ""
+    set done 0
+    if {[catch {
+        set where [sc_pos location]
+        sc_move ply $ply
+        if {[sc_pos location] != $ply} {
+            set out "ply $ply is not in this game"
+            sc_move ply $where
+        } else {
+            set want [commentText $label $eval_cp]
+            sc_pos setComment [mergeComment [sc_pos getComment] $want]
+            foreach pv [selectLines $lines] {
+                sc_move ply $ply
+                sc_move back
+                # Never stack a second variation on a position that already has one.
+                set have 0
+                catch { set have [sc_var count] }
+                if {$have} { continue }
+                if {[catch {
+                    sc_var create
+                    foreach uci $pv { ::uci::sc_move_add $uci }
+                    sc_var exit
+                }]} {
+                    catch { sc_var exit }
+                }
+            }
+            sc_move ply $where
+            set done 1
+        }
+    } err]} {
+        set out $err
+    }
+    if {!$done} { catch { sc_move ply 0 } }
     return $out
 }
 
