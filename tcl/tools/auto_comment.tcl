@@ -1341,8 +1341,15 @@ proc ::auto_comment::escapeJson {str} {
 #   Queries the Gemini API for the current list of available models.
 #   Returns a list of model names (without the "models/" prefix), or {} on failure.
 #
+# ::auto_comment::geminiModelsUrl
+#   The model-list request, page size included: the warning shows this URL, and
+#   the base alone would name a request that was never made.
+proc ::auto_comment::geminiModelsUrl {} {
+    return "$::auto_comment::geminiApiBase?pageSize=200"
+}
+
 proc ::auto_comment::fetchGeminiModels {} {
-    set url "$::auto_comment::geminiApiBase?pageSize=200"
+    set url [::auto_comment::geminiModelsUrl]
     set result ""
     if {[catch {exec curl -s --max-time 15 \
             -H "x-goog-api-key: $::auto_comment::apiKey" \
@@ -1591,7 +1598,7 @@ proc ::auto_comment::loadModels {combo provider} {
         }
         default {
             set label "Gemini"
-            set targets [list $::auto_comment::geminiApiBase]
+            set targets [list [::auto_comment::geminiModelsUrl]]
             set models [::auto_comment::fetchGeminiModels]
         }
     }

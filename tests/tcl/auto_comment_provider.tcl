@@ -585,11 +585,19 @@ foreach prov {opencode gemini} {
     set ::boxes {}
     ::auto_comment::loadModels .autoCommentConfig.content.$prov.model $prov
     set want [expr {$prov eq "opencode" \
-        ? $::auto_comment::opencodeModelsUrl : $::auto_comment::geminiApiBase}]
+        ? $::auto_comment::opencodeModelsUrl \
+        : "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200"}]
     check "$prov names the URL it tried" \
         [expr {[string first $want [dict get [lindex $::boxes 0] -message]] >= 0}] \
         [dict get [lindex $::boxes 0] -message]
 }
+
+# The Gemini warning used to name the API root, not the request: the list is
+# asked with a page size, and anyone reproducing the failure with the bare root
+# would get a different answer.
+check "gemini names the page size it asked for" \
+    [string match {*?pageSize=200*} [dict get [lindex $::boxes 0] -message]] \
+    [dict get [lindex $::boxes 0] -message]
 
 # ------------------------------------------------------- gateway model filter --
 puts "\n== gateway model filter =="
