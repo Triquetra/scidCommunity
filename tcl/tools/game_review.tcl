@@ -187,7 +187,8 @@ proc ::review::mergeComment {existing new} {
 
 # Write one move's comment and its variations into the game. `ply` is the move
 # number in the main line (1-based), `lines` are the engine's lines for the
-# position before it, best first, in centipawns from the mover's view.
+# position before it, best first, in centipawns from the mover's view. The line
+# the played move owns is not inserted as a variation of itself; the others are.
 #
 # Nothing else in the game is touched: the move's own comment is merged, the
 # variations branch from the position before it, and the game is left where it
@@ -196,17 +197,27 @@ proc ::review::writeMove {ply label eval_cp lines} {
     # No `return` inside the catch body: Tcl turns it into TCL_RETURN, the catch
     # reports a failure and the handler would undo a write that succeeded.
     set out ""
-    set done 0
+    # Whether the cursor is back where it was found. The refusal path and the
+    # write path both put it back; only an unexpected error leaves the game
+    # somewhere unknown, and the start of the line is then the one position that
+    # is always valid.
+    set restored 0
     if {[catch {
         set where [sc_pos location]
         sc_move ply $ply
         if {[sc_pos location] != $ply} {
             set out "ply $ply is not in this game"
             sc_move ply $where
+            set restored 1
         } else {
+            # Which line is the game's own move, so it is not inserted as a
+            # variation of itself. "" when the move cannot be read: selectLines
+            # then keeps the best line rather than dropping it on a guess.
+            set played ""
+            catch { set played [lindex [sc_game UCI_mainLine] $ply] }
             set want [commentText $label $eval_cp]
             sc_pos setComment [mergeComment [sc_pos getComment] $want]
-            foreach pv [selectLines $lines] {
+            foreach pv [selectLines $lines $played] {
                 sc_move ply $ply
                 sc_move back
                 # Never stack a second variation on a position that already has one.
@@ -222,33 +233,43 @@ proc ::review::writeMove {ply label eval_cp lines} {
                 }
             }
             sc_move ply $where
-            set done 1
+            set restored 1
         }
     } err]} {
         set out $err
     }
-    if {!$done} { catch { sc_move ply 0 } }
+    if {!$restored} { catch { sc_move ply 0 } }
     return $out
 }
 
 # Which of the engine's lines become variations.
 #
 # `lines` is a list of {cp pv}, best first, in centipawns from the mover's point
-# of view - the same figure the label ladder uses. The first line is the game's
-# own move when it was best, so only lines 2..var_lines are candidates.
+# of view - the same figure the label ladder uses. `played` is the move the game
+# actually played, in UCI, and the one line it owns is never a variation: the
+# engine's best line is the played move's own line when that move was best, and
+# on a blunder it is the strongest alternative and belongs in the game. A
+# `played` of "" means the caller cannot say which move was played, and then
+# nothing is dropped - the best line is kept rather than discarded on a guess.
 #
 # var_cp is a noise filter: a line that is further behind the best line than
 # var_cp centipawns is not worth inserting. The comparison is strict, so a
 # threshold of 50 excludes a line exactly 50cp worse - "3.0 or more" in the
 # worked example. var_cp 0 means no filter at all.
-proc ::review::selectLines {lines} {
+proc ::review::selectLines {lines {played ""}} {
     set s [all]
     set want [dict get $s var_lines]
     set limit [dict get $s var_cp]
-    if {$want < 1 || [llength $lines] < 2} { return {} }
+    if {$want < 1 || ![llength $lines]} { return {} }
+    # Drop the played move's own line, and only that one: the best line is an
+    # alternative worth inserting whenever the game played something else.
+    set candidates $lines
+    if {$played ne "" && [string equal [lindex [lindex $lines 0] 1 0] $played]} {
+        set candidates [lrange $lines 1 end]
+    }
     set best [lindex [lindex $lines 0] 0]
     set out {}
-    foreach line [lrange $lines 1 end] {
+    foreach line $candidates {
         if {[llength $out] >= $want} { break }
         lassign $line cp pv
         if {![llength $pv]} { continue }

@@ -67,34 +67,42 @@ puts "which lines become variations"
 
 ::review::reset
 set lines {{20 pvA} {10 pvB} {-30 pvC}}
-checkEq "no variations by default" [::review::selectLines $lines] {}
+checkEq "no variations by default" [::review::selectLines $lines pvA] {}
 ::review::setValue var_lines 2
-checkEq "two alternates, best first" [::review::selectLines $lines] {pvB pvC}
-checkEq "one alternate" [::review::selectLines [list {20 pvA} {10 pvB}]] {pvB}
-checkEq "a single line has no alternate" [::review::selectLines [list {20 pvA}]] {}
+checkEq "two alternates, best first" [::review::selectLines $lines pvA] {pvB pvC}
+checkEq "one alternate" [::review::selectLines [list {20 pvA} {10 pvB}] pvA] {pvB}
+checkEq "the played move's own line is not a variation" \
+    [::review::selectLines [list {20 pvA}] pvA] {}
+# A blunder: the best line is not the move played, so it is the variation the
+# game is missing - not line 2 of the engine's list.
+checkEq "the best line is a variation when the game played something else" \
+    [::review::selectLines $lines Qxd8] {pvA pvB}
+# Nothing is dropped when the caller cannot say which move was played.
+checkEq "an unknown played move keeps the best line" \
+    [::review::selectLines [list {20 pvA} {10 pvB}]] {pvA pvB}
 
 # The worked example: best +2.50 for White is -250 for the Black mover, and an
 # alternative that scores +3.00 is 50cp worse, so a 50cp threshold excludes it.
 set example [list {-250 pvBest} {-300 pvWorse} {-280 pvCloser}]
-checkEq "no threshold keeps both" [::review::selectLines $example] {pvWorse pvCloser}
+checkEq "no threshold keeps both" [::review::selectLines $example pvBest] {pvWorse pvCloser}
 ::review::setValue var_cp 50
 checkEq "a 50cp threshold drops the line exactly 50 worse" \
-    [::review::selectLines $example] {pvCloser}
+    [::review::selectLines $example pvBest] {pvCloser}
 ::review::setValue var_cp 100
-checkEq "a wider threshold keeps them" [::review::selectLines $example] {pvWorse pvCloser}
+checkEq "a wider threshold keeps them" [::review::selectLines $example pvBest] {pvWorse pvCloser}
 
 # Lines that are not in order, or have no moves, are not variations.
 checkEq "a line ahead of the best is ignored" \
-    [::review::selectLines [list {10 pvA} {40 pvAhead}]] {}
+    [::review::selectLines [list {10 pvA} {40 pvAhead}] pvA] {}
 checkEq "a line with no moves is ignored" \
-    [::review::selectLines [list {10 pvA} {-20 {}}]] {}
+    [::review::selectLines [list {10 pvA} {-20 {}}] pvA] {}
 
 # var_lines is the count that is inserted, not the count that is examined.
 ::review::setValue mpv 5
 ::review::setValue var_lines 1
 ::review::setValue var_cp 0
 checkEq "only the first eligible alternate" \
-    [::review::selectLines {{20 a} {10 b} {5 c}}] {b}
+    [::review::selectLines {{20 a} {10 b} {5 c}} a] {b}
 
 puts "when the move comment may write"
 
@@ -149,6 +157,12 @@ proc sc_var {args} {
     if {[lindex $args 0] eq "count"} { return 0 }
     return ""
 }
+# UCI_mainLine is the setup followed by the moves, as the real command returns
+# it, so element $ply is the move played at ply $ply.
+proc sc_game {args} {
+    if {[lindex $args 0] eq "UCI_mainLine"} { return $::fakeMainLine }
+    return ""
+}
 namespace eval ::uci { proc sc_move_add {moves} { lappend ::calls [list add $moves] ; return 0 } }
 
 ::review::reset
@@ -156,6 +170,8 @@ namespace eval ::uci { proc sc_move_add {moves} { lappend ::calls [list add $mov
 set ::fakeLen 10
 set ::fakeLoc 5
 set ::fakeComment "Existing note."
+# The engine's best line is the move played at ply 4, so it is not a variation.
+set ::fakeMainLine [list {position startpos moves} m1 m2 m3 pvBest m5]
 set ::calls {}
 set err [::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}]
 checkEq "it succeeds" $err {}
@@ -163,7 +179,16 @@ check "the comment is written at the move" \
     [expr {[lsearch -exact $::calls {setComment {Existing note. [blunder] [%eval -1.20]}}] >= 0}]
 check "a variation is created" [expr {[lsearch -exact $::calls {var create}] >= 0}]
 check "with the alternate line" [expr {[lsearch -exact $::calls {add pvAlt}] >= 0}]
+check "and not with the line the game already played" \
+    [expr {[lsearch -exact $::calls {add pvBest}] < 0}]
 check "and the game is left where it was" [expr {$::fakeLoc == 5}]
+
+# A blunder: the best line is not the move played, so it is the variation.
+set ::fakeMainLine [list {position startpos moves} m1 m2 m3 m5 m6]
+set ::calls {}
+::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}
+check "the best line is inserted" [expr {[lsearch -exact $::calls {add pvBest}] >= 0}]
+check "and the weaker line is not" [expr {[lsearch -exact $::calls {add pvAlt}] < 0}]
 
 # No variations when the setting is off, and none when the move is not there.
 set ::calls {}
@@ -175,6 +200,8 @@ set ::fakeLen 3
 set ::fakeLoc 2
 checkEq "a ply that is not in the game is refused" \
     [::review::writeMove 4 good 20 {}] {ply 4 is not in this game}
+check "and the game is left where it was, not moved to the start" \
+    [expr {$::fakeLoc == 2}]
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]
