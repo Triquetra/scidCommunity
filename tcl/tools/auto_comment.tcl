@@ -1579,14 +1579,14 @@ proc ::auto_comment::loadModels {combo provider} {
         }
         opencode {
             set label "OpenCode Console"
-            set target $::auto_comment::opencodeModelsUrl
+            set targets [list $::auto_comment::opencodeModelsUrl]
             set models [::auto_comment::chatCompletionsOnly \
                 [::auto_comment::fetchUrlModels "" $::auto_comment::opencodeKey \
                     $::auto_comment::opencodeModelsUrl]]
         }
         default {
             set label "Gemini"
-            set target $::auto_comment::geminiApiBase
+            set targets [list $::auto_comment::geminiApiBase]
             set models [::auto_comment::fetchGeminiModels]
         }
     }

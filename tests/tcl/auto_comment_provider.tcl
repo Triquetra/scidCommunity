@@ -567,6 +567,22 @@ check "both attempted URLs are named" \
         && ([string first {http://ollama.com/api/tags} [dict get [lindex $::boxes 0] -message]] >= 0)}] \
     [dict get [lindex $::boxes 0] -message]
 
+# The other channels have one target each. Their branches set a singular
+# `target`, which the message never read, so the warning named the provider but
+# not the URL - the one line that exposes a wrong base.
+foreach prov {opencode gemini} {
+    set ::auto_comment::provider $prov
+    set ::fakeBody ""
+    set ::fakeStatus "500"
+    set ::boxes {}
+    ::auto_comment::loadModels .autoCommentConfig.content.$prov.model $prov
+    set want [expr {$prov eq "opencode" \
+        ? $::auto_comment::opencodeModelsUrl : $::auto_comment::geminiApiBase}]
+    check "$prov names the URL it tried" \
+        [expr {[string first $want [dict get [lindex $::boxes 0] -message]] >= 0}] \
+        [dict get [lindex $::boxes 0] -message]
+}
+
 # ------------------------------------------------------- gateway model filter --
 puts "\n== gateway model filter =="
 set gatewayIds {glm-5.3 kimi-k3 minimax-m3 deepseek-v4-pro mistral-large-4 qwen3.8-max \
