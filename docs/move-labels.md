@@ -46,7 +46,7 @@ actually learns from:
 | Label | Rule |
 | --- | --- |
 | forced | only one legal move — not a choice, whatever it costs |
-| book | inside the opening (`ply <= 12` by default, `in_book` overrides) and not a mistake |
+| book | inside the opening (`ply <= 12` by default, `in_book` overrides) and not a mistake. The resolved status gates every later rule too — brilliant, great and the blunder upgrade all use it, so an early novelty marked `in_book 0` is judged on its merits |
 | brilliant | the engine's move, out of book, keeps the game (`cp_before <= 500`, `cp_after >= -50`, `cp_loss <= 20`), gives up two points or more that the line does not simply trade back |
 | great | the best move beats the second-best by 200cp or more and the position is still playable — or a rescue from `-150` to `-50`; never for taking a piece the opponent left hanging |
 | miss | already an inaccuracy, mistake or blunder, and it gave up a win: `cp_before >= 150` and `cp_after < 50`, or a mate was there and is gone |
@@ -66,14 +66,20 @@ is a missed win, not a blunder — so the blunder upgrade only sees what is left
 | `cp_loss`, `win_drop` | `::movelabels::cpLoss` / `winDrop` of the two |
 | `ply`, `legal_moves`, `in_book` | position context |
 | `candidates` | the engine's top evaluations from the mover's view, best first (MultiPV) |
-| `played`, `fen_before`, `fen_after`, `pv_after_played` | the move and the board, for the sacrifice and free-capture tests |
+| `played`, `fen_before`, `fen_after`, `pv_after_played` | the move and the board, for the sacrifice and free-capture tests. **Brilliant requires a line**: with no `pv_after_played` there is nothing to show the sacrificed piece is not simply taken, so the claim is not made |
 
 The two board questions come from `::chessboard::hangingMaterial` (what the move
 left en prise, net of what it took), `::movelabels::isFreeCapture` (a capture the
 opponent handed over) and `::movelabels::isTrivialRecapture` (the line comes back to the
 material it started with, within a pawn, in either direction — a line that wins
 material is not a trade-back). A "free" capture means nearly the whole value of
-the victim, and at least a point, so a recaptured pawn is not one.
+the victim, and at least a point, so a recaptured pawn is not one; the victim is
+read through `::movelabels::captureVictim`, which knows an en passant capture
+takes the pawn beside the destination square rather than a piece on it. Only a
+line that can actually be played from the position is evidence: every ply is
+checked against the legal moves, and both helpers **fail closed** — an error in
+the board work answers 1, so a question the position core could not answer
+unlocks neither `great` nor `brilliant`.
 
 ## Mate
 
@@ -96,6 +102,7 @@ there is.
 | `winDrop`, `cpLoss` | the two measurements the ladder is built on |
 | `mateToCp`, `isMate` | the mate encoding |
 | `refine {label ctx}` | the refined label, from what the move did and the engine's other lines |
+| `captureVictim {pos uci}` | the piece a move takes, en passant included |
 | `isFreeCapture {fen uci}` | takes a piece standing there for free |
 | `isTrivialRecapture {side fen pv fenAfter}` | the line simply trades back |
 | `text {label}` | the translated word for display |
@@ -116,7 +123,10 @@ table pins every boundary of the ladder from both sides together with the drop
 it computes (1.93 points still excellent, 2.02 not; 4.95 good, 5.05 inaccuracy;
 9.99 inaccuracy, 10.08 mistake; 19.99 mistake, 20.76 blunder), a property check
 asserts that a bigger loss never earns a better label, and the mate transitions
-are covered separately.
+are covered separately. The refinements are checked on real positions (a
+sacrifice measured on the board, a free en passant capture, a line that cannot
+be replayed, an early novelty marked out of book) as well as on fixed contexts;
+142 checks in all.
 
 ## Related
 

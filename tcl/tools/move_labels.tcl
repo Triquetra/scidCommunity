@@ -368,8 +368,10 @@ proc ::movelabels::refine {label ctx} {
 
     # The two scales disagree near the ends of the curve, so a board loss that
     # big is a blunder even when the win-chance drop rounds under the line. It
-    # applies to what is left once a missed win has been named above.
-    if {!$A(is_best) && $A(ply) > $BOOK_PLIES && $A(cp_loss) >= 300 \
+    # applies to what is left once a missed win has been named above, and it is
+    # gated on the same resolved book status as the labels above: a caller that
+    # marked an early novelty out of book means the ply number, not the book.
+    if {!$A(is_best) && !$inBook && $A(cp_loss) >= 300 \
         && $A(win_drop) >= 12 && abs($A(cp_before)) < 500} {
         return blunder
     }

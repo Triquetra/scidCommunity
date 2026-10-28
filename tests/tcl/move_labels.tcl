@@ -341,6 +341,12 @@ check "a line that wins material is not a trade-back" \
 # loss also trips the blunder upgrade.
 checkEq "a move from +3 to 0 is a miss, not a blunder" \
     [::movelabels::refine mistake [rctx cp_before 300 cp_after 0 cp_loss 300 win_drop 20.0]] miss
+# The book override has to reach every guard, not just the labels: an early
+# novelty marked out of book is judged, and one still in book is not.
+checkEq "a big loss in an early novelty is a blunder" \
+    [::movelabels::refine mistake [rctx ply 5 in_book 0 cp_before 100 cp_after -200 cp_loss 300 win_drop 20.0]] blunder
+checkEq "the same loss in book is not upgraded" \
+    [::movelabels::refine mistake [rctx ply 5 cp_before 100 cp_after -200 cp_loss 300 win_drop 20.0]] mistake
 checkEq "a big loss in a level position is still a blunder" \
     [::movelabels::refine mistake [rctx cp_before 100 cp_after -200 cp_loss 300 win_drop 20.0]] blunder
 
