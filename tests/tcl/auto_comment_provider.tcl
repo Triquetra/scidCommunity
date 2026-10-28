@@ -560,6 +560,24 @@ checkEq "and names both paths it tried" $localTargets \
     {http://localhost:11434/v1/models http://localhost:11434/api/tags}
 unset -nocomplain ::fakeStatusFor ::fakeBodyFor
 
+# A 200 that is not a tags list (a gateway's web UI answers unknown paths with
+# HTML): the native list did not answer, so the generic one is still tried. A
+# valid empty {"models":[]} is different and must not fall back.
+set ::fakeStatusFor(http://localhost:11434/api/tags) 200
+set ::fakeBodyFor(http://localhost:11434/api/tags) \
+    {<!doctype html><html><body>not found</body></html>}
+set ::fakeBodyFor(http://localhost:11434/v1/models) \
+    {{"object":"list","data":[{"id":"qwen3:8b"}]}}
+lassign [::auto_comment::localModelList] localModels localTargets
+checkEq "a 200 that is not a tags list falls back" $localModels {qwen3:8b}
+checkEq "and names both paths" $localTargets \
+    {http://localhost:11434/v1/models http://localhost:11434/api/tags}
+set ::fakeBodyFor(http://localhost:11434/api/tags) {{"models":[]}}
+lassign [::auto_comment::localModelList] localModels localTargets
+checkEq "a valid empty tags list does not fall back" $localModels {}
+checkEq "and only the native list is named" $localTargets {http://localhost:11434/api/tags}
+unset -nocomplain ::fakeStatusFor ::fakeBodyFor ::fakeFailFor
+
 # The hosted channel must not read the local server's list, and the local one
 # must not read ollama.com's: the two channels are separate settings.
 set ::auto_comment::localUrl "http://127.0.0.1:11434"

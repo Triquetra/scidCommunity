@@ -1694,6 +1694,12 @@ proc ::auto_comment::fetchTagModels {apiRoot {key ""}} {
     set failed [catch {exec {*}$cmd 2>@1} raw]
     if {$authfile ne ""} { catch {file delete -force $authfile} }
     if {$failed} { return [list 0 {}] }
+    # A 200 is not enough: a server that answers unknown paths with its web UI
+    # returns HTML, which parses to no models - and a valid empty models array
+    # must not be treated the same way, or an Ollama with no chat model would
+    # get the unfiltered generic list. Only a body with a models array is the
+    # native list.
+    if {![regexp {"models"\s*:} $raw]} { return [list 0 {}] }
     return [list 1 [::auto_comment::parseOllamaTags $raw]]
 }
 
