@@ -778,15 +778,26 @@ proc ::auto_comment::chooseProviderForModel {combo modelCombo} {
     ::auto_comment::syncModelCombo $modelCombo
 }
 
+# ::auto_comment::refreshAfterSettings
+#   Bring the calling dialog's provider and model comboboxes back in step after
+#   the settings dialog closes: both may have been changed there.
+proc ::auto_comment::refreshAfterSettings {modelCombo providerCombo} {
+    ::auto_comment::syncProviderCombo $providerCombo
+    ::auto_comment::syncModelCombo $modelCombo
+}
+
 # ::auto_comment::openSettings
 #   Opens the settings dialog and, once it is closed, refreshes the supplied
-#   model combobox in case the provider or model was changed there.
+#   comboboxes in case the provider or model was changed there.
 #
-proc ::auto_comment::openSettings {combo} {
+proc ::auto_comment::openSettings {combo {providerCombo ""}} {
     ::auto_comment::configureApiKey
     if {[winfo exists .autoCommentConfig]} {
+        # The script runs when the dialog is destroyed, so `winfo exists` has to
+        # be evaluated then: in the old double-quoted bind it was substituted
+        # here, the test became a constant, and the refresh never ran.
         bind .autoCommentConfig <Destroy> \
-            "+if {![winfo exists .autoCommentConfig]} { ::auto_comment::syncModelCombo $combo }"
+            "+if {!\[winfo exists .autoCommentConfig\]} { ::auto_comment::refreshAfterSettings {$combo} {$providerCombo} }"
     }
 }
 
@@ -1662,7 +1673,10 @@ proc ::auto_comment::parseOllamaTags {raw} {
 #   can chat. /v1/models lists an embedding model (nomic-embed-text) exactly
 #   like a chat model, and offering it only produces a failed request.
 proc ::auto_comment::fetchTagModels {apiRoot {key ""}} {
-    set cmd [list curl -s -L --max-time 15 -H {Accept: application/json}]
+    # --fail: a server that answers /api/tags with a 404 (LM Studio, vLLM) must
+    # count as "no native list", or its empty body would suppress the generic
+    # fallback that exists for exactly those servers.
+    set cmd [list curl -s -L --fail --max-time 15 -H {Accept: application/json}]
     # A keyed request must not be redirected down to cleartext; the hosted base
     # is https by construction, a local one usually is not.
     if {[regexp -nocase {^https://} $apiRoot]} { lappend cmd --proto-redir =https }

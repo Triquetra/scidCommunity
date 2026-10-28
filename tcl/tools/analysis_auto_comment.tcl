@@ -94,7 +94,7 @@ proc ::analysis_auto_comment::batch_generate {{engineId ""}} {
     pack $w.buttons -fill x
 
     ttk::button $w.buttons.settings -text "Settings..." \
-        -command [list ::auto_comment::openSettings $w.content.model]
+        -command [list ::auto_comment::openSettings $w.content.model $w.content.provider]
     pack $w.buttons.settings -side left -padx 5
 
     ttk::button $w.buttons.start -text "Start" -command {

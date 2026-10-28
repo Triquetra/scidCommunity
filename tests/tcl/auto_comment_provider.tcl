@@ -401,8 +401,16 @@ proc exec {args} {
     }
     set body $::fakeBody
     set fail $::fakeExecError
+    set status $::fakeStatus
     if {[info exists ::fakeBodyFor($target)]} { set body $::fakeBodyFor($target) }
     if {[info exists ::fakeFailFor($target)]} { set fail $::fakeFailFor($target) }
+    if {[info exists ::fakeStatusFor($target)]} { set status $::fakeStatusFor($target) }
+    # --fail makes curl exit non-zero on a 4xx/5xx; the stub has to model it or
+    # a test cannot tell a 404 body from an answer.
+    if {[lsearch -exact $args --fail] >= 0 \
+        && [string is integer -strict $status] && $status >= 400} {
+        set fail "curl: (22) The requested URL returned error: $status"
+    }
     set idx [lsearch -exact $args --config]
     if {$idx >= 0} {
         set ::lastCfg [lindex $args [expr {$idx + 1}]]
@@ -538,6 +546,19 @@ checkEq "a server without api/tags falls back to /v1/models" \
 checkEq "and the targets name both paths it tried" $localTargets \
     {http://localhost:11434/v1/models http://localhost:11434/api/tags}
 unset -nocomplain ::fakeBodyFor ::fakeFailFor
+
+# The same server answering /api/tags with a 404 body (not a curl error): with
+# --fail that is a failed request, so the generic list is still tried. Without
+# it curl exits 0 and the empty filtered list looked like an answer.
+set ::fakeStatusFor(http://localhost:11434/api/tags) 404
+set ::fakeBodyFor(http://localhost:11434/api/tags) {{"error":"not found"}}
+set ::fakeBodyFor(http://localhost:11434/v1/models) \
+    {{"object":"list","data":[{"id":"qwen3:8b"}]}}
+lassign [::auto_comment::localModelList] localModels localTargets
+checkEq "a 404 from api/tags still falls back" $localModels {qwen3:8b}
+checkEq "and names both paths it tried" $localTargets \
+    {http://localhost:11434/v1/models http://localhost:11434/api/tags}
+unset -nocomplain ::fakeStatusFor ::fakeBodyFor
 
 # The hosted channel must not read the local server's list, and the local one
 # must not read ollama.com's: the two channels are separate settings.
@@ -822,6 +843,15 @@ set ::comboValue {Ollama - local server}
 ::auto_comment::chooseProviderForModel ::fakeProviderCombo ::fakeModelCombo
 checkEq "the batch dialog stores the local id" $::auto_comment::provider local
 checkEq "and its model field follows it" $::modelVar ::auto_comment::localModel
+
+# Closing Settings refreshes both combos: a provider changed there must show in
+# the dialog that opened it, and the model field must follow it.
+set ::auto_comment::provider ollama
+set ::comboValue ""
+set ::modelVar ""
+::auto_comment::refreshAfterSettings ::fakeModelCombo ::fakeProviderCombo
+checkEq "the provider label follows Settings" $::comboValue {Ollama Cloud (hosted)}
+checkEq "and the model field follows that channel" $::modelVar ::auto_comment::ollamaModel
 
 # ------------------------------------------------------- gateway model filter --
 puts "\n== gateway model filter =="

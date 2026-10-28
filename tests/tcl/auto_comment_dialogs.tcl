@@ -338,6 +338,25 @@ if {[catch {::analysis_auto_comment::batch_generate ""} err]} {
     ::auto_comment::syncModelCombo $bw.content.model
     checkEq "gemini still shows its own model" \
         [$bw.content.model get] $::auto_comment::model
+
+    # Settings can change the provider. Closing it must bring this dialog's
+    # label and model field back in step, or Start runs a channel the dialog
+    # does not name.
+    set ::auto_comment::provider local
+    ::auto_comment::syncProviderCombo $bw.content.provider
+    ::auto_comment::syncModelCombo $bw.content.model
+    ::auto_comment::openSettings $bw.content.model $bw.content.provider
+    if {[winfo exists .autoCommentConfig]} {
+        set ::auto_comment::provider ollama
+        destroy .autoCommentConfig
+        update
+        checkEq "closing Settings refreshes the provider label" \
+            [$bw.content.provider get] {Ollama Cloud (hosted)}
+        checkEq "and the model field follows the new channel" \
+            [$bw.content.model cget -textvariable] ::auto_comment::ollamaModel
+    } else {
+        check "the settings dialog opened from the batch dialog" 0
+    }
     destroy $bw
 }
 
