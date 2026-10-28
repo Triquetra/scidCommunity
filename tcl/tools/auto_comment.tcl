@@ -1438,6 +1438,9 @@ proc ::auto_comment::fetchUrlModels {base key {modelsUrl ""}} {
     set ids {}
     foreach {target re} [::auto_comment::modelListTargets $base $modelsUrl] {
         set cmd [list curl -s -L --max-time 10 -H {Accept: application/json}]
+        # A keyed request must not be redirected down to cleartext; the key is
+        # only attached to https or loopback targets above.
+        if {[regexp -nocase {^https://} $target]} { lappend cmd --proto-redir =https }
         set authfile ""
         if {$key ne ""} {
             # the key only rides an https (or loopback) connection, and never
@@ -1500,10 +1503,11 @@ proc ::auto_comment::chatCompletionsOnly {ids} {
 proc ::auto_comment::parseOllamaTags {raw} {
     set starts {}
     set pos 0
-    # Whitespace-tolerant: a pretty-printed body is the same document, and the
-    # compact form the splitter used to require sent it to the all-names
+    # Split at the name key rather than at the object's opening brace: the
+    # document's whitespace and its key order are not significant, and relying
+    # on "name" being the first property sent a valid response to the all-names
     # fallback, where the capabilities filter does not run.
-    while {[regexp -indices -start $pos {\{\s*"name"\s*:\s*"} $raw m]} {
+    while {[regexp -indices -start $pos {"name"\s*:\s*"} $raw m]} {
         lappend starts [lindex $m 0]
         set pos [expr {[lindex $m 1] + 1}]
     }
@@ -1545,7 +1549,11 @@ proc ::auto_comment::parseOllamaTags {raw} {
 #   so the list is usable before one is entered, and the key rides the https
 #   connection when there is one.
 proc ::auto_comment::fetchOllamaModels {} {
-    set cmd [list curl -s -L --max-time 15 -H {Accept: application/json}]
+    # The base is https by construction, and the list needs no key to be read;
+    # the key is attached only when one is stored. --proto-redir keeps a
+    # redirect from downgrading that keyed request to cleartext.
+    set cmd [list curl -s -L --proto-redir =https --max-time 15 \
+        -H {Accept: application/json}]
     set authfile ""
     if {$::auto_comment::ollamaKey ne ""} {
         if {![catch {set authfile [::auto_comment::writeCurlConfig \

@@ -215,6 +215,11 @@ checkEq "and a pretty list with nothing that can chat stays empty" \
     [::auto_comment::parseOllamaTags {{"models": [
   {"name": "clef:27b", "capabilities": ["decision", "vision"]}
 ]}}] {}
+# Key order is not significant either: `model` often comes before `name`, and
+# splitting on the object's first property sent that shape to the fallback.
+checkEq "key order does not bypass the capability filter" \
+    [::auto_comment::parseOllamaTags {{"models":[{"model":"clef:27b","name":"clef:27b","capabilities":["decision","vision"]},{"model":"glm-5.3","name":"glm-5.3","capabilities":["completion"]}]}}] \
+    {glm-5.3}
 
 # -------------------------------------------------------------------- request --
 puts "\n== request bodies =="
@@ -639,6 +644,25 @@ if {$::tcl_platform(platform) eq "windows"} {
     checkEq "owner-only permissions" [format %04o [expr {$st(mode) & 0o777}]] 0600
 }
 file delete -force $f1 $f2
+
+# A keyed model-list request must not follow a redirect down to cleartext.
+puts "\n== model-list redirects stay encrypted =="
+set savedOllamaKey $::auto_comment::ollamaKey
+set ::auto_comment::ollamaKey "secret-key"
+set ::fakeBody {{"models":[{"name":"glm-5.3","capabilities":["completion"]}]}}
+set ::fakeStatus "200"
+set ::lastArgv {}
+catch {::auto_comment::fetchOllamaModels}
+check "the Ollama model list refuses an https downgrade" \
+    [expr {[lsearch -exact $::lastArgv --proto-redir] >= 0 \
+        && [lindex $::lastArgv [expr {[lsearch -exact $::lastArgv --proto-redir] + 1}]] eq "=https"}] \
+    $::lastArgv
+set ::auto_comment::ollamaKey $savedOllamaKey
+set ::lastArgv {}
+catch {::auto_comment::fetchUrlModels "https://api.deepseek.com" "secret-key"}
+check "the generic model list refuses it too" \
+    [expr {[lsearch -exact $::lastArgv --proto-redir] >= 0}] $::lastArgv
+
 
 # ------------------------------------------------------------------- cleanup --
 file delete -force $tmproot
