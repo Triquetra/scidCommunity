@@ -42,12 +42,13 @@ written, and saving depth or time leaves the preset's `autorun` alone.
 
 ### Files written by an older version
 
-`Limits` is the tenth element of the entry and is omitted when the preset sets
-no limit, so a file that never used limits is byte-identical to one written by
-an older version. Entries without `Limits` are read as "no limits set", and the
-legacy global options (`enginewin::depth_limit` / `enginewin::movetime_limit`)
-still apply to them. Those globals remain stored for this reason and are no
-longer edited by the UI.
+`Limits` is the tenth element of the entry. A preset that carries the field
+writes it even when it is empty (`Limits {}`): that is how "all limits cleared"
+survives a reload and overrides the legacy globals. An entry from a file written
+before the field existed has nine elements and no `Limits` line, so it is
+byte-identical to what an older version wrote; the legacy global options
+(`enginewin::depth_limit` / `enginewin::movetime_limit`) still apply to it.
+Those globals remain stored for this reason and are no longer edited by the UI.
 
 ## Where the code lives
 

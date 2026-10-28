@@ -27,7 +27,6 @@ proc ::enginecfg::get {name} {
         if {[llength [lindex $res 6]] != 6} {
             lset res 6 [list white 1 none false normal ""]
         }
-        set res [::enginelimits::pad $res]
     }
     return $res
 }
@@ -92,11 +91,17 @@ proc ::enginecfg::save {enginecfg {force_write false}} {
     if {$idx < 0} {
         return ""
     }
-    set enginecfg [::enginelimits::pad $enginecfg]
+    # A record loaded from the file holds already-filtered {name value} pairs;
+    # only the live widget form carries the type/default/... fields. The old
+    # filter threw "expected boolean value" on a loaded pair.
     lset enginecfg 8 [lmap elem [lindex $enginecfg 8] {
-        lassign $elem name value type default min max var_list internal
-        if {$internal || $value eq $default} { continue }
-        list $name $value
+        if {[llength $elem] == 2} {
+            set elem
+        } else {
+            lassign $elem name value type default min max var_list internal
+            if {$internal || $value eq $default} { continue }
+            list $name $value
+        }
     }]
     if {$force_write || [lindex $::engines(list) $idx] ne $enginecfg} {
         lset ::engines(list) $idx $enginecfg
@@ -113,6 +118,10 @@ proc ::enginecfg::write {} {
     puts $f "\# Analysis engines list file for Scid $::scidVersion with UCI support"
     puts $f ""
     foreach e $::engines(list) {
+        # The raw length says whether this preset ever had a Limits field: an
+        # entry from an older file has nine elements, and an explicit empty
+        # dict (all limits cleared) must still be written as "Limits {}".
+        set hasLimits [expr {[llength $e] >= 10}]
         lassign [::enginelimits::pad $e] name cmd args dir elo time url uci opt lim
         puts $f "engine {"
             puts $f "  Name [list $name]"
@@ -126,7 +135,7 @@ proc ::enginecfg::write {} {
             puts $f "  UCIoptions [list $opt]"
             # Written only when the preset sets a limit, so a file that never
             # used them is byte-identical to one written by an older version.
-            if {$lim ne "" && ![catch {dict size $lim}] && [dict size $lim] > 0} {
+            if {$hasLimits} {
                 puts $f "  Limits [list $lim]"
             }
             puts $f "}"
@@ -242,7 +251,9 @@ proc ::enginecfg::resetConfigOptions {id configFrame config} {
     lassign $config name cmd args wdir elo time url uci options
     lassign $url scoreside notation pvwrap debugframe priority netport
     set time [clock seconds]; # Update engine's last used time.
-    set ::enginecfg::engConfig_$id [list $name $cmd $args $wdir $elo $time $url $uci {}]
+    set live [list $name $cmd $args $wdir $elo $time $url $uci {}]
+    if {[llength $config] >= 10} { lappend live [lindex $config 9] }
+    set ::enginecfg::engConfig_$id $live
     if {$config ne ""} {
         set msg "$cmd $args\nConnecting..."
         event generate $configFrame <<EngineCfgLayout>> -data [list $id debug $debugframe]

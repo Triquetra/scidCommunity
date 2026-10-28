@@ -84,17 +84,26 @@ puts "which limits a window uses"
 set ::engines(list) {
     {Deep /x {} {} 0 0 {} 1 {} {depth 66 movetime 300000}}
     {Quick /x {} {} 0 0 {} 1 {} {depth 18}}
+    {Empty /x {} {} 0 0 {} 1 {} {}}
     {Legacy /x {} {} 0 0 {} 1 {}}
+    {Invalid /x {} {} 0 0 {} 1 {} {depth 0 movetime abc}}
 }
-set fallback [list depth {} movetime 1000]
+set fallback [list depth 7 movetime 1000]
 checkEq "a complete preset" [::enginelimits::forName Deep $fallback] \
     {depth 66 movetime 300000 autorun {}}
-checkEq "an unset key falls back" [::enginelimits::forName Quick $fallback] \
-    {depth 18 movetime 1000 autorun {}}
+# A preset that carries Limits is authoritative: an empty key means "no limit",
+# which is how the window stores a blank depth or time field. Falling back to a
+# legacy global here would make "unlimited" impossible to express.
+checkEq "a preset's empty key means no limit" [::enginelimits::forName Quick $fallback] \
+    {depth 18 movetime {} autorun {}}
+checkEq "an explicit empty Limits is authoritative too" \
+    [::enginelimits::forName Empty $fallback] {depth {} movetime {} autorun {}}
 checkEq "a legacy entry is all fallback" [::enginelimits::forName Legacy $fallback] \
-    {depth {} movetime 1000 autorun {}}
+    {depth 7 movetime 1000 autorun {}}
+checkEq "invalid values in the file are dropped" \
+    [::enginelimits::forName Invalid $fallback] {depth {} movetime {} autorun {}}
 checkEq "an unknown engine is all fallback" [::enginelimits::forName Nope $fallback] \
-    {depth {} movetime 1000 autorun {}}
+    {depth 7 movetime 1000 autorun {}}
 
 puts "the file"
 # The test file lives in the OS temp directory, as the other harnesses do, so
@@ -122,11 +131,30 @@ checkEq "an empty value clears the depth" [dict get $saved depth] {}
 checkEq "and keeps the rest" [dict get $saved movetime] 50
 check "an invalid value is refused" [expr {[catch {::enginelimits::saveFor Deep [list depth 0]}]}]
 
+# A loaded preset's option list is {name value} pairs, not the live widget
+# definitions: save must accept both, or a depth edit throws for every engine
+# with a stored Threads/Hash.
+set ::engines(list) [list [list Deep /x {} {} 0 0 {} 1 {{Threads 4} {Hash 256}} {depth 66}]]
+::enginecfg::save [lindex $::engines(list) 0]
+checkEq "a save keeps the stored UCI options" \
+    [lindex [lindex $::engines(list) 0] 8] {{Threads 4} {Hash 256}}
+checkEq "and the limit survives it" \
+    [dict get [::enginelimits::of [lindex $::engines(list) 0]] depth] 66
+
+# The window's live record is written back on an option change; it has to learn
+# about a limit saved from the field, or that save would erase it.
+set ::enginecfg::engConfig_1 [list Deep /x {} {} 0 0 {} 1 {} {depth 66}]
+::enginelimits::saveFor Deep [list depth 30]
+checkEq "an open window follows a limit save" [lindex $::enginecfg::engConfig_1 9] {depth 30}
+unset ::enginecfg::engConfig_1
+
 if {$haveLoader} {
-    # Write one preset with limits and one without, then read them back.
+    # Write a preset with limits and a legacy preset, then read the file back:
+    # the loader check must use what ::enginecfg::write emitted, not a stanza
+    # constructed to suit it.
     set ::engines(list) [list \
         [list Deep /x {} {} 0 0 {} 1 {} [dict create depth 66 movetime 300000]] \
-        [list Legacy /x {} {} 0 0 {} 1 {} {}]]
+        [list Legacy /x {} {} 0 0 {} 1 {}]]
     ::enginecfg::write
     set written [read [set f [open $::tmp r]]]
     close $f
@@ -134,14 +162,19 @@ if {$haveLoader} {
     checkEq "and writes them once" [regexp -all {Limits} $written] 1
 
     set ::engines(list) {}
-    engine {Name Deep Cmd /x Dir {} Limits {depth 66 movetime 300000}}
-    engine {Name Legacy Cmd /x Dir {}}
-    checkEq "the loader reads them back" [dict get [::enginelimits::of [::enginecfg::get Deep]] depth] 66
-    checkEq "a preset without limits loads with none" \
-        [dict get [::enginelimits::of [::enginecfg::get Legacy]] depth] {}
+    source $::tmp
+    checkEq "the loader reads the written depth back" \
+        [dict get [::enginelimits::of [::enginecfg::get Deep]] depth] 66
+    checkEq "and the written movetime" \
+        [dict get [::enginelimits::of [::enginecfg::get Deep]] movetime] 300000
+    checkEq "a legacy entry still has nine elements" \
+        [llength [::enginecfg::get Legacy]] 9
     engine {Name Bare Cmd /x Dir {} Limits 20}
     checkEq "a bare integer is taken as the depth" \
         [dict get [::enginelimits::of [::enginecfg::get Bare]] depth] 20
+    engine {Name Zero Cmd /x Dir {} Limits 0}
+    checkEq "and an invalid bare integer is dropped at use" \
+        [dict get [::enginelimits::forName Zero] depth] {}
 } else {
     # A silent skip would let the file-format round trip rot unnoticed.
     puts "  FAIL the engine list loader could not be extracted"
@@ -154,11 +187,17 @@ set ::engines(list) [list [list Deep /x {} {} 0 0 {} 1 {} [dict create depth 66]
 set written [read [set f [open $::tmp r]]]
 close $f
 check "a file with a preset limit carries it" [string match {*  Limits {depth 66}*} $written]
-set ::engines(list) [list [list Legacy /x {} {} 0 0 {} 1 {} {}]]
+set ::engines(list) [list [list Empty /x {} {} 0 0 {} 1 {} {}]]
 ::enginecfg::write
 set written [read [set f [open $::tmp r]]]
 close $f
-check "a preset with no limits writes no Limits line" \
+check "a preset whose limits were all cleared still writes the field" \
+    [string match {*  Limits {}*} $written]
+set ::engines(list) [list [list Legacy /x {} {} 0 0 {} 1 {}]]
+::enginecfg::write
+set written [read [set f [open $::tmp r]]]
+close $f
+check "a legacy entry writes no Limits line" \
     [expr {[string first "Limits" $written] < 0}]
 
 file delete -force $::tmp

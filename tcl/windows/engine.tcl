@@ -1083,7 +1083,9 @@ proc ::enginewin::loadLimits {id {name ""}} {
     set ::enginewin::depth($id) [dict get $lim depth]
     set ::enginewin::movetime($id) [dict get $lim movetime]
     if {[dict get $lim autorun] ne ""} {
-        set ::enginewin_autorun($id) [list movetime [dict get $lim autorun]]
+        # The Autorun menu's radio values are one-element lists; the variable
+        # must have the same shape or the menu shows no selection.
+        set ::enginewin_autorun($id) [list [list movetime [dict get $lim autorun]]]
     }
     return $lim
 }

@@ -29,7 +29,7 @@ proc ::enginelimits::of {enginecfg} {
     if {[catch {dict size $lim}]} {
         set lim {}
     }
-    return [dict merge {depth "" movetime "" autorun ""} $lim]
+    return [dict merge {depth {} movetime {} autorun {}} $lim]
 }
 
 # True if value is an acceptable setting for key. An empty value always is:
@@ -67,7 +67,7 @@ proc ::enginelimits::setLimit {enginecfg key value} {
 
 # The Go message's limits list for a preset dict, in a fixed order.
 proc ::enginelimits::goLimits {lim} {
-    set lim [dict merge {depth "" movetime "" autorun ""} $lim]
+    set lim [dict merge {depth {} movetime {} autorun {}} $lim]
     set out {}
     if {[dict get $lim depth] ne ""} {
         lappend out [list depth [dict get $lim depth]]
@@ -78,20 +78,32 @@ proc ::enginelimits::goLimits {lim} {
     return $out
 }
 
-# The limits to use for the named engine: its preset, with any key the preset
-# leaves unset taken from fallback (the legacy global settings).
-proc ::enginelimits::forName {name {fallback {}}} {
-    set lim [dict merge {depth "" movetime "" autorun ""} $fallback]
-    set enginecfg [::enginecfg::get $name]
-    if {$enginecfg ne ""} {
-        set preset [::enginelimits::of $enginecfg]
-        dict for {key value} $preset {
-            if {$value ne ""} {
-                dict set lim $key $value
-            }
+# Drop keys whose value is not a limit this build would accept. A hand-edited
+# or corrupted engines.dat can otherwise send "go depth 0" on every search.
+proc ::enginelimits::clean {lim} {
+    set out {}
+    foreach key {depth movetime autorun} {
+        set value [dict get $lim $key]
+        if {$value ne "" && [::enginelimits::valid $key $value]} {
+            dict set out $key $value
         }
     }
-    return $lim
+    return $out
+}
+
+# The limits to use for the named engine.
+#
+# A preset that carries a Limits field is authoritative: an empty key means
+# "no limit", which is how the window's blank depth/time field is stored. The
+# legacy global settings are only a fallback for an entry written before the
+# field existed - an entry with no Limits element at all.
+proc ::enginelimits::forName {name {fallback {}}} {
+    set defaults {depth {} movetime {} autorun {}}
+    set enginecfg [::enginecfg::get $name]
+    if {$enginecfg ne "" && [llength $enginecfg] >= 10} {
+        return [dict merge $defaults [::enginelimits::clean [::enginelimits::of $enginecfg]]]
+    }
+    return [dict merge $defaults $fallback]
 }
 
 # Store limits in the named engine's preset and save the engine list.
@@ -118,7 +130,20 @@ proc ::enginelimits::saveFor {name lim} {
     dict for {key value} $current {
         if {$value ne ""} { dict set out $key $value }
     }
+    set enginecfg [::enginelimits::pad $enginecfg]
     lset enginecfg 9 $out
     ::enginecfg::save $enginecfg
+    # Keep a window that already has this engine open in step. Its live record
+    # is written back whenever an option changes, and a stale element 9 would
+    # erase the limits that were just stored.
+    foreach var [info vars ::enginecfg::engConfig_*] {
+        set live [set $var]
+        if {[lindex $live 0] eq $name} {
+            # A legacy engine's live record has nine elements too.
+            set live [::enginelimits::pad $live]
+            lset live 9 $out
+            set $var $live
+        }
+    }
     return 1
 }
