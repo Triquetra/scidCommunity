@@ -67,6 +67,54 @@ proc ::enginewin::listEngines {} {
 }
 
 # Handles <<NotifyNewGame>>. Schedule a NewGame msg for the engine.
+# Seed the score graph from the evaluations the game already carries.
+#
+# A game from Lichess, from a previous review or from Ctrl+Shift+A knows its own
+# scores; re-searching them costs time and replaces a stored score with a
+# shallower guess. The seeded plies are also marked in the depth map, which is
+# what ::enginewin::analyzeMainLine tests before it queues a position, so the
+# Autorun pass only fills the gaps.
+proc ::enginewin::seedChart {id} {
+    set w .engineWin$id
+    if {[info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id)} {
+        set w .pv$::enginewin::pgnviewer($id).engineWin$id
+    }
+    if {![winfo exists $w.chart.canvas]} { return 0 }
+    set canvas $w.chart.canvas
+    set ply0 0
+    catch { set ply0 [sc_pos location] }
+    set n 0
+    catch { set n [expr {[llength [sc_game UCI_mainLine]] - 1}] }
+    if {$n < 1} { return 0 }
+    upvar ::enginewin::pv_(depths,$id) depths
+    set seeded 0
+    for {set i 1} {$i <= $n} {incr i} {
+        if {[catch { sc_move ply $i }]} break
+        if {[catch { sc_pos location } loc] || $loc != $i} break
+        set cp [::seed::score [sc_pos getComment]]
+        if {$cp eq ""} continue
+        ::chart::setDataPoint $canvas $i $cp [list ::enginewin::seedLabel $i]
+        # A stored score outranks any search the Autorun pass would run here.
+        dict set depths $i 100000
+        incr seeded
+    }
+    catch { sc_move ply $ply0 }
+    if {$seeded} {
+        set scores [::chart::getScores $canvas]
+        if {[llength $scores] > 1} {
+            lassign [::accuracy::calculate $scores] wAcc bAcc
+            catch { ::chart::setAccuracy $canvas $wAcc $bAcc }
+        }
+    }
+    return $seeded
+}
+
+proc ::enginewin::seedLabel {ply cp} {
+    set mv [expr {($ply + 1) / 2}]
+    set suffix [expr {$ply % 2 ? "." : "..."}]
+    return "$mv$suffix stored\n[::seed::label $cp]"
+}
+
 proc ::enginewin::onNewGame {id} {
     set ::enginewin::m_(newgame,$id) true
     ::stored_eval::clear $id
@@ -81,6 +129,8 @@ proc ::enginewin::onNewGame {id} {
             set mainLine [::pgnviewer::getMainline $::enginewin::pgnviewer($id)]
         }
         ::chart::clear $w.chart.canvas [expr {max(1, [llength $mainLine] - 1)}]
+        # What the game already knows, before any engine starts.
+        catch { ::enginewin::seedChart $id }
     }
 }
 

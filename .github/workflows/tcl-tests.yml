@@ -31,6 +31,12 @@ jobs:
       - name: Move labels
         run: tclsh tests/tcl/move_labels.tcl
 
+      - name: Score seed
+        run: tclsh tests/tcl/score_seed.tcl
+
+      - name: Game review settings
+        run: tclsh tests/tcl/game_review.tcl
+
       - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl
 
