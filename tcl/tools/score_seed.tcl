@@ -34,10 +34,21 @@ proc ::seed::score {comment} {
         set cp [expr {$MATE_CP - 100 * $dist}]
         return [expr {$sign eq "-" ? -$cp : $cp}]
     }
-    # Strip the depth suffix and normalise a decimal comma before scanning.
-    set value [lindex [split [string map {, .} $token] "/"] 0]
-    if {[scan $value %f pawns] != 1} { return "" }
-    set cp [expr {round($pawns * 100)}]
+    # Strip the depth suffix and normalise a decimal comma. The two exporter
+    # forms put the depth after "/" ("-6,64/23", comma is the decimal point) or
+    # after "," only when the score itself uses a point ("0.34,18"). The whole
+    # value then has to be a number: scan accepts a numeric prefix, which made
+    # "0.34junk" a score and marked a ply as evaluated on the strength of it.
+    set value $token
+    if {[string first "/" $value] >= 0} {
+        set value [string map {, .} [lindex [split $value "/"] 0]]
+    } elseif {[string first "," $value] >= 0 && [string first "." $value] >= 0} {
+        set value [lindex [split $value ","] 0]
+    } else {
+        set value [string map {, .} $value]
+    }
+    if {![regexp {^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)$} $value]} { return "" }
+    set cp [expr {round($value * 100)}]
     if {$cp > $MAX_CP} { return $MAX_CP }
     if {$cp < -$MAX_CP} { return -$MAX_CP }
     return $cp

@@ -83,6 +83,9 @@ proc ::review::setValue {key value} {
         }
         var_lines {
             if {$value < 0} { return "var_lines cannot be negative" }
+            if {$value > 0 && [dict get $S mpv] < 2} {
+                return "var_lines needs mpv of at least 2"
+            }
         }
         var_cp {
             if {$value < 0} { return "var_cp cannot be negative" }
@@ -102,8 +105,12 @@ proc ::review::setValue {key value} {
         default { return "unknown setting: $key" }
     }
     dict set S $key $value
-    # var_lines is capped by mpv, and lowering mpv must lower the cap with it.
-    if {[dict get $S var_lines] > [dict get $S mpv]} {
+    # var_lines is capped by mpv, and needs mpv of at least 2: lowering mpv to 1
+    # turns variations off rather than leaving a state ::review::problems would
+    # report against a setting the setter accepted.
+    if {[dict get $S mpv] < 2} {
+        dict set S var_lines 0
+    } elseif {[dict get $S var_lines] > [dict get $S mpv]} {
         if {$key eq "mpv"} {
             dict set S var_lines [dict get $S mpv]
         } else {
@@ -182,7 +189,15 @@ proc ::review::commentText {label eval_cp} {
 # leaving the old one makes the graph show the score that was just replaced.
 # Other tokens ([%clk], [%emt]) and the user's prose are kept.
 proc ::review::stripReviewTokens {comment} {
-    set out [regsub -all {\[%eval\s+[^\]]*\]} $comment ""]
+    # The evaluation, and the verdict token immediately in front of it. Matching
+    # that pair by position is language-independent: the game may have been
+    # reviewed under another UI language, and ::movelabels::text only knows the
+    # current one. The token starts with a letter and carries no %, so [%clk]
+    # and friends are not mistaken for it.
+    set out [regsub -all {\s*\[[[:alpha:]][^\]%]*\]\s*\[%eval\s+[^\]]*\]} $comment ""]
+    set out [regsub -all {\[%eval\s+[^\]]*\]} $out ""]
+    # A verdict written without a score has no anchor: remove the current
+    # language's word for each label.
     foreach label {best excellent good inaccuracy mistake blunder brilliant great miss forced book} {
         set out [string map [list "\[[::movelabels::text $label]\]" ""] $out]
     }

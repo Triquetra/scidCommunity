@@ -42,6 +42,8 @@ checkEq "embedded in a comment" [::seed::score {A good move. [%eval 1.05] Indeed
 checkEq "no evaluation" [::seed::score {A good move.}] {}
 checkEq "an empty comment" [::seed::score {}] {}
 checkEq "a malformed token" [::seed::score {[%eval abc]}] {}
+checkEq "a token with trailing junk is not a score" [::seed::score {[%eval 0.34junk]}] {}
+checkEq "a leading plus is still a score" [::seed::score {[%eval +0.20]}] 20
 
 # The graph's range is a dozen pawns; a tablebase score must not flatten it.
 checkEq "clamped high" [::seed::score {[%eval 25.00]}] 1200

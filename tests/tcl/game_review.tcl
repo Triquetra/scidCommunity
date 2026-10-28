@@ -52,6 +52,14 @@ checkEq "it is remembered" [::review::get var_lines] 5
 checkEq "lowering mpv lowers var_lines with it" [::review::get var_lines] 2
 checkEq "no problems reported" [::review::problems] {}
 
+# mpv 1 means no alternatives at all, so var_lines goes to 0 rather than to 1:
+# ::review::problems refuses that combination, and the setter must too.
+checkEq "mpv 1 is allowed" [::review::setValue mpv 1] ""
+checkEq "mpv 1 turns variations off" [::review::get var_lines] 0
+checkEq "var_lines 1 is refused while mpv is 1" \
+    [::review::setValue var_lines 1] {var_lines needs mpv of at least 2}
+checkEq "and problems agrees with the setter" [::review::problems] {}
+
 puts "where the pass starts"
 
 ::review::reset
@@ -137,6 +145,11 @@ checkEq "a previous verdict and score are removed" \
     [::review::stripReviewTokens {A fine move. [good] [%eval +0.20]}] {A fine move.}
 checkEq "other tokens and the prose survive" \
     [::review::stripReviewTokens {[%clk 0:03:00] A fine move.}] {[%clk 0:03:00] A fine move.}
+checkEq "a verdict in another language is replaced by its position" \
+    [::review::stripReviewTokens {[Bon] [%eval +0.20]}] {}
+checkEq "and a token before it survives" \
+    [::review::stripReviewTokens {[%clk 0:03:00] [Good] [%eval +0.20]}] \
+    {[%clk 0:03:00]}
 checkEq "a re-review leaves one verdict and one score" \
     [::review::mergeComment \
         [::review::stripReviewTokens {A fine move. [good] [%eval +0.20]}] \

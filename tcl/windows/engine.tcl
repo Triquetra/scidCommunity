@@ -123,6 +123,16 @@ proc ::enginewin::seedChart {id} {
 # The chart calls a point's callback as {xIndex score}, so this takes exactly
 # those two arguments; anything else raises on hover.
 proc ::enginewin::seedLabel {ply score} {
+    # A click calls the callback with an empty score, the way chartCallback
+    # treats it: navigate to the ply instead of formatting a label.
+    if {$score eq ""} {
+        catch {
+            sc_move start
+            sc_move forward $ply
+            ::notify::PosChanged -pgn
+        }
+        return ""
+    }
     set mv [expr {($ply + 1) / 2}]
     set suffix [expr {$ply % 2 ? "." : "..."}]
     return "$mv$suffix stored\n[::seed::label $score]"
