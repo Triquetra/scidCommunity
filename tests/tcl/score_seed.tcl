@@ -54,14 +54,21 @@ checkEq "a mate label" [::seed::label 99700] {#3}
 checkEq "a mate against" [::seed::label -99700] {#-3}
 checkEq "a mate already delivered" [::seed::label 100000] {#0}
 
+# The chart can show scores from the side to move; the stored value is White's.
+checkEq "white's chart keeps the stored sign" [::seed::forSide -35 black white] -35
+checkEq "an engine-side chart flips a black-to-move point" [::seed::forSide -35 black engine] 35
+checkEq "and leaves a white-to-move one alone" [::seed::forSide 35 white engine] 35
+
 # A game's comments, one per position from the start.
 set comments [list {opening} {[%eval 0.20]} {} {[%eval -0.35]} {}]
 set points [::seed::points $comments]
 checkEq "the first comment is the position before move 1" [dict exists $points 0] 0
-checkEq "a score lands on its ply" [dict get $points 2] 20
-checkEq "a gap stays a gap" [dict exists $points 3] 0
-checkEq "and the next score is still read" [dict get $points 4] -35
-checkEq "three of five plies" [dict size $points] 2
+checkEq "a score lands on its ply" [dict get $points 1] 20
+checkEq "a gap stays a gap" [dict exists $points 2] 0
+checkEq "and the next score is still read" [dict get $points 3] -35
+checkEq "two of five comments carry one" [dict size $points] 2
+checkEq "an evaluation before the first move is not a ply" \
+    [dict exists [::seed::points [list {[%eval 0.20]} {}]] 0] 0
 
 # Half the plies is the point at which the graph stops needing an engine pass.
 check "a half-covered game counts as covered" [::seed::covers {1 10 2 20} 4]

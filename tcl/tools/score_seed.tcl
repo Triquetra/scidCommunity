@@ -43,6 +43,14 @@ proc ::seed::score {comment} {
     return $cp
 }
 
+# The value to plot for a stored score. [%eval] is White's perspective; a chart
+# set to "engine" shows the side to move's, so a black-to-move point is negated.
+# The "white" setting plots the stored value as it stands.
+proc ::seed::forSide {cp side scoreside} {
+    if {$scoreside eq "engine" && $side eq "black"} { return [expr {-$cp}] }
+    return $cp
+}
+
 # The score as the graph's label shows it: pawns with a sign, or #N for a mate.
 proc ::seed::label {cp} {
     variable MATE_CP
@@ -62,11 +70,13 @@ proc ::seed::points {comments} {
     set out [dict create]
     set ply 0
     foreach comment $comments {
+        # Element 0 is the position before the first move (ply 0), so it is
+        # checked before `ply` advances; element 1 is the position after move 1.
+        if {$ply >= 1} {
+            set cp [score $comment]
+            if {$cp ne ""} { dict set out $ply $cp }
+        }
         incr ply
-        if {$ply < 1} continue
-        set cp [score $comment]
-        if {$cp eq ""} continue
-        dict set out $ply $cp
     }
     return $out
 }
