@@ -354,11 +354,14 @@ set ::lastCfgText ""
 set ::lastCfgMode 0
 set ::fakeBody "{}"
 set ::fakeStatus "200"
+set ::fakeCurlVersion "curl 8.23.0 (x86_64-pc-linux-gnu)"
 set ::fakeStderr ""
 set ::fakeExecError ""
 set ::lastOutFile ""
 proc exec {args} {
     set ::lastArgv $args
+    # post303Flag probes `curl --version`; answer with the fake version.
+    if {[lsearch -exact $args --version] >= 0} { return $::fakeCurlVersion }
     set idx [lsearch -exact $args --config]
     if {$idx >= 0} {
         set ::lastCfg [lindex $args [expr {$idx + 1}]]
@@ -520,6 +523,20 @@ set ::auto_comment::openaiUrl "http://127.0.0.1:8000"
 ::auto_comment::queryChat "hi" 50
 check "an http base keeps the default redirect policy" \
     [expr {[lsearch -exact $::lastArgv --proto-redir] < 0}] $::lastArgv
+# curl before 7.70 does not know --post303 and refuses the whole command line
+# for it, so the flag is offered only when the probe finds a version that has it.
+set ::fakeCurlVersion "curl 7.55.1 (Windows) libcurl/7.55.1"
+unset -nocomplain ::auto_comment::post303
+set ::lastArgv {}
+::auto_comment::queryChat "hi" 50
+check "an old curl is not offered --post303" \
+    [expr {[lsearch -exact $::lastArgv --post303] < 0}] $::lastArgv
+check "but still keeps the POST across 301 and 302" \
+    [expr {[lsearch -exact $::lastArgv --post301] >= 0 \
+        && [lsearch -exact $::lastArgv --post302] >= 0}] $::lastArgv
+set ::fakeCurlVersion "curl 8.23.0 (x86_64-pc-linux-gnu)"
+unset -nocomplain ::auto_comment::post303
+
 set ::auto_comment::openaiUrl "https://api.example.com"
 check "the reply file is deleted after the request" \
     [expr {$::lastOutFile ne "" && ![file exists $::lastOutFile]}] $::lastOutFile

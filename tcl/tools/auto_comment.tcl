@@ -521,6 +521,25 @@ proc ::auto_comment::query {prompt {maxTokens 300}} {
     return "ERROR: unknown provider: $::auto_comment::provider"
 }
 
+# ::auto_comment::post303Flag
+#   --post303 exists only since curl 7.70, and an unknown option makes curl
+#   refuse the whole command line before it sends anything: a 7.55 system curl
+#   would fail every request, redirect or not. Probe once and offer the flag
+#   only where it exists; on an older curl a 303 is followed as a GET, which is
+#   what the status means.
+proc ::auto_comment::post303Flag {} {
+    if {![info exists ::auto_comment::post303]} {
+        set ::auto_comment::post303 ""
+        if {![catch {exec curl --version} out]} {
+            if {[regexp {curl (\d+)\.(\d+)} $out -> major minor] \
+                    && [package vcompare "$major.$minor" "7.70"] >= 0} {
+                set ::auto_comment::post303 --post303
+            }
+        }
+    }
+    return $::auto_comment::post303
+}
+
 # ::auto_comment::queryChat
 #   The transport for both generic providers: one request shape per provider,
 #   written to a temp file and handed to curl, exactly like the native DeepSeek
@@ -558,7 +577,7 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
     # a file of its own: merging it into stdout (2>@1) mixed it into the status
     # code, and plain -s swallowed it, which is why every transport failure used
     # to read "network error or timeout" and nothing else.
-    set args [list curl -sS -L --post301 --post302 --post303 \
+    set args [list curl -sS -L --post301 --post302 {*}[::auto_comment::post303Flag] \
         --connect-timeout 15 --max-time 180 \
         -H {Content-Type: application/json} -X POST \
         -o $replyfile -w {%{http_code}} --data-binary @$tmpfile]
