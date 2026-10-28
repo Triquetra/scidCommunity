@@ -27,6 +27,7 @@ proc ::enginecfg::get {name} {
         if {[llength [lindex $res 6]] != 6} {
             lset res 6 [list white 1 none false normal ""]
         }
+        set res [::enginelimits::pad $res]
     }
     return $res
 }
@@ -91,6 +92,7 @@ proc ::enginecfg::save {enginecfg {force_write false}} {
     if {$idx < 0} {
         return ""
     }
+    set enginecfg [::enginelimits::pad $enginecfg]
     lset enginecfg 8 [lmap elem [lindex $enginecfg 8] {
         lassign $elem name value type default min max var_list internal
         if {$internal || $value eq $default} { continue }
@@ -111,7 +113,7 @@ proc ::enginecfg::write {} {
     puts $f "\# Analysis engines list file for Scid $::scidVersion with UCI support"
     puts $f ""
     foreach e $::engines(list) {
-        lassign $e name cmd args dir elo time url uci opt
+        lassign [::enginelimits::pad $e] name cmd args dir elo time url uci opt lim
         puts $f "engine {"
             puts $f "  Name [list $name]"
             puts $f "  Cmd  [list $cmd]"
@@ -122,6 +124,11 @@ proc ::enginecfg::write {} {
             puts $f "  URL  [list $url]"
             puts $f "  UCI [list $uci]"
             puts $f "  UCIoptions [list $opt]"
+            # Written only when the preset sets a limit, so a file that never
+            # used them is byte-identical to one written by an older version.
+            if {$lim ne "" && ![catch {dict size $lim}] && [dict size $lim] > 0} {
+                puts $f "  Limits [list $lim]"
+            }
             puts $f "}"
         puts $f ""
     }
