@@ -67,6 +67,80 @@ proc ::enginewin::listEngines {} {
 }
 
 # Handles <<NotifyNewGame>>. Schedule a NewGame msg for the engine.
+# Seed the score graph from the evaluations the game already carries.
+#
+# A game from Lichess, from a previous review or from Ctrl+Shift+A knows its own
+# scores; re-searching them costs time and replaces a stored score with a
+# shallower guess. The seeded plies are also marked in the depth map, which is
+# what ::enginewin::analyzeMainLine tests before it queues a position, so the
+# Autorun pass only fills the gaps.
+proc ::enginewin::seedChart {id} {
+    # An embedded viewer shows a game the board does not hold: sc_move would read
+    # the wrong game, so those windows are left to the engine pass.
+    if {[info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id)} {
+        return 0
+    }
+    set w .engineWin$id
+    if {![winfo exists $w.chart.canvas]} { return 0 }
+    set canvas $w.chart.canvas
+    set ply0 0
+    catch { set ply0 [sc_pos location] }
+    set n 0
+    catch { set n [expr {[llength $::enginewin::m_(mainLine,$id)] - 1}] }
+    if {$n < 1} { return 0 }
+    # The seeded plies are marked in their own map, not in the depth map: Autorun
+    # tests for them so it does not re-search a stored score, but a manual search
+    # still reaches updateChart's depth check and replaces the point, which a
+    # marker of 100000 in the depth map would have blocked.
+    upvar ::enginewin::pv_(seeded,$id) seeded
+    set seeded [dict create]
+    set count 0
+    for {set i 1} {$i <= $n} {incr i} {
+        if {[catch { sc_move ply $i }]} break
+        if {[catch { sc_pos location } loc] || $loc != $i} break
+        set cp [::seed::score [sc_pos getComment]]
+        if {$cp eq ""} continue
+        set side white
+        catch { set side [sc_pos side] }
+        set scoreside white
+        catch { set scoreside $::enginewin::m_(scoreside,$id) }
+        ::chart::setDataPoint $canvas $i [::seed::forSide $cp $side $scoreside] \
+            [list ::enginewin::seedLabel]
+        dict set seeded $i 1
+        incr count
+    }
+    catch { sc_move ply $ply0 }
+    # Accuracy means something only when the stored scores cover the game: the
+    # chart carries a missing ply forward, so a handful of evaluations would be
+    # averaged as if the line between them had been played.
+    if {$count && [::seed::covers $seeded $n]} {
+        set scores [::chart::getScores $canvas]
+        if {[llength $scores] > 1} {
+            lassign [::accuracy::calculate $scores] wAcc bAcc
+            catch { ::chart::setAccuracy $canvas $wAcc $bAcc }
+        }
+    }
+    return $count
+}
+
+# The chart calls a point's callback as {xIndex score}, so this takes exactly
+# those two arguments; anything else raises on hover.
+proc ::enginewin::seedLabel {ply score} {
+    # A click calls the callback with an empty score, the way chartCallback
+    # treats it: navigate to the ply instead of formatting a label.
+    if {$score eq ""} {
+        catch {
+            sc_move start
+            sc_move forward $ply
+            ::notify::PosChanged -pgn
+        }
+        return ""
+    }
+    set mv [expr {($ply + 1) / 2}]
+    set suffix [expr {$ply % 2 ? "." : "..."}]
+    return "$mv$suffix stored\n[::seed::label $score]"
+}
+
 proc ::enginewin::onNewGame {id} {
     set ::enginewin::m_(newgame,$id) true
     ::stored_eval::clear $id
@@ -1472,7 +1546,13 @@ proc ::enginewin::sendPosition {id position plyInMainLine} {
         #     }
         # }
         set ::enginewin::pv_(depths,$id) [dict create]
+        set ::enginewin::pv_(seeded,$id) [dict create]
         set ::enginewin::pv_(postponed,$id) $plyInMainLine
+        # What the game already knows, before any engine starts. This has to
+        # come AFTER the depth reset above: the seeded markers are what
+        # analyzeMainLine tests before it queues a position, so seeding earlier
+        # would let Autorun re-search - and overwrite - a stored score.
+        catch { ::enginewin::seedChart $id }
     }
     set m_(position,$id) $position
     set m_(posPly,$id) ""
@@ -1501,9 +1581,12 @@ proc ::enginewin::analyzeMainLine {id} {
         || [::enginewin::stateLocked $id]} { return 0 }
 
     upvar ::enginewin::pv_(depths,$id) depths
+    upvar ::enginewin::pv_(seeded,$id) seeded
+    if {![info exists seeded]} { set seeded [dict create] }
     set i [llength $::enginewin::m_(mainLine,$id)]
     while {[incr i -1] >= 0} {
-        if {![dict exists $depths $i] && $i ne $::enginewin::pv_(postponed,$id)} {
+        if {![dict exists $depths $i] && ![dict exists $seeded $i] \
+            && $i ne $::enginewin::pv_(postponed,$id)} {
             dict set depths $i 0
             set uci_pos [join [lrange $::enginewin::m_(mainLine,$id) 0 $i]]
             set uci_pos [string range $uci_pos [string last "position" $uci_pos] end]
