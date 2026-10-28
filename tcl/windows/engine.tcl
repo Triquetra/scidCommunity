@@ -75,16 +75,18 @@ proc ::enginewin::listEngines {} {
 # what ::enginewin::analyzeMainLine tests before it queues a position, so the
 # Autorun pass only fills the gaps.
 proc ::enginewin::seedChart {id} {
-    set w .engineWin$id
+    # An embedded viewer shows a game the board does not hold: sc_move would read
+    # the wrong game, so those windows are left to the engine pass.
     if {[info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id)} {
-        set w .pv$::enginewin::pgnviewer($id).engineWin$id
+        return 0
     }
+    set w .engineWin$id
     if {![winfo exists $w.chart.canvas]} { return 0 }
     set canvas $w.chart.canvas
     set ply0 0
     catch { set ply0 [sc_pos location] }
     set n 0
-    catch { set n [expr {[llength [sc_game UCI_mainLine]] - 1}] }
+    catch { set n [expr {[llength $::enginewin::m_(mainLine,$id)] - 1}] }
     if {$n < 1} { return 0 }
     upvar ::enginewin::pv_(depths,$id) depths
     set seeded 0
@@ -93,7 +95,7 @@ proc ::enginewin::seedChart {id} {
         if {[catch { sc_pos location } loc] || $loc != $i} break
         set cp [::seed::score [sc_pos getComment]]
         if {$cp eq ""} continue
-        ::chart::setDataPoint $canvas $i $cp [list ::enginewin::seedLabel $i]
+        ::chart::setDataPoint $canvas $i $cp [list ::enginewin::seedLabel]
         # A stored score outranks any search the Autorun pass would run here.
         dict set depths $i 100000
         incr seeded
@@ -109,10 +111,12 @@ proc ::enginewin::seedChart {id} {
     return $seeded
 }
 
-proc ::enginewin::seedLabel {ply cp} {
+# The chart calls a point's callback as {xIndex score}, so this takes exactly
+# those two arguments; anything else raises on hover.
+proc ::enginewin::seedLabel {ply score} {
     set mv [expr {($ply + 1) / 2}]
     set suffix [expr {$ply % 2 ? "." : "..."}]
-    return "$mv$suffix stored\n[::seed::label $cp]"
+    return "$mv$suffix stored\n[::seed::label $score]"
 }
 
 proc ::enginewin::onNewGame {id} {
@@ -129,8 +133,6 @@ proc ::enginewin::onNewGame {id} {
             set mainLine [::pgnviewer::getMainline $::enginewin::pgnviewer($id)]
         }
         ::chart::clear $w.chart.canvas [expr {max(1, [llength $mainLine] - 1)}]
-        # What the game already knows, before any engine starts.
-        catch { ::enginewin::seedChart $id }
     }
 }
 
@@ -1523,6 +1525,11 @@ proc ::enginewin::sendPosition {id position plyInMainLine} {
         # }
         set ::enginewin::pv_(depths,$id) [dict create]
         set ::enginewin::pv_(postponed,$id) $plyInMainLine
+        # What the game already knows, before any engine starts. This has to
+        # come AFTER the depth reset above: the seeded markers are what
+        # analyzeMainLine tests before it queues a position, so seeding earlier
+        # would let Autorun re-search - and overwrite - a stored score.
+        catch { ::enginewin::seedChart $id }
     }
     set m_(position,$id) $position
     set m_(posPly,$id) ""
