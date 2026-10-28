@@ -25,8 +25,11 @@ Limits {depth 66 movetime 300000 autorun 250}
 
 - `depth` — search depth limit (1–500). Empty means unlimited.
 - `movetime` — search time limit in milliseconds (1–3600000). Empty means unlimited.
-- `autorun` — the cadence used when the window autoruns the main line, in
-  milliseconds.
+- `autorun` — the default cadence used when the window autoruns the main line,
+  in milliseconds. It is applied when an engine window opens and then lives in
+  that window's Autorun control; changing the control does not write the preset
+  back, so a preset's autorun is set in `engines.dat` (a preset editor will get
+  a field for it).
 
 Limits belong to the preset, not to the window and not to Scid globally, so the
 same engine can be browsed at `movetime 100` under one preset and searched to
@@ -34,7 +37,8 @@ same engine can be browsed at `movetime 100` under one preset and searched to
 
 The engine window's depth and time entries read and write the limits of the
 preset it is showing. Editing them saves `engines.dat` immediately; there is no
-separate "Save Options" step for them.
+separate "Save Options" step for them. Only the keys a preset actually sets are
+written, and saving depth or time leaves the preset's `autorun` alone.
 
 ### Files written by an older version
 

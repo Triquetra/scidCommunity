@@ -99,6 +99,23 @@ set ::tmp [file normalize $::tmp]
 proc scidConfigFile {type} { return $::tmp }
 set ::scidVersion 5.0
 
+puts "saving one limit keeps the rest"
+
+# The window's depth/time editor saves what it shows. It does not show autorun
+# and must not wipe it.
+set ::engines(list) [list [list Deep /x {} {} 0 0 {} 1 {} \
+    [dict create depth 66 movetime 300000 autorun 250]]]
+::enginelimits::saveFor Deep [list depth 30 movetime 50]
+set saved [::enginelimits::of [lindex $::engines(list) 0]]
+checkEq "a save keeps a depth it was not asked to change" [dict get $saved depth] 30
+checkEq "and the autorun it never showed" [dict get $saved autorun] 250
+# An explicitly empty value clears the key, and the file stops carrying it.
+::enginelimits::saveFor Deep [list depth ""]
+set saved [::enginelimits::of [lindex $::engines(list) 0]]
+checkEq "an empty value clears the depth" [dict get $saved depth] {}
+checkEq "and keeps the rest" [dict get $saved movetime] 50
+check "an invalid value is refused" [expr {[catch {::enginelimits::saveFor Deep [list depth 0]}]}]
+
 if {$haveLoader} {
     # Write one preset with limits and one without, then read them back.
     set ::engines(list) [list \
@@ -120,7 +137,9 @@ if {$haveLoader} {
     checkEq "a bare integer is taken as the depth" \
         [dict get [::enginelimits::of [::enginecfg::get Bare]] depth] 20
 } else {
-    puts "  (engine list loader unavailable here; format round-trip skipped)"
+    # A silent skip would let the file-format round trip rot unnoticed.
+    puts "  FAIL the engine list loader could not be extracted"
+    incr fails
 }
 
 # The write-only path, independent of the loader.

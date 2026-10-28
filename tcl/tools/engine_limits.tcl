@@ -92,16 +92,30 @@ proc ::enginelimits::forName {name {fallback {}}} {
 }
 
 # Store limits in the named engine's preset and save the engine list.
+# Only the keys present in `lim` are changed: the window's depth/time editor
+# does not touch autorun, and wiping a key it never showed would be data loss.
+# An empty value means "not set" and is dropped, so the file carries only the
+# limits the preset actually sets.
 # Return true if an engine by that name exists.
 proc ::enginelimits::saveFor {name lim} {
     set enginecfg [::enginecfg::get $name]
     if {$enginecfg eq ""} {
         return 0
     }
-    set lim [dict merge {depth "" movetime "" autorun ""} $lim]
+    set current [::enginelimits::of $enginecfg]
     foreach key {depth movetime autorun} {
-        set enginecfg [::enginelimits::setLimit $enginecfg $key [dict get $lim $key]]
+        if {![dict exists $lim $key]} { continue }
+        set value [dict get $lim $key]
+        if {![::enginelimits::valid $key $value]} {
+            error "invalid engine limit: $key $value"
+        }
+        dict set current $key $value
     }
+    set out {}
+    dict for {key value} $current {
+        if {$value ne ""} { dict set out $key $value }
+    }
+    lset enginecfg 9 $out
     ::enginecfg::save $enginecfg
     return 1
 }
