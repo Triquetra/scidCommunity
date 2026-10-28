@@ -202,6 +202,19 @@ checkEq "a list with nothing that can chat stays empty" \
 checkEq "an unreadable shape still falls back to every name" \
     [::auto_comment::parseOllamaTags {{"models": [{"name": "qwen3:8b"}, {"name": "glm-5.3"}]}}] \
     {glm-5.3 qwen3:8b}
+# The same document, pretty-printed, must go through the same filter: whitespace
+# is not a different shape, and the all-names fallback does not look at
+# capabilities.
+set prettyTags {{"models": [
+  {"name": "clef:27b", "capabilities": ["decision", "vision"]},
+  {"name": "glm-5.3", "capabilities": ["completion", "thinking"]}
+]}}
+checkEq "whitespace does not bypass the capability filter" \
+    [::auto_comment::parseOllamaTags $prettyTags] {glm-5.3}
+checkEq "and a pretty list with nothing that can chat stays empty" \
+    [::auto_comment::parseOllamaTags {{"models": [
+  {"name": "clef:27b", "capabilities": ["decision", "vision"]}
+]}}] {}
 
 # -------------------------------------------------------------------- request --
 puts "\n== request bodies =="

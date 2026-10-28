@@ -1500,7 +1500,10 @@ proc ::auto_comment::chatCompletionsOnly {ids} {
 proc ::auto_comment::parseOllamaTags {raw} {
     set starts {}
     set pos 0
-    while {[regexp -indices -start $pos {\{"name":"} $raw m]} {
+    # Whitespace-tolerant: a pretty-printed body is the same document, and the
+    # compact form the splitter used to require sent it to the all-names
+    # fallback, where the capabilities filter does not run.
+    while {[regexp -indices -start $pos {\{\s*"name"\s*:\s*"} $raw m]} {
         lappend starts [lindex $m 0]
         set pos [expr {[lindex $m 1] + 1}]
     }
@@ -1515,11 +1518,11 @@ proc ::auto_comment::parseOllamaTags {raw} {
             set end [string length $raw]
         }
         set entry [string range $raw $start $end]
-        if {![regexp {"name":"([^"]+)"} $entry -> name]} { continue }
+        if {![regexp {"name"\s*:\s*"([^"]+)"} $entry -> name]} { continue }
         incr recognised
         # an entry with no capabilities (an older server) is kept: the list is
         # the only way to find a model, and a wrong entry fails loudly
-        if {[regexp {"capabilities":\[([^\]]*)\]} $entry -> caps] \
+        if {[regexp {"capabilities"\s*:\s*\[([^\]]*)\]} $entry -> caps] \
                 && [string first "completion" $caps] < 0} {
             continue
         }
