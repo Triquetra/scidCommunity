@@ -39,6 +39,9 @@ jobs:
       - name: Engine preset limits
         run: tclsh tests/tcl/engine_limits.tcl
 
+      - name: Review driver
+        run: tclsh tests/tcl/review_driver.tcl
+
       - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl
 

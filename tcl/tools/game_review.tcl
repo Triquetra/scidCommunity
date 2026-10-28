@@ -121,6 +121,48 @@ proc ::review::setValue {key value} {
     return ""
 }
 
+# The resources a pass should use, read from the engine's own config: Threads
+# and Hash are properties of that preset, and MultiPV is the preset's own value.
+# A key the engine does not advertise comes back empty.
+proc ::review::engineDefaults {enginecfg} {
+    set out [dict create threads "" hash "" mpv ""]
+    foreach elem [lindex $enginecfg 8] {
+        lassign $elem name value
+        switch -nocase -- $name {
+            threads { dict set out threads $value }
+            hash    { dict set out hash $value }
+            multipv { dict set out mpv $value }
+        }
+    }
+    return $out
+}
+
+# The settings a pass actually runs with. Threads and Hash are the engine's:
+# the preset wins whenever it advertises them, and ::review's own values are only
+# the fallback for an engine that does not. A second place to set them is a
+# second place to get them wrong, and the window's controls already write the
+# preset. MultiPV is raised to 2 regardless, because a verdict without a second
+# line cannot tell a mistake from the only move available.
+proc ::review::effective {enginecfg} {
+    set defaults [::review::engineDefaults $enginecfg]
+    set threads [dict get $defaults threads]
+    if {$threads eq ""} {
+        set threads [get threads]
+    }
+    set hash [dict get $defaults hash]
+    if {$hash eq ""} {
+        set hash [get hash_mb]
+    }
+    set mpv [get mpv]
+    if {[dict get $defaults mpv] ne "" && [dict get $defaults mpv] > $mpv} {
+        set mpv [dict get $defaults mpv]
+    }
+    if {$mpv < 2} {
+        set mpv 2
+    }
+    return [dict create threads $threads hash $hash mpv $mpv depth [get depth]]
+}
+
 # Cross-field problems, for a dialog that wants to show them all at once.
 proc ::review::problems {} {
     set s [all]
