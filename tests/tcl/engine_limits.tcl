@@ -1,4 +1,7 @@
 #!/usr/bin/env tclsh
+# Copyright (C) 2026 David Crandall
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
 # Search limits that belong to an engine preset: the data layer, the file
 # format, and what the engine window derives from both.
 
@@ -94,8 +97,11 @@ checkEq "an unknown engine is all fallback" [::enginelimits::forName Nope $fallb
     {depth {} movetime 1000 autorun {}}
 
 puts "the file"
-set ::tmp [file join [file dirname [info script]] .. .. cache_engine_limits.dat]
-set ::tmp [file normalize $::tmp]
+# The test file lives in the OS temp directory, as the other harnesses do, so
+# an aborted run cannot leave it in the source tree.
+set ::tmpbase [expr {[info exists ::env(TMPDIR)] ? $::env(TMPDIR) \
+                 : [info exists ::env(TEMP)] ? $::env(TEMP) : "/tmp"}]
+set ::tmp [file join $::tmpbase "scid_engine_limits_[pid].dat"]
 proc scidConfigFile {type} { return $::tmp }
 set ::scidVersion 5.0
 

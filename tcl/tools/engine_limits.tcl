@@ -1,3 +1,6 @@
+# Copyright (C) 2026 David Crandall
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
 ########################################################################
 ### Search limits that belong to an engine preset.
 ###
