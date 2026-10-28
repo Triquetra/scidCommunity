@@ -194,6 +194,14 @@ checkEq "only models that can chat are offered" \
     [::auto_comment::parseOllamaTags $tags] {deepseek-v4.1-flash:1017 glm-5.3}
 checkEq "a server without capabilities keeps every model" \
     [::auto_comment::parseOllamaTags {{"models":[{"name":"qwen3:8b","model":"qwen3:8b"}]}}] {qwen3:8b}
+# ... but a list where every entry *was* parsed and every one filtered out stays
+# empty: the fallback is for a shape the parser could not read, not for models
+# that cannot answer a chat request. Offering clef:27b only produces a failure.
+checkEq "a list with nothing that can chat stays empty" \
+    [::auto_comment::parseOllamaTags {{"models":[{"name":"clef:27b","capabilities":["decision","vision"]}]}}] {}
+checkEq "an unreadable shape still falls back to every name" \
+    [::auto_comment::parseOllamaTags {{"models": [{"name": "qwen3:8b"}, {"name": "glm-5.3"}]}}] \
+    {glm-5.3 qwen3:8b}
 
 # -------------------------------------------------------------------- request --
 puts "\n== request bodies =="

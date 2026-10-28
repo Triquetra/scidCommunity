@@ -1498,6 +1498,7 @@ proc ::auto_comment::parseOllamaTags {raw} {
         set pos [expr {[lindex $m 1] + 1}]
     }
     set chat {}
+    set recognised 0
     set n 0
     foreach start $starts {
         incr n
@@ -1508,6 +1509,7 @@ proc ::auto_comment::parseOllamaTags {raw} {
         }
         set entry [string range $raw $start $end]
         if {![regexp {"name":"([^"]+)"} $entry -> name]} { continue }
+        incr recognised
         # an entry with no capabilities (an older server) is kept: the list is
         # the only way to find a model, and a wrong entry fails loudly
         if {[regexp {"capabilities":\[([^\]]*)\]} $entry -> caps] \
@@ -1516,8 +1518,11 @@ proc ::auto_comment::parseOllamaTags {raw} {
         }
         lappend chat $name
     }
-    if {[llength $chat] == 0} {
-        # nothing matched: keep every name rather than showing an empty list
+    if {$recognised == 0} {
+        # No entry could be read at all (a shape this parser does not split, for
+        # example JSON with a space after the colon): keep every name rather
+        # than showing an empty list. A model that was read and then filtered
+        # out must not come back here - the filter exists so it is not offered.
         foreach {_ name} [regexp -all -inline {"name"\s*:\s*"([^"]+)"} $raw] {
             lappend chat $name
         }
