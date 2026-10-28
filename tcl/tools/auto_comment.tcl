@@ -5,14 +5,19 @@
 ############################################################
 ### Auto Comment - AI-generated chess commentary
 ### Queries engine evaluation APIs and uses an LLM (Gemini,
-### DeepSeek, an OpenAI-compatible endpoint, a local model,
-### or OpenCode Console) to generate natural language
-### commentary.
+### DeepSeek, Ollama Cloud, an OpenAI-compatible endpoint, a
+### local model, or OpenCode Console) to generate natural
+### language commentary.
 
 namespace eval ::auto_comment {
     # LLM provider, one value for every path:
     #   none    no model at all - no request is ever made
     #   local   any Ollama-style server (ollama, LM Studio's Ollama endpoint)
+    #   ollama  Ollama's hosted service. Its own channel, not a typed URL: the
+    #           native API lives at https://ollama.com/api (chat, tags) and the
+    #           OpenAI-compatible one at https://ollama.com/v1, so "https://
+    #           ollama.com/api" typed into the generic channel answers 404 on
+    #           every /v1 path
     #   openai  any OpenAI-compatible endpoint: DeepSeek, Gemini's compatibility
     #           endpoint, vLLM, LM Studio, a gateway...
     #   opencode OpenCode Console's model gateway, which is OpenAI-compatible
@@ -32,6 +37,20 @@ namespace eval ::auto_comment {
     options.store ::auto_comment::openaiUrl "https://api.deepseek.com"
     options.store ::auto_comment::openaiKey ""
     options.store ::auto_comment::openaiModel ""
+
+    # Ollama Cloud settings. The base is fixed here rather than typed: the
+    # hosted service is the one endpoint whose URL a user gets wrong, because
+    # the native API and the OpenAI-compatible API sit under different roots.
+    #
+    # The channel speaks the native API (api/chat, api/tags). That is the whole
+    # of it: the OpenAI and Anthropic compatibility layers are documented as
+    # subsets of it, and the native one carries what this feature needs - the
+    # answer in message.content with thinking kept in its own field, and a model
+    # list that says which models can chat at all.
+    options.store ::auto_comment::ollamaKey ""
+    options.store ::auto_comment::ollamaModel ""
+    variable ollamaBase "https://ollama.com/api"
+    variable ollamaKeyUrl "https://ollama.com/settings/keys"
 
     # OpenCode Console settings. The gateway itself is a commercial service, so
     # both roots live here where a rename or a path change is one line.
@@ -131,7 +150,7 @@ proc ::auto_comment::fitWindow {w {minW 0} {minH 0}} {
 # ::auto_comment::providerList
 #   The values the settings combo offers, in the order it shows them.
 proc ::auto_comment::providerList {} {
-    return {none local openai opencode gemini deepseek}
+    return {none local ollama openai opencode gemini deepseek}
 }
 
 # ::auto_comment::providerReady
@@ -148,6 +167,14 @@ proc ::auto_comment::providerReady {} {
         openai {
             if {$::auto_comment::openaiUrl eq ""} { return "no endpoint set" }
             if {$::auto_comment::openaiModel eq ""} { return "no model selected" }
+            return ""
+        }
+        ollama {
+            # The hosted service refuses an unauthenticated chat request, and its
+            # model list answers without one, so a missing key is caught here
+            # instead of arriving as a 401 after the game has been scanned.
+            if {$::auto_comment::ollamaKey eq ""} { return "no Ollama Cloud key set" }
+            if {$::auto_comment::ollamaModel eq ""} { return "no Ollama model selected" }
             return ""
         }
         opencode {
@@ -262,6 +289,7 @@ proc ::auto_comment::writeCurlConfig {header {tag auth}} {
 proc ::auto_comment::chatEndpoint {} {
     switch -- $::auto_comment::provider {
         local  { return "[::auto_comment::baseUrl $::auto_comment::localUrl]/api/chat" }
+        ollama { return "$::auto_comment::ollamaBase/chat" }
         openai {
             set base [::auto_comment::baseUrl $::auto_comment::openaiUrl]
             # A full endpoint pasted from a provider's documentation is used as
@@ -297,6 +325,7 @@ proc ::auto_comment::modelsUrl {url} {
 proc ::auto_comment::providerModel {} {
     switch -- $::auto_comment::provider {
         local    { return $::auto_comment::localModel }
+        ollama   { return $::auto_comment::ollamaModel }
         openai   { return $::auto_comment::openaiModel }
         opencode { return $::auto_comment::opencodeModel }
     }
@@ -310,8 +339,11 @@ proc ::auto_comment::providerModel {} {
 proc ::auto_comment::chatBody {prompt {maxTokens 300}} {
     set esc [::auto_comment::escapeJson $prompt]
     switch -- $::auto_comment::provider {
-        local {
-            set model [::auto_comment::escapeJson $::auto_comment::localModel]
+        local -
+        ollama {
+            # the native shape: Ollama's own /api/chat, which both the local
+            # server and the hosted service answer
+            set model [::auto_comment::escapeJson [::auto_comment::providerModel]]
             return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"options\":{\"num_predict\":$maxTokens}}"
         }
         openai -
@@ -328,6 +360,11 @@ proc ::auto_comment::chatBody {prompt {maxTokens 300}} {
 #   server must never be sent someone's cloud key.
 proc ::auto_comment::chatAuth {} {
     switch -- $::auto_comment::provider {
+        ollama {
+            if {$::auto_comment::ollamaKey eq ""} { return "" }
+            # the hosted service is https by construction: no cleartext case
+            return "Authorization: Bearer $::auto_comment::ollamaKey"
+        }
         opencode {
             if {$::auto_comment::opencodeKey eq ""} { return "" }
             # the OpenCode endpoint is always https, so no cleartext case exists
@@ -400,6 +437,72 @@ proc ::auto_comment::replyError {raw} {
     return ""
 }
 
+# ::auto_comment::readAndDelete
+#   The contents of a scratch file, removed as it is read. "" when it is gone.
+proc ::auto_comment::readAndDelete {path} {
+    if {![file exists $path]} { return "" }
+    set text ""
+    if {![catch {set fd [open $path r]}]} {
+        catch { set text [read $fd] }
+        catch { close $fd }
+    }
+    catch { file delete -force $path }
+    return $text
+}
+
+# ::auto_comment::replyFailure
+#   The "ERROR:" line for a response that cannot be read as a chat reply, or
+#   "" when the body should be parsed for text. The status is what separates a
+#   wrong URL from a wrong model, so it is reported instead of guessed at.
+proc ::auto_comment::replyFailure {status body authSent} {
+    if {[regexp {^3[0-9][0-9]$} $status]} {
+        # curl was told to follow redirects, so this is a redirect it would not
+        # take (a method change it could not make, or a loop).
+        return "ERROR: the endpoint redirected (HTTP $status) instead of answering: use the URL it points at, usually the https form"
+    }
+    set err [::auto_comment::replyError $body]
+    if {$err ne ""} {
+        # A 401/403 on a request that carried no key is not a bad key: the key
+        # was never sent. Saying so saves a round trip through the settings.
+        if {!$authSent && $status in {401 403}} { append err " (no API key was sent)" }
+        return "ERROR: $err"
+    }
+    if {[regexp {^[45][0-9][0-9]$} $status]} {
+        return "ERROR: the endpoint answered HTTP $status: [string range [string trim $body] 0 200]"
+    }
+    return ""
+}
+
+# ::auto_comment::emptyReplyError
+#   Why a response held no text. An empty 301 body used to be reported as "the
+#   endpoint returned no text (check the model name)", which sent the user to
+#   the model name for a URL mistake: a base typed as "http://host/v1" answers
+#   301 with no body at all.
+proc ::auto_comment::emptyReplyError {status body} {
+    set body [string trim $body]
+    if {[regexp {^3[0-9][0-9]$} $status]} {
+        return "the endpoint redirected (HTTP $status) instead of answering: use the URL it points at, usually the https form"
+    }
+    if {$body eq ""} {
+        if {$status eq "" || $status eq "000"} {
+            return "the endpoint answered nothing (no HTTP status): check the endpoint URL"
+        }
+        return "the endpoint answered HTTP $status with an empty body"
+    }
+    # A reply cut off at the token limit is not a model-name problem, and the
+    # native channel can produce exactly that: a reasoning model that spends its
+    # options.num_predict on thinking answers with message.content empty and
+    # done_reason "length". Saying "check the model name" there would repeat the
+    # misdirection this transport exists to remove.
+    if {[regexp {"(?:done_reason|finish_reason)"\s*:\s*"length"} $body]} {
+        return "the model used its whole output budget before writing an answer (the reply was cut off): raise the token limit or pick a model that does not think first"
+    }
+    if {![regexp {"choices"\s*:} $body] && ![regexp {"message"\s*:} $body]} {
+        return "the endpoint answered HTTP $status with something that is not a chat reply: [string range $body 0 200]"
+    }
+    return "the endpoint returned no text (check the model name)"
+}
+
 # ::auto_comment::query
 #   One entry point for every caller. Returns the assistant text, or a string
 #   starting with "ERROR:" that the caller shows to the user. "none" is a
@@ -411,10 +514,30 @@ proc ::auto_comment::query {prompt {maxTokens 300}} {
         gemini   { return [::auto_comment::queryGemini $prompt] }
         deepseek { return [::auto_comment::queryDeepSeek $prompt] }
         local -
+        ollama -
         openai -
         opencode { return [::auto_comment::queryChat $prompt $maxTokens] }
     }
     return "ERROR: unknown provider: $::auto_comment::provider"
+}
+
+# ::auto_comment::post303Flag
+#   --post303 exists only since curl 7.70, and an unknown option makes curl
+#   refuse the whole command line before it sends anything: a 7.55 system curl
+#   would fail every request, redirect or not. Probe once and offer the flag
+#   only where it exists; on an older curl a 303 is followed as a GET, which is
+#   what the status means.
+proc ::auto_comment::post303Flag {} {
+    if {![info exists ::auto_comment::post303]} {
+        set ::auto_comment::post303 ""
+        if {![catch {exec curl --version} out]} {
+            if {[regexp {curl (\d+)\.(\d+)} $out -> major minor] \
+                    && [package vcompare "$major.$minor" "7.70"] >= 0} {
+                set ::auto_comment::post303 --post303
+            }
+        }
+    }
+    return $::auto_comment::post303
 }
 
 # ::auto_comment::queryChat
@@ -437,33 +560,77 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
     if {[catch {set tmpfile [::auto_comment::writeRequestFile $body chat]} err]} {
         return "ERROR: cannot write the request: $err"
     }
+    # The reply goes to its own file, so curl's stdout carries nothing but the
+    # status code. Without it a 301 from "http://host/v1" arrived as an empty
+    # body and was reported as "the endpoint returned no text (check the model
+    # name)" - the model name had nothing to do with it.
+    if {[catch {set replyfile [::auto_comment::writeRequestFile "" reply]} err]} {
+        catch {file delete -force $tmpfile}
+        return "ERROR: cannot write the request: $err"
+    }
 
-    set args [list curl -s --connect-timeout 15 --max-time 180 \
-        -H {Content-Type: application/json} -X POST --data-binary @$tmpfile]
+    # -L follows a redirect and --post30x keeps the POST body across it: a base
+    # typed without the https scheme answers 301, and without these the request
+    # arrived as a GET with no prompt.
+    #
+    # -sS is silent progress but still prints curl's own complaint, which goes to
+    # a file of its own: merging it into stdout (2>@1) mixed it into the status
+    # code, and plain -s swallowed it, which is why every transport failure used
+    # to read "network error or timeout" and nothing else.
+    set args [list curl -sS -L --post301 --post302 {*}[::auto_comment::post303Flag] \
+        --connect-timeout 15 --max-time 180 \
+        -H {Content-Type: application/json} -X POST \
+        -o $replyfile -w {%{http_code}} --data-binary @$tmpfile]
+    # A redirect must not downgrade an encrypted request: -L resends the prompt
+    # body, and curl follows https -> http by default. An http base is already in
+    # clear text, so it keeps the default and a LAN server that redirects within
+    # http still works.
+    if {[regexp -nocase {^https://} $url]} { lappend args --proto-redir =https }
     set authfile ""
     set auth [::auto_comment::chatAuth]
     if {$auth ne ""} {
         if {[catch {set authfile [::auto_comment::writeCurlConfig $auth]} err]} {
             catch {file delete -force $tmpfile}
+            catch {file delete -force $replyfile}
             return "ERROR: cannot write the request: $err"
         }
         lappend args --config $authfile
     }
     lappend args $url
+    if {[catch {set errfile [::auto_comment::writeRequestFile "" err]} err]} {
+        catch {file delete -force $tmpfile}
+        catch {file delete -force $replyfile}
+        # the auth file holds the key: a failure here must not leave it behind
+        if {$authfile ne ""} { catch {file delete -force $authfile} }
+        return "ERROR: cannot write the request: $err"
+    }
 
     set result ""
     set ok 0
-    if {![catch {exec {*}$args 2>@1} result]} { set ok 1 }
+    if {![catch {exec {*}$args 2> $errfile} result]} { set ok 1 }
     catch { file delete -force $tmpfile }
     if {$authfile ne ""} { catch {file delete -force $authfile} }
+
+    set raw [::auto_comment::readAndDelete $replyfile]
+    set reason [string trim [::auto_comment::readAndDelete $errfile]]
+    # stdout is the status code and nothing else; a failed transfer reports 000
+    # there and explains itself in $reason.
+    set status ""
+    regexp {^([0-9]{3})} [string trim $result] -> status
+
     if {!$ok} {
-        return "ERROR: request failed (network error or timeout): [string range [string trim $result] 0 300]"
+        # A redirect loop is an exit code, not an empty body: name it as the
+        # redirect it is before falling back to curl's own words.
+        set failure [::auto_comment::replyFailure $status $raw [expr {$auth ne ""}]]
+        if {$failure ne ""} { return $failure }
+        if {$reason eq ""} { set reason "curl exited without a message" }
+        return "ERROR: request failed: $reason"
     }
-    set err [::auto_comment::replyError $result]
-    if {$err ne ""} { return "ERROR: $err" }
-    set text [::auto_comment::finishReply $result]
+    set failure [::auto_comment::replyFailure $status $raw [expr {$auth ne ""}]]
+    if {$failure ne ""} { return $failure }
+    set text [::auto_comment::finishReply $raw]
     if {$text eq ""} {
-        return "ERROR: the endpoint returned no text (check the model name)"
+        return "ERROR: [::auto_comment::emptyReplyError $status $raw]"
     }
     return $text
 }
@@ -484,6 +651,11 @@ proc ::auto_comment::finishReply {raw} {
 #
 proc ::auto_comment::modelChoices {provider} {
     switch -- $provider {
+        ollama {
+            # what the hosted service serves to a chat-completions client; "Load
+            # Models" replaces this with the live list
+            return {deepseek-v4.1-flash glm-5.3-flash kimi-k2.6 minimax-m3 gpt-oss:120b}
+        }
         deepseek { return {deepseek-v4-pro deepseek-flash} }
         gemini {
             return {gemini-3.6-flash gemini-3.5-flash-lite gemini-2.5-flash gemini-2.5-flash-lite}
@@ -513,6 +685,7 @@ proc ::auto_comment::syncModelCombo {combo} {
     # Gemini's model beside "LLM Provider: none".
     switch -- $::auto_comment::provider {
         local    { set var ::auto_comment::localModel }
+        ollama   { set var ::auto_comment::ollamaModel }
         openai   { set var ::auto_comment::openaiModel }
         opencode { set var ::auto_comment::opencodeModel }
         gemini   { set var ::auto_comment::model }
@@ -542,12 +715,12 @@ proc ::auto_comment::openSettings {combo} {
 proc ::auto_comment::syncProviderSections {w} {
     if {![winfo exists $w.content]} { return }
     set want $::auto_comment::provider
-    if {$want ni {none local openai opencode gemini deepseek}} { set want none }
+    if {$want ni {none local ollama openai opencode gemini deepseek}} { set want none }
     # The "no model yet" note lives in a frame called "note", not "none"; without
     # this the default provider matched no section and the dialog opened with no
     # body at all - which is the one state a fresh install is in.
     set show [expr {$want eq "none" ? "note" : $want}]
-    foreach name {note local openai opencode gemini deepseek} {
+    foreach name {note local ollama openai opencode gemini deepseek} {
         set frame $w.content.$name
         if {![winfo exists $frame]} { continue }
         if {$name eq $show} {
@@ -647,6 +820,29 @@ proc ::auto_comment::configureApiKey {} {
     ttk::label $w.content.local.hint -justify left -wraplength 420 -text \
         "Works with Ollama, LM Studio and any server that answers /api/chat. No key and no GPU required: a small model is enough."
     pack $w.content.local.hint -anchor w
+
+    # --- Ollama Cloud ---
+    # Its own section, not a preset of the OpenAI-compatible one: the base URL is
+    # the thing users get wrong (the native API lives under /api, the
+    # OpenAI-compatible one under /v1), so it is not a field at all here.
+    ttk::labelframe $w.content.ollama -text "Ollama Cloud" -padding 10
+    ttk::label $w.content.ollama.keylbl -text "API key:"
+    pack $w.content.ollama.keylbl -anchor w
+    ttk::entry $w.content.ollama.key -width 50 -textvariable ::auto_comment::ollamaKey -show "*"
+    pack $w.content.ollama.key -fill x -pady {0 5}
+    ttk::label $w.content.ollama.modellbl -text "Model:"
+    pack $w.content.ollama.modellbl -anchor w
+    ttk::combobox $w.content.ollama.model -width 30 -textvariable ::auto_comment::ollamaModel \
+        -values [::auto_comment::modelChoices ollama]
+    pack $w.content.ollama.model -anchor w -pady {0 5}
+    ttk::button $w.content.ollama.load -text "Load Models" \
+        -command [list ::auto_comment::loadModels $w.content.ollama.model ollama]
+    pack $w.content.ollama.load -anchor w -pady {0 5}
+    ttk::button $w.content.ollama.open -text "Get an Ollama Key" -command [list openURL $::auto_comment::ollamaKeyUrl]
+    pack $w.content.ollama.open -anchor w -pady {0 5}
+    ttk::label $w.content.ollama.hint -justify left -wraplength 420 -text \
+        "Ollama's hosted models, including the ones too large to run locally. Requests go to https://ollama.com/api/chat; the key comes from your Ollama account."
+    pack $w.content.ollama.hint -anchor w
 
     # --- OpenAI-compatible ---
     ttk::labelframe $w.content.openai -text "Cloud / OpenAI-compatible" -padding 10
@@ -1164,8 +1360,15 @@ proc ::auto_comment::escapeJson {str} {
 #   Queries the Gemini API for the current list of available models.
 #   Returns a list of model names (without the "models/" prefix), or {} on failure.
 #
+# ::auto_comment::geminiModelsUrl
+#   The model-list request, page size included: the warning shows this URL, and
+#   the base alone would name a request that was never made.
+proc ::auto_comment::geminiModelsUrl {} {
+    return "$::auto_comment::geminiApiBase?pageSize=200"
+}
+
 proc ::auto_comment::fetchGeminiModels {} {
-    set url "$::auto_comment::geminiApiBase?pageSize=200"
+    set url [::auto_comment::geminiModelsUrl]
     set result ""
     if {[catch {exec curl -s --max-time 15 \
             -H "x-goog-api-key: $::auto_comment::apiKey" \
@@ -1234,14 +1437,29 @@ proc ::auto_comment::modelListTargets {base {modelsUrl ""}} {
                  "$base/api/tags"              {"name"\s*:\s*"([^"]+)"}]
 }
 
+# ::auto_comment::targetUrls
+#   The URLs modelListTargets would ask, as a plain list. loadModels reports
+#   these on failure, and taking them from the same function means the reported
+#   list cannot drift from the attempted one.
+proc ::auto_comment::targetUrls {base} {
+    set urls {}
+    foreach {target re} [::auto_comment::modelListTargets $base] { lappend urls $target }
+    return $urls
+}
+
 # ::auto_comment::fetchUrlModels
 #   Ask an endpoint what models it has. /v1/models first (OpenAI-compatible),
 #   then Ollama's /api/tags for a server that only speaks the native API. Model
 #   lists include embedding models, so the caller must let the user choose.
+#   A redirect is followed: a base typed as "http://host/v1" answers on its
+#   https form, and the model list is how the user finds that out.
 proc ::auto_comment::fetchUrlModels {base key {modelsUrl ""}} {
     set ids {}
     foreach {target re} [::auto_comment::modelListTargets $base $modelsUrl] {
-        set cmd [list curl -s --max-time 10 -H {Accept: application/json}]
+        set cmd [list curl -s -L --max-time 10 -H {Accept: application/json}]
+        # A keyed request must not be redirected down to cleartext; the key is
+        # only attached to https or loopback targets above.
+        if {[regexp -nocase {^https://} $target]} { lappend cmd --proto-redir =https }
         set authfile ""
         if {$key ne ""} {
             # the key only rides an https (or loopback) connection, and never
@@ -1290,28 +1508,127 @@ proc ::auto_comment::chatCompletionsOnly {ids} {
     return $out
 }
 
+# ::auto_comment::parseOllamaTags
+#   Model ids out of an /api/tags response, keeping only the ones that can
+#   answer a chat request. Every entry carries a capabilities list, and a model
+#   without "completion" (clef:27b is decision/vision only) would only produce a
+#   failed request - /v1/models listed it anyway, with nothing to filter on.
+#
+#   The array is split into entries by the key every entry starts with, and the
+#   name and the capabilities are read from each entry on its own. One regexp
+#   spanning from a name to its capabilities does not work here: Tcl's regexp
+#   prefers the longest overall match, so the first name was paired with the
+#   last capabilities and every model in between was lost.
+proc ::auto_comment::parseOllamaTags {raw} {
+    set starts {}
+    set pos 0
+    # Split at the name key rather than at the object's opening brace: the
+    # document's whitespace and its key order are not significant, and relying
+    # on "name" being the first property sent a valid response to the all-names
+    # fallback, where the capabilities filter does not run.
+    while {[regexp -indices -start $pos {"name"\s*:\s*"} $raw m]} {
+        lappend starts [lindex $m 0]
+        set pos [expr {[lindex $m 1] + 1}]
+    }
+    set chat {}
+    set recognised 0
+    set n 0
+    foreach start $starts {
+        incr n
+        if {$n < [llength $starts]} {
+            set end [expr {[lindex $starts $n] - 1}]
+        } else {
+            set end [string length $raw]
+        }
+        set entry [string range $raw $start $end]
+        if {![regexp {"name"\s*:\s*"([^"]+)"} $entry -> name]} { continue }
+        incr recognised
+        # an entry with no capabilities (an older server) is kept: the list is
+        # the only way to find a model, and a wrong entry fails loudly
+        if {[regexp {"capabilities"\s*:\s*\[([^\]]*)\]} $entry -> caps] \
+                && [string first "completion" $caps] < 0} {
+            continue
+        }
+        lappend chat $name
+    }
+    if {$recognised == 0} {
+        # No entry could be read at all (a shape this parser does not split, for
+        # example JSON with a space after the colon): keep every name rather
+        # than showing an empty list. A model that was read and then filtered
+        # out must not come back here - the filter exists so it is not offered.
+        foreach {_ name} [regexp -all -inline {"name"\s*:\s*"([^"]+)"} $raw] {
+            lappend chat $name
+        }
+    }
+    return [lsort -dictionary [lsort -unique $chat]]
+}
+
+# ::auto_comment::fetchOllamaModels
+#   The hosted model list from ollama.com's /api/tags. It answers without a key,
+#   so the list is usable before one is entered, and the key rides the https
+#   connection when there is one.
+proc ::auto_comment::fetchOllamaModels {} {
+    # The base is https by construction, and the list needs no key to be read;
+    # the key is attached only when one is stored. --proto-redir keeps a
+    # redirect from downgrading that keyed request to cleartext.
+    set cmd [list curl -s -L --proto-redir =https --max-time 15 \
+        -H {Accept: application/json}]
+    set authfile ""
+    if {$::auto_comment::ollamaKey ne ""} {
+        if {![catch {set authfile [::auto_comment::writeCurlConfig \
+                "Authorization: Bearer $::auto_comment::ollamaKey"]} err]} {
+            lappend cmd --config $authfile
+        } else {
+            ::auto_comment::logDebug "Auto Comment: cannot write the auth file: $err"
+        }
+    }
+    lappend cmd "$::auto_comment::ollamaBase/tags"
+    set raw ""
+    set failed [catch {exec {*}$cmd 2>@1} raw]
+    if {$authfile ne ""} { catch {file delete -force $authfile} }
+    if {$failed} { return {} }
+    return [::auto_comment::parseOllamaTags $raw]
+}
+
 proc ::auto_comment::loadModels {combo provider} {
+    # The URLs the list was asked for, so a failure can show them: a base the
+    # user typed wrong ("https://ollama.com/api") is invisible in the dialog, and
+    # the model list is the first place the mistake shows up. A generic base has
+    # two targets (see modelListTargets), and both are reported: a local server
+    # that only speaks the native API failed on the /v1 one too.
+    set targets {}
     switch -- $provider {
         deepseek {
             set label "DeepSeek"
+            set targets [list "$::auto_comment::deepseekApiBase/models"]
             set models [::auto_comment::fetchDeepSeekModels]
         }
         local {
             set label "the local server"
+            set targets [::auto_comment::targetUrls $::auto_comment::localUrl]
             set models [::auto_comment::fetchUrlModels $::auto_comment::localUrl ""]
         }
         openai {
             set label "the endpoint"
+            set targets [::auto_comment::targetUrls $::auto_comment::openaiUrl]
             set models [::auto_comment::fetchUrlModels $::auto_comment::openaiUrl $::auto_comment::openaiKey]
+        }
+        ollama {
+            set label "Ollama Cloud"
+            set targets [list "$::auto_comment::ollamaBase/tags"]
+            # /api/tags is the documented list, and it answers without a key
+            set models [::auto_comment::fetchOllamaModels]
         }
         opencode {
             set label "OpenCode Console"
+            set targets [list $::auto_comment::opencodeModelsUrl]
             set models [::auto_comment::chatCompletionsOnly \
                 [::auto_comment::fetchUrlModels "" $::auto_comment::opencodeKey \
                     $::auto_comment::opencodeModelsUrl]]
         }
         default {
             set label "Gemini"
+            set targets [list [::auto_comment::geminiModelsUrl]]
             set models [::auto_comment::fetchGeminiModels]
         }
     }
@@ -1326,9 +1643,31 @@ proc ::auto_comment::loadModels {combo provider} {
             }
         }
     } else {
+        # The box belongs to the dialog the button is in, not to the main
+        # window. Parented to ".", a modal box activates the main window, and
+        # the Game Comment dialog is transient to it, so on Windows the settings
+        # dialog the user was typing in dropped behind the dialog it was opened
+        # from - "Load Models" looked like it threw the settings away and went
+        # back to the previous dialog, with the correction still unsaved.
+        if {[winfo exists $combo]} {
+            set owner [winfo toplevel $combo]
+        } else {
+            set owner .
+        }
+        set message "Could not retrieve a model list from $label.\n\n"
+        if {[llength $targets] > 0} {
+            append message "Tried:\n"
+            foreach t $targets { append message "  $t\n" }
+            append message "\n"
+        }
+        append message "Check the endpoint, the API key and the internet connection."
         tk_messageBox -icon warning -type ok -title "Auto Comment" \
-            -message "Could not retrieve a model list from $label.\n\nCheck the endpoint, the API key and the internet connection." \
-            -parent .
+            -message $message \
+            -parent $owner
+        # Whatever the window manager did with the z-order while the box was
+        # up, the user's next click belongs in this dialog.
+        raise $owner
+        focus -force $owner
     }
 }
 

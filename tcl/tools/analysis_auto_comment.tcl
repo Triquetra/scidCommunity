@@ -398,17 +398,29 @@ proc ::analysis_auto_comment::run_batch {{engineId ""}} {
             if {$isEnd} {
                 set nagTrim [string trim $nagSymbol]
                 set isNagInvolved [expr {$nagTrim ne "" && $nagTrim ne "0"}]
-                
+
+                # The summary instructions describe a score-history table and the
+                # accuracy figures on the score chart. A game that was never
+                # annotated or analysed has neither, and a prompt that asks for
+                # them gets a summary of an imagined table - which is what an
+                # unannotated game used to produce.
+                set haveHistory [expr {[string first "ENGINE SCORE HISTORY" $engineStats] >= 0}]
+
                 set prefix "===== GAME SUMMARY INSTRUCTIONS =====\n"
                 append prefix "This is the LAST POSITION of the game. You MUST provide a holistic 'GAME SUMMARY' at the end of your response.\n"
-                append prefix "1. NARRATIVE FLOW: Analyze the full ENGINE SCORE HISTORY table provided. Describe the real trend (e.g., 'White built a steady lead' versus 'Black collapsed at move 15...').\n"
-                append prefix "2. PERSPECTIVE AND SCALE: Scores are from White's perspective. Negative scores mean BLACK is winning. Scores beyond +/- 10.00 are decisive; scores beyond +/- 50.00 are mate. NEVER call a large negative score (like -80.00) equality.\n"
-                append prefix "3. THE TURNING POINT: Identify the specific MOVE LABEL (e.g., 15. or 15...) from the table where the evaluation shifted significantly. Explain WHY based on that move.\n"
-                append prefix "4. DO NOT HALLUCINATE: Use the EXACT scores from the table for the labels. Each move has two entries: '15.' for White's turn and '15...' for Black's turn.\n"
-                append prefix "5. CHART ACCURACY: Mention the accuracy percentages, noting they match the labels on the Engine Score Chart.\n"
-                
+                if {$haveHistory} {
+                    append prefix "1. NARRATIVE FLOW: Analyze the full ENGINE SCORE HISTORY table provided. Describe the real trend (e.g., 'White built a steady lead' versus 'Black collapsed at move 15...').\n"
+                    append prefix "2. PERSPECTIVE AND SCALE: Scores are from White's perspective. Negative scores mean BLACK is winning. Scores beyond +/- 10.00 are decisive; scores beyond +/- 50.00 are mate. NEVER call a large negative score (like -80.00) equality.\n"
+                    append prefix "3. THE TURNING POINT: Identify the specific MOVE LABEL (e.g., 15. or 15...) from the table where the evaluation shifted significantly. Explain WHY based on that move.\n"
+                    append prefix "4. DO NOT HALLUCINATE: Use the EXACT scores from the table for the labels. Each move has two entries: '15.' for White's turn and '15...' for Black's turn.\n"
+                    append prefix "5. CHART ACCURACY: Mention the accuracy percentages, noting they match the labels on the Engine Score Chart.\n"
+                } else {
+                    append prefix "1. NO SCORE TABLE: this game has no engine score history, so do NOT mention a score table, move labels, chart labels or accuracy percentages. Summarise the play from the game information and engine analysis provided below.\n"
+                    append prefix "2. DO NOT HALLUCINATE: do not invent evaluations, accuracy figures or engine lines that are not in the analysis provided below.\n"
+                }
+
                 if {!$isNagInvolved} {
-                    append prefix "6. CONCISE START: Since $movePlayed has NO annotation, keep your VERDICT and move commentary to ONE short sentence, then focus 90% on the GAME SUMMARY.\n"
+                    append prefix "[expr {$haveHistory ? 6 : 3}]. CONCISE START: Since $movePlayed has NO annotation, keep your VERDICT and move commentary to ONE short sentence, then focus 90% on the GAME SUMMARY.\n"
                 }
                 
                 set prompt "${prefix}\n${prompt}"

@@ -40,7 +40,10 @@ proc options.store {varname {default ""}} {
 namespace eval ttk {}
 namespace eval ::auto_comment {}
 proc winfo {args} { return 0 }
-proc tk_messageBox {args} { return ok }
+set ::boxes {}
+proc tk_messageBox {args} { lappend ::boxes $args ; return ok }
+proc raise {w} { set ::raisedWindow $w }
+proc focus {args} { set ::focusedWindow $args }
 proc ttk::label {args} {}
 proc ttk::labelframe {args} {}
 proc ttk::entry {args} {}
@@ -70,7 +73,7 @@ set ::env(TMPDIR) $tmproot
 
 # ------------------------------------------------------------- provider list --
 puts "\n== provider list =="
-checkEq "all six providers" [::auto_comment::providerList] {none local openai opencode gemini deepseek}
+checkEq "all seven providers" [::auto_comment::providerList] {none local ollama openai opencode gemini deepseek}
 check "none first so a fresh install sends nothing" \
     [expr {[lindex [::auto_comment::providerList] 0] eq "none"}]
 
@@ -78,6 +81,21 @@ check "none first so a fresh install sends nothing" \
 puts "\n== readiness =="
 set ::auto_comment::provider none
 checkEq "none is a refusal, not a failure" [::auto_comment::providerReady] {no model selected}
+
+set ::auto_comment::provider ollama
+set ::auto_comment::ollamaKey ""
+set ::auto_comment::ollamaModel "deepseek-v4.1-flash:1017"
+checkEq "ollama cloud needs its key" [::auto_comment::providerReady] {no Ollama Cloud key set}
+set ::auto_comment::ollamaKey "k"
+set ::auto_comment::ollamaModel ""
+checkEq "ollama cloud needs its model" [::auto_comment::providerReady] {no Ollama model selected}
+set ::auto_comment::ollamaModel "deepseek-v4.1-flash:1017"
+checkEq "ollama cloud ready" [::auto_comment::providerReady] {}
+
+set ::auto_comment::ollamaKey ""
+checkEq "a keyless ollama request is refused before anything is sent" \
+    [::auto_comment::query "hi" 50] "ERROR: no Ollama Cloud key set"
+set ::auto_comment::ollamaKey "k"
 
 set ::auto_comment::provider opencode
 set ::auto_comment::opencodeKey ""
@@ -129,6 +147,15 @@ set ::auto_comment::provider opencode
 checkEq "opencode endpoint" [::auto_comment::chatEndpoint] \
     {https://opencode.ai/inference/openai/v1/chat/completions}
 
+set ::auto_comment::provider ollama
+checkEq "ollama cloud speaks the native chat endpoint" [::auto_comment::chatEndpoint] \
+    {https://ollama.com/api/chat}
+checkEq "and its model list is api/tags" \
+    "$::auto_comment::ollamaBase/tags" {https://ollama.com/api/tags}
+check "ollama cloud offers default models" \
+    [expr {[llength [::auto_comment::modelChoices ollama]] > 0}] \
+    [::auto_comment::modelChoices ollama]
+
 set ::auto_comment::provider local
 set ::auto_comment::localUrl "http://localhost:11434/"
 checkEq "local endpoint" [::auto_comment::chatEndpoint] {http://localhost:11434/api/chat}
@@ -158,6 +185,42 @@ checkEq "the explicit URL is used verbatim" \
     {https://opencode.ai/inference/v1/models}
 checkEq "no base and no URL means nothing to try" [::auto_comment::modelListTargets ""] {}
 
+# api/tags carries a capabilities list per model, which /v1/models does not.
+# clef:27b is decision/vision only: offering it would only produce a failed chat
+# request.
+puts "\n== ollama cloud model list =="
+set tags {{"models":[{"name":"glm-5.3","model":"glm-5.3","modified_at":"2026-10-06T06:00:00-07:00","size":0,"digest":"abc","details":{"parent_model":"","format":"","family":"","families":null,"parameter_size":"","quantization_level":""},"capabilities":["completion","thinking","tools"]},{"name":"clef:27b","model":"clef:27b","modified_at":"2026-10-06T06:00:00-07:00","size":0,"digest":"def","details":{"parent_model":"","format":"","family":"","families":null,"parameter_size":"","quantization_level":""},"capabilities":["decision","vision"]},{"name":"deepseek-v4.1-flash:1017","model":"deepseek-v4.1-flash:1017","modified_at":"2026-10-06T06:00:00-07:00","size":0,"digest":"ghi","details":{"parent_model":"","format":"","family":"","families":null,"parameter_size":"","quantization_level":""},"capabilities":["completion","thinking","tools","vision"]}]}}
+checkEq "only models that can chat are offered" \
+    [::auto_comment::parseOllamaTags $tags] {deepseek-v4.1-flash:1017 glm-5.3}
+checkEq "a server without capabilities keeps every model" \
+    [::auto_comment::parseOllamaTags {{"models":[{"name":"qwen3:8b","model":"qwen3:8b"}]}}] {qwen3:8b}
+# ... but a list where every entry *was* parsed and every one filtered out stays
+# empty: the fallback is for a shape the parser could not read, not for models
+# that cannot answer a chat request. Offering clef:27b only produces a failure.
+checkEq "a list with nothing that can chat stays empty" \
+    [::auto_comment::parseOllamaTags {{"models":[{"name":"clef:27b","capabilities":["decision","vision"]}]}}] {}
+checkEq "an unreadable shape still falls back to every name" \
+    [::auto_comment::parseOllamaTags {{"models": [{"name": "qwen3:8b"}, {"name": "glm-5.3"}]}}] \
+    {glm-5.3 qwen3:8b}
+# The same document, pretty-printed, must go through the same filter: whitespace
+# is not a different shape, and the all-names fallback does not look at
+# capabilities.
+set prettyTags {{"models": [
+  {"name": "clef:27b", "capabilities": ["decision", "vision"]},
+  {"name": "glm-5.3", "capabilities": ["completion", "thinking"]}
+]}}
+checkEq "whitespace does not bypass the capability filter" \
+    [::auto_comment::parseOllamaTags $prettyTags] {glm-5.3}
+checkEq "and a pretty list with nothing that can chat stays empty" \
+    [::auto_comment::parseOllamaTags {{"models": [
+  {"name": "clef:27b", "capabilities": ["decision", "vision"]}
+]}}] {}
+# Key order is not significant either: `model` often comes before `name`, and
+# splitting on the object's first property sent that shape to the fallback.
+checkEq "key order does not bypass the capability filter" \
+    [::auto_comment::parseOllamaTags {{"models":[{"model":"clef:27b","name":"clef:27b","capabilities":["decision","vision"]},{"model":"glm-5.3","name":"glm-5.3","capabilities":["completion"]}]}}] \
+    {glm-5.3}
+
 # -------------------------------------------------------------------- request --
 puts "\n== request bodies =="
 set ::auto_comment::provider opencode
@@ -177,6 +240,21 @@ set ::auto_comment::localModel "qwen3:8b"
 set body [::auto_comment::chatBody "x" 300]
 check "local uses num_predict" [string match {*"num_predict":300*} $body] $body
 check "local body has no max_tokens" [expr {![string match {*max_tokens*} $body]}] $body
+
+# A hosted Ollama model id carries a tag ("deepseek-v4.1-flash:1017"); the colon
+# is part of the id and must reach the request untouched. The channel speaks the
+# native API, so the budget is Ollama's num_predict, not max_tokens.
+set ::auto_comment::provider ollama
+set ::auto_comment::ollamaModel "deepseek-v4.1-flash:1017"
+set body [::auto_comment::chatBody "x" 300]
+check "ollama cloud sends its own model, tag included" \
+    [string match {*"model":"deepseek-v4.1-flash:1017"*} $body] $body
+check "ollama cloud uses the native body shape" \
+    [string match {*"num_predict":300*} $body] $body
+check "ollama cloud body has no max_tokens" \
+    [expr {![string match {*max_tokens*} $body]}] $body
+check "ollama cloud sends a bearer header" \
+    [string match {*Bearer*} [::auto_comment::chatAuth]]
 
 set ::auto_comment::provider opencode
 checkEq "providerModel follows the provider" [::auto_comment::providerModel] "glm-5.3-flash"
@@ -219,6 +297,14 @@ checkEq "ollama reply" [::auto_comment::replyText $ollamaReply] {Castle early.}
 set reasoner {{"choices":[{"message":{"role":"assistant","reasoning_content":"thinking about the pawn structure","content":"The knight goes to f3."}}]}}
 checkEq "reasoning is not the answer" [::auto_comment::replyText $reasoner] {The knight goes to f3.}
 
+# The hosted service answers in the native shape, with thinking in its own
+# field: the answer is what gets written, never the reasoning.
+set cloudReply {{"model":"deepseek-v4.1-flash:1017","created_at":"2026-10-06T06:00:00Z","message":{"role":"assistant","content":"The knight goes to f3.","thinking":"the pawn structure suggests"},"done":true,"done_reason":"stop","eval_count":42}}
+checkEq "a native cloud reply keeps the answer, not the thinking" \
+    [::auto_comment::replyText $cloudReply] {The knight goes to f3.}
+checkEq "a native cloud error body is read" \
+    [::auto_comment::replyError {{"error":"Unauthorized"}}] {Unauthorized}
+
 checkEq "escapes decoded" \
     [::auto_comment::replyText {{"choices":[{"message":{"content":"line1\nline2 \"q\" and \\ slash"}}]}}] \
     "line1\nline2 \"q\" and \\ slash"
@@ -257,14 +343,25 @@ puts "\n== auth goes to curl in a file, never in its arguments =="
 
 # Replace exec so nothing leaves the machine, and record what curl would have
 # been given. A key in argv is readable by any local user via ps or /proc.
+#
+# The transport asks curl for the body in a file (-o) and the status code on
+# stdout (-w), so the stub does the same: $::fakeBody lands in the file and
+# $::fakeStatus is what the command returns.
 rename exec ::real_exec
 set ::lastArgv {}
 set ::lastCfg ""
 set ::lastCfgText ""
 set ::lastCfgMode 0
-set ::fakeReply "{}"
+set ::fakeBody "{}"
+set ::fakeStatus "200"
+set ::fakeCurlVersion "curl 8.23.0 (x86_64-pc-linux-gnu)"
+set ::fakeStderr ""
+set ::fakeExecError ""
+set ::lastOutFile ""
 proc exec {args} {
     set ::lastArgv $args
+    # post303Flag probes `curl --version`; answer with the fake version.
+    if {[lsearch -exact $args --version] >= 0} { return $::fakeCurlVersion }
     set idx [lsearch -exact $args --config]
     if {$idx >= 0} {
         set ::lastCfg [lindex $args [expr {$idx + 1}]]
@@ -276,14 +373,34 @@ proc exec {args} {
             set ::lastCfgMode [expr {$st(mode) & 0o777}]
         }]} {}
     }
-    return $::fakeReply
+    set eidx [lsearch -exact $args 2>]
+    if {$eidx >= 0} {
+        set fh [open [lindex $args [expr {$eidx + 1}]] w]
+        puts -nonewline $fh $::fakeStderr
+        close $fh
+    }
+    set oidx [lsearch -exact $args -o]
+    if {$oidx >= 0} {
+        set ::lastOutFile [lindex $args [expr {$oidx + 1}]]
+        set fh [open $::lastOutFile w]
+        puts -nonewline $fh $::fakeBody
+        close $fh
+        # a non-zero curl exit is what Tcl turns into an error; the stub can
+        # reproduce one, including the message Tcl appends to stdout
+        if {$::fakeExecError ne ""} { error $::fakeExecError }
+        return $::fakeStatus
+    }
+    # without -o curl writes the body to stdout, which is how the model-list
+    # fetch reads it
+    return $::fakeBody
 }
 
 set ::auto_comment::provider openai
 set ::auto_comment::openaiUrl "https://api.example.com"
 set ::auto_comment::openaiKey "sk-secret-value"
 set ::auto_comment::openaiModel "m"
-set ::fakeReply {{"choices":[{"message":{"content":"Fine."}}]}}
+set ::fakeBody {{"choices":[{"message":{"content":"Fine."}}]}}
+set ::fakeStatus "200"
 set ::lastArgv {}
 set ::lastCfg ""
 set ::reply [::auto_comment::queryChat "hi" 50]
@@ -320,7 +437,7 @@ check "deepseek key is not in argv" \
     [expr {[string first "ds-secret-value" [join $::lastArgv " "]] < 0}] $::lastArgv
 
 # loading a model list sends the key too
-set ::fakeReply {{"object":"list","data":[{"id":"model-a"},{"id":"model-b"}]}}
+set ::fakeBody {{"object":"list","data":[{"id":"model-a"},{"id":"model-b"}]}}
 set ::lastArgv {}
 set models [::auto_comment::fetchUrlModels "https://api.example.com" "sk-secret-value"]
 checkEq "the model list came back" $models {model-a model-b}
@@ -328,6 +445,194 @@ check "the model-list key is not in argv" \
     [expr {[string first "sk-secret-value" [join $::lastArgv " "]] < 0}] $::lastArgv
 check "the model-list auth file is deleted" \
     [expr {![file exists $::lastCfg]}] $::lastCfg
+
+# the hosted channel asks api/tags, and its key stays out of argv like every other
+set ::fakeBody $tags
+set ::lastArgv {}
+set ::auto_comment::ollamaKey "ollama-secret-value"
+set models [::auto_comment::fetchOllamaModels]
+checkEq "the hosted list is the chat-capable subset" $models {deepseek-v4.1-flash:1017 glm-5.3}
+check "it asks api/tags" \
+    [string match {*ollama.com/api/tags*} [join $::lastArgv { }]] $::lastArgv
+check "the hosted key is not in argv" \
+    [expr {[string first "ollama-secret-value" [join $::lastArgv { }]] < 0}] $::lastArgv
+set ::auto_comment::ollamaKey ""
+
+# ------------------------------------------- a failure says what happened ----
+puts "\n== a failed request says what happened =="
+
+# A base typed without the scheme answers 301 with no body at all. That used to
+# be reported as "the endpoint returned no text (check the model name)", which
+# sent the user looking at the model name for a URL mistake.
+checkEq "a redirect is named as a redirect" \
+    [::auto_comment::emptyReplyError 301 ""] \
+    "the endpoint redirected (HTTP 301) instead of answering: use the URL it points at, usually the https form"
+checkEq "an empty body names the status" \
+    [::auto_comment::emptyReplyError 200 ""] \
+    "the endpoint answered HTTP 200 with an empty body"
+checkEq "a body that is not a chat reply is quoted" \
+    [::auto_comment::emptyReplyError 200 "<html>nope</html>"] \
+    "the endpoint answered HTTP 200 with something that is not a chat reply: <html>nope</html>"
+checkEq "an empty message still blames the model" \
+    [::auto_comment::emptyReplyError 200 {{"choices":[{"message":{"content":""}}]}}] \
+    "the endpoint returned no text (check the model name)"
+# A reasoning model that spends its budget thinking answers with empty content:
+# that is a budget problem, not a wrong model name.
+checkEq "a truncated native reply is a budget problem" \
+    [::auto_comment::emptyReplyError 200 {{"message":{"role":"assistant","content":"","thinking":"long reasoning"},"done":true,"done_reason":"length"}}] \
+    "the model used its whole output budget before writing an answer (the reply was cut off): raise the token limit or pick a model that does not think first"
+checkEq "the openai shape says the same" \
+    [::auto_comment::emptyReplyError 200 {{"choices":[{"message":{"content":""},"finish_reason":"length"}]}}] \
+    "the model used its whole output budget before writing an answer (the reply was cut off): raise the token limit or pick a model that does not think first"
+checkEq "no status at all is its own case" \
+    [::auto_comment::emptyReplyError "" ""] \
+    "the endpoint answered nothing (no HTTP status): check the endpoint URL"
+
+checkEq "an unauthorised reply with no key says so" \
+    [::auto_comment::replyFailure 401 {{"error":{"message":"Unauthorized"}}} 0] \
+    "ERROR: Unauthorized (no API key was sent)"
+checkEq "an unauthorised reply with a key stays plain" \
+    [::auto_comment::replyFailure 401 {{"error":{"message":"Unauthorized"}}} 1] \
+    "ERROR: Unauthorized"
+checkEq "a 404 body is quoted" \
+    [::auto_comment::replyFailure 404 "Not Found" 0] \
+    "ERROR: the endpoint answered HTTP 404: Not Found"
+checkEq "a good reply is not a failure" \
+    [::auto_comment::replyFailure 200 $openaiReply 1] {}
+
+# end to end through the transport: the status decides, not the body
+set ::auto_comment::provider openai
+set ::auto_comment::openaiUrl "https://api.example.com"
+set ::auto_comment::openaiModel "m"
+set ::fakeBody ""
+set ::fakeStatus "301"
+checkEq "the transport reports the redirect" [::auto_comment::queryChat "hi" 50] \
+    "ERROR: the endpoint redirected (HTTP 301) instead of answering: use the URL it points at, usually the https form"
+check "a redirect is followed" [expr {[lsearch -exact $::lastArgv -L] >= 0}] $::lastArgv
+check "the POST and its body survive the redirect" \
+    [expr {[lsearch -exact $::lastArgv --post301] >= 0 \
+        && [lsearch -exact $::lastArgv --post302] >= 0 \
+        && [lsearch -exact $::lastArgv --post303] >= 0}] $::lastArgv
+check "the body is written to a file, the status read from stdout" \
+    [expr {[lsearch -exact $::lastArgv -o] >= 0 && [lsearch -exact $::lastArgv -w] >= 0}] $::lastArgv
+# -L resends the prompt body, so an encrypted request must not be allowed to
+# redirect into clear text.
+check "an https request refuses a cleartext redirect" \
+    [expr {[lsearch -exact $::lastArgv --proto-redir] >= 0}] $::lastArgv
+set ::auto_comment::openaiUrl "http://127.0.0.1:8000"
+::auto_comment::queryChat "hi" 50
+check "an http base keeps the default redirect policy" \
+    [expr {[lsearch -exact $::lastArgv --proto-redir] < 0}] $::lastArgv
+# curl before 7.70 does not know --post303 and refuses the whole command line
+# for it, so the flag is offered only when the probe finds a version that has it.
+set ::fakeCurlVersion "curl 7.55.1 (Windows) libcurl/7.55.1"
+unset -nocomplain ::auto_comment::post303
+set ::lastArgv {}
+::auto_comment::queryChat "hi" 50
+check "an old curl is not offered --post303" \
+    [expr {[lsearch -exact $::lastArgv --post303] < 0}] $::lastArgv
+check "but still keeps the POST across 301 and 302" \
+    [expr {[lsearch -exact $::lastArgv --post301] >= 0 \
+        && [lsearch -exact $::lastArgv --post302] >= 0}] $::lastArgv
+set ::fakeCurlVersion "curl 8.23.0 (x86_64-pc-linux-gnu)"
+unset -nocomplain ::auto_comment::post303
+
+set ::auto_comment::openaiUrl "https://api.example.com"
+check "the reply file is deleted after the request" \
+    [expr {$::lastOutFile ne "" && ![file exists $::lastOutFile]}] $::lastOutFile
+
+set ::fakeStatus "200"
+set ::fakeBody {{"choices":[{"message":{"content":""}}]}}
+checkEq "an empty message keeps its own wording" [::auto_comment::queryChat "hi" 50] \
+    "ERROR: the endpoint returned no text (check the model name)"
+
+set ::auto_comment::openaiKey ""
+set ::fakeStatus "401"
+set ::fakeBody {{"error":{"message":"Unauthorized"}}}
+checkEq "a keyless 401 says the key was never sent" [::auto_comment::queryChat "hi" 50] \
+    "ERROR: Unauthorized (no API key was sent)"
+
+# curl's own reason is kept: -s used to swallow it, so every transport failure
+# read "network error or timeout" and nothing else.
+set ::fakeStatus "000"
+set ::fakeBody ""
+set ::fakeStderr "curl: (7) Failed to connect to 127.0.0.1 port 1: Connection refused"
+set ::fakeExecError "000child process exited abnormally"
+checkEq "a transport failure quotes curl" [::auto_comment::queryChat "hi" 50] \
+    "ERROR: request failed: curl: (7) Failed to connect to 127.0.0.1 port 1: Connection refused"
+
+# a redirect that never resolves is a redirect, not a network error
+set ::fakeStatus "301"
+set ::fakeStderr "curl: (47) Maximum (50) redirects followed"
+set ::fakeExecError "301child process exited abnormally"
+check "a redirect loop is named as a redirect" \
+    [string match {ERROR: the endpoint redirected (HTTP 301)*} [::auto_comment::queryChat "hi" 50]] \
+    [::auto_comment::queryChat "hi" 50]
+set ::fakeExecError ""
+set ::fakeStderr ""
+set ::fakeStatus "200"
+
+# ------------------------------- a failed model list keeps the dialog in front --
+puts "\n== a failed model list keeps the settings dialog in front =="
+# Load Models is the button whose warning used to be parented to ".": on Windows
+# a box parented to the main window activates it, and the Game Comment dialog is
+# transient to it, so the settings dialog the user was typing in dropped behind
+# the dialog it had been opened from.
+proc winfo {args} {
+    switch -- [lindex $args 0] {
+        toplevel { return .autoCommentConfig }
+        exists   { return 1 }
+    }
+    return 0
+}
+set ::auto_comment::provider openai
+set ::auto_comment::openaiUrl "http://ollama.com/v1"
+set ::auto_comment::openaiKey ""
+set ::auto_comment::openaiModel "deepseek-v4.1-flash:1017"
+set ::fakeBody ""
+set ::fakeStatus "301"
+set ::boxes {}
+set ::raisedWindow ""
+set ::focusedWindow ""
+::auto_comment::loadModels .autoCommentConfig.content.openai.model openai
+check "the warning was shown once" [expr {[llength $::boxes] == 1}] $::boxes
+checkEq "it is parented to the settings dialog, not the main window" \
+    [dict get [lindex $::boxes 0] -parent] .autoCommentConfig
+checkEq "the settings dialog is put back in front" $::raisedWindow .autoCommentConfig
+checkEq "and takes the focus back" [lindex $::focusedWindow 0] -force
+check "the warning names the URL it tried" \
+    [string match {*Tried:*} [dict get [lindex $::boxes 0] -message]] \
+    [dict get [lindex $::boxes 0] -message]
+# A generic base has two targets, and a local server that only speaks the native
+# API failed on both: report both, or the message hides half the attempt.
+check "both attempted URLs are named" \
+    [expr {([string first {http://ollama.com/v1/models} [dict get [lindex $::boxes 0] -message]] >= 0) \
+        && ([string first {http://ollama.com/api/tags} [dict get [lindex $::boxes 0] -message]] >= 0)}] \
+    [dict get [lindex $::boxes 0] -message]
+
+# The other channels have one target each. Their branches set a singular
+# `target`, which the message never read, so the warning named the provider but
+# not the URL - the one line that exposes a wrong base.
+foreach prov {opencode gemini} {
+    set ::auto_comment::provider $prov
+    set ::fakeBody ""
+    set ::fakeStatus "500"
+    set ::boxes {}
+    ::auto_comment::loadModels .autoCommentConfig.content.$prov.model $prov
+    set want [expr {$prov eq "opencode" \
+        ? $::auto_comment::opencodeModelsUrl \
+        : "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200"}]
+    check "$prov names the URL it tried" \
+        [expr {[string first $want [dict get [lindex $::boxes 0] -message]] >= 0}] \
+        [dict get [lindex $::boxes 0] -message]
+}
+
+# The Gemini warning used to name the API root, not the request: the list is
+# asked with a page size, and anyone reproducing the failure with the bare root
+# would get a different answer.
+check "gemini names the page size it asked for" \
+    [string match {*?pageSize=200*} [dict get [lindex $::boxes 0] -message]] \
+    [dict get [lindex $::boxes 0] -message]
 
 # ------------------------------------------------------- gateway model filter --
 puts "\n== gateway model filter =="
@@ -356,6 +661,25 @@ if {$::tcl_platform(platform) eq "windows"} {
     checkEq "owner-only permissions" [format %04o [expr {$st(mode) & 0o777}]] 0600
 }
 file delete -force $f1 $f2
+
+# A keyed model-list request must not follow a redirect down to cleartext.
+puts "\n== model-list redirects stay encrypted =="
+set savedOllamaKey $::auto_comment::ollamaKey
+set ::auto_comment::ollamaKey "secret-key"
+set ::fakeBody {{"models":[{"name":"glm-5.3","capabilities":["completion"]}]}}
+set ::fakeStatus "200"
+set ::lastArgv {}
+catch {::auto_comment::fetchOllamaModels}
+check "the Ollama model list refuses an https downgrade" \
+    [expr {[lsearch -exact $::lastArgv --proto-redir] >= 0 \
+        && [lindex $::lastArgv [expr {[lsearch -exact $::lastArgv --proto-redir] + 1}]] eq "=https"}] \
+    $::lastArgv
+set ::auto_comment::ollamaKey $savedOllamaKey
+set ::lastArgv {}
+catch {::auto_comment::fetchUrlModels "https://api.deepseek.com" "secret-key"}
+check "the generic model list refuses it too" \
+    [expr {[lsearch -exact $::lastArgv --proto-redir] >= 0}] $::lastArgv
+
 
 # ------------------------------------------------------------------- cleanup --
 file delete -force $tmproot

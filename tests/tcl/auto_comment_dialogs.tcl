@@ -45,7 +45,12 @@ proc options.write {} {
     return $::saveResult
 }
 proc openURL {url} { set ::openedUrl $url }
-proc tk_messageBox {args} { lappend ::messages [dict get $args -message] ; return ok }
+set ::boxes {}
+proc tk_messageBox {args} {
+    lappend ::messages [dict get $args -message]
+    lappend ::boxes $args
+    return ok
+}
 set ::language E
 set ::translatePieces 0
 
@@ -55,7 +60,7 @@ source [file join $root tcl tools analysis_auto_comment.tcl]
 
 proc visibleSections {w} {
     set out {}
-    foreach n {note local openai opencode gemini deepseek} {
+    foreach n {note local ollama openai opencode gemini deepseek} {
         set f $w.content.$n
         if {[winfo exists $f] && [winfo ismapped $f]} { lappend out $n }
     }
@@ -69,7 +74,7 @@ update
 set w .autoCommentConfig
 check "dialog is built" [winfo exists $w]
 
-foreach p {none local openai opencode gemini deepseek} {
+foreach p {none local ollama openai opencode gemini deepseek} {
     set ::auto_comment::provider $p
     if {[catch {::auto_comment::syncProviderSections $w} err]} {
         check "$p switches without a Tk error" 0 $err
@@ -98,6 +103,42 @@ check "opencode section has a model field" [expr {[winfo exists $w.content.openc
 check "opencode section offers models" \
     [expr {[llength [$w.content.opencode.model cget -values]] > 0}] \
     [$w.content.opencode.model cget -values]
+
+# Ollama Cloud is a named channel, so the base URL is not something the user
+# types: the section has a key and a model, and no endpoint field at all.
+set ::auto_comment::provider ollama
+::auto_comment::syncProviderSections $w
+update
+checkEq "ollama cloud shows its section" [visibleSections $w] {ollama}
+check "ollama cloud has a key field" [expr {[winfo exists $w.content.ollama.key]}]
+check "ollama cloud has no endpoint field to get wrong" \
+    [expr {![winfo exists $w.content.ollama.url]}]
+check "ollama cloud offers models" \
+    [expr {[llength [$w.content.ollama.model cget -values]] > 0}] \
+    [$w.content.ollama.model cget -values]
+
+# ------------------------------------------------- a failed Load Models ------
+# The warning used to be parented to the main window. On Windows that activates
+# it, and the Game Comment dialog is transient to it, so the settings dialog the
+# user was typing in dropped behind the dialog it was opened from: "Load Models"
+# looked like it threw the settings away. The box belongs to the dialog now.
+puts "\n== a failed Load Models keeps the settings dialog in front =="
+# The Ollama section asks ::auto_comment::fetchOllamaModels, not the generic
+# fetcher: stubbing only the latter left this test talking to ollama.com, which
+# has a live model list and therefore no warning to check. On a runner with
+# network the assertion failed; the harness must decide the answer itself.
+rename ::auto_comment::fetchUrlModels ::real_fetchUrlModels
+proc ::auto_comment::fetchUrlModels {args} { return {} }
+rename ::auto_comment::fetchOllamaModels ::real_fetchOllamaModels
+proc ::auto_comment::fetchOllamaModels {} { return {} }
+set ::boxes {}
+set ::messages {}
+::auto_comment::loadModels $w.content.ollama.model ollama
+update
+check "the settings dialog is still open" [winfo exists $w]
+check "the warning was shown" [expr {[llength $::boxes] == 1}] $::boxes
+checkEq "and it belongs to the settings dialog" \
+    [dict get [lindex $::boxes 0] -parent] $w
 
 # ------------------------------------------------------- staying on the screen --
 # The switch resizes the dialog in place, so the position it already has is the
@@ -219,7 +260,7 @@ if {[catch {::analysis_auto_comment::batch_generate ""} err]} {
     set bw .analysisAutoCommentDlg
     check "batch dialog is built" [expr {[winfo exists $bw]}]
     check "it offers the same provider list" \
-        [expr {[llength [$bw.content.provider cget -values]] == 6}] \
+        [expr {[llength [$bw.content.provider cget -values]] == 7}] \
         [$bw.content.provider cget -values]
 
     set ::auto_comment::provider opencode
