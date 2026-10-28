@@ -12,10 +12,14 @@
 #     that leaves the book has the reference position it needs);
 #   * which of the engine's lines become variations in the game, and how far
 #     behind the best line a variation may be before it is noise (var_lines,
-#     var_cp).
+#     var_cp);
+#   * the snapshot of the main line the pass searches from, and the positions it
+#     asks about (the board itself never moves while the engine runs);
+#   * where the board was, so that a write can leave it there exactly, variation
+#     path included.
 #
-# Nothing here searches and nothing here writes: the caller supplies the
-# results and does the sc_* work.
+# Nothing here searches: the caller supplies the results and does the sc_* work.
+# Nothing here writes either, beyond one move's comment and variations.
 
 namespace eval ::review {
     variable DEFAULTS {
@@ -158,6 +162,155 @@ proc ::review::plan {plies bookEnd} {
     return $out
 }
 
+# The positions (not moves) the engine pass searches: the reference position
+# for each planned move - the position before it - plus the position after the
+# last move, so that move can still be judged when its played move is not among
+# the engine's lines. Ascending, so the pass walks the game forwards in the
+# order a human reads it; `{}` when there is nothing to search, and never a
+# negative position.
+proc ::review::searchPlies {plies bookEnd} {
+    set moves [plan $plies $bookEnd]
+    if {![llength $moves]} { return {} }
+    set out {}
+    foreach m $moves { lappend out [expr {$m - 1}] }
+    lappend out $plies
+    return [lsort -unique -integer $out]
+}
+
+# The main line as `sc_game UCI_mainLine` returns it, indexed the way the rest
+# of the pass needs it.
+#
+# Element 0 is the setup every position string starts from; every later element
+# is one ply. A null move is not a token: it is emitted as a fresh
+# "position fen ... moves" header IN PLACE OF that ply's move, so the indexes do
+# not shift - the element at a null-move ply is simply not a move. Hence:
+#
+#   plies      the number of moves (null moves included)
+#   moves      ply -> the UCI move played there, "" for a null move
+#   positions  ply -> the "position ... moves" string of the position AFTER
+#              that ply, restarted at every mid-list header
+#
+# `positions` is what spares the pass the board's own navigation while the
+# engine runs: the strings are read once, before anything is written.
+proc ::review::mainLineMap {ml} {
+    set moves [dict create]
+    set positions [dict create]
+    if {[llength $ml] < 1} {
+        return [list plies 0 moves $moves positions $positions]
+    }
+    set plies 0
+    set acc [lindex $ml 0]
+    dict set positions 0 $acc
+    for {set ply 1} {$ply < [llength $ml]} {incr ply} {
+        set token [lindex $ml $ply]
+        if {[string match "position *" $token]} {
+            # A null move: the header stands in for the move, and becomes the
+            # base every position after it is built from.
+            set acc $token
+            dict set moves $ply ""
+        } else {
+            set acc "$acc $token"
+            dict set moves $ply $token
+        }
+        dict set positions $ply $acc
+        set plies $ply
+    }
+    return [list plies $plies moves $moves positions $positions]
+}
+
+# The move the game played at `ply`: the UCI token, or "" when there is none -
+# a null move, a ply past the end of the line, or a ply the map does not have.
+# It never returns a `position ...` header: that is a setup string, not a move,
+# and a caller that treated it as one would look for a variation that cannot
+# exist.
+proc ::review::playedMove {map ply} {
+    if {![string is integer -strict $ply]} { return "" }
+    if {[catch { set moves [dict get $map moves] }]} { return "" }
+    if {![dict exists $moves $ply]} { return "" }
+    set token [dict get $moves $ply]
+    if {$token eq "" || [string match "position *" $token]} { return "" }
+    return $token
+}
+
+# Where the board is, in a form that can be put back exactly.
+#
+# `sc_move ply N` walks the MAIN line (`MoveToPly` is `MoveToStart` then N
+# `MoveForward`s), so it always lands outside any variation, and `sc_pos
+# location` is a ply counter: inside a variation it keeps counting but cannot
+# say which line the board is in. What identifies a position is the ply counter
+# plus the variation numbers walked to reach it, each with the number of moves
+# played inside that variation.
+#
+#   {loc <absolute ply> base <main-line ply> path {{<var> <moves inside>} ...}}
+#
+# The path is outermost first, which is the order a restore has to enter.
+proc ::review::cursorSave {} {
+    set loc 0
+    set base 0
+    set path {}
+    if {[catch {
+        set loc [sc_pos location]
+        set inner $loc
+        # Exit one level at a time. `sc_var exit` returns to the position the
+        # variation branched from, so the ply counter difference across the two
+        # is how many moves were played inside that variation.
+        while {[sc_var level] > 0} {
+            set number [sc_var number]
+            sc_var exit
+            set outer [sc_pos location]
+            lappend path [list $number [expr {$inner - $outer}]]
+            set inner $outer
+        }
+        set base $inner
+    }]} {
+        # A cursor that cannot be read cannot be described; the ply counter
+        # alone is still an honest answer, and it is on the main line.
+        set base $loc
+        set path {}
+    }
+    return [list loc $loc base $base path [lreverse $path]]
+}
+
+# Put the board back where `cursorSave` found it. Returns 1 when it landed
+# exactly, or 0 when it could not and left the board on the main line at the
+# saved base ply.
+#
+# `sc_var enter n` moves into the variation AND plays its first move, so the
+# moves still to walk are `moves inside - 1`; 0 means the board was at the
+# variation's own start, before its first move.
+#
+# A restore never raises and never lands inside the wrong variation. The
+# realistic failure is a sibling renumbered by an insertion at the same branch
+# point (`::review::writeMove` does exactly that), so the path it entered is
+# checked against the recorded ply counter and level, and a mismatch retreats to
+# the base ply rather than guessing.
+proc ::review::cursorRestore {state} {
+    set exact 0
+    if {[catch {
+        set base [dict get $state base]
+        sc_move ply $base
+        foreach step [dict get $state path] {
+            lassign $step number moves
+            sc_var enter $number
+            if {$moves == 0} {
+                sc_move back
+            } else {
+                sc_move forward [expr {$moves - 1}]
+            }
+        }
+        if {[sc_pos location] == [dict get $state loc]
+                && [sc_var level] == [llength [dict get $state path]]} {
+            set exact 1
+        } else {
+            catch { sc_move ply $base }
+        }
+    }]} {
+        set exact 0
+        catch { sc_move ply [dict get $state base] }
+    }
+    return $exact
+}
+
 # When the Move Comment button may write.
 #
 # The current analysis may be shallower than a review, and a comment written
@@ -236,24 +389,26 @@ proc ::review::writeMove {ply label eval_cp lines} {
     # No `return` inside the catch body: Tcl turns it into TCL_RETURN, the catch
     # reports a failure and the handler would undo a write that succeeded.
     set out ""
-    # Whether the cursor is back where it was found. The refusal path and the
-    # write path both put it back; only an unexpected error leaves the game
-    # somewhere unknown, and the start of the line is then the one position that
-    # is always valid.
-    set restored 0
+    # Whether the cursor is back where it was found, exactly. The refusal path
+    # and the write path both restore it; only an unexpected error, or a restore
+    # that could not find the line again, leaves the start of the line as the one
+    # position that is always valid.
+    set exact 0
     if {[catch {
-        set where [sc_pos location]
+        set cursor [cursorSave]
         sc_move ply $ply
         if {[sc_pos location] != $ply} {
             set out "ply $ply is not in this game"
-            sc_move ply $where
-            set restored 1
+            set exact [cursorRestore $cursor]
         } else {
             # Which line is the game's own move, so it is not inserted as a
-            # variation of itself. "" when the move cannot be read: selectLines
-            # then keeps the best line rather than dropping it on a guess.
+            # variation of itself. "" when the move cannot be read - a null move
+            # has no token in the map at all: selectLines then keeps the best
+            # line rather than dropping it on a guess.
             set played ""
-            catch { set played [lindex [sc_game UCI_mainLine] $ply] }
+            catch {
+                set played [playedMove [mainLineMap [sc_game UCI_mainLine]] $ply]
+            }
             set want [commentText $label $eval_cp]
             sc_pos setComment [mergeComment \
                 [stripReviewTokens [sc_pos getComment]] $want]
@@ -280,13 +435,15 @@ proc ::review::writeMove {ply label eval_cp lines} {
                     lappend existing $first
                 }
             }
-            sc_move ply $where
-            set restored 1
+            set exact [cursorRestore $cursor]
         }
     } err]} {
         set out $err
     }
-    if {!$restored} { catch { sc_move ply 0 } }
+    # A restore that fell back to the base ply did not fail the write: the
+    # comment has landed and the reason is still "". What is left is to leave the
+    # board somewhere known, and the start of the line always is.
+    if {!$exact} { catch { sc_move ply 0 } }
     return $out
 }
 

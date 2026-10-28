@@ -71,6 +71,68 @@ checkEq "the whole game when there is no book" [::review::plan 3 0] {1 2 3}
 checkEq "with book skipping off the pass starts at move 1" [::review::startPly 7] 0
 checkEq "and covers the whole game" [::review::plan 3 7] {1 2 3}
 
+puts "the pass's helpers are there"
+
+# Asserted by absence on the pre-fix tree: every section below needs one of
+# these, so naming them first makes the RED side report each missing anchor
+# instead of stopping at the first call.
+foreach helper {searchPlies mainLineMap playedMove cursorSave cursorRestore} {
+    check "::review::$helper exists" \
+        [expr {[llength [info commands ::review::$helper]] > 0}]
+}
+
+puts "the positions the pass searches"
+
+::review::reset
+checkEq "no book: the position before every move, and the last one" \
+    [::review::searchPlies 3 0] {0 1 2 3}
+checkEq "book ends at 7: the pass starts one position earlier" \
+    [::review::searchPlies 10 7] {6 7 8 9 10}
+checkEq "one move: the start and the position after it" \
+    [::review::searchPlies 1 0] {0 1}
+checkEq "an empty plan has no positions" [::review::searchPlies 0 0] {}
+checkEq "a book that covers the game has no positions" [::review::searchPlies 3 5] {}
+check "never a negative position" \
+    [expr {[lindex [::review::searchPlies 3 0] 0] >= 0}]
+::review::setValue skip_book 0
+checkEq "with book skipping off, the whole game" [::review::searchPlies 3 7] {0 1 2 3}
+::review::reset
+
+puts "the main line as the pass reads it"
+
+set map [::review::mainLineMap [list {position startpos moves} e2e4 e7e5]]
+checkEq "plies counts the moves" [dict get $map plies] 2
+checkEq "the move played at each ply" [dict get $map moves] {1 e2e4 2 e7e5}
+checkEq "the position after each ply" [dict get $map positions] [list \
+    0 "position startpos moves" \
+    1 "position startpos moves e2e4" \
+    2 "position startpos moves e2e4 e7e5"]
+checkEq "the move played at ply 1" [::review::playedMove $map 1] e2e4
+checkEq "the move played at ply 2" [::review::playedMove $map 2] e7e5
+checkEq "a ply past the end has no move" [::review::playedMove $map 3] {}
+checkEq "the setup is not a ply" [::review::playedMove $map 0] {}
+checkEq "a setup-only game has no plies" \
+    [dict get [::review::mainLineMap [list {position startpos moves}]] plies] 0
+checkEq "an empty line maps to nothing" \
+    [::review::playedMove [::review::mainLineMap {}] 1] {}
+
+# A null move has no token: it is emitted as a fresh setup header in place of
+# that ply's move, so it must read as "no move played" and must not shift the
+# plies after it. The indexes do not move - the element is just not a move.
+set fen "position fen 8/8/8/8/8/8/8/K6k w - - 0 1 moves"
+set map [::review::mainLineMap [list {position startpos moves} e2e4 $fen e7e5]]
+checkEq "a null move still counts as a ply" [dict get $map plies] 3
+checkEq "the null ply has no move token" [dict get $map moves] [list 1 e2e4 2 "" 3 e7e5]
+checkEq "a null move has no played move" [::review::playedMove $map 2] {}
+check "a header is never reported as a move" \
+    [expr {[string match "position *" [::review::playedMove $map 2]] == 0}]
+set positions [dict get $map positions]
+checkEq "the position before the null move" [dict get $positions 1] \
+    "position startpos moves e2e4"
+checkEq "the header is the position after it" [dict get $positions 2] $fen
+checkEq "and the moves after it build on that header" [dict get $positions 3] \
+    "$fen e7e5"
+
 puts "which lines become variations"
 
 ::review::reset
@@ -165,6 +227,16 @@ puts "writing one move"
 # The sc_* layer is stubbed: the point of these checks is which calls are made,
 # not what scid does with them.
 set ::calls {}
+# The stub board is a ply counter plus the variation path walked to reach it:
+# `level` is how many sc_var exits reach the main line, `nums` the variation
+# number at each level, `exits` the ply counter of the position each level
+# branched from. That is exactly what ::review::cursorSave has to read, and it
+# is enough to put the board back.
+set ::fakeLevel 0
+set ::fakeNums {}
+set ::fakeExit {}
+# How many variations exist at a given "<ply>,<level>" branch point.
+set ::fakeVarCounts [dict create]
 proc sc_pos {args} {
     switch -- [lindex $args 0] {
         location { return $::fakeLoc }
@@ -174,22 +246,90 @@ proc sc_pos {args} {
     return ""
 }
 proc sc_move {args} {
-    # A game of ::fakeLen moves: asking for a ply beyond it leaves the game
-    # where it was, which is what the real command does.
-    if {[lindex $args 0] eq "ply"} {
-        if {[lindex $args 1] <= $::fakeLen} { set ::fakeLoc [lindex $args 1] }
+    set what [lindex $args 0]
+    set n [lindex $args 1]
+    # sc_move ply N is the MAIN line - MoveToStart then N MoveForward - so it
+    # leaves every variation. Asking for a ply beyond it leaves the game where it
+    # was, which is what the real command does here.
+    switch -- $what {
+        ply {
+            if {$n <= $::fakeLen} {
+                set ::fakeLoc $n
+                set ::fakeLevel 0
+                set ::fakeNums {}
+                set ::fakeExit {}
+            }
+        }
+        forward {
+            if {$n eq ""} { set n 1 }
+            incr ::fakeLoc $n
+        }
+        back { incr ::fakeLoc -1 }
     }
-    if {[lindex $args 0] eq "back"} { incr ::fakeLoc -1 }
-    lappend ::calls [list move [lindex $args 0] [lindex $args 1]]
+    lappend ::calls [list move $what $n]
     return ""
+}
+proc fakeVarCount {} {
+    set key "$::fakeLoc,$::fakeLevel"
+    if {[dict exists $::fakeVarCounts $key]} {
+        return [dict get $::fakeVarCounts $key]
+    }
+    return 0
 }
 proc sc_var {args} {
     lappend ::calls [list var [lindex $args 0]]
     switch -- [lindex $args 0] {
-        count { return 0 }
+        count { return [fakeVarCount] }
         list  { lappend ::listAt $::fakeLoc ; return $::fakeVars }
+        level { return $::fakeLevel }
+        number {
+            if {!$::fakeLevel} { return 0 }
+            return [lindex $::fakeNums end]
+        }
+        enter {
+            set n [lindex $args 1]
+            if {$n >= [fakeVarCount]} { error "No such variation!" }
+            # The number matters: entering two different siblings has to be
+            # distinguishable in the recorded calls.
+            lset ::calls end [list var enter $n]
+            # MoveIntoVariation and then MoveForward: entering plays the
+            # variation's first move, so the ply counter advances by one.
+            lappend ::fakeExit $::fakeLoc
+            lappend ::fakeNums $n
+            incr ::fakeLevel
+            incr ::fakeLoc
+            return ""
+        }
+        exit {
+            if {$::fakeLevel == 0} { error "No such variation!" }
+            set ::fakeLoc [lindex $::fakeExit end]
+            set ::fakeExit [lrange $::fakeExit 0 end-1]
+            set ::fakeNums [lrange $::fakeNums 0 end-1]
+            incr ::fakeLevel -1
+            return ""
+        }
+        create {
+            # A new variation is opened to be filled; the caller exits it.
+            lappend ::fakeExit $::fakeLoc
+            lappend ::fakeNums 0
+            incr ::fakeLevel
+            return ""
+        }
     }
     return ""
+}
+# Put the board at `loc`, inside the variations named by `nums`, whose branch
+# positions are `exits` (outermost first), in a game of `len` main-line moves.
+proc fakeCursor {loc nums exits {len 40}} {
+    set ::fakeLen $len
+    set ::fakeLoc $loc
+    set ::fakeNums $nums
+    set ::fakeExit $exits
+    set ::fakeLevel [llength $nums]
+    set ::fakeVarCounts [dict create]
+    set ::fakeVars {}
+    set ::listAt {}
+    set ::calls {}
 }
 set ::fakeVars {}
 set ::listAt {}
@@ -201,10 +341,81 @@ proc sc_game {args} {
 }
 namespace eval ::uci { proc sc_move_add {moves} { lappend ::calls [list add $moves] ; return 0 } }
 
+puts "where the board was"
+
+# On the main line there is nothing to walk back into: the ply counter is the
+# whole position.
+fakeCursor 5 {} {}
+set state [::review::cursorSave]
+checkEq "a main-line cursor is a ply" [dict get $state loc] 5
+checkEq "whose base is itself" [dict get $state base] 5
+checkEq "with an empty path" [dict get $state path] {}
+checkEq "and it restores exactly" [::review::cursorRestore $state] 1
+checkEq "leaving the board where it was" [list $::fakeLoc $::fakeLevel] {5 0}
+
+# One variation, branched from ply 3, cursor two moves inside it.
+fakeCursor 5 {0} {3}
+set state [::review::cursorSave]
+checkEq "one variation: the captured ply" [dict get $state loc] 5
+checkEq "one variation: the main-line base" [dict get $state base] 3
+checkEq "one variation: which one and how far in" [dict get $state path] {{0 2}}
+checkEq "saving leaves the board on the base ply" [list $::fakeLoc $::fakeLevel] {3 0}
+set ::fakeVarCounts [dict create "3,0" 2]
+set ::calls {}
+checkEq "it restores exactly" [::review::cursorRestore $state] 1
+checkEq "on the captured ply, in the variation" \
+    [list $::fakeLoc $::fakeLevel [lindex $::fakeNums end]] {5 1 0}
+checkEq "by walking the path" $::calls \
+    {{move ply 3} {var enter 0} {move forward 1} {var level}}
+
+# A variation inside a variation: the path is outermost first, because that is
+# the order a restore has to enter.
+fakeCursor 8 {1 0} {3 6}
+set state [::review::cursorSave]
+checkEq "nested: the outer path is innermost-first when captured, outer first when read" \
+    [dict get $state path] {{1 3} {0 2}}
+checkEq "nested: the base is the main-line ply" [dict get $state base] 3
+set ::fakeVarCounts [dict create "3,0" 2 "6,1" 1]
+set ::calls {}
+checkEq "nested: it restores exactly" [::review::cursorRestore $state] 1
+checkEq "nested: on the captured ply, both levels deep" \
+    [list $::fakeLoc $::fakeLevel $::fakeNums] {8 2 {1 0}}
+checkEq "nested: entering each level and walking the rest of it" $::calls \
+    {{move ply 3} {var enter 1} {move forward 2} {var enter 0} {move forward 1} {var level}}
+
+# A cursor at the variation's own start, before its first move. Entering plays
+# that move, so the restore has to step back out of it.
+fakeCursor 3 {0} {3}
+set state [::review::cursorSave]
+checkEq "a cursor before the variation's first move" [dict get $state path] {{0 0}}
+set ::fakeVarCounts [dict create "3,0" 1]
+set ::calls {}
+checkEq "it restores exactly too" [::review::cursorRestore $state] 1
+checkEq "one move back out of the auto-played first move" $::calls \
+    {{move ply 3} {var enter 0} {move back {}} {var level}}
+checkEq "and is still inside the variation" [list $::fakeLoc $::fakeLevel] {3 1}
+
+# An insertion at the same branch point renumbers the siblings - writeMove does
+# exactly that - so the captured number may no longer name the same line. The
+# restore must say so and retreat to the base ply, never land inside the wrong
+# variation.
+fakeCursor 5 {1} {3}
+set state [::review::cursorSave]
+checkEq "the second variation, two moves in" [dict get $state path] {{1 2}}
+set ::fakeVarCounts [dict create "3,0" 1]
+checkEq "a variation that is gone falls back" [::review::cursorRestore $state] 0
+checkEq "and the board is on the base ply, not in some other line" \
+    [list $::fakeLoc $::fakeLevel] {3 0}
+
+# A state that cannot be read is a fallback, not an exception.
+checkEq "an unreadable cursor does not raise" \
+    [::review::cursorRestore [list loc now base 2 path {}]] 0
+
+puts "writing one move"
+
 ::review::reset
 ::review::setValue var_lines 1
-set ::fakeLen 10
-set ::fakeLoc 5
+fakeCursor 5 {} {} 10
 set ::fakeComment "Existing note."
 # The engine's best line is the move played at ply 4, so it is not a variation.
 set ::fakeMainLine [list {position startpos moves} m1 m2 m3 pvBest m5]
@@ -232,8 +443,7 @@ set ::calls {}
 ::review::writeMove 4 good 20 {{20 pvBest} {10 pvAlt}}
 check "no variation with var_lines 0" [expr {[lsearch -exact $::calls {var create}] < 0}]
 
-set ::fakeLen 3
-set ::fakeLoc 2
+fakeCursor 2 {} {} 3
 checkEq "a ply that is not in the game is refused" \
     [::review::writeMove 4 good 20 {}] {ply 4 is not in this game}
 check "and the game is left where it was, not moved to the start" \
@@ -243,13 +453,9 @@ check "and the game is left where it was, not moved to the start" \
 # review already wrote is not duplicated.
 ::review::reset
 ::review::setValue var_lines 2
-set ::fakeLen 10
-set ::fakeLoc 5
+fakeCursor 5 {} {} 10
 set ::fakeComment "Existing note."
 set ::fakeMainLine [list {position startpos moves} m1 m2 m3 pvBest m5]
-set ::fakeVars {}
-set ::listAt {}
-set ::calls {}
 ::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt} {-250 pvThird}}
 check "both alternates are inserted" \
     [expr {[lsearch -exact $::calls {add pvAlt}] >= 0 \
@@ -265,6 +471,52 @@ check "an existing variation is not duplicated" \
     [expr {[lsearch -exact $::calls {add pvAlt}] < 0}] $::calls
 check "a new one is still added" \
     [expr {[lsearch -exact $::calls {add pvThird}] >= 0}] $::calls
+
+puts "writing a move inside a variation"
+
+# The board was inside a variation when the review started: the write has to
+# leave it there, path and all.
+::review::reset
+::review::setValue var_lines 1
+set ::fakeComment ""
+set ::fakeMainLine [list {position startpos moves} m1 m2 m3 pvBest m5]
+fakeCursor 5 {0} {3} 10
+set ::fakeVarCounts [dict create "3,0" 2]
+checkEq "a write inside a variation succeeds" \
+    [::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}] {}
+checkEq "and the variation path is restored" [list $::fakeLoc $::fakeLevel] {5 1}
+checkEq "in the same variation" [lindex $::fakeNums end] 0
+
+# The refusal path restores it too - and a refusal is not a reason to move the
+# board to the start of the line.
+fakeCursor 5 {0} {3} 3
+set ::fakeVarCounts [dict create "3,0" 2]
+checkEq "a refused ply still says so" \
+    [::review::writeMove 4 good 20 {}] {ply 4 is not in this game}
+checkEq "and the variation path is restored" [list $::fakeLoc $::fakeLevel] {5 1}
+check "the board did not end up at the start of the line" \
+    [expr {$::fakeLoc != 0}]
+
+# If the line cannot be found again the board goes to the start of the line, and
+# that is still a write, not a refusal: the comment landed.
+fakeCursor 5 {1} {3} 10
+set ::fakeVarCounts [dict create "3,0" 1]
+checkEq "a write whose line is gone still counts as written" \
+    [::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}] {}
+checkEq "and the board falls back to the start of the line" \
+    [list $::fakeLoc $::fakeLevel] {0 0}
+
+# A null move at the ply being written: there is no move to drop from the
+# engine's lines, so the best line is inserted rather than discarded on a guess.
+::review::reset
+::review::setValue var_lines 1
+set ::fakeComment ""
+set ::fakeMainLine [list {position startpos moves} m1 m2 m3 \
+    "position fen 8/8/8/8/8/8/8/K6k w - - 0 1 moves" m6]
+fakeCursor 5 {} {} 10
+::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}
+check "with a null move nothing is dropped" \
+    [expr {[lsearch -exact $::calls {add pvBest}] >= 0}] $::calls
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]
