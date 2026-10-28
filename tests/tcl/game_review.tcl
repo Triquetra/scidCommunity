@@ -77,6 +77,8 @@ checkEq "the played move's own line is not a variation" \
 # game is missing - not line 2 of the engine's list.
 checkEq "the best line is a variation when the game played something else" \
     [::review::selectLines $lines Qxd8] {pvA pvB}
+checkEq "the played move is dropped wherever it ranks" \
+    [::review::selectLines {{20 pvA} {10 pvB} {5 pvC}} pvB] {pvA pvC}
 # Nothing is dropped when the caller cannot say which move was played.
 checkEq "an unknown played move keeps the best line" \
     [::review::selectLines [list {20 pvA} {10 pvB}]] {pvA pvB}
@@ -129,6 +131,18 @@ checkEq "and is not repeated" \
 checkEq "an empty comment is just the new text" \
     [::review::mergeComment {} {[Good]}] {[Good]}
 
+# A second review has to replace what the first one wrote: one verdict, and the
+# [%eval] the graph reads first must be the new one.
+checkEq "a previous verdict and score are removed" \
+    [::review::stripReviewTokens {A fine move. [good] [%eval +0.20]}] {A fine move.}
+checkEq "other tokens and the prose survive" \
+    [::review::stripReviewTokens {[%clk 0:03:00] A fine move.}] {[%clk 0:03:00] A fine move.}
+checkEq "a re-review leaves one verdict and one score" \
+    [::review::mergeComment \
+        [::review::stripReviewTokens {A fine move. [good] [%eval +0.20]}] \
+        [::review::commentText blunder -120]] \
+    {A fine move. [blunder] [%eval -1.20]}
+
 puts "writing one move"
 
 # The sc_* layer is stubbed: the point of these checks is which calls are made,
@@ -154,9 +168,14 @@ proc sc_move {args} {
 }
 proc sc_var {args} {
     lappend ::calls [list var [lindex $args 0]]
-    if {[lindex $args 0] eq "count"} { return 0 }
+    switch -- [lindex $args 0] {
+        count { return 0 }
+        list  { lappend ::listAt $::fakeLoc ; return $::fakeVars }
+    }
     return ""
 }
+set ::fakeVars {}
+set ::listAt {}
 # UCI_mainLine is the setup followed by the moves, as the real command returns
 # it, so element $ply is the move played at ply $ply.
 proc sc_game {args} {
@@ -202,6 +221,33 @@ checkEq "a ply that is not in the game is refused" \
     [::review::writeMove 4 good 20 {}] {ply 4 is not in this game}
 check "and the game is left where it was, not moved to the start" \
     [expr {$::fakeLoc == 2}]
+
+# var_lines > 1 inserts every distinct alternative, and a variation a previous
+# review already wrote is not duplicated.
+::review::reset
+::review::setValue var_lines 2
+set ::fakeLen 10
+set ::fakeLoc 5
+set ::fakeComment "Existing note."
+set ::fakeMainLine [list {position startpos moves} m1 m2 m3 pvBest m5]
+set ::fakeVars {}
+set ::listAt {}
+set ::calls {}
+::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt} {-250 pvThird}}
+check "both alternates are inserted" \
+    [expr {[lsearch -exact $::calls {add pvAlt}] >= 0 \
+        && [lsearch -exact $::calls {add pvThird}] >= 0}] $::calls
+check "two variations are created" \
+    [expr {[llength [lsearch -all $::calls {var create}]] == 2}] $::calls
+checkEq "the variation list is read before the move, not after it" \
+    [lindex $::listAt 0] 3
+set ::fakeVars {pvAlt}
+set ::calls {}
+::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt} {-250 pvThird}}
+check "an existing variation is not duplicated" \
+    [expr {[lsearch -exact $::calls {add pvAlt}] < 0}] $::calls
+check "a new one is still added" \
+    [expr {[lsearch -exact $::calls {add pvThird}] >= 0}] $::calls
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

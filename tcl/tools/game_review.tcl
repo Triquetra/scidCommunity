@@ -176,6 +176,21 @@ proc ::review::commentText {label eval_cp} {
     return $txt
 }
 
+# Drop what a previous review wrote: our label, in the language it was written
+# in, and the [%eval] beside it. A re-review has to replace them rather than
+# stack a second verdict, and ::seed::score reads the first [%eval] it finds, so
+# leaving the old one makes the graph show the score that was just replaced.
+# Other tokens ([%clk], [%emt]) and the user's prose are kept.
+proc ::review::stripReviewTokens {comment} {
+    set out [regsub -all {\[%eval\s+[^\]]*\]} $comment ""]
+    foreach label {best excellent good inaccuracy mistake blunder brilliant great miss forced book} {
+        set out [string map [list "\[[::movelabels::text $label]\]" ""] $out]
+    }
+    # Collapse the gap the tokens left, but not the line breaks of a comment
+    # the user wrote themselves.
+    return [string trim [regsub -all {[ \t]{2,}} $out " "]]
+}
+
 # Add `new` to a comment unless it is already there, so a second run does not
 # stack labels.
 proc ::review::mergeComment {existing new} {
@@ -216,20 +231,29 @@ proc ::review::writeMove {ply label eval_cp lines} {
             set played ""
             catch { set played [lindex [sc_game UCI_mainLine] $ply] }
             set want [commentText $label $eval_cp]
-            sc_pos setComment [mergeComment [sc_pos getComment] $want]
+            sc_pos setComment [mergeComment \
+                [stripReviewTokens [sc_pos getComment]] $want]
+            # The variations already at the position BEFORE the move, by their
+            # first move: a second review must not duplicate one, and var_lines
+            # > 1 must still add each distinct line. sc_var list reads the first
+            # move of every variation and leaves the cursor where it found it.
+            sc_move ply $ply
+            sc_move back
+            set existing {}
+            catch { set existing [sc_var list UCI] }
             foreach pv [selectLines $lines $played] {
+                set first [lindex $pv 0]
+                if {$first eq "" || [lsearch -exact $existing $first] >= 0} { continue }
                 sc_move ply $ply
                 sc_move back
-                # Never stack a second variation on a position that already has one.
-                set have 0
-                catch { set have [sc_var count] }
-                if {$have} { continue }
                 if {[catch {
                     sc_var create
                     foreach uci $pv { ::uci::sc_move_add $uci }
                     sc_var exit
                 }]} {
                     catch { sc_var exit }
+                } else {
+                    lappend existing $first
                 }
             }
             sc_move ply $where
@@ -261,11 +285,16 @@ proc ::review::selectLines {lines {played ""}} {
     set want [dict get $s var_lines]
     set limit [dict get $s var_cp]
     if {$want < 1 || ![llength $lines]} { return {} }
-    # Drop the played move's own line, and only that one: the best line is an
-    # alternative worth inserting whenever the game played something else.
-    set candidates $lines
-    if {$played ne "" && [string equal [lindex [lindex $lines 0] 1 0] $played]} {
-        set candidates [lrange $lines 1 end]
+    # Drop the played move's own line wherever it ranks: the best line is an
+    # alternative worth inserting whenever the game played something else, and
+    # when the game move is a lower MultiPV root its line is not an alternative
+    # to itself either.
+    set candidates {}
+    foreach line $lines {
+        if {$played ne "" && [string equal [lindex [lindex $line] 1 0] $played]} {
+            continue
+        }
+        lappend candidates $line
     }
     set best [lindex [lindex $lines 0] 0]
     set out {}
