@@ -145,10 +145,14 @@ checkEq "a previous verdict and score are removed" \
     [::review::stripReviewTokens {A fine move. [good] [%eval +0.20]}] {A fine move.}
 checkEq "other tokens and the prose survive" \
     [::review::stripReviewTokens {[%clk 0:03:00] A fine move.}] {[%clk 0:03:00] A fine move.}
-checkEq "a verdict in another language is replaced by its position" \
-    [::review::stripReviewTokens {[Bon] [%eval +0.20]}] {}
-checkEq "and a token before it survives" \
-    [::review::stripReviewTokens {[%clk 0:03:00] [Good] [%eval +0.20]}] \
+# Only the ladder's own words are removed. A positional rule also deleted a
+# user's tag sitting in front of the evaluation.
+checkEq "a known verdict and its score are removed" \
+    [::review::stripReviewTokens {[good] [%eval +0.20]}] {}
+checkEq "a user tag in front of the score survives" \
+    [::review::stripReviewTokens {[Source] [%eval +0.20]}] {[Source]}
+checkEq "a timestamp before the verdict survives" \
+    [::review::stripReviewTokens {[%clk 0:03:00] [good] [%eval +0.20]}] \
     {[%clk 0:03:00]}
 checkEq "a re-review leaves one verdict and one score" \
     [::review::mergeComment \

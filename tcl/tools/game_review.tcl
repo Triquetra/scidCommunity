@@ -188,18 +188,27 @@ proc ::review::commentText {label eval_cp} {
 # stack a second verdict, and ::seed::score reads the first [%eval] it finds, so
 # leaving the old one makes the graph show the score that was just replaced.
 # Other tokens ([%clk], [%emt]) and the user's prose are kept.
-proc ::review::stripReviewTokens {comment} {
-    # The evaluation, and the verdict token immediately in front of it. Matching
-    # that pair by position is language-independent: the game may have been
-    # reviewed under another UI language, and ::movelabels::text only knows the
-    # current one. The token starts with a letter and carries no %, so [%clk]
-    # and friends are not mistaken for it.
-    set out [regsub -all {\s*\[[[:alpha:]][^\]%]*\]\s*\[%eval\s+[^\]]*\]} $comment ""]
-    set out [regsub -all {\[%eval\s+[^\]]*\]} $out ""]
-    # A verdict written without a score has no anchor: remove the current
-    # language's word for each label.
+# The words the label ladder can have written, in the current language and in
+# English (always loaded as the fallback). Only these brackets are ours: a
+# positional rule ("anything in front of an evaluation") also deletes a user's
+# [Source] tag, and a verdict written under a language this session never
+# loaded is left alone rather than guessed at.
+proc ::review::labelWords {} {
+    set words {}
     foreach label {best excellent good inaccuracy mistake blunder brilliant great miss forced book} {
-        set out [string map [list "\[[::movelabels::text $label]\]" ""] $out]
+        lappend words [::movelabels::text $label]
+        set key "MoveLabel[string totitle $label]"
+        if {[info exists ::translations(E,$key)]} {
+            lappend words $::translations(E,$key)
+        }
+    }
+    return [lsort -unique $words]
+}
+
+proc ::review::stripReviewTokens {comment} {
+    set out [regsub -all {\[%eval\s+[^\]]*\]} $comment ""]
+    foreach word [labelWords] {
+        set out [string map [list "\[$word\]" ""] $out]
     }
     # Collapse the gap the tokens left, but not the line breaks of a comment
     # the user wrote themselves.

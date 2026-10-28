@@ -110,7 +110,10 @@ proc ::enginewin::seedChart {id} {
         incr count
     }
     catch { sc_move ply $ply0 }
-    if {$count} {
+    # Accuracy means something only when the stored scores cover the game: the
+    # chart carries a missing ply forward, so a handful of evaluations would be
+    # averaged as if the line between them had been played.
+    if {$count && [::seed::covers $seeded $n]} {
         set scores [::chart::getScores $canvas]
         if {[llength $scores] > 1} {
             lassign [::accuracy::calculate $scores] wAcc bAcc
