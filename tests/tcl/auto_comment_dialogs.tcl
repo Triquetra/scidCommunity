@@ -123,8 +123,14 @@ check "ollama cloud offers models" \
 # user was typing in dropped behind the dialog it was opened from: "Load Models"
 # looked like it threw the settings away. The box belongs to the dialog now.
 puts "\n== a failed Load Models keeps the settings dialog in front =="
+# The Ollama section asks ::auto_comment::fetchOllamaModels, not the generic
+# fetcher: stubbing only the latter left this test talking to ollama.com, which
+# has a live model list and therefore no warning to check. On a runner with
+# network the assertion failed; the harness must decide the answer itself.
 rename ::auto_comment::fetchUrlModels ::real_fetchUrlModels
 proc ::auto_comment::fetchUrlModels {args} { return {} }
+rename ::auto_comment::fetchOllamaModels ::real_fetchOllamaModels
+proc ::auto_comment::fetchOllamaModels {} { return {} }
 set ::boxes {}
 set ::messages {}
 ::auto_comment::loadModels $w.content.ollama.model ollama
