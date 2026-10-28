@@ -90,14 +90,22 @@ check "provider combo is always shown" [expr {[winfo ismapped $w.content.provide
 check "the dialog has a body below the selector" \
     [expr {[llength [visibleSections $w]] == 1}]
 
-# switching through the combobox binding, not just by calling the proc
+# switching through the combobox binding, not just by calling the proc: the
+# widget carries the label, and selecting it stores the id
 set ::auto_comment::provider none
+::auto_comment::syncProviderCombo $w.content.provider
 ::auto_comment::syncProviderSections $w
 update
-set ::auto_comment::provider opencode
+checkEq "the combo shows the stored provider's label" \
+    [$w.content.provider get] [::auto_comment::providerLabel none]
+check "the labels are what the combo offers" \
+    [expr {[$w.content.provider cget -values] eq [::auto_comment::providerLabels]}] \
+    [$w.content.provider cget -values]
+$w.content.provider set [::auto_comment::providerLabel opencode]
 event generate $w.content.provider <<ComboboxSelected>>
 update
 checkEq "combobox event switches sections" [visibleSections $w] {opencode}
+checkEq "and stores the id, not the label" $::auto_comment::provider opencode
 check "opencode section has a key field" [expr {[winfo exists $w.content.opencode.key]}]
 check "opencode section has a model field" [expr {[winfo exists $w.content.opencode.model]}]
 check "opencode section offers models" \
@@ -116,6 +124,39 @@ check "ollama cloud has no endpoint field to get wrong" \
 check "ollama cloud offers models" \
     [expr {[llength [$w.content.ollama.model cget -values]] > 0}] \
     [$w.content.ollama.model cget -values]
+
+# ------------------------------------------- the two Ollama channels -----------------
+# The stored ids are "local" and "ollama", which is the same product name twice.
+# What tells a user which is the server on this machine and which is the hosted
+# service is the combo label and the section: one asks for an endpoint and no
+# key, the other asks for a key and has no endpoint to get wrong.
+puts "\n== the two Ollama channels are told apart =="
+set labels [$w.content.provider cget -values]
+checkEq "seven labels, one per provider" [llength $labels] 7
+check "the local channel is labelled local" \
+    [expr {[lsearch -exact $labels {Ollama - local server}] >= 0}] $labels
+check "the hosted channel is labelled Ollama Cloud" \
+    [expr {[lsearch -exact $labels {Ollama Cloud (hosted)}] >= 0}] $labels
+check "the two labels are different" \
+    [expr {[lsearch -exact $labels {Ollama - local server}] \
+        ne [lsearch -exact $labels {Ollama Cloud (hosted)}]}]
+
+$w.content.provider set {Ollama Cloud (hosted)}
+event generate $w.content.provider <<ComboboxSelected>>
+update
+checkEq "picking the cloud label stores ollama" $::auto_comment::provider ollama
+checkEq "and shows the Ollama Cloud section" [visibleSections $w] {ollama}
+check "the cloud section asks for a key" [expr {[winfo exists $w.content.ollama.key]}]
+check "the cloud section has no endpoint field" \
+    [expr {![winfo exists $w.content.ollama.url]}]
+
+$w.content.provider set {Ollama - local server}
+event generate $w.content.provider <<ComboboxSelected>>
+update
+checkEq "picking the local label stores local" $::auto_comment::provider local
+checkEq "and shows the local section" [visibleSections $w] {local}
+check "the local section asks for an endpoint" [expr {[winfo exists $w.content.local.url]}]
+check "the local section asks for no key" [expr {![winfo exists $w.content.local.key]}]
 
 # ------------------------------------------------- a failed Load Models ------
 # The warning used to be parented to the main window. On Windows that activates
@@ -195,6 +236,7 @@ update
 checkEq "it starts on the stored provider" [visibleSections $w] {gemini}
 
 set ::auto_comment::provider openai
+$w.content.provider set [::auto_comment::providerLabel openai]
 event generate $w.content.provider <<ComboboxSelected>>
 update
 checkEq "picking openai shows the openai section" [visibleSections $w] {openai}
@@ -262,6 +304,21 @@ if {[catch {::analysis_auto_comment::batch_generate ""} err]} {
     check "it offers the same provider list" \
         [expr {[llength [$bw.content.provider cget -values]] == 7}] \
         [$bw.content.provider cget -values]
+    checkEq "and the same labels" \
+        [$bw.content.provider cget -values] [::auto_comment::providerLabels]
+
+    # The channel chosen here is the one the batch run uses, and the label is
+    # the only thing that says which Ollama it is.
+    $bw.content.provider set {Ollama - local server}
+    event generate $bw.content.provider <<ComboboxSelected>>
+    checkEq "a label picked here stores the id" $::auto_comment::provider local
+    checkEq "and the model field follows that channel" \
+        [$bw.content.model cget -textvariable] ::auto_comment::localModel
+    $bw.content.provider set {Ollama Cloud (hosted)}
+    event generate $bw.content.provider <<ComboboxSelected>>
+    checkEq "the cloud label stores the hosted id" $::auto_comment::provider ollama
+    checkEq "and the model field follows it" \
+        [$bw.content.model cget -textvariable] ::auto_comment::ollamaModel
 
     set ::auto_comment::provider opencode
     ::auto_comment::syncModelCombo $bw.content.model
@@ -281,6 +338,25 @@ if {[catch {::analysis_auto_comment::batch_generate ""} err]} {
     ::auto_comment::syncModelCombo $bw.content.model
     checkEq "gemini still shows its own model" \
         [$bw.content.model get] $::auto_comment::model
+
+    # Settings can change the provider. Closing it must bring this dialog's
+    # label and model field back in step, or Start runs a channel the dialog
+    # does not name.
+    set ::auto_comment::provider local
+    ::auto_comment::syncProviderCombo $bw.content.provider
+    ::auto_comment::syncModelCombo $bw.content.model
+    ::auto_comment::openSettings $bw.content.model $bw.content.provider
+    if {[winfo exists .autoCommentConfig]} {
+        set ::auto_comment::provider ollama
+        destroy .autoCommentConfig
+        update
+        checkEq "closing Settings refreshes the provider label" \
+            [$bw.content.provider get] {Ollama Cloud (hosted)}
+        checkEq "and the model field follows the new channel" \
+            [$bw.content.model cget -textvariable] ::auto_comment::ollamaModel
+    } else {
+        check "the settings dialog opened from the batch dialog" 0
+    }
     destroy $bw
 }
 
