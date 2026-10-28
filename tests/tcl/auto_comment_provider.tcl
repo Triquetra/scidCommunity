@@ -77,6 +77,35 @@ checkEq "all seven providers" [::auto_comment::providerList] {none local ollama 
 check "none first so a fresh install sends nothing" \
     [expr {[lindex [::auto_comment::providerList] 0] eq "none"}]
 
+# ---------------------------------------------------------- provider labels --
+# The combo shows a label and the options file keeps the id. The two Ollama
+# channels are why: "local" and "ollama" are the same product name to anyone
+# who does not already know that one is a server on this machine and the other
+# is a hosted service.
+puts "\n== provider labels =="
+checkEq "one label per provider" [llength [::auto_comment::providerLabels]] 7
+checkEq "the labels are all different" \
+    [llength [lsort -unique [::auto_comment::providerLabels]]] 7
+checkEq "the local channel says so" [::auto_comment::providerLabel local] {Ollama - local server}
+checkEq "the hosted channel says so" [::auto_comment::providerLabel ollama] {Ollama Cloud (hosted)}
+foreach id [::auto_comment::providerList] {
+    checkEq "$id round-trips through its label" \
+        [::auto_comment::providerFromLabel [::auto_comment::providerLabel $id]] $id
+}
+checkEq "a bare product name is not a provider" [::auto_comment::providerFromLabel Ollama] {}
+checkEq "an empty label is not a provider" [::auto_comment::providerFromLabel ""] {}
+# Picking a label stores the id, and only a label we wrote is accepted.
+set ::auto_comment::provider none
+checkEq "picking the local label stores local" \
+    [::auto_comment::pickProvider {Ollama - local server}] local
+checkEq "... and the variable holds the id" $::auto_comment::provider local
+checkEq "picking the cloud label stores ollama" \
+    [::auto_comment::pickProvider {Ollama Cloud (hosted)}] ollama
+checkEq "... and the variable holds that id" $::auto_comment::provider ollama
+set ::auto_comment::provider none
+checkEq "an unknown label picks nothing" [::auto_comment::pickProvider {Some other model}] {}
+checkEq "... and leaves the provider alone" $::auto_comment::provider none
+
 # ----------------------------------------------------------------- readiness --
 puts "\n== readiness =="
 set ::auto_comment::provider none
@@ -362,6 +391,18 @@ proc exec {args} {
     set ::lastArgv $args
     # post303Flag probes `curl --version`; answer with the fake version.
     if {[lsearch -exact $args --version] >= 0} { return $::fakeCurlVersion }
+    # A per-target answer, for the runs where two targets must answer
+    # differently: a local server that serves /api/tags and one that does not
+    # are the same channel. The URL is the last http(s) word: a redirection
+    # ("2>@1") can follow it, and it is not the target.
+    set target ""
+    foreach a $args {
+        if {[regexp {^https?://} $a]} { set target $a }
+    }
+    set body $::fakeBody
+    set fail $::fakeExecError
+    if {[info exists ::fakeBodyFor($target)]} { set body $::fakeBodyFor($target) }
+    if {[info exists ::fakeFailFor($target)]} { set fail $::fakeFailFor($target) }
     set idx [lsearch -exact $args --config]
     if {$idx >= 0} {
         set ::lastCfg [lindex $args [expr {$idx + 1}]]
@@ -383,16 +424,17 @@ proc exec {args} {
     if {$oidx >= 0} {
         set ::lastOutFile [lindex $args [expr {$oidx + 1}]]
         set fh [open $::lastOutFile w]
-        puts -nonewline $fh $::fakeBody
+        puts -nonewline $fh $body
         close $fh
         # a non-zero curl exit is what Tcl turns into an error; the stub can
         # reproduce one, including the message Tcl appends to stdout
-        if {$::fakeExecError ne ""} { error $::fakeExecError }
+        if {$fail ne ""} { error $fail }
         return $::fakeStatus
     }
     # without -o curl writes the body to stdout, which is how the model-list
     # fetch reads it
-    return $::fakeBody
+    if {$fail ne ""} { error $fail }
+    return $body
 }
 
 set ::auto_comment::provider openai
@@ -457,6 +499,62 @@ check "it asks api/tags" \
 check "the hosted key is not in argv" \
     [expr {[string first "ollama-secret-value" [join $::lastArgv { }]] < 0}] $::lastArgv
 set ::auto_comment::ollamaKey ""
+
+# ------------------------------------------ the local channel's own model list --
+# The local channel speaks the same native API as the hosted one, so it asks
+# /api/tags and keeps the same chat-capable subset. /v1/models is the list that
+# would offer an embedding model the chat endpoint cannot use.
+puts "\n== local channel model list =="
+set ::auto_comment::localUrl "http://localhost:11434"
+set ::fakeBody {{"models":[{"name":"qwen3:8b","capabilities":["completion","tools"]},{"name":"nomic-embed-text:latest","capabilities":["embedding"]},{"name":"glm-5.3","capabilities":["completion"]}]}}
+set ::fakeStatus "200"
+set ::lastArgv {}
+lassign [::auto_comment::localModelList] localModels localTargets
+checkEq "the local list drops what cannot chat" $localModels {glm-5.3 qwen3:8b}
+checkEq "and only the native list was asked" $localTargets {http://localhost:11434/api/tags}
+check "the request went to the local server" \
+    [string match {*localhost:11434/api/tags*} [join $::lastArgv { }]] $::lastArgv
+check "the local list never asks ollama.com" \
+    [expr {[string first "ollama.com" [join $::lastArgv { }]] < 0}] $::lastArgv
+
+# A local Ollama whose only models cannot chat has nothing to offer. The empty
+# answer is the honest one: falling back to the unfiltered list would offer the
+# embedding model again.
+set ::fakeBody {{"models":[{"name":"nomic-embed-text:latest","capabilities":["embedding"]}]}}
+lassign [::auto_comment::localModelList] localModels localTargets
+checkEq "an Ollama with nothing that can chat stays empty" $localModels {}
+checkEq "... and no fallback list was tried" $localTargets {http://localhost:11434/api/tags}
+
+# LM Studio, vLLM and the like do not serve /api/tags at all: the generic list
+# is used instead, and the failure warning can then name both paths.
+unset -nocomplain ::fakeBodyFor ::fakeFailFor
+set ::fakeFailFor(http://localhost:11434/api/tags) \
+    "curl: (22) The requested URL returned error: 404"
+set ::fakeBodyFor(http://localhost:11434/v1/models) \
+    {{"object":"list","data":[{"id":"qwen3:8b"},{"id":"nomic-embed-text:latest"}]}}
+lassign [::auto_comment::localModelList] localModels localTargets
+checkEq "a server without api/tags falls back to /v1/models" \
+    $localModels {nomic-embed-text:latest qwen3:8b}
+checkEq "and the targets name both paths it tried" $localTargets \
+    {http://localhost:11434/v1/models http://localhost:11434/api/tags}
+unset -nocomplain ::fakeBodyFor ::fakeFailFor
+
+# The hosted channel must not read the local server's list, and the local one
+# must not read ollama.com's: the two channels are separate settings.
+set ::auto_comment::localUrl "http://127.0.0.1:11434"
+set ::fakeBody {{"models":[{"name":"glm-5.3","capabilities":["completion"]}]}}
+set ::lastArgv {}
+::auto_comment::fetchOllamaModels
+check "the hosted list asks ollama.com" \
+    [string match {*ollama.com/api/tags*} [join $::lastArgv { }]] $::lastArgv
+check "the hosted list never asks the local server" \
+    [expr {[string first "127.0.0.1" [join $::lastArgv { }]] < 0}] $::lastArgv
+set ::lastArgv {}
+::auto_comment::localModelList
+check "the local list asks the local server" \
+    [string match {*127.0.0.1:11434/api/tags*} [join $::lastArgv { }]] $::lastArgv
+check "the local list never asks ollama.com" \
+    [expr {[string first "ollama.com" [join $::lastArgv { }]] < 0}] $::lastArgv
 
 # ------------------------------------------- a failure says what happened ----
 puts "\n== a failed request says what happened =="
@@ -633,6 +731,97 @@ foreach prov {opencode gemini} {
 check "gemini names the page size it asked for" \
     [string match {*?pageSize=200*} [dict get [lindex $::boxes 0] -message]] \
     [dict get [lindex $::boxes 0] -message]
+
+# Load Models on each Ollama channel names that channel's own endpoint: the
+# local one reports the local server, the hosted one reports ollama.com, and
+# neither reports the other. A user who picked one channel and got the other's
+# URL in the warning is looking at the wrong machine.
+puts "\n== each Ollama channel reports its own endpoint =="
+set ::auto_comment::localUrl "http://localhost:11434"
+set ::fakeBody ""
+set ::fakeStatus "500"
+set ::auto_comment::provider local
+set ::boxes {}
+::auto_comment::loadModels .autoCommentConfig.content.local.model local
+set localMsg [dict get [lindex $::boxes 0] -message]
+check "the local warning names the local server" \
+    [expr {[string first {http://localhost:11434/api/tags} $localMsg] >= 0}] $localMsg
+check "the local warning never names ollama.com" \
+    [expr {[string first "ollama.com" $localMsg] < 0}] $localMsg
+set ::boxes {}
+set ::auto_comment::provider ollama
+::auto_comment::loadModels .autoCommentConfig.content.ollama.model ollama
+set cloudMsg [dict get [lindex $::boxes 0] -message]
+check "the hosted warning names ollama.com" \
+    [expr {[string first {https://ollama.com/api/tags} $cloudMsg] >= 0}] $cloudMsg
+check "the hosted warning never names the local server" \
+    [expr {[string first "localhost" $cloudMsg] < 0}] $cloudMsg
+
+# ---------------------------------------- the dialog handlers store ids, not labels --
+# The combo holds the label and ::auto_comment::provider holds the id the options
+# file keeps. The handler is the only place the two meet, and Tk itself needs a
+# display, so this stands in for the widget: same three subcommands the dialog
+# uses (configure -values, set, get).
+puts "\n== the dialog handlers store ids, not labels =="
+proc .autoCommentConfig.content.provider {sub args} {
+    switch -- $sub {
+        configure { set ::comboValues [lindex $args 1]; return }
+        set       { set ::comboValue [lindex $args 0]; return }
+        get       { return $::comboValue }
+        default   { return }
+    }
+}
+proc ::fakeModelCombo {sub args} {
+    switch -- $sub {
+        configure {
+            foreach {key value} $args {
+                if {$key eq "-textvariable"} { set ::modelVar $value }
+            }
+            return
+        }
+        default { return }
+    }
+}
+proc ::fakeProviderCombo {sub args} {
+    switch -- $sub {
+        configure { set ::comboValues [lindex $args 1]; return }
+        set       { set ::comboValue [lindex $args 0]; return }
+        get       { return $::comboValue }
+        default   { return }
+    }
+}
+set ::comboValue ""
+set ::comboValues {}
+set ::auto_comment::provider none
+::auto_comment::syncProviderCombo .autoCommentConfig.content.provider
+checkEq "the combo shows the stored provider's label" $::comboValue {No model}
+checkEq "and offers every label" $::comboValues [::auto_comment::providerLabels]
+
+.autoCommentConfig.content.provider set {Ollama Cloud (hosted)}
+::auto_comment::chooseProvider .autoCommentConfig
+checkEq "picking the cloud label stores ollama" $::auto_comment::provider ollama
+checkEq "and the combo keeps showing it" $::comboValue {Ollama Cloud (hosted)}
+.autoCommentConfig.content.provider set {Ollama - local server}
+::auto_comment::chooseProvider .autoCommentConfig
+checkEq "picking the local label stores local" $::auto_comment::provider local
+
+# A value that is not one of our labels (a stale dialog, a hand-edited file) is
+# not a pick: the provider stays put and the display is put back.
+.autoCommentConfig.content.provider set Ollama
+::auto_comment::chooseProvider .autoCommentConfig
+checkEq "an unknown label changes nothing" $::auto_comment::provider local
+checkEq "and the combo is put back in step" $::comboValue {Ollama - local server}
+
+# The Game Comment dialog's handler does the same, then rebinds the model field.
+set ::comboValue {Ollama Cloud (hosted)}
+set ::modelVar ""
+::auto_comment::chooseProviderForModel ::fakeProviderCombo ::fakeModelCombo
+checkEq "the batch dialog stores the hosted id" $::auto_comment::provider ollama
+checkEq "and its model field follows that channel" $::modelVar ::auto_comment::ollamaModel
+set ::comboValue {Ollama - local server}
+::auto_comment::chooseProviderForModel ::fakeProviderCombo ::fakeModelCombo
+checkEq "the batch dialog stores the local id" $::auto_comment::provider local
+checkEq "and its model field follows it" $::modelVar ::auto_comment::localModel
 
 # ------------------------------------------------------- gateway model filter --
 puts "\n== gateway model filter =="
