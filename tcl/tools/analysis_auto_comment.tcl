@@ -415,8 +415,8 @@ proc ::analysis_auto_comment::run_batch {{engineId ""}} {
                     append prefix "4. DO NOT HALLUCINATE: Use the EXACT scores from the table for the labels. Each move has two entries: '15.' for White's turn and '15...' for Black's turn.\n"
                     append prefix "5. CHART ACCURACY: Mention the accuracy percentages, noting they match the labels on the Engine Score Chart.\n"
                 } else {
-                    append prefix "1. NO SCORE TABLE: this game has no engine score history, so do NOT mention a score table, move labels, chart labels or accuracy percentages. Summarise the play from the moves and the analysis above.\n"
-                    append prefix "2. DO NOT HALLUCINATE: do not invent evaluations, accuracy figures or engine lines that are not in the analysis above.\n"
+                    append prefix "1. NO SCORE TABLE: this game has no engine score history, so do NOT mention a score table, move labels, chart labels or accuracy percentages. Summarise the play from the game information and engine analysis provided below.\n"
+                    append prefix "2. DO NOT HALLUCINATE: do not invent evaluations, accuracy figures or engine lines that are not in the analysis provided below.\n"
                 }
 
                 if {!$isNagInvolved} {

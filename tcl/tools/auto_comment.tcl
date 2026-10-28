@@ -489,6 +489,14 @@ proc ::auto_comment::emptyReplyError {status body} {
         }
         return "the endpoint answered HTTP $status with an empty body"
     }
+    # A reply cut off at the token limit is not a model-name problem, and the
+    # native channel can produce exactly that: a reasoning model that spends its
+    # options.num_predict on thinking answers with message.content empty and
+    # done_reason "length". Saying "check the model name" there would repeat the
+    # misdirection this transport exists to remove.
+    if {[regexp {"(?:done_reason|finish_reason)"\s*:\s*"length"} $body]} {
+        return "the model used its whole output budget before writing an answer (the reply was cut off): raise the token limit or pick a model that does not think first"
+    }
     if {![regexp {"choices"\s*:} $body] && ![regexp {"message"\s*:} $body]} {
         return "the endpoint answered HTTP $status with something that is not a chat reply: [string range $body 0 200]"
     }
@@ -554,6 +562,11 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
         --connect-timeout 15 --max-time 180 \
         -H {Content-Type: application/json} -X POST \
         -o $replyfile -w {%{http_code}} --data-binary @$tmpfile]
+    # A redirect must not downgrade an encrypted request: -L resends the prompt
+    # body, and curl follows https -> http by default. An http base is already in
+    # clear text, so it keeps the default and a LAN server that redirects within
+    # http still works.
+    if {[regexp -nocase {^https://} $url]} { lappend args --proto-redir =https }
     set authfile ""
     set auth [::auto_comment::chatAuth]
     if {$auth ne ""} {
@@ -568,6 +581,8 @@ proc ::auto_comment::queryChat {prompt {maxTokens 300}} {
     if {[catch {set errfile [::auto_comment::writeRequestFile "" err]} err]} {
         catch {file delete -force $tmpfile}
         catch {file delete -force $replyfile}
+        # the auth file holds the key: a failure here must not leave it behind
+        if {$authfile ne ""} { catch {file delete -force $authfile} }
         return "ERROR: cannot write the request: $err"
     }
 
@@ -1396,6 +1411,16 @@ proc ::auto_comment::modelListTargets {base {modelsUrl ""}} {
                  "$base/api/tags"              {"name"\s*:\s*"([^"]+)"}]
 }
 
+# ::auto_comment::targetUrls
+#   The URLs modelListTargets would ask, as a plain list. loadModels reports
+#   these on failure, and taking them from the same function means the reported
+#   list cannot drift from the attempted one.
+proc ::auto_comment::targetUrls {base} {
+    set urls {}
+    foreach {target re} [::auto_comment::modelListTargets $base] { lappend urls $target }
+    return $urls
+}
+
 # ::auto_comment::fetchUrlModels
 #   Ask an endpoint what models it has. /v1/models first (OpenAI-compatible),
 #   then Ollama's /api/tags for a server that only speaks the native API. Model
@@ -1524,29 +1549,31 @@ proc ::auto_comment::fetchOllamaModels {} {
 }
 
 proc ::auto_comment::loadModels {combo provider} {
-    # The URL the list was asked for, so a failure can show it: a base the user
-    # typed wrong ("https://ollama.com/api") is invisible in the dialog, and the
-    # model list is the first place the mistake shows up.
-    set target ""
+    # The URLs the list was asked for, so a failure can show them: a base the
+    # user typed wrong ("https://ollama.com/api") is invisible in the dialog, and
+    # the model list is the first place the mistake shows up. A generic base has
+    # two targets (see modelListTargets), and both are reported: a local server
+    # that only speaks the native API failed on the /v1 one too.
+    set targets {}
     switch -- $provider {
         deepseek {
             set label "DeepSeek"
-            set target "$::auto_comment::deepseekApiBase/models"
+            set targets [list "$::auto_comment::deepseekApiBase/models"]
             set models [::auto_comment::fetchDeepSeekModels]
         }
         local {
             set label "the local server"
-            set target [::auto_comment::modelsUrl $::auto_comment::localUrl]
+            set targets [::auto_comment::targetUrls $::auto_comment::localUrl]
             set models [::auto_comment::fetchUrlModels $::auto_comment::localUrl ""]
         }
         openai {
             set label "the endpoint"
-            set target [::auto_comment::modelsUrl $::auto_comment::openaiUrl]
+            set targets [::auto_comment::targetUrls $::auto_comment::openaiUrl]
             set models [::auto_comment::fetchUrlModels $::auto_comment::openaiUrl $::auto_comment::openaiKey]
         }
         ollama {
             set label "Ollama Cloud"
-            set target "$::auto_comment::ollamaBase/tags"
+            set targets [list "$::auto_comment::ollamaBase/tags"]
             # /api/tags is the documented list, and it answers without a key
             set models [::auto_comment::fetchOllamaModels]
         }
@@ -1586,7 +1613,11 @@ proc ::auto_comment::loadModels {combo provider} {
             set owner .
         }
         set message "Could not retrieve a model list from $label.\n\n"
-        if {$target ne ""} { append message "Tried: $target\n\n" }
+        if {[llength $targets] > 0} {
+            append message "Tried:\n"
+            foreach t $targets { append message "  $t\n" }
+            append message "\n"
+        }
         append message "Check the endpoint, the API key and the internet connection."
         tk_messageBox -icon warning -type ok -title "Auto Comment" \
             -message $message \

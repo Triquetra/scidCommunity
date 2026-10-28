@@ -447,6 +447,14 @@ checkEq "a body that is not a chat reply is quoted" \
 checkEq "an empty message still blames the model" \
     [::auto_comment::emptyReplyError 200 {{"choices":[{"message":{"content":""}}]}}] \
     "the endpoint returned no text (check the model name)"
+# A reasoning model that spends its budget thinking answers with empty content:
+# that is a budget problem, not a wrong model name.
+checkEq "a truncated native reply is a budget problem" \
+    [::auto_comment::emptyReplyError 200 {{"message":{"role":"assistant","content":"","thinking":"long reasoning"},"done":true,"done_reason":"length"}}] \
+    "the model used its whole output budget before writing an answer (the reply was cut off): raise the token limit or pick a model that does not think first"
+checkEq "the openai shape says the same" \
+    [::auto_comment::emptyReplyError 200 {{"choices":[{"message":{"content":""},"finish_reason":"length"}]}}] \
+    "the model used its whole output budget before writing an answer (the reply was cut off): raise the token limit or pick a model that does not think first"
 checkEq "no status at all is its own case" \
     [::auto_comment::emptyReplyError "" ""] \
     "the endpoint answered nothing (no HTTP status): check the endpoint URL"
@@ -478,6 +486,15 @@ check "the POST and its body survive the redirect" \
         && [lsearch -exact $::lastArgv --post303] >= 0}] $::lastArgv
 check "the body is written to a file, the status read from stdout" \
     [expr {[lsearch -exact $::lastArgv -o] >= 0 && [lsearch -exact $::lastArgv -w] >= 0}] $::lastArgv
+# -L resends the prompt body, so an encrypted request must not be allowed to
+# redirect into clear text.
+check "an https request refuses a cleartext redirect" \
+    [expr {[lsearch -exact $::lastArgv --proto-redir] >= 0}] $::lastArgv
+set ::auto_comment::openaiUrl "http://127.0.0.1:8000"
+::auto_comment::queryChat "hi" 50
+check "an http base keeps the default redirect policy" \
+    [expr {[lsearch -exact $::lastArgv --proto-redir] < 0}] $::lastArgv
+set ::auto_comment::openaiUrl "https://api.example.com"
 check "the reply file is deleted after the request" \
     [expr {$::lastOutFile ne "" && ![file exists $::lastOutFile]}] $::lastOutFile
 
@@ -541,7 +558,13 @@ checkEq "it is parented to the settings dialog, not the main window" \
 checkEq "the settings dialog is put back in front" $::raisedWindow .autoCommentConfig
 checkEq "and takes the focus back" [lindex $::focusedWindow 0] -force
 check "the warning names the URL it tried" \
-    [string match {*Tried: http://ollama.com/v1/models*} [dict get [lindex $::boxes 0] -message]] \
+    [string match {*Tried:*} [dict get [lindex $::boxes 0] -message]] \
+    [dict get [lindex $::boxes 0] -message]
+# A generic base has two targets, and a local server that only speaks the native
+# API failed on both: report both, or the message hides half the attempt.
+check "both attempted URLs are named" \
+    [expr {([string first {http://ollama.com/v1/models} [dict get [lindex $::boxes 0] -message]] >= 0) \
+        && ([string first {http://ollama.com/api/tags} [dict get [lindex $::boxes 0] -message]] >= 0)}] \
     [dict get [lindex $::boxes 0] -message]
 
 # ------------------------------------------------------- gateway model filter --
