@@ -148,10 +148,10 @@ checkEq "opencode endpoint" [::auto_comment::chatEndpoint] \
     {https://opencode.ai/inference/openai/v1/chat/completions}
 
 set ::auto_comment::provider ollama
-checkEq "ollama cloud endpoint is the hosted /v1 root" [::auto_comment::chatEndpoint] \
-    {https://ollama.com/v1/chat/completions}
-checkEq "and its model list hangs off the same root" \
-    [::auto_comment::modelsUrl $::auto_comment::ollamaBase] {https://ollama.com/v1/models}
+checkEq "ollama cloud speaks the native chat endpoint" [::auto_comment::chatEndpoint] \
+    {https://ollama.com/api/chat}
+checkEq "and its model list is api/tags" \
+    "$::auto_comment::ollamaBase/tags" {https://ollama.com/api/tags}
 check "ollama cloud offers default models" \
     [expr {[llength [::auto_comment::modelChoices ollama]] > 0}] \
     [::auto_comment::modelChoices ollama]
@@ -185,6 +185,16 @@ checkEq "the explicit URL is used verbatim" \
     {https://opencode.ai/inference/v1/models}
 checkEq "no base and no URL means nothing to try" [::auto_comment::modelListTargets ""] {}
 
+# api/tags carries a capabilities list per model, which /v1/models does not.
+# clef:27b is decision/vision only: offering it would only produce a failed chat
+# request.
+puts "\n== ollama cloud model list =="
+set tags {{"models":[{"name":"glm-5.3","model":"glm-5.3","modified_at":"2026-10-06T06:00:00-07:00","size":0,"digest":"abc","details":{"parent_model":"","format":"","family":"","families":null,"parameter_size":"","quantization_level":""},"capabilities":["completion","thinking","tools"]},{"name":"clef:27b","model":"clef:27b","modified_at":"2026-10-06T06:00:00-07:00","size":0,"digest":"def","details":{"parent_model":"","format":"","family":"","families":null,"parameter_size":"","quantization_level":""},"capabilities":["decision","vision"]},{"name":"deepseek-v4.1-flash:1017","model":"deepseek-v4.1-flash:1017","modified_at":"2026-10-06T06:00:00-07:00","size":0,"digest":"ghi","details":{"parent_model":"","format":"","family":"","families":null,"parameter_size":"","quantization_level":""},"capabilities":["completion","thinking","tools","vision"]}]}}
+checkEq "only models that can chat are offered" \
+    [::auto_comment::parseOllamaTags $tags] {deepseek-v4.1-flash:1017 glm-5.3}
+checkEq "a server without capabilities keeps every model" \
+    [::auto_comment::parseOllamaTags {{"models":[{"name":"qwen3:8b","model":"qwen3:8b"}]}}] {qwen3:8b}
+
 # -------------------------------------------------------------------- request --
 puts "\n== request bodies =="
 set ::auto_comment::provider opencode
@@ -206,14 +216,17 @@ check "local uses num_predict" [string match {*"num_predict":300*} $body] $body
 check "local body has no max_tokens" [expr {![string match {*max_tokens*} $body]}] $body
 
 # A hosted Ollama model id carries a tag ("deepseek-v4.1-flash:1017"); the colon
-# is part of the id and must reach the request untouched.
+# is part of the id and must reach the request untouched. The channel speaks the
+# native API, so the budget is Ollama's num_predict, not max_tokens.
 set ::auto_comment::provider ollama
 set ::auto_comment::ollamaModel "deepseek-v4.1-flash:1017"
 set body [::auto_comment::chatBody "x" 300]
 check "ollama cloud sends its own model, tag included" \
     [string match {*"model":"deepseek-v4.1-flash:1017"*} $body] $body
-check "ollama cloud uses the openai body shape" \
-    [string match {*"max_tokens":300*} $body] $body
+check "ollama cloud uses the native body shape" \
+    [string match {*"num_predict":300*} $body] $body
+check "ollama cloud body has no max_tokens" \
+    [expr {![string match {*max_tokens*} $body]}] $body
 check "ollama cloud sends a bearer header" \
     [string match {*Bearer*} [::auto_comment::chatAuth]]
 
@@ -257,6 +270,14 @@ checkEq "ollama reply" [::auto_comment::replyText $ollamaReply] {Castle early.}
 
 set reasoner {{"choices":[{"message":{"role":"assistant","reasoning_content":"thinking about the pawn structure","content":"The knight goes to f3."}}]}}
 checkEq "reasoning is not the answer" [::auto_comment::replyText $reasoner] {The knight goes to f3.}
+
+# The hosted service answers in the native shape, with thinking in its own
+# field: the answer is what gets written, never the reasoning.
+set cloudReply {{"model":"deepseek-v4.1-flash:1017","created_at":"2026-10-06T06:00:00Z","message":{"role":"assistant","content":"The knight goes to f3.","thinking":"the pawn structure suggests"},"done":true,"done_reason":"stop","eval_count":42}}
+checkEq "a native cloud reply keeps the answer, not the thinking" \
+    [::auto_comment::replyText $cloudReply] {The knight goes to f3.}
+checkEq "a native cloud error body is read" \
+    [::auto_comment::replyError {{"error":"Unauthorized"}}] {Unauthorized}
 
 checkEq "escapes decoded" \
     [::auto_comment::replyText {{"choices":[{"message":{"content":"line1\nline2 \"q\" and \\ slash"}}]}}] \
@@ -395,6 +416,18 @@ check "the model-list key is not in argv" \
     [expr {[string first "sk-secret-value" [join $::lastArgv " "]] < 0}] $::lastArgv
 check "the model-list auth file is deleted" \
     [expr {![file exists $::lastCfg]}] $::lastCfg
+
+# the hosted channel asks api/tags, and its key stays out of argv like every other
+set ::fakeBody $tags
+set ::lastArgv {}
+set ::auto_comment::ollamaKey "ollama-secret-value"
+set models [::auto_comment::fetchOllamaModels]
+checkEq "the hosted list is the chat-capable subset" $models {deepseek-v4.1-flash:1017 glm-5.3}
+check "it asks api/tags" \
+    [string match {*ollama.com/api/tags*} [join $::lastArgv { }]] $::lastArgv
+check "the hosted key is not in argv" \
+    [expr {[string first "ollama-secret-value" [join $::lastArgv { }]] < 0}] $::lastArgv
+set ::auto_comment::ollamaKey ""
 
 # ------------------------------------------- a failure says what happened ----
 puts "\n== a failed request says what happened =="

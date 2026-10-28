@@ -14,9 +14,10 @@ namespace eval ::auto_comment {
     #   none    no model at all - no request is ever made
     #   local   any Ollama-style server (ollama, LM Studio's Ollama endpoint)
     #   ollama  Ollama's hosted service. Its own channel, not a typed URL: the
-    #           OpenAI-compatible root is https://ollama.com/v1, and "https://
-    #           ollama.com/api" - the native API's root, which is what people
-    #           paste - answers 404 on every /v1 path
+    #           native API lives at https://ollama.com/api (chat, tags) and the
+    #           OpenAI-compatible one at https://ollama.com/v1, so "https://
+    #           ollama.com/api" typed into the generic channel answers 404 on
+    #           every /v1 path
     #   openai  any OpenAI-compatible endpoint: DeepSeek, Gemini's compatibility
     #           endpoint, vLLM, LM Studio, a gateway...
     #   opencode OpenCode Console's model gateway, which is OpenAI-compatible
@@ -40,9 +41,15 @@ namespace eval ::auto_comment {
     # Ollama Cloud settings. The base is fixed here rather than typed: the
     # hosted service is the one endpoint whose URL a user gets wrong, because
     # the native API and the OpenAI-compatible API sit under different roots.
+    #
+    # The channel speaks the native API (api/chat, api/tags). That is the whole
+    # of it: the OpenAI and Anthropic compatibility layers are documented as
+    # subsets of it, and the native one carries what this feature needs - the
+    # answer in message.content with thinking kept in its own field, and a model
+    # list that says which models can chat at all.
     options.store ::auto_comment::ollamaKey ""
     options.store ::auto_comment::ollamaModel ""
-    variable ollamaBase "https://ollama.com/v1"
+    variable ollamaBase "https://ollama.com/api"
     variable ollamaKeyUrl "https://ollama.com/settings/keys"
 
     # OpenCode Console settings. The gateway itself is a commercial service, so
@@ -282,7 +289,7 @@ proc ::auto_comment::writeCurlConfig {header {tag auth}} {
 proc ::auto_comment::chatEndpoint {} {
     switch -- $::auto_comment::provider {
         local  { return "[::auto_comment::baseUrl $::auto_comment::localUrl]/api/chat" }
-        ollama { return "[::auto_comment::baseUrl $::auto_comment::ollamaBase]/v1/chat/completions" }
+        ollama { return "$::auto_comment::ollamaBase/chat" }
         openai {
             set base [::auto_comment::baseUrl $::auto_comment::openaiUrl]
             # A full endpoint pasted from a provider's documentation is used as
@@ -332,12 +339,14 @@ proc ::auto_comment::providerModel {} {
 proc ::auto_comment::chatBody {prompt {maxTokens 300}} {
     set esc [::auto_comment::escapeJson $prompt]
     switch -- $::auto_comment::provider {
-        local {
-            set model [::auto_comment::escapeJson $::auto_comment::localModel]
+        local -
+        ollama {
+            # the native shape: Ollama's own /api/chat, which both the local
+            # server and the hosted service answer
+            set model [::auto_comment::escapeJson [::auto_comment::providerModel]]
             return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"options\":{\"num_predict\":$maxTokens}}"
         }
         openai -
-        ollama -
         opencode {
             set model [::auto_comment::escapeJson [::auto_comment::providerModel]]
             return "{\"model\":\"$model\",\"messages\":\[{\"role\":\"user\",\"content\":\"$esc\"}\],\"stream\":false,\"max_tokens\":$maxTokens}"
@@ -798,7 +807,7 @@ proc ::auto_comment::configureApiKey {} {
     ttk::button $w.content.ollama.open -text "Get an Ollama Key" -command [list openURL $::auto_comment::ollamaKeyUrl]
     pack $w.content.ollama.open -anchor w -pady {0 5}
     ttk::label $w.content.ollama.hint -justify left -wraplength 420 -text \
-        "Ollama's hosted models, including the ones too large to run locally. Requests go to https://ollama.com/v1; the key comes from your Ollama account."
+        "Ollama's hosted models, including the ones too large to run locally. Requests go to https://ollama.com/api/chat; the key comes from your Ollama account."
     pack $w.content.ollama.hint -anchor w
 
     # --- OpenAI-compatible ---
@@ -1445,6 +1454,75 @@ proc ::auto_comment::chatCompletionsOnly {ids} {
     return $out
 }
 
+# ::auto_comment::parseOllamaTags
+#   Model ids out of an /api/tags response, keeping only the ones that can
+#   answer a chat request. Every entry carries a capabilities list, and a model
+#   without "completion" (clef:27b is decision/vision only) would only produce a
+#   failed request - /v1/models listed it anyway, with nothing to filter on.
+#
+#   The array is split into entries by the key every entry starts with, and the
+#   name and the capabilities are read from each entry on its own. One regexp
+#   spanning from a name to its capabilities does not work here: Tcl's regexp
+#   prefers the longest overall match, so the first name was paired with the
+#   last capabilities and every model in between was lost.
+proc ::auto_comment::parseOllamaTags {raw} {
+    set starts {}
+    set pos 0
+    while {[regexp -indices -start $pos {\{"name":"} $raw m]} {
+        lappend starts [lindex $m 0]
+        set pos [expr {[lindex $m 1] + 1}]
+    }
+    set chat {}
+    set n 0
+    foreach start $starts {
+        incr n
+        if {$n < [llength $starts]} {
+            set end [expr {[lindex $starts $n] - 1}]
+        } else {
+            set end [string length $raw]
+        }
+        set entry [string range $raw $start $end]
+        if {![regexp {"name":"([^"]+)"} $entry -> name]} { continue }
+        # an entry with no capabilities (an older server) is kept: the list is
+        # the only way to find a model, and a wrong entry fails loudly
+        if {[regexp {"capabilities":\[([^\]]*)\]} $entry -> caps] \
+                && [string first "completion" $caps] < 0} {
+            continue
+        }
+        lappend chat $name
+    }
+    if {[llength $chat] == 0} {
+        # nothing matched: keep every name rather than showing an empty list
+        foreach {_ name} [regexp -all -inline {"name"\s*:\s*"([^"]+)"} $raw] {
+            lappend chat $name
+        }
+    }
+    return [lsort -dictionary [lsort -unique $chat]]
+}
+
+# ::auto_comment::fetchOllamaModels
+#   The hosted model list from ollama.com's /api/tags. It answers without a key,
+#   so the list is usable before one is entered, and the key rides the https
+#   connection when there is one.
+proc ::auto_comment::fetchOllamaModels {} {
+    set cmd [list curl -s -L --max-time 15 -H {Accept: application/json}]
+    set authfile ""
+    if {$::auto_comment::ollamaKey ne ""} {
+        if {![catch {set authfile [::auto_comment::writeCurlConfig \
+                "Authorization: Bearer $::auto_comment::ollamaKey"]} err]} {
+            lappend cmd --config $authfile
+        } else {
+            ::auto_comment::logDebug "Auto Comment: cannot write the auth file: $err"
+        }
+    }
+    lappend cmd "$::auto_comment::ollamaBase/tags"
+    set raw ""
+    set failed [catch {exec {*}$cmd 2>@1} raw]
+    if {$authfile ne ""} { catch {file delete -force $authfile} }
+    if {$failed} { return {} }
+    return [::auto_comment::parseOllamaTags $raw]
+}
+
 proc ::auto_comment::loadModels {combo provider} {
     # The URL the list was asked for, so a failure can show it: a base the user
     # typed wrong ("https://ollama.com/api") is invisible in the dialog, and the
@@ -1468,10 +1546,9 @@ proc ::auto_comment::loadModels {combo provider} {
         }
         ollama {
             set label "Ollama Cloud"
-            set target [::auto_comment::modelsUrl $::auto_comment::ollamaBase]
-            # its model list answers without a key, so a wrong key still shows
-            # the list; the key rides the https connection when one is set
-            set models [::auto_comment::fetchUrlModels $::auto_comment::ollamaBase $::auto_comment::ollamaKey]
+            set target "$::auto_comment::ollamaBase/tags"
+            # /api/tags is the documented list, and it answers without a key
+            set models [::auto_comment::fetchOllamaModels]
         }
         opencode {
             set label "OpenCode Console"
