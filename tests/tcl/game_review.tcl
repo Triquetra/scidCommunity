@@ -240,6 +240,11 @@ set ::fakeVarCounts [dict create]
 proc sc_pos {args} {
     switch -- [lindex $args 0] {
         location { return $::fakeLoc }
+        # The position identity the restore compares: the same ply in a
+        # renumbered sibling is a different line, which the fake FEN shows.
+        # The line tag changes when a renumbered sibling takes the number the
+        # saved cursor names; ply and level alone cannot see that.
+        fen { return "$::fakeLoc/$::fakeLevel/$::fakeLine" }
         getComment { return $::fakeComment }
         setComment { lappend ::calls [list setComment [lindex $args 1]] ; set ::fakeComment [lindex $args 1] ; return "" }
     }
@@ -327,6 +332,7 @@ proc fakeCursor {loc nums exits {len 40}} {
     set ::fakeExit $exits
     set ::fakeLevel [llength $nums]
     set ::fakeVarCounts [dict create]
+    set ::fakeLine L
     set ::fakeVars {}
     set ::listAt {}
     set ::calls {}
@@ -402,10 +408,15 @@ checkEq "and is still inside the variation" [list $::fakeLoc $::fakeLevel] {3 1}
 fakeCursor 5 {1} {3}
 set state [::review::cursorSave]
 checkEq "the second variation, two moves in" [dict get $state path] {{1 2}}
-set ::fakeVarCounts [dict create "3,0" 1]
-checkEq "a variation that is gone falls back" [::review::cursorRestore $state] 0
+set ::fakeVarCounts [dict create "3,0" 2]
+# Variation 1 now exists with the same move count, so the ply and level checks
+# alone would accept it; it is a different line, which the position shows.
+set ::fakeLine other
+checkEq "a renumbered sibling is not the same position" [::review::cursorRestore $state] 0
 checkEq "and the board is on the base ply, not in some other line" \
     [list $::fakeLoc $::fakeLevel] {3 0}
+set ::fakeVarCounts [dict create "3,0" 1]
+checkEq "a variation that is gone falls back" [::review::cursorRestore $state] 0
 
 # A state that cannot be read is a fallback, not an exception.
 checkEq "an unreadable cursor does not raise" \

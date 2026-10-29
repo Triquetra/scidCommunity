@@ -248,7 +248,11 @@ proc ::review::cursorSave {} {
     set loc 0
     set base 0
     set path {}
+    set fen ""
     if {[catch {
+        # The position identity has to be read before walking out: the walk
+        # leaves the cursor on the base ply, which is a different position.
+        set fen [sc_pos fen]
         set loc [sc_pos location]
         set inner $loc
         # Exit one level at a time. `sc_var exit` returns to the position the
@@ -268,7 +272,10 @@ proc ::review::cursorSave {} {
         set base $loc
         set path {}
     }
-    return [list loc $loc base $base path [lreverse $path]]
+    # The FEN identifies the position itself: a sibling renumbered by an
+    # insertion can reach the same ply at the same level on a different line,
+    # and the counter/level checks alone would call that an exact restore.
+    return [list loc $loc base $base path [lreverse $path] fen $fen]
 }
 
 # Put the board back where `cursorSave` found it. Returns 1 when it landed
@@ -301,8 +308,13 @@ proc ::review::cursorRestore {state} {
                 sc_move forward [expr {$moves - 1}]
             }
         }
+        set wantFen ""
+        if {[dict exists $state fen]} { set wantFen [dict get $state fen] }
+        set gotFen ""
+        catch { set gotFen [sc_pos fen] }
         if {[sc_pos location] == [dict get $state loc]
-                && [sc_var level] == [llength [dict get $state path]]} {
+                && [sc_var level] == [llength [dict get $state path]]
+                && ($wantFen eq "" || $gotFen eq $wantFen)} {
             set exact 1
         } elseif {[catch { sc_move ply $base }]} {
             set exact -1
