@@ -880,6 +880,7 @@ translate F EngineTime {Date}
 translate F EngineNew {Nouveau}
 translate F EngineEdit {Éditer}
 translate F EngineRequired {Les champs en gras sont requis; les autres sont optionnels}
+translate F EngineNameInUse {Un moteur nomme %s existe deja. Enregistrer celui-ci sous %s ?}
 translate F EngineProtocol {Protocole de communication}
 translate F EngineNotation {Notation des mouvements}
 translate F EngineFlipEvaluation {Perspective d'évaluation inversée}

@@ -867,6 +867,7 @@ translate b EngineTime {তারিখ}
 translate b EngineNew {নতুন}
 translate b EngineEdit {সম্পাদনা করুন}
 translate b EngineRequired {গাঢ় ক্ষেত্র প্রয়োজন; অন্যরা ঐচ্ছিক}
+translate b EngineNameInUse {%s নামের একটি ইঞ্জিন ইতিমধ্যে আছে। এটিকে %s হিসেবে সংরক্ষণ করবেন?}
 translate b EngineProtocol {যোগাযোগ প্রোটোকল}
 translate b EngineNotation {পদক্ষেপের স্বরলিপি}
 translate b EngineFlipEvaluation {ফ্লিপ মূল্যায়ন দৃষ্টিকোণ}

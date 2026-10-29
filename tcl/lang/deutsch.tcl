@@ -907,6 +907,7 @@ translate D EngineTime {Datum}
 translate D EngineNew {Neu}
 translate D EngineEdit {Bearbeiten}
 translate D EngineRequired {Fettgedruckte Parameter obligatorisch, andere optional}
+translate D EngineNameInUse {Eine Engine namens %s existiert bereits. Diese stattdessen als %s speichern?}
 translate D EngineProtocol {Kommunikationsprotokoll}
 translate D EngineNotation {Notation der Züge}
 translate D EngineFlipEvaluation {Bewertungsperspektive umdrehen}

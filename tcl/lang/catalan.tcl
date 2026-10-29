@@ -893,6 +893,7 @@ translate K EngineTime {Data}
 translate K EngineNew {Nova}
 translate K EngineEdit {Editar}
 translate K EngineRequired {Els camps en negreta son obligatoris; la resta opcionals}
+translate K EngineNameInUse {Ja existeix un motor anomenat %s. Voleu desar aquest com a %s?}
 translate K EngineProtocol {Protocol de comunicació}
 translate K EngineNotation {Anotació de les jugades}
 translate K EngineFlipEvaluation {Inverteix perspectiva d'avaluació}

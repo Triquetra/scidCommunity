@@ -878,6 +878,7 @@ translate W EngineTime {Datum}
 translate W EngineNew {Ny}
 translate W EngineEdit {Redigera}
 translate W EngineRequired {Fet stil indikerar obligatoriska fält; övriga fält är frivilliga} 
+translate W EngineNameInUse {Det finns redan en motor med namnet %s. Spara den här som %s?}
 translate W EngineProtocol {Kommunikationsprotokoll}
 translate W EngineNotation {Notering av rörelserna}
 translate W EngineFlipEvaluation {Flip utvärdering perspektiv}

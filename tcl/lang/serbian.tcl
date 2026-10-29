@@ -1365,6 +1365,7 @@ translate Y EngineNew {New}
 translate Y EngineEdit {Edit}
 # ====== TODO To be translated ======
 translate Y EngineRequired {Fields in bold are required; others are optional}
+translate Y EngineNameInUse {An engine named %s already exists. Save this one as %s instead?}
 # ====== TODO To be translated ======
 translate Y EngineProtocol {Communication protocol}
 # ====== TODO To be translated ======

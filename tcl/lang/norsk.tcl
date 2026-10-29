@@ -877,6 +877,7 @@ translate O EngineTime {Dato}
 translate O EngineNew {Ny}
 translate O EngineEdit {Rediger}
 translate O EngineRequired {Fete felter er nødvendige, de øvrige er valgfrie}
+translate O EngineNameInUse {Det finnes allerede en motor som heter %s. Lagre denne som %s?}
 translate O EngineProtocol {Kommunikasjonsprotokoll}
 translate O EngineNotation {Notasjon av trekkene}
 translate O EngineFlipEvaluation {Flip evalueringsperspektiv}

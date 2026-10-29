@@ -878,6 +878,7 @@ translate I EngineTime {Data}
 translate I EngineNew {Nuovo}
 translate I EngineEdit {Modifica}
 translate I EngineRequired {I campi in grassetto sono obbligatori; gli altri sono opzionali}
+translate I EngineNameInUse {Esiste già un motore chiamato %s. Salvare questo come %s?}
 translate I EngineProtocol {Protocollo di comunicazione}
 translate I EngineNotation {Notazione delle mosse}
 translate I EngineFlipEvaluation {Cambia la prospettiva di valutazione}

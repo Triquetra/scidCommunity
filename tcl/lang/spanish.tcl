@@ -924,6 +924,7 @@ translate S EngineTime {Fecha}
 translate S EngineNew {Nuevo}
 translate S EngineEdit {Editar}
 translate S EngineRequired {Los campos en negrita son obligatorios; los demás opcionales}
+translate S EngineNameInUse {Ya existe un motor llamado %s. ¿Guardar este como %s?}
 translate S EngineProtocol {Protocolo de comunicación}
 translate S EngineNotation {Notación de los movimientos.}
 translate S EngineFlipEvaluation {Voltear la perspectiva de evaluación}

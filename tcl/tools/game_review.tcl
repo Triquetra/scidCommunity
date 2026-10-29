@@ -555,12 +555,34 @@ proc ::review::writeMove {ply label eval_cp lines} {
                 if {$first eq "" || [lsearch -exact $existing $first] >= 0} { continue }
                 sc_move ply $ply
                 sc_move back
+                # A variation the game refuses part-way is not a variation: the
+                # engine's line is inserted whole or dropped whole, and a
+                # half-written one is deleted rather than left behind. The
+                # refusal is reported, so the caller does not count a partial
+                # line as written.
+                set bad ""
                 if {[catch {
                     sc_var create
-                    foreach uci $pv { ::uci::sc_move_add $uci }
-                    sc_var exit
-                }]} {
+                    foreach uci $pv {
+                        if {[::uci::sc_move_add $uci]} {
+                            set bad "the variation move $uci was rejected"
+                            break
+                        }
+                    }
+                    if {$bad eq ""} {
+                        sc_var exit
+                    } else {
+                        catch { sc_var delete }
+                    }
+                } err]} {
+                    catch { sc_var delete }
                     catch { sc_var exit }
+                    if {$bad eq ""} {
+                        set bad "the variation could not be inserted: $err"
+                    }
+                }
+                if {$bad ne ""} {
+                    lappend out $bad
                 } else {
                     lappend existing $first
                 }

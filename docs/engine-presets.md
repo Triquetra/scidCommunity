@@ -71,6 +71,13 @@ back into a legacy one.
 dialog shows the other nine fields, and renaming a preset used to erase its
 limits.
 
+A rename cannot take a name another preset already carries. The list is read by
+name (`lsearch -exact -index 0`), so two entries under one name leave the second
+unreachable until one of them is renamed or removed — and a rename is exactly how
+the copy above would stop being unique. `::enginelist::saveEdit` checks the name
+first and offers the one `::enginecfg::uniquename` would have picked instead;
+declining writes neither the list nor the file.
+
 ## Where the code lives
 
 - `tcl/tools/engine_limits.tcl` — the entry layout, validation, `Go` limit
