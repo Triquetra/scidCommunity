@@ -10,6 +10,11 @@
 ### {ply positionSpec} pairs, the same shape ::engine::send Go takes, because
 ### turning a game into position specs needs the game commands and this module
 ### must stay testable without them.
+###
+### onprogress {done total ply lines} reports each finished position, and ondone
+### {results} fires exactly once per pass: on the last reply, or when the engine
+### is lost. A results dict with fewer plies than the positions handed in is how a
+### pass that was cut short is reported.
 
 namespace eval reviewdriver {}
 
@@ -22,7 +27,7 @@ proc ::reviewdriver::start {enginecfg positions mpv depth onprogress ondone} {
     variable job
     variable seq
     set id $::reviewdriver::ENGINE_ID
-    if {[info exists ::engconn(channel_$id)]} {
+    if {[::reviewdriver::busy $id]} {
         error "engine $id is already running a pass"
     }
     incr seq
@@ -35,12 +40,29 @@ proc ::reviewdriver::start {enginecfg positions mpv depth onprogress ondone} {
     set args [lindex $enginecfg 2]
     ::engine::setLogCmd $id {}
     if {[catch {
-        ::engine::connect $id [list ::reviewdriver::callback $token] $exe {*}$args uci
+        # The preset's args go in as one element, the way ::enginewin and
+        # ::engineNoWin pass them: ::engine::connect takes the protocol from its
+        # last positional, so splatting here either swallows "uci" into the
+        # engine's own argv (Stockfish runs it as a command and exits) or gives
+        # connect more positionals than it has parameters.
+        ::engine::connect $id [list ::reviewdriver::callback $token] $exe $args uci
     } err]} {
         unset -nocomplain job($token)
         error $err
     }
     return $token
+}
+
+# Is a pass using this engine id? A finished pass leaves its connection open
+# until the queued close runs, so the id can be occupied with nothing to run.
+proc ::reviewdriver::busy {id} {
+    variable job
+    foreach token [array names job] {
+        if {[dict get $job($token) id] eq $id} {
+            return 1
+        }
+    }
+    return 0
 }
 
 # Stop a pass: no further positions are started and the engine is closed.
@@ -52,8 +74,33 @@ proc ::reviewdriver::stop {token} {
     set id [dict get $job($token) id]
     unset job($token)
     catch { ::engine::send $id StopGo }
-    catch { ::engine::close $id }
+    ::reviewdriver::closeSoon $id
     return 1
+}
+
+# Nothing may close a connection from inside an engine reply. ::engine::close runs
+# ::engine::destroy_, which unsets the arrays ::engine::reply walks *after* the
+# callback returns, so a close in finish, or in an onprogress handler that stops the
+# pass, throws on every completed pass. Queue the close instead, and take the channel
+# it was queued for: a pass that starts in the meantime has its own connection and
+# must keep it.
+proc ::reviewdriver::closeSoon {id} {
+    set channel ""
+    catch { set channel $::engconn(channel_$id) }
+    if {$channel eq ""} {
+        return
+    }
+    after idle [list ::reviewdriver::closeConn $id $channel]
+}
+
+proc ::reviewdriver::closeConn {id channel} {
+    if {![info exists ::engconn(channel_$id)]} {
+        return
+    }
+    if {$::engconn(channel_$id) ne $channel} {
+        return
+    }
+    catch { ::engine::close $id }
 }
 
 # The engine messages for a pass.
@@ -78,6 +125,11 @@ proc ::reviewdriver::callback {token msg} {
         }
         "InfoBestMove" {
             ::reviewdriver::next $token
+        }
+        "InfoDisconnected" {
+            # The process died mid-pass: its connection is already gone, and the
+            # caller would otherwise wait forever for a pass nobody will finish.
+            ::reviewdriver::lost $token
         }
     }
 }
@@ -130,6 +182,11 @@ proc ::reviewdriver::next {token} {
         dict set job($token) lines {}
         if {[dict get $j onprogress] ne ""} {
             catch { {*}[dict get $j onprogress] [expr {$index + 1}] [llength $positions] $ply $lines }
+            # The handler may have stopped the pass. Then there is no job to
+            # advance and no engine left to search the next position.
+            if {![info exists job($token)]} {
+                return
+            }
         }
     }
     incr index
@@ -154,7 +211,26 @@ proc ::reviewdriver::finish {token} {
     set results [dict get $j results]
     set done [dict get $j ondone]
     unset job($token)
-    catch { ::engine::close $id }
+    # finish runs inside the last InfoBestMove reply, so the close is queued rather
+    # than done here; ondone still sees the whole result.
+    ::reviewdriver::closeSoon $id
+    if {$done ne ""} {
+        catch { {*}$done $results }
+    }
+    return $results
+}
+
+# The engine is gone: report what finished and forget the pass. Nothing is closed,
+# because there is nothing left to close.
+proc ::reviewdriver::lost {token} {
+    variable job
+    if {![info exists job($token)]} {
+        return
+    }
+    set j $job($token)
+    unset job($token)
+    set results [dict get $j results]
+    set done [dict get $j ondone]
     if {$done ne ""} {
         catch { {*}$done $results }
     }
