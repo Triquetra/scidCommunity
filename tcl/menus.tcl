@@ -274,6 +274,8 @@ $m  add command -label ToolsStartEngine2 \
 $m  add command -label ToolsAnalysis -command "::enginelist::choose"
 $m  add command -label ToolsRapidAnnotate \
     -accelerator "Ctrl+Shift+A" -command ::rapid_annotate::commit
+# The engine window no longer carries the batch annotator; it is still a tool.
+$m  add command -label [tr GameComment] -command ::analysis_auto_comment::batch_generate
 $m add separator
 $m add checkbutton -label ToolsFilterGraph \
     -accelerator "Ctrl+Shift+G" -variable filterGraph -command tools::graphs::filter::Open

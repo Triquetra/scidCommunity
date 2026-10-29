@@ -2676,10 +2676,10 @@ set helpText(P,BatchAnnotate) {<h1>Komentowanie partii w trybie zbiorczym</h1>
   <p>
   ScidCommunity potrafi wygenerować komentarze AI dla całej partii naraz, w
   trybie zbiorczym. Dawniej służył do tego przycisk <b>Komentarz do Partii</b> w
-  oknie silnika. Tego przycisku już nie ma, a tryb zbiorczy uruchamia się po
-  nazwie, <b>::analysis_auto_comment::batch_generate</b>, ze skryptu lub z
-  interpretera. Otwiera on to samo okno co dawniej, a jego działanie się nie
-  zmieniło.
+  oknie silnika. Tego przycisku już nie ma; użyj <menu>Narzędzia</menu> >
+  <menu>Komentarz do Partii</menu> (albo wywołaj
+  <b>::analysis_auto_comment::batch_generate</b> ze skryptu). Otwiera on to samo
+  okno co dawniej, a jego działanie się nie zmieniło.
   </p>
   <p>
   Okno zbiorcze przeszukuje partię w poszukiwaniu posunięć z adnotacjami

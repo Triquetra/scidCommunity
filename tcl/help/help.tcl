@@ -2665,10 +2665,10 @@ set helpText(BatchAnnotate) {<h1>Annotating a game in batch</h1>
   <p>
   scidCommunity can generate AI commentary for a whole game at once, in batch
   mode. The engine window used to carry a <b>Game Comment</b> button for it.
-  That button is gone; the pass is started by name instead,
-  <b>::analysis_auto_comment::batch_generate</b>, from a script or from the
-  interpreter. It opens the same dialog it always did, and what the dialog does
-  is unchanged.
+  That button is gone; use <menu>Tools</menu> > <menu>Game Comment</menu>
+  instead (or call <b>::analysis_auto_comment::batch_generate</b> from a
+  script). It opens the same dialog it always did, and what the dialog does is
+  unchanged.
   </p>
   <p>
   The dialog scans the game for annotated moves - moves with NAGs or existing

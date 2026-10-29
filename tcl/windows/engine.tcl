@@ -153,7 +153,10 @@ proc ::enginewin::onNewGame {id} {
     set ::enginewin::m_(newgame,$id) true
     ::stored_eval::clear $id
     ::rapid_annotate::onNewGame
-    # A new game is a new main line: what Move Comment could do has changed.
+    # A new game is a new main line: stop a pass over the old one and drop its
+    # results, which are keyed by ply and must never be written into this game.
+    catch { ::enginewin::reviewCancel $id }
+    unset -nocomplain ::enginewin::reviewresults($id)
     catch { ::enginewin::reviewRefresh $id }
     set w .engineWin$id
     if { [info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id) } {
@@ -723,6 +726,12 @@ proc ::enginewin::reviewWindow {id} {
 # The facts ::reviewui::buttons needs, read from the window and the board.
 proc ::enginewin::reviewState {id} {
     set state [dict create game 0 engine "" pass "" move ""]
+    # An embedded PGN viewer shows a game the main board does not hold, and the
+    # review reads the board's game: not offered there rather than reviewing
+    # something the window is not showing.
+    if {[info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id)} {
+        return $state
+    }
     # The engine this window analyses with. Its preset is where Threads, Hash and
     # MultiPV come from (::review::effective reads them from there), so the pass
     # is configured from the same one the window shows.
@@ -777,6 +786,9 @@ proc ::enginewin::reviewStart {id positions depth} {
     set enginecfg [::enginecfg::get $name]
     set eff [::review::effective $enginecfg]
     set token ""
+    # A new pass replaces the old results; if it is cancelled, the window must
+    # not be left holding a previous game's (or previous run's) lines.
+    unset -nocomplain ::enginewin::reviewresults($id)
     set ::enginewin::reviewpass($id) [dict create state searching token ""]
     if {[catch {
         set token [::reviewdriver::start $enginecfg $positions [dict get $eff mpv] $depth \
