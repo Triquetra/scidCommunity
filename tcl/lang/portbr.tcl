@@ -880,6 +880,7 @@ translate B EngineTime {Data}
 translate B EngineNew {Novo}
 translate B EngineEdit {Editar}
 translate B EngineRequired {Campos em negrito são obrigatórios; os demais são opcionais}
+translate B EngineNameInUse {Já existe um motor chamado %s. Salvar este como %s?}
 translate B EngineProtocol {Protocolo de comunicação}
 translate B EngineNotation {Notação dos movimentos}
 translate B EngineFlipEvaluation {Perspectiva de avaliação invertida}

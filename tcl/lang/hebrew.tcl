@@ -868,6 +868,7 @@ translate V EngineTime {תַאֲרִיך}
 translate V EngineNew {חָדָשׁ}
 translate V EngineEdit {לַעֲרוֹך}
 translate V EngineRequired {שדות מודגשים נדרשים; אחרים הם אופציונליים}
+translate V EngineNameInUse {מנוע בשם %s כבר קיים. לשמור את זה בשם %s?}
 translate V EngineProtocol {פרוטוקול תקשורת}
 translate V EngineNotation {סימון המהלכים}
 translate V EngineFlipEvaluation {פרספקטיבה של הערכת היפוך}

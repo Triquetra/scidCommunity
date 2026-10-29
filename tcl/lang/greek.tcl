@@ -899,6 +899,7 @@ translate G EngineTime {Ημερομηνία}
 translate G EngineNew {Νέα}
 translate G EngineEdit {Επεξεργασία}
 translate G EngineRequired {Τα παιδία με έντονη γραμματοσειρά είναι απαραίτητα, τα άλλα είναι προαιρετικά}
+translate G EngineNameInUse {Υπάρχει ήδη μηχανή με όνομα %s. Αποθήκευση αυτής ως %s;}
 translate G EngineProtocol {Πρωτόκολλο επικοινωνίας}
 translate G EngineNotation {Σημείωση των κινήσεων}
 translate G EngineFlipEvaluation {Αναποδογυρίστε την προοπτική αξιολόγησης}

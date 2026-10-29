@@ -874,6 +874,7 @@ translate R EngineTime {Дата}
 translate R EngineNew {Новый}
 translate R EngineEdit {Редактор}
 translate R EngineRequired {Поля, отмеченные жирным шрифтом, заполнять обязательно, остальные - по желанию}
+translate R EngineNameInUse {Движок с именем %s уже существует. Сохранить этот как %s?}
 translate R EngineProtocol {Протокол связи}
 translate R EngineNotation {Обозначения ходов}
 translate R EngineFlipEvaluation {Перевернуть оценку роста}

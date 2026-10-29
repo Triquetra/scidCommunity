@@ -907,6 +907,7 @@ translate E EngineTime {Date}
 translate E EngineNew {New}
 translate E EngineEdit {Edit}
 translate E EngineRequired {Fields in bold are required; others are optional}
+translate E EngineNameInUse {An engine named %s already exists. Save this one as %s instead?}
 translate E EngineProtocol {Communication protocol}
 translate E EngineNotation {Notation of the moves}
 translate E EngineFlipEvaluation {Flip evaluation perspective}

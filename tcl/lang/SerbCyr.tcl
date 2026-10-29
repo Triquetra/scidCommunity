@@ -908,6 +908,7 @@ translate J EngineTime {Датум}
 translate J EngineNew {Ново}
 translate J EngineEdit {Уреди}
 translate J EngineRequired {Подебљана поља су обавезна; други су опциони}
+translate J EngineNameInUse {Већ постоји engine са именом %s. Сачувати овај као %s?}
 translate J EngineProtocol {Комуникациони протокол}
 translate J EngineNotation {Запис потеза}
 translate J EngineFlipEvaluation {Окрените перспективу евалуације}

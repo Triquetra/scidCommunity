@@ -867,6 +867,7 @@ translate h EngineTime {तारीख}
 translate h EngineNew {नया}
 translate h EngineEdit {संपादन करना}
 translate h EngineRequired {जो बोल्ड में हैं वें फ़ील्ड आवश्यक हैं; अन्य वैकल्पिक हैं}
+translate h EngineNameInUse {%s नाम का इंजन पहले से मौजूद है। इसे %s के रूप में सहेजें?}
 translate h EngineProtocol {संचार प्रोटोकॉल}
 translate h EngineNotation {चालों का अंकन}
 translate h EngineFlipEvaluation {मूल्यांकन परिप्रेक्ष्य पलटें}

@@ -908,6 +908,7 @@ translate A EngineTime {日付}
 translate A EngineNew {新しい}
 translate A EngineEdit {編集}
 translate A EngineRequired {太字のフィールドは必須です。他はオプションです}
+translate A EngineNameInUse {%s という名前のエンジンは既に存在します。これを %s として保存しますか?}
 translate A EngineProtocol {通信プロトコル}
 translate A EngineNotation {動きの表記}
 translate A EngineFlipEvaluation {評価の視点を反転する}

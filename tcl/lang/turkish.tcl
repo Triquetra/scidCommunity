@@ -871,6 +871,7 @@ translate T EngineTime {Tarih}
 translate T EngineNew {Yeni}
 translate T EngineEdit {Düzenlemek}
 translate T EngineRequired {Kalın yazılan alanların doldurulması zorunludur; diğerleri isteğe bağlıdır}
+translate T EngineNameInUse {%s adlı bir motor zaten var. Bu motor %s olarak kaydedilsin mi?}
 translate T EngineProtocol {İletişim protokolü}
 translate T EngineNotation {Hareketlerin notasyonu}
 translate T EngineFlipEvaluation {Değerlendirme perspektifini çevir}

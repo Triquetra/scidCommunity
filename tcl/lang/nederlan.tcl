@@ -897,6 +897,7 @@ translate N EngineTime {Datum}
 translate N EngineNew {Nieuw}
 translate N EngineEdit {Bewerk}
 translate N EngineRequired {Velden in <b>vet</b> zijn vereist; de andere facultatief}
+translate N EngineNameInUse {Er bestaat al een engine met de naam %s. Deze opslaan als %s?}
 translate N EngineProtocol {Communicatieprotocol}
 translate N EngineNotation {Notatie van de zetten}
 translate N EngineFlipEvaluation {Evaluatieperspectief omdraaien}

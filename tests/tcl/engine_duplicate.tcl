@@ -79,7 +79,8 @@ proc procText {path name} {
 
 set enginelistFile [file join $root tcl tools enginelist.tcl]
 namespace eval enginelist {}
-foreach name {engine ::enginelist::read ::enginelist::applyEdit ::enginelist::duplicate} {
+foreach name {engine ::enginelist::read ::enginelist::applyEdit ::enginelist::nameTaken \
+              ::enginelist::saveEdit ::enginelist::duplicate} {
     set text [procText $enginelistFile $name]
     if {$text eq ""} {
         puts "FAIL the engine list's $name could not be extracted"
@@ -94,6 +95,17 @@ foreach name {engine ::enginelist::read ::enginelist::applyEdit ::enginelist::du
 set ::edited {}
 proc ::enginelist::edit {index} { set ::edited $index }
 proc ::enginelist::sort {{type ""}} {}
+# The edit dialog's side effects outside the list: the engine window's own
+# saved state, and the question it asks before it will not write.
+namespace eval engineNoWin {}
+proc ::engineNoWin::saveEngineSetup {args} {}
+set ::tr(EngineNameInUse) {An engine named %s already exists. Save this one as %s instead?}
+set ::asked {}
+set ::answer yes
+proc tk_messageBox {args} {
+    lappend ::asked $args
+    return $::answer
+}
 
 # The list and the file it saves, as the loader would have left them.
 proc reload {} {
@@ -195,6 +207,52 @@ call {::enginelist::applyEdit 0 {Legacy2 /x {} {} 0 0 {} 1 {}}}
 checkEq "a legacy entry stays nine elements after a rename" \
     [llength [lindex $::engines(list) 0]] 9
 
+puts "a rename cannot take another preset's name"
+# The list is read by name, so two entries under one name leave the second
+# unreachable. A rename is how a duplicate turns into that, so the edit has to
+# refuse it - and the file must not be touched when it does.
+set deep [list Deep /x {} {} 0 0 {} 1 {{Threads 4}} {depth 66}]
+set deep1 [list {Deep (1)} /x {} {} 0 0 {} 1 {{Threads 2}} {depth 18}]
+set renameOnto [list Deep /x {} {} 0 0 {} 1 {{Threads 2}}]
+set ::engines(list) [list $deep $deep1]
+::enginecfg::write
+set before [fileText]
+set ::answer no
+set ::asked {}
+check "the clash is seen" [expr {[::enginelist::nameTaken 1 Deep]}]
+check "an entry's own name is not a clash" [expr {![::enginelist::nameTaken 0 Deep]}]
+check "a free name is not a clash" [expr {![::enginelist::nameTaken 0 Nope]}]
+checkEq "so a rename onto it is refused" [::enginelist::saveEdit 1 $renameOnto] false
+checkEq "the list keeps both entries" [llength $::engines(list)] 2
+checkEq "the edited entry keeps its own name" [lindex [lindex $::engines(list) 1] 0] {Deep (1)}
+checkEq "and the file is not written" [fileText] $before
+checkEq "the question offers the name a duplicate would take" \
+    [string match {*Deep (2)*} $::asked] 1
+
+set ::answer yes
+set ::asked {}
+checkEq "accepting the suggestion writes the edit" [::enginelist::saveEdit 1 $renameOnto] true
+checkEq "under the suggested name" [lindex [lindex $::engines(list) 1] 0] {Deep (2)}
+checkEq "the original entry is untouched" [lindex [lindex $::engines(list) 0] 0] Deep
+checkEq "and keeps its own limits" \
+    [dict get [::enginelimits::of [lindex $::engines(list) 0]] depth] 66
+checkEq "so does the renamed one" \
+    [dict get [::enginelimits::of [lindex $::engines(list) 1]] depth] 18
+set names {}
+foreach e $::engines(list) { lappend names [lindex $e 0] }
+checkEq "one name, one entry" [llength [lsort -unique $names]] [llength $names]
+::enginecfg::write
+reload
+checkEq "and the file holds the suggested name" \
+    [call {llength [::enginecfg::get {Deep (2)}]}] 10
+
+set ::asked {}
+checkEq "an edit that keeps its own name is saved without asking" \
+    [::enginelist::saveEdit 0 [list Deep /x {} {} 0 0 {} 1 {{Threads 4}}]] true
+checkEq "without a question" [llength $::asked] 0
+checkEq "and keeps its limits" \
+    [dict get [::enginelimits::of [lindex $::engines(list) 0]] depth] 66
+
 puts "the story end to end: duplicate, rename, reload"
 set ::engines(list) [list {Deep /x {--threads 8} /opt 2800 100 \
     {white 1 none false normal {}} 1 {{Threads 8} {Hash 512}} {depth 66 movetime 300000}}]
@@ -223,8 +281,13 @@ check "wired to ::enginelist::duplicate" \
     [regexp {dialogbutton \$f\.duplicate[^\n]*\n[^\n]*::enginelist::duplicate} $dialogSrc]
 check "packed with the other list buttons" \
     [string match {*$f.edit $f.duplicate $f.delete*} $dialogSrc]
-check "the edit dialog stores through applyEdit" \
-    [string match {*::enginelist::applyEdit $engines(newIndex)*} $dialogSrc]
+check "the edit dialog stores through saveEdit" \
+    [string match {*::enginelist::saveEdit $engines(newIndex)*} $dialogSrc]
+set saveAt [string first "proc ::enginelist::saveEdit" $dialogSrc]
+check "saveEdit checks the name before it writes" \
+    [expr {$saveAt >= 0 &&
+            [string first "::enginelist::nameTaken" $dialogSrc $saveAt] > $saveAt &&
+            [string first {::enginelist::applyEdit $index $fields} $dialogSrc $saveAt] > $saveAt}]
 
 file delete -force $::tmp
 

@@ -337,6 +337,43 @@ proc ::enginelist::applyEdit {index fields} {
     return $fields
 }
 
+# ::enginelist::nameTaken
+#   True if an entry other than the one at index already carries name.
+#   The entry at index is exempt: an edit that keeps the name it already has
+#   is not a clash, and neither is a new entry whose placeholder is at index.
+proc ::enginelist::nameTaken {index name} {
+    global engines
+    set found [lsearch -exact -index 0 $engines(list) $name]
+    return [expr {$found >= 0 && $found != $index}]
+}
+
+# ::enginelist::saveEdit
+#   Writes what the edit dialog shows over the entry at index and returns true,
+#   or returns false when nothing may be written.
+#   A name another entry already carries is refused first. The list is read by
+#   name (lsearch -exact -index 0), so two entries under one name leave the
+#   second unreachable until one of them is renamed or removed - and renaming
+#   one preset onto another's name is exactly how a duplicate becomes one. The
+#   dialog offers the name duplicating would have picked instead; declining
+#   leaves both the list and the file as they were.
+proc ::enginelist::saveEdit {index fields} {
+    global engines
+    set name [lindex $fields 0]
+    if {[::enginelist::nameTaken $index $name]} {
+        set suggestion [::enginecfg::uniquename $name]
+        set answer [tk_messageBox -title scidCommunity -icon question \
+                -type yesno -message [format $::tr(EngineNameInUse) $name $suggestion]]
+        if {$answer ne "yes"} { return false }
+        lset fields 0 $suggestion
+    }
+    # applyEdit adds back whatever the dialog does not show (element 9).
+    ::enginelist::applyEdit $index $fields
+    ::engineNoWin::saveEngineSetup editEngine
+    ::enginelist::sort
+    ::enginecfg::write
+    return true
+}
+
 # ::enginelist::duplicate
 #   Copies the preset at index as a complete spec (see ::enginecfg::duplicate),
 #   writes the "Engine list" file and opens the copy for editing, so the user
@@ -503,16 +540,11 @@ proc ::enginelist::edit {index} {
             [string trim $engines(newDir)] == ""} {
             tk_messageBox -title scidCommunity -icon info \
                     -message "The Name, Command and Directory fields must not be empty."
-        } else {
-            # applyEdit adds back whatever the dialog does not show (element 9).
-            ::enginelist::applyEdit $engines(newIndex) [list \
-                    $engines(newName) $engines(newCmd) \
-                    $engines(newArgs) $engines(newDir) \
-                    $engines(newElo) $engines(newTime) \
-                    $engines(newURL) $engines(newUCI) $engines(newOptions) ]
-            ::engineNoWin::saveEngineSetup editEngine
-            ::enginelist::sort
-            ::enginecfg::write
+        } elseif {[::enginelist::saveEdit $engines(newIndex) [list \
+                $engines(newName) $engines(newCmd) \
+                $engines(newArgs) $engines(newDir) \
+                $engines(newElo) $engines(newTime) \
+                $engines(newURL) $engines(newUCI) $engines(newOptions) ]]} {
             destroy .engineEdit
         }
     }

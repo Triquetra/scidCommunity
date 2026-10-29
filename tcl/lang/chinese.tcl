@@ -843,6 +843,7 @@ translate M EngineTime {日期}
 translate M EngineNew {新的}
 translate M EngineEdit {编辑}
 translate M EngineRequired {Fields in bold are required; others are optional}
+translate M EngineNameInUse {名为 %s 的引擎已存在。将此引擎保存为 %s?}
 translate M EngineProtocol {Communication protocol}
 translate M EngineNotation {Notation of the moves}
 translate M EngineFlipEvaluation {Flip evaluation perspective}
