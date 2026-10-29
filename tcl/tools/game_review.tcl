@@ -125,6 +125,56 @@ proc ::review::setValue {key value} {
     return ""
 }
 
+# The resources a pass should use, read from the engine's own config: Threads
+# and Hash are properties of that preset, and MultiPV is the preset's own value.
+# A key the engine does not advertise comes back empty.
+proc ::review::engineDefaults {enginecfg} {
+    set out [dict create threads "" hash "" mpv ""]
+    foreach elem [lindex $enginecfg 8] {
+        lassign $elem name value
+        switch -nocase -- $name {
+            threads { dict set out threads $value }
+            hash    { dict set out hash $value }
+            multipv { dict set out mpv $value }
+        }
+    }
+    return $out
+}
+
+# The settings a pass actually runs with. Threads and Hash are the engine's: the
+# preset wins whenever it advertises them, and a second place to set them is a
+# second place to get them wrong - the window's controls already write the preset.
+# An engine that advertises neither leaves them empty rather than borrowing
+# ::review's own values, because a pass can only set what the engine announced: a
+# setoption for an option the engine never sent is ignored at best. MultiPV is
+# raised to 2 regardless, because a verdict without a second line cannot tell a
+# mistake from the only move available.
+proc ::review::effective {enginecfg} {
+    set defaults [::review::engineDefaults $enginecfg]
+    set threads [dict get $defaults threads]
+    set hash [dict get $defaults hash]
+    set mpv [get mpv]
+    if {[dict get $defaults mpv] ne "" && [dict get $defaults mpv] > $mpv} {
+        set mpv [dict get $defaults mpv]
+    }
+    if {$mpv < 2} {
+        set mpv 2
+    }
+    # The preset's own search limits apply here too, but the review's depth is a
+    # floor rather than a default: a preset set up to browse at depth 12 must not
+    # shallow out a verdict. A preset that has no Limits element falls back to
+    # the review's values, which is what an engines.dat from an older version is.
+    set depth [get depth]
+    if {[llength $enginecfg] >= 1 && [info exists ::engines(list)] &&
+        [info commands ::enginelimits::forName] ne ""} {
+        set preset [::enginelimits::forName [lindex $enginecfg 0]]
+        if {[dict get $preset depth] ne "" && [dict get $preset depth] > $depth} {
+            set depth [dict get $preset depth]
+        }
+    }
+    return [dict create threads $threads hash $hash mpv $mpv depth $depth]
+}
+
 # Cross-field problems, for a dialog that wants to show them all at once.
 proc ::review::problems {} {
     set s [all]

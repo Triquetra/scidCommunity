@@ -1162,6 +1162,7 @@ tools/move_labels.tcl
 tools/score_seed.tcl
 tools/engine_limits.tcl
 tools/game_review.tcl
+tools/review_driver.tcl
 tools/comment_facts.tcl
 tools/inputengine.tcl
 tools/novag.tcl
