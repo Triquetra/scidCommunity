@@ -146,7 +146,11 @@ proc ::reviewui::applySettings {values} {
 # line: "Threads 8, Hash 256 MB". Empty when the engine advertises neither,
 # which is an engines.dat written before ::enginelimits existed.
 proc ::reviewui::presetLimits {enginecfg} {
-    set d [::review::engineDefaults $enginecfg]
+    # ::review::effective, not the preset: the pass runs on a second engine and is
+    # bounded (::review::MAX_PASS_THREADS/HASH), so the dialog should not promise
+    # the preset's full reservation. "From engine preset" stays true - these are
+    # its numbers, reduced to what a pass may take.
+    set d [::review::effective $enginecfg]
     set parts {}
     if {[dict get $d threads] ne ""} { lappend parts "Threads [dict get $d threads]" }
     if {[dict get $d hash] ne ""} { lappend parts "Hash [dict get $d hash] MB" }

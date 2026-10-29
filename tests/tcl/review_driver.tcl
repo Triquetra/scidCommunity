@@ -100,6 +100,21 @@ checkEq "and a pass cannot borrow ::review's threads for it" \
     [dict get [::review::effective {X /x {} {} 0 0 {} 1 {}}] threads] {}
 checkEq "nor its hash" \
     [dict get [::review::effective {X /x {} {} 0 0 {} 1 {}}] hash] {}
+
+# The pass is a second engine process: the preset's reservation is allocated
+# again beside the window's own engine. A preset sized for an interactive search
+# on a 128 GB machine (Threads 64, Hash 110000) put two ~107 GB searches in RAM
+# and systemd-oomd killed the session 28 positions into a 90-position review.
+set huge {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {{Threads 64} {Hash 110000}}}
+checkEq "a pass takes at most its share of the preset's threads" \
+    [dict get [::review::effective $huge] threads] 8
+checkEq "and at most a TT a batch search can use" \
+    [dict get [::review::effective $huge] hash] 512
+checkEq "a preset below the thread ceiling keeps its threads" \
+    [dict get [::review::effective $enginecfg] threads] 8
+set modest {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {{Threads 4} {Hash 128}}}
+checkEq "and one below both keeps its hash" \
+    [dict get [::review::effective $modest] hash] 128
 ::review::reset
 
 puts "where the depth comes from"
@@ -164,6 +179,24 @@ set first [dict get $::done 4]
 checkEq "the deepest line is kept, not the last" [lindex [dict get $first 1] 0] 12
 checkEq "and the second MultiPV slot too" [lindex [dict get $first 2] 0] 8
 checkEq "positions after the first are recorded" [lindex [dict get [dict get $::done 6] 1] 0] 11
+
+# The preset's reservation is not allocated a second time: a pass asks for the
+# bounded values ::review::effective returns, which is what keeps a 110 GB preset
+# from doubling the machine's memory use.
+puts "a pass over a preset set up for a long analysis"
+set ::sent {}
+::reviewdriver::stop $token
+pump
+set huge {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {{Threads 64} {Hash 110000}}}
+set token [::reviewdriver::start $huge {{4 {fen A}}} 3 18 ::onProgress ::onDone]
+feed InfoConfig {}
+set opt [lsearch -inline $::sent {send 20 SetOptions*}]
+check "the pass takes only its share of the threads" [string match {*Threads 8*} $opt]
+check "and only a table it can use" [string match {*Hash 512*} $opt]
+check "the preset's own numbers never reach the second engine" \
+    [expr {![string match {*Threads 64*} $opt] && ![string match {*Hash 110000*} $opt]}]
+feed InfoBestMove {}
+pump
 
 puts "stopping a pass"
 set ::sent {}

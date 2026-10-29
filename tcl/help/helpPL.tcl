@@ -2572,8 +2572,10 @@ set helpText(P,ReviewGameButton) {<h1>Okno silnika: Przycisk Przegląd partii</h
   Głębokość przeszukiwania, liczbę linii i to, które z nich trafiają do partii
   jako warianty, ustawia się w <a ReviewSettings><b>Ustawieniach przeglądu</b></a>.
   Liczby Threads i Hash należą do profilu silnika i są tam pokazywane tylko do
-  odczytu, dzięki czemu każdy przegląd tego silnika korzysta z tych samych
-  zasobów.
+  odczytu. Przegląd działa na własnym, drugim silniku, więc bierze z profilu
+  najwyżej 8 wątków i 512 MB tablicy transpozycji: profil ustawiony pod długą
+  analizę byłby inaczej przydzielony drugi raz, a dwa przeszukiwania tej wielkości
+  nie mieszczą się w pamięci.
   </p>
 
   <h3>Jedno posunięcie zamiast całej partii</h3>
@@ -2650,8 +2652,9 @@ set helpText(P,ReviewSettings) {<h1>Okno silnika: Ustawienia przeglądu</h1>
   <h3>Czego tu nie ma</h3>
   <p>
   Threads i Hash należą do profilu silnika, nie do przeglądu: ustawia się je
-  przyciskami okna silnika i zapisuje razem z silnikiem. Okno pokazuje je tylko
-  do odczytu, aby liczby były widoczne tam, gdzie są liczby przeglądu.
+  przyciskami okna silnika i zapisuje razem z silnikiem. Okno pokazuje, ile
+  przegląd z nich weźmie - najwyżej 8 wątków i 512 MB tablicy transpozycji -
+  ponieważ przegląd to drugi silnik obok silnika okna.
   </p>
 
   <h3>Odrzucona wartość</h3>

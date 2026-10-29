@@ -2562,8 +2562,10 @@ set helpText(ReviewGameButton) {<h1>Engine Window: Game Review Button</h1>
   How deep the pass searches, how many lines it keeps, and which of those lines
   become variations are set in <a ReviewSettings><b>Review Settings</b></a>. The
   Threads and Hash the engine searches with are the engine preset's own and are
-  shown there read-only, so every review of that engine runs with the same
-  resources.
+  shown there read-only. The pass runs on a second engine of its own, so it takes
+  at most 8 threads and 512 MB of hash from the preset: a preset sized for a long
+  interactive search would otherwise be allocated a second time, and two searches
+  that size do not fit in memory.
   </p>
 
   <h3>One move instead of the whole game</h3>
@@ -2639,7 +2641,8 @@ set helpText(ReviewSettings) {<h1>Engine Window: Review Settings</h1>
   <p>
   Threads and Hash belong to the engine preset, not to the review: they are set
   from the engine window's own controls and saved with the engine. The dialog
-  shows them read-only, so the numbers are visible where the review's are.
+  shows what the pass will take from them - at most 8 threads and 512 MB of hash
+  - because the pass is a second engine running beside the window's own.
   </p>
 
   <h3>A refused value</h3>

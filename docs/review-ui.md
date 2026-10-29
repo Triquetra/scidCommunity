@@ -96,10 +96,19 @@ able to decide that a pass searches at depth 0.
 
 **Threads and Hash are not in this dialog.** They are properties of the engine
 preset — the whole point of the preset work in #382 — and are set from the
-window's own controls. The dialog shows them read-only, under the five rows, as
-`Threads 8, Hash 256 MB (from engine preset)`. A second place to set them is a
-second place to get them wrong, and the window's own controls already write the
-preset.
+window's own controls. The dialog shows what the pass will take from them,
+read-only, under the five rows, as `Threads 8, Hash 256 MB (from engine preset)`.
+A second place to set them is a second place to get them wrong, and the window's
+own controls already write the preset.
+
+The pass is bounded to at most 8 threads and 512 MB of hash
+(`::review::MAX_PASS_THREADS`, `MAX_PASS_HASH`), and a preset asking for less
+keeps what it asks for. The reason is that the pass is a *second* engine process:
+the preset's reservation is allocated a second time beside the window's own
+engine. A preset of Threads 64 / Hash 110000 MB on a 128 GB machine therefore
+means two ~107 GB searches, the kernel swaps for its life, and systemd-oomd kills
+the whole application when the second engine's table fills in. A batch of
+short, fixed-depth searches cannot use a table that size anyway.
 
 ## What the buttons do not do
 
