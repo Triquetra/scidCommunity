@@ -73,6 +73,7 @@ set helpText(Index) {<h1>scidCommunity Help Topic Index</h1>
   <ul>
   <li><a Analysis>Analysis</a> window</li>
   <li><a Annotating>Annotating games</a></li>
+  <li><a BatchAnnotate>Annotating in batch</a> (AI commentary)</li>
   <li><a NAGs>Annotation symbols</a></li>
   <li><a Author>Author, contacting</a></li>
   <li><a MainWindow Autoplay>Autoplay mode</a></li>
@@ -153,7 +154,7 @@ set helpText(Index) {<h1>scidCommunity Help Topic Index</h1>
   
   <h3>G</h3>
   <ul>
-  <li><a GameComment>Game Comment</a> (Engine Window button)</li>
+  <li><a ReviewGameButton><b>Game Review</b></a> (Engine Window button)</li>
   <li><a Flags>Game flags</a></li>
   <li><a GameList>Game List</a> window</li>
   <li><a Menus Game>Game menu</a></li>
@@ -194,6 +195,7 @@ set helpText(Index) {<h1>scidCommunity Help Topic Index</h1>
   <li><a Menus>Menus</a></li>
   <li><a GameList Browsing>Merging games</a></li>
   <li><a Metadata>Metadata</a></li>
+  <li><a ReviewMoveButton><b>Move Comment</b></a> (Engine Window button)</li>
   <li><a Moves>Move entry</a></li>
   </ul>
   
@@ -240,6 +242,7 @@ set helpText(Index) {<h1>scidCommunity Help Topic Index</h1>
   <h3>R</h3>
   <ul>
   <li><a Graphs Rating>Rating graph</a></li>
+  <li><a ReviewSettings><b>Review Settings</b></a> (Engine Window button)</li>
   </ul>
   
   <h3>S</h3>
@@ -2528,46 +2531,173 @@ set helpText(PGNChessDB) {<h1>PGN Window: chessdb Engine Tree Button</h1>
 }
 
 ####################
-### Engine Window Game Comment button help:
+### Engine Window Game Review button help:
 
-set helpTitle(GameComment) "Game Comment Button"
-set helpText(GameComment) {<h1>Engine Window: Game Comment Button</h1>
+set helpTitle(ReviewGameButton) "Game Review Button"
+set helpText(ReviewGameButton) {<h1>Engine Window: Game Review Button</h1>
   <p>
-  The <b>Game Comment</b> button in the <a Engine>Engine</a> window allows you to
-  automatically generate AI commentary for an entire game in batch mode.
+  The <b>Game Review</b> button in the <a Engine>Engine</a> window reviews the
+  main line of the open game. The engine searches every position of the line,
+  one after another, and the review keeps what it found for each of them.
   </p>
-  
+
   <h3>How it works</h3>
   <p>
-  When you click the button, scidCommunity scans the entire game for annotated moves
-  (moves with NAGs or existing comments). For each such move, it:
-  <ul>
-  <li>Retrieves cloud evaluations for context</li>
-  <li>Uses any existing PGN variations as "Ground Truth" engine lines</li>
-  <li>Queries the AI to explain why the recommended line is best or why the played move was an error</li>
-  <li>Appends the generated commentary to the move's existing comments</li>
-  </ul>
+  A review runs on an engine connection of its own, so it does not disturb the
+  analysis you are watching. The board does not move either: the positions come
+  from the main line as it was when you pressed the button, so you can keep
+  working while the pass runs. Variations are not reviewed - the pass covers the
+  main line.
   </p>
-  
+  <p>
+  While it runs, the window shows <b>Reviewing position N of M</b> with a
+  <b>Cancel</b> button beside it. Cancel stops the pass and writes nothing. The
+  button is live when a game is open and an engine is selected; while a pass
+  runs both review buttons are disabled, so a second pass cannot be started over
+  the first.
+  </p>
+
+  <h3>Settings</h3>
+  <p>
+  How deep the pass searches, how many lines it keeps, and which of those lines
+  become variations are set in <a ReviewSettings><b>Review Settings</b></a>. The
+  Threads and Hash the engine searches with are the engine preset's own and are
+  shown there read-only, so every review of that engine runs with the same
+  resources.
+  </p>
+
+  <h3>One move instead of the whole game</h3>
+  <p>
+  <a ReviewMoveButton><b>Move Comment</b></a> describes the single move played
+  from the position on the board, which is the cheaper way to have one move
+  explained.
+  </p>
+
+  <p><footer>(Updated: scidCommunity, October 2026)</footer></p>
+}
+
+####################
+### Engine Window Move Comment button help:
+
+set helpTitle(ReviewMoveButton) "Move Comment Button"
+set helpText(ReviewMoveButton) {<h1>Engine Window: Move Comment Button</h1>
+  <p>
+  The <b>Move Comment</b> button in the <a Engine>Engine</a> window comments one
+  move: the move played from the position on the board. The engine searches the
+  position before the move and the one after it, because a verdict on a move
+  needs both scores - what the move was worth and what it brought.
+  </p>
+
+  <h3>When the button is live</h3>
+  <p>
+  Move Comment needs a game, a selected engine, and a move after the current
+  position. There is nothing to comment on the last position of the game, and
+  inside a variation the move numbering means something else: the pass covers
+  the main line, so the button is disabled there.
+  </p>
+
+  <h3>Waiting for the review depth</h3>
+  <p>
+  With <b>Wait for the review depth</b> on - the default, set in
+  <a ReviewSettings>Review Settings</a> - the comment has to be the one a full
+  review would have written, so a shallow analysis is not good enough: the pass
+  searches at the review's depth, and the status line says which depth it is
+  waiting for. Turn the setting off and the window's own analysis is used
+  whenever it has a number at all, which is what "comment on what the engine has
+  now" means, and the position is not searched twice.
+  </p>
+
+  <p><footer>(Updated: scidCommunity, October 2026)</footer></p>
+}
+
+####################
+### Engine Window Review Settings help:
+
+set helpTitle(ReviewSettings) "Review Settings"
+set helpText(ReviewSettings) {<h1>Engine Window: Review Settings</h1>
+  <p>
+  <b>Review Settings</b> in the <a Engine>Engine</a> window holds the choices a
+  review pass reads. Five numbers and one rule:
+  </p>
+  <ul>
+  <li><b>Lines</b>: how many of the engine's lines each position keeps (MultiPV),
+    from 1 to 5.</li>
+  <li><b>Depth</b>: how deep each position is searched. This is also the depth
+    <a ReviewMoveButton>Move Comment</a> waits for when
+    <b>Wait for the review depth</b> is on.</li>
+  <li><b>Variations to write</b>: how many of the engine's lines become variations
+    in the game for each move. Zero writes none, and the number cannot exceed
+    Lines.</li>
+  <li><b>Variation margin (cp)</b>: how far behind the best line another line may
+    be and still be written; a line further behind is noise and is dropped.</li>
+  <li><b>Wait for the review depth</b>: whether a move comment waits for the
+    review's depth instead of using the analysis already on screen - see
+    <a ReviewMoveButton>Move Comment</a>.</li>
+  </ul>
+
+  <h3>What is not in this dialog</h3>
+  <p>
+  Threads and Hash belong to the engine preset, not to the review: they are set
+  from the engine window's own controls and saved with the engine. The dialog
+  shows them read-only, so the numbers are visible where the review's are.
+  </p>
+
+  <h3>A refused value</h3>
+  <p>
+  A value the pass cannot honour - a number outside the range its field offers,
+  or more variations than there are lines - is refused, and the reason is shown
+  under the fields. The dialog stays open on the value that was refused, so it
+  can be corrected without losing the rest of the edit.
+  </p>
+
+  <p><footer>(Updated: scidCommunity, October 2026)</footer></p>
+}
+
+####################
+### Batch AI annotation help:
+###
+### The engine window's Game Comment button is gone, and the batch pass is still
+### here to be called by name (::analysis_auto_comment::batch_generate). The page
+### stays where it documented that pass, and says how to reach the dialog now.
+
+set helpTitle(BatchAnnotate) "Annotating a game in batch"
+set helpText(BatchAnnotate) {<h1>Annotating a game in batch</h1>
+  <p>
+  scidCommunity can generate AI commentary for a whole game at once, in batch
+  mode. The engine window used to carry a <b>Game Comment</b> button for it.
+  That button is gone; the pass is started by name instead,
+  <b>::analysis_auto_comment::batch_generate</b>, from a script or from the
+  interpreter. It opens the same dialog it always did, and what the dialog does
+  is unchanged.
+  </p>
+  <p>
+  The dialog scans the game for annotated moves - moves with NAGs or existing
+  comments - and for each of them retrieves cloud evaluations for context, uses
+  existing PGN variations as "ground truth" engine lines, asks the AI why the
+  recommended line is best or why the played move was an error, and appends the
+  generated commentary to the move's existing comment. Its one argument is the
+  engine id the button used to pass in; it may be left out.
+  </p>
+
   <h3>Choosing a provider and a model</h3>
   <p>
-  Game Comment needs an AI provider and a model before it can write anything.
-  Press <b>Settings...</b> in the Game Comment dialog once, choose a provider -
-  Google Gemini, DeepSeek, OpenCode Console, an OpenAI-compatible endpoint such as
-  a gateway or vLLM, or a local server such as Ollama or LM Studio - then choose a
-  model for it. With nothing configured the dialog offers to open these settings;
-  no commentary request is sent until a provider and a model are chosen.
-  <b>Load Models</b> asks the provider which models it offers. The choice is saved
-  when you press OK.
+  Batch annotation needs an AI provider and a model before it can write
+  anything. Press <b>Settings...</b> in the dialog once, choose a provider -
+  Google Gemini, DeepSeek, OpenCode Console, an OpenAI-compatible endpoint such
+  as a gateway or vLLM, or a local server such as Ollama or LM Studio - then
+  choose a model for it. With nothing configured the dialog offers to open these
+  settings; no commentary request is sent until a provider and a model are
+  chosen. <b>Load Models</b> asks the provider which models it offers. The choice
+  is saved when you press OK.
   </p>
-  
+
   <h3>Usage</h3>
   <p>
-  This feature is ideal for quickly adding educational notes to a game you've already
-  analyzed with an engine. It respects your local variations, ensuring the AI's
-  explanations align with your specific engine analysis.
+  This is the quickest way to add educational notes to a game you have already
+  analysed with an engine. It respects your local variations, so the AI's
+  explanations line up with your own analysis.
   </p>
-  
+
   <p><footer>(Updated: scidCommunity, October 2026)</footer></p>
 }
 
@@ -3438,7 +3568,12 @@ set helpText(Engine) {<h1>The Engine windows</h1>
     variations.</li>
   <li><b>Config</b> <button tb_eng_config>: Shows or hides the engine configuration
     panel.</li>
-  <li><a GameComment><b>Game Comment</b></a>: Generates comments for all positions in the game.</li>
+  <li><a ReviewGameButton><b>Game Review</b></a>: Reviews the main line of the
+    game, searching every position of it.</li>
+  <li><a ReviewMoveButton><b>Move Comment</b></a>: Describes the move played
+    from the current position, and nothing else.</li>
+  <li><a ReviewSettings><b>Review Settings</b></a>: Depth, lines, variations
+    and the review depth a move comment waits for.</li>
   </ul>
 
   <h3>Controls</h3>
