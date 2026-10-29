@@ -345,6 +345,49 @@ proc ::reviewdriver::lines {results ply mpv} {
     return $out
 }
 
+# The side to move at every position of the snapshot, from the map itself.
+#
+# Parity cannot answer this: a game may start from a FEN with Black to move, and
+# a null move is a fresh `position fen ... moves` header that leaves the same side
+# to move without advancing the ply counter. The header of each position says who
+# starts, and only a real move flips the side.
+proc ::reviewdriver::sides {map} {
+    set sides {}
+    set side ""
+    catch {
+        set words [split [dict get [dict get $map positions] 0]]
+        if {[lindex $words 1] eq "startpos"} {
+            set side w
+        } elseif {[lindex $words 1] eq "fen"} {
+            set side [lindex $words 3]
+        }
+    }
+    if {$side ne "w" && $side ne "b"} { set side w }
+    dict set sides 0 $side
+    set plies 0
+    catch { set plies [dict get $map plies] }
+    for {set p 1} {$p <= $plies} {incr p} {
+        set move ""
+        catch { set move [dict get [dict get $map moves] $p] }
+        if {$move eq ""} {
+            # A null move's own header: it names the side to move, and the ply
+            # counter is not a move.
+            catch {
+                set words [split [dict get [dict get $map positions] $p]]
+                if {[lindex $words 1] eq "fen"} {
+                    set side [lindex $words 3]
+                } elseif {[lindex $words 1] eq "startpos"} {
+                    set side w
+                }
+            }
+        } else {
+            set side [expr {$side eq "w" ? "b" : "w"}]
+        }
+        dict set sides $p $side
+    }
+    return $sides
+}
+
 # ply -> {label eval_cp} for every move the pass can judge, from the results of
 # the positions it searched.
 #
@@ -362,6 +405,7 @@ proc ::reviewdriver::lines {results ply mpv} {
 # omits the token.
 proc ::reviewdriver::verdicts {map results} {
     set out {}
+    set sides [::reviewdriver::sides $map]
     set plies 0
     catch { set plies [dict get $map plies] }
     for {set ply 1} {$ply <= $plies} {incr ply} {
@@ -374,30 +418,51 @@ proc ::reviewdriver::verdicts {map results} {
         if {$cp1 eq ""} { continue }
         set pv1 [lindex $best 3]
         set played [::review::playedMove $map $ply]
-        set isBest [expr {$played ne "" && [string equal [lindex $pv1 0] $played]}]
-        set after ""
-        if {$played ne ""} {
-            foreach idx [lsort -integer [dict keys $lines]] {
-                set line [dict get $lines $idx]
-                if {[string equal [lindex [lindex $line 3] 0] $played]} {
-                    set after [::reviewdriver::lineScore $line]
-                    break
-                }
+        # No move, no verdict: a null move is a header, not a move to label, and
+        # writing a comment and variations into it would corrupt the game.
+        if {$played eq ""} { continue }
+        set isBest [expr {[string equal [lindex $pv1 0] $played]}]
+        # The line the move owns at this root, when the engine ranked it: one
+        # search for both figures, so the drop it measures is not search noise.
+        set ranked ""
+        foreach idx [lsort -integer [dict keys $lines]] {
+            set line [dict get $lines $idx]
+            if {[string equal [lindex [lindex $line 3] 0] $played]} {
+                set ranked [::reviewdriver::lineScore $line]
+                break
             }
         }
-        if {$after eq "" && [dict exists $results $ply]
-                && [dict exists [dict get $results $ply] 1]} {
+        # The searched successor is the engine's own evaluation of the position
+        # the move reaches, from the opponent's point of view; negate it to the
+        # mover's. This is the figure the comment's [%eval] carries, whatever the
+        # move's rank at the root: the unranked case already had to use it, and
+        # one source for the token beats two.
+        set successor ""
+        if {[dict exists $results $ply] && [dict exists [dict get $results $ply] 1]} {
             set successor [::reviewdriver::lineScore [dict get [dict get $results $ply] 1]]
-            if {$successor ne ""} { set after [expr {-$successor}] }
+            if {$successor ne ""} { set successor [expr {-$successor}] }
         }
-        # The ladder needs a pair of evaluations. A move with no successor to
-        # compare against is judged on the best line alone - no measured drop -
-        # and its comment carries no [%eval] at all.
+        set after $ranked
+        if {$after eq ""} { set after $successor }
+        # The ladder needs a pair of evaluations. A move the engine measured -
+        # the best line, or the line the move owns, or the searched successor -
+        # has one; a move it never measured does not, and "no drop measured" is
+        # not the same as "excellent". Only the engine's own move is judged
+        # without a successor (it is `best` by definition); anything else is
+        # left unlabelled rather than given a verdict nothing supports.
+        if {$after eq "" && !$isBest} { continue }
         set judged $after
         if {$judged eq ""} { set judged $cp1 }
+        # [%eval] is White's point of view. The figure is the mover's, and the
+        # mover is whoever is to move in the position before the move - read from
+        # the snapshot, not from ply parity.
+        set shown $successor
+        if {$shown eq ""} { set shown $ranked }
         set eval_cp ""
-        if {$after ne ""} {
-            set eval_cp [expr {($ply % 2) ? $after : -$after}]
+        if {$shown ne ""} {
+            set mover ""
+            catch { set mover [dict get $sides $before] }
+            set eval_cp [expr {$mover eq "b" ? -$shown : $shown}]
         }
         dict set out $ply [list [::movelabels::label $cp1 $judged $isBest] $eval_cp]
     }
@@ -446,18 +511,27 @@ proc ::reviewdriver::run {engine args} {
     }
     if {![string is integer -strict $bookEnd]} { return "-bookEnd must be a whole number" }
     if {[llength $engine] == 0} { return "no engine selected" }
+    # The pass pins the protocol to uci: an XBoard preset would never answer the
+    # handshake, and the run would sit in `searching` until the user cancelled.
+    if {[lindex $engine 7] eq "" || [lindex $engine 7] eq 0} {
+        return "the review needs a UCI engine"
+    }
+    # One run at a time, and refusal before anything is read: a second call must
+    # not rewrite the counts of the pass that is already searching.
+    if {[dict size $pass]} {
+        return "engine 20 is already running a pass"
+    }
     # What the pass may spend is ::review::effective's answer, not a second set of
     # defaults here: the preset wins Threads/Hash, MultiPV is at least two, and the
     # depth is the review's own floor.
     set eff [::review::effective $engine]
     set mpv [dict get $eff mpv]
     set depth [dict get $eff depth]
-    # An engine that never announced MultiPV would be sent a setoption it ignores,
-    # and the review would promise lines it does not have. Refuse rather than
-    # quietly review one line.
-    if {$mpv > 1 && [dict get [::review::engineDefaults $engine] mpv] eq ""} {
-        return "the engine does not advertise MultiPV"
-    }
+    # MultiPV is asked for on the pass's own connection and an engine that does
+    # not offer it ignores the option, so a preset that never overrode it is not
+    # evidence of anything: ::enginecfg::save drops options sitting at their
+    # default, so most presets have no mpv key at all. A one-line engine simply
+    # returns one line and the verdicts fall back to the searched successor.
     set map ""
     if {[catch { set map [::review::mainLineMap [sc_game UCI_mainLine]] } err]} {
         return $err
@@ -473,7 +547,9 @@ proc ::reviewdriver::run {engine args} {
     # at the end is the only thing that puts the reader back where the pass found
     # them.
     set cursor [::review::cursorSave]
-    set state [dict merge [::reviewdriver::blankState searching] \
+    # Not published until the pass has started: a refusal must leave the status
+    # of a run that is already in flight alone.
+    set starting [dict merge [::reviewdriver::blankState searching] \
         [dict create total [llength $positions]]]
     set token ""
     if {[catch {
@@ -490,6 +566,7 @@ proc ::reviewdriver::run {engine args} {
         }
         return $err
     }
+    set state $starting
     set pass [dict create token $token map $map plies [dict get $map plies] \
         bookEnd $bookEnd mpv $mpv positions $positions cursor $cursor \
         progress $progress notify $notify]
@@ -565,14 +642,14 @@ proc ::reviewdriver::writeResults {p results} {
 # that could not be verified leaves the board on a known position.
 proc ::reviewdriver::restoreRun {p} {
     variable state
+    # cursorRestore's own answer, not a loc/level comparison: a game that changed
+    # while the pass ran can put the same ply on a different position, and only
+    # the FEN check inside cursorRestore tells the two apart. 1 is exact, 0 is a
+    # known fallback, -1 an unknown one.
     set restored 0
-    set cursor [dict get $p cursor]
-    catch { ::review::cursorRestore $cursor }
-    catch {
-        if {[sc_pos location] == [dict get $cursor loc]
-                && [sc_var level] == [llength [dict get $cursor path]]} {
-            set restored 1
-        }
+    catch { set restored [::review::cursorRestore [dict get $p cursor]] }
+    if {![string is integer -strict $restored] || $restored != 1} {
+        set restored 0
     }
     dict set state restored $restored
     return $restored

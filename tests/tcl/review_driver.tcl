@@ -370,21 +370,53 @@ set vres [dict create \
 set verd [::reviewdriver::verdicts $vmap $vres]
 checkEq "every move whose reference position was searched has a verdict" \
     [dict keys $verd] {1 2 3 4}
-# The move the engine preferred: best, and the eval is the best line's own score.
-checkEq "the move the engine preferred is best" [dict get $verd 1] {best 30}
-# Ranked second by the engine, so the move's own line is the "after" figure.
-checkEq "a ranked move is judged against its own line" [dict get $verd 2] {excellent -25}
+# The move the engine preferred is best; the [%eval] is the successor's own
+# search (-40: Black to move there, +40 for Black), not the root line's +30.
+checkEq "the move the engine preferred is best" [dict get $verd 1] {best -40}
+# Ranked second by the engine: its own line is what the label compares against
+# (no search noise), while the token still comes from the searched successor.
+checkEq "a ranked move is judged against its own line" [dict get $verd 2] {excellent 50}
 # Nowhere in the MultiPV window: the searched successor answers instead, negated
 # because the side to move there is the opponent.
 checkEq "a move outside the window falls back to its successor" \
     [dict get $verd 3] {excellent 120}
 checkEq "a big drop past the window is a blunder" [dict get $verd 4] {blunder 800}
 
+# A move with no successor and not the engine's choice has no measurement to
+# support a label: no verdict, rather than an "excellent" nothing measured.
 set short [dict remove $vres 4]
-checkEq "with no successor the label still exists" \
-    [lindex [dict get [::reviewdriver::verdicts $vmap $short] 4] 0] excellent
-checkEq {and the comment carries no [%eval]} \
-    [lindex [dict get [::reviewdriver::verdicts $vmap $short] 4] 1] {}
+check "an unmeasured move gets no verdict" \
+    [expr {![dict exists [::reviewdriver::verdicts $vmap $short] 4]}]
+checkEq "and the moves that were measured keep theirs" \
+    [dict keys [::reviewdriver::verdicts $vmap $short]] {1 2 3}
+
+puts "a null move is a header, not a move to judge"
+
+# A null move costs a ply in the map but is not a move: there is nothing to
+# label, and writing a comment and variations into it would corrupt the game.
+set nmap [::review::mainLineMap [list \
+    {position startpos moves} e2e4 \
+    {position fen rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1 moves} \
+    d7d5]]
+set nres [dict create \
+    0 [dict create 1 {20 30 cp {e2e4}}] \
+    1 [dict create 1 {20 20 cp {g1f3}}] \
+    2 [dict create 1 {20 15 cp {d7d5}}]]
+set nverd [::reviewdriver::verdicts $nmap $nres]
+checkEq "the null move gets no verdict" [dict keys $nverd] {1 3}
+# The header says who moves next, so the comment after a null move still carries
+# White's point of view rather than a ply-parity guess.
+checkEq "and the move after it is still judged from the right side" \
+    [dict get $nverd 3] {best -15}
+
+puts "a game that starts with Black to move"
+set fmap [::review::mainLineMap [list \
+    {position fen 4k3/8/8/8/8/8/8/4K2R b - - 0 1 moves} e8d8]]
+set fres [dict create \
+    0 [dict create 1 {20 120 cp {e8d8}}] \
+    1 [dict create 1 {20 60 cp {e1e2}}]]
+checkEq {[%eval] is White's point of view, not the ply's parity} \
+    [dict get [::reviewdriver::verdicts $fmap $fres] 1] {best 60}
 
 puts "a pass over a game: search first, write after"
 
@@ -546,8 +578,8 @@ foreach e $::events {
     if {[lindex $e 0] eq "setComment"} { lappend comments [lindex $e 1] }
 }
 checkEq "the verdicts are written once each, in ply order" $comments [list \
-    {[best] [%eval +0.30]} \
-    {[excellent] [%eval -0.25]} \
+    {[best] [%eval -0.40]} \
+    {[excellent] [%eval +0.50]} \
     {[excellent] [%eval +1.20]} \
     {[blunder] [%eval +8.00]}]
 checkEq {and the [%eval] token reads back as the score that was written} \
@@ -597,17 +629,42 @@ set ::sent {}
 checkEq "no engine is a refusal, not a silent choice" [::reviewdriver::run ""] \
     {no engine selected}
 checkEq "and nothing was opened" $::sent {}
-checkEq "an engine that never announced MultiPV is refused" \
-    [::reviewdriver::run {Plain /usr/bin/plain {} {} 0 0 {} 1 {{Threads 2}}}] \
-    {the engine does not advertise MultiPV}
-checkEq "nothing was opened for it either" $::sent {}
+# ::enginecfg::save drops an option sitting at its default, so a preset that
+# never overrode MultiPV carries no mpv key - that is not evidence the engine
+# cannot do it. The pass asks for MultiPV on its own connection, and a one-line
+# engine ignores the option and answers with one line.
+checkEq "a preset that never set MultiPV still starts" \
+    [::reviewdriver::run {Plain /usr/bin/plain {} {} 0 0 {} 1 {{Threads 2}}}] ""
+check "and a connection was opened for it" [expr {[llength $::sent] > 0}]
+::reviewdriver::cancel
+pump
+set ::sent {}
+# The pass pins the protocol to uci, so an XBoard preset would never answer the
+# handshake and the run would sit in `searching` until the user cancelled. The
+# preset here advertises MultiPV on purpose: without the protocol check it would
+# pass every other gate and open a connection nothing can answer.
+checkEq "an XBoard preset that advertises MultiPV is refused, not left waiting" \
+    [::reviewdriver::run {Phalanx /usr/bin/phalanx {} {} 0 0 {} 0 {{MultiPV 3}}}] \
+    {the review needs a UCI engine}
+checkEq "and nothing was opened for it either" $::sent {}
 
 ::review::reset
 checkEq "the first of two passes starts" [::reviewdriver::run $runcfg] ""
+# Give the running pass one position, so a second call that read the map before
+# refusing would visibly rewrite its counts.
+feedEvent InfoConfig {Threads 8 Hash 256 MultiPV 3}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 30 cp 0 e2e4 e7e5}
+feedEvent InfoBestMove {}
+checkEq "the running pass has searched a position" \
+    [dict get [::reviewdriver::status] searched] 1
+set ::fakeMainLine [list {position startpos moves} e2e4]
 checkEq "a second pass over the same connection is refused" \
     [::reviewdriver::run $runcfg] {engine 20 is already running a pass}
-checkEq "and the running pass is left alone" \
-    [dict get [::reviewdriver::status] state] searching
+checkEq "and the running pass keeps its state and counts" \
+    [list [dict get [::reviewdriver::status] state] \
+          [dict get [::reviewdriver::status] total] \
+          [dict get [::reviewdriver::status] searched]] {searching 5 1}
+set ::fakeMainLine [list {position startpos moves} e2e4 e7e5 g1f3 b8c6]
 
 puts "a cancelled pass writes nothing"
 
@@ -621,6 +678,15 @@ checkEq "nothing is written" $::events {}
 checkEq "and the reader is left where the pass found them" \
     [list $::fakeLoc $::fakeLevel] {2 0}
 pump
+
+puts "an exact restore is the position, not the ply"
+
+# cursorRestore compares the saved FEN, because a ply counter can land on a
+# different position when the game changed during the asynchronous search.
+set exact [dict create cursor [dict create loc 2 base 2 path {} fen {2/0}]]
+checkEq "the same position is an exact restore" [::reviewdriver::restoreRun $exact] 1
+set moved [dict create cursor [dict create loc 2 base 2 path {} fen {9/0}]]
+checkEq "a different position at the same ply is not" [::reviewdriver::restoreRun $moved] 0
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]
