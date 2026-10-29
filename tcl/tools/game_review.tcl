@@ -36,6 +36,15 @@ namespace eval ::review {
     variable MAX_MPV 5
     variable MIN_DEPTH 6
     variable MAX_DEPTH 60
+    # The pass is a second engine process, so every resource it is given is
+    # allocated again beside the window's own engine. A preset sized for a long
+    # interactive search - Threads 64 and Hash 110000 MB on a 128 GB machine -
+    # then puts two of those in memory, and the machine swaps itself to death
+    # before the review is half done. A batch of short, fixed-depth searches
+    # cannot use a TT that size anyway, so the pass has a ceiling. It is a
+    # ceiling, not a setting: a preset that asks for less keeps what it asks for.
+    variable MAX_PASS_THREADS 8
+    variable MAX_PASS_HASH 512
 }
 
 proc ::review::defaults {} {
@@ -198,9 +207,17 @@ proc ::review::engineDefaults {enginecfg} {
 # raised to 2 regardless, because a verdict without a second line cannot tell a
 # mistake from the only move available.
 proc ::review::effective {enginecfg} {
+    variable MAX_PASS_THREADS
+    variable MAX_PASS_HASH
     set defaults [::review::engineDefaults $enginecfg]
     set threads [dict get $defaults threads]
     set hash [dict get $defaults hash]
+    if {$threads ne "" && $threads > $MAX_PASS_THREADS} {
+        set threads $MAX_PASS_THREADS
+    }
+    if {$hash ne "" && $hash > $MAX_PASS_HASH} {
+        set hash $MAX_PASS_HASH
+    }
     set mpv [get mpv]
     if {[dict get $defaults mpv] ne "" && [dict get $defaults mpv] > $mpv} {
         set mpv [dict get $defaults mpv]

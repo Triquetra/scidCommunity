@@ -249,6 +249,12 @@ checkEq "the note says where they come from" \
     [::reviewui::presetNote $enginecfg] {Threads 8, Hash 256 MB (from engine preset)}
 checkEq "no preset values, no note" \
     [::reviewui::presetNote {X /x {} {} 0 0 {} 1 {}}] ""
+# The note is what the pass will take, not what the preset reserves: a preset of
+# Threads 64 / Hash 110000 is run as 8 / 512, because the pass is a second engine
+# and the preset's full reservation would be allocated beside the window's.
+checkEq "the note shows the pass's share of a large preset" \
+    [::reviewui::presetNote {X /x {} {} 0 0 {} 1 {{Threads 64} {Hash 110000}}}] \
+    {Threads 8, Hash 512 MB (from engine preset)}
 
 puts "the move comment's gate"
 

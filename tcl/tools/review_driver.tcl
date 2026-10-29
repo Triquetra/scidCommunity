@@ -147,9 +147,12 @@ proc ::reviewdriver::configure {token} {
     variable job
     set id [dict get $job($token) id]
     set opts [list [list MultiPV [dict get $job($token) mpv]]]
-    set defaults [::review::engineDefaults [dict get $job($token) enginecfg]]
+    # ::review::effective, not the preset itself: a pass is a second engine, and
+    # that is where the ceiling on the threads and hash it may take lives. Ask
+    # the preset here and a 110 GB transposition table is allocated twice.
+    set eff [::review::effective [dict get $job($token) enginecfg]]
     foreach key {threads hash} {
-        set value [dict get $defaults $key]
+        set value [dict get $eff $key]
         if {$value ne ""} {
             lappend opts [list [expr {$key eq "threads" ? "Threads" : "Hash"}] $value]
         }
