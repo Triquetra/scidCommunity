@@ -424,5 +424,21 @@ checkEq "the mpv range stops where the setter does" \
 checkEq "and so does the depth range" \
     [lindex [::reviewui::settingRange depth] 0] 6
 
+puts "\nthe engine window's guards (read, not run: this harness has no Tk)"
+
+# tcl/windows/engine.tcl cannot be loaded here, and each of these is one clause
+# in a loop or a line in a <Destroy> binding. Both are invisible until the case
+# they exist for happens - a window opened on the pass's own connection, or a
+# window closed while its pass is still searching - so they are asserted as text.
+set engineSrc [langText [file join $root tcl windows engine.tcl]]
+check "a window never takes the pass's connection id" \
+    [regexp {while \{\[winfo exists \.engineWin\$id\] \|\| \[::enginewin::idReserved \$id\]\}} $engineSrc]
+check "and a viewer's window neither" \
+    [regexp {while \{\[info exists ::enginewin::pgnviewer\(\$id\)\] \|\| \[::enginewin::idReserved \$id\]\}} $engineSrc]
+check "closing a window stops its pass" \
+    [regexp {catch \{ ::enginewin::reviewCancel \$id \}} $engineSrc]
+check "and drops the results the pass was writing" \
+    [regexp {unset -nocomplain ::enginewin::reviewresults\(\$id\)} $engineSrc]
+
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

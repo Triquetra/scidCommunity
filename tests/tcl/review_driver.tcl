@@ -125,6 +125,16 @@ set token [::reviewdriver::start $enginecfg $positions 3 18 ::onProgress ::onDon
 checkEq "the engine was opened on the pass's own id" [lindex $::sent 0] {connect 20 /usr/bin/stockfish {} uci}
 checkEq "with uci as the protocol, never as the engine's argument" \
     [lindex $::argv_seen 0] {/usr/bin/stockfish}
+
+# Engine windows are allocated their ids from this same pool, and
+# ::engine::connect closes whatever connection already holds the id it is given -
+# so a window opened on 20 would take the pass's engine. ::enginewin::Open asks
+# this before it hands out an id.
+check "the pass's id is kept for the pass" [::reviewdriver::reservedId 20]
+checkEq "and asking is the id the pass really uses" \
+    [::reviewdriver::reservedId $::reviewdriver::ENGINE_ID] 1
+check "a window id is not reserved" [expr {![::reviewdriver::reservedId 1]}]
+check "nor is the next one up" [expr {![::reviewdriver::reservedId 21]}]
 feed InfoConfig {Threads 8 Hash 256 MultiPV 3}
 set opt [lsearch -inline $::sent {send 20 SetOptions*}]
 check "the pass asks for its own MultiPV" [string match {*MultiPV 3*} $opt]

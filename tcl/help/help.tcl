@@ -2671,12 +2671,13 @@ set helpText(BatchAnnotate) {<h1>Annotating a game in batch</h1>
   unchanged.
   </p>
   <p>
-  The dialog scans the game for annotated moves - moves with NAGs or existing
-  comments - and for each of them retrieves cloud evaluations for context, uses
-  existing PGN variations as "ground truth" engine lines, asks the AI why the
-  recommended line is best or why the played move was an error, and appends the
-  generated commentary to the move's existing comment. Its one argument is the
-  engine id the button used to pass in; it may be left out.
+  The dialog scans the game for moves carrying an annotation symbol (a NAG
+  other than the Diagram marker), and always adds the game's final position for
+  a summary. For each of those moves it retrieves cloud evaluations for context,
+  uses existing PGN variations as "ground truth" engine lines, asks the AI why
+  the recommended line is best or why the played move was an error, and appends
+  the generated commentary to the move's existing comment. Its one argument is
+  the engine id the button used to pass in; it may be left out.
   </p>
 
   <h3>Choosing a provider and a model</h3>

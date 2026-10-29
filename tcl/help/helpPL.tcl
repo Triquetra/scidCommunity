@@ -2682,13 +2682,14 @@ set helpText(P,BatchAnnotate) {<h1>Komentowanie partii w trybie zbiorczym</h1>
   okno co dawniej, a jego działanie się nie zmieniło.
   </p>
   <p>
-  Okno zbiorcze przeszukuje partię w poszukiwaniu posunięć z adnotacjami
-  (posunięć z NAG-ami lub istniejącymi komentarzami). Dla każdego z nich pobiera
-  oceny z chmury jako kontekst, używa istniejących wariantów PGN jako „ground
-  truth” linii silnika, pyta AI, dlaczego rekomendowana linia jest najlepsza
-  albo dlaczego zagrane posunięcie było błędem, i dopisuje wygenerowany
-  komentarz do istniejącego komentarza przy posunięciu. Jego jedynym argumentem
-  jest identyfikator silnika, który przekazywał przycisk; można go pominąć.
+  Okno zbiorcze przeszukuje partię w poszukiwaniu posunięć z symbolem adnotacji
+  (NAG innym niż znacznik diagramu) i zawsze dodaje ostatnią pozycję partii, żeby
+  ją podsumować. Dla każdego z nich pobiera oceny z chmury jako kontekst, używa
+  istniejących wariantów PGN jako „ground truth” linii silnika, pyta AI,
+  dlaczego rekomendowana linia jest najlepsza albo dlaczego zagrane posunięcie
+  było błędem, i dopisuje wygenerowany komentarz do istniejącego komentarza przy
+  posunięciu. Jego jedynym argumentem jest identyfikator silnika, który
+  przekazywał przycisk; można go pominąć.
   </p>
 
   <h3>Wybór dostawcy i modelu</h3>

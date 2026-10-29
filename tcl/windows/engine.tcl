@@ -253,15 +253,26 @@ proc ::enginewin::toggleStartStop { {id ""} {enginename ""} } {
     return [::enginewin::start $id $enginename $pgnviewer]
 }
 
+# Whether the connection id belongs to someone other than an engine window. The
+# review pass runs on a connection of its own (tools/review_driver.tcl), and
+# ::engine::connect closes any connection that already holds the id it is given,
+# so a window must not be opened on it.
+proc ::enginewin::idReserved {id} {
+    if {[llength [info commands ::reviewdriver::reservedId]]} {
+        return [::reviewdriver::reservedId $id]
+    }
+    return 0
+}
+
 proc ::enginewin::Open { {id ""} {enginename ""} {pgnviewer 0} } {
     if {$id == ""} {
         set id 1
         if { $pgnviewer } {
-            while {[info exists ::enginewin::pgnviewer($id)]} {
+            while {[info exists ::enginewin::pgnviewer($id)] || [::enginewin::idReserved $id]} {
                 incr id
             }
         } else {
-            while {[winfo exists .engineWin$id]} {
+            while {[winfo exists .engineWin$id] || [::enginewin::idReserved $id]} {
                 incr id
             }
         }
@@ -389,6 +400,11 @@ proc ::enginewin::Open { {id ""} {enginename ""} {pgnviewer 0} } {
     # The engine should be closed before the debug .text is destroyed
     bind $w.config <Destroy> [list apply {{id w} {
         if {![info exists ::enginewin::engState($id)]} { return }
+        # The pass runs on its own connection, so closing the window would
+        # otherwise leave it searching a game nothing shows any more - and
+        # ::reviewdriver::busy would keep every other window from starting one.
+        catch { ::enginewin::reviewCancel $id }
+        unset -nocomplain ::enginewin::reviewresults($id)
         ::stored_eval::cancelQuery $id
         ::stored_eval::clear $id
         unset ::enginewin::engState($id)
