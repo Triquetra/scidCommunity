@@ -536,5 +536,39 @@ fakeCursor 5 {} {} 10
 check "with a null move nothing is dropped" \
     [expr {[lsearch -exact $::calls {add pvBest}] >= 0}] $::calls
 
+puts "\nsaved settings"
+# Review Settings is an ordinary preference: the values are option variables, and
+# the working copy starts from them. This is what a restart looks like.
+::review::reset
+set ::reviewopt(depth) 25
+set ::reviewopt(mpv) 2
+set ::reviewopt(var_lines) 2
+set ::review::S [dict create]
+checkEq "a saved depth is the one in force" [::review::get depth] 25
+checkEq "and a saved mpv" [::review::get mpv] 2
+checkEq "and a saved variation count" [::review::get var_lines] 2
+checkEq "the settings that were never saved keep their default" \
+    [::review::get var_cp] 0
+::review::setValue depth 30
+checkEq "a change is written where the options file reads it" $::reviewopt(depth) 30
+::review::setValue depth 0
+checkEq "and a refused change is not written" $::reviewopt(depth) 30
+# A hand-edited options file must not decide how the pass searches.
+set ::reviewopt(depth) 0
+set ::reviewopt(mpv) 99
+set ::reviewopt(var_lines) 40
+set ::review::S [dict create]
+checkEq "a saved depth below the floor is raised to it" [::review::get depth] 6
+checkEq "a saved mpv above the ceiling is lowered to it" [::review::get mpv] 5
+checkEq "and var_lines follows the mpv it was saved with" [::review::get var_lines] 5
+set ::reviewopt(mpv) 1
+set ::review::S [dict create]
+checkEq "one line means no variations at all" [::review::get var_lines] 0
+set ::reviewopt(depth) "deep"
+set ::review::S [dict create]
+checkEq "a value that is not a number is ignored" [::review::get depth] 18
+array unset ::reviewopt
+::review::reset
+
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

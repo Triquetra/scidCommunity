@@ -51,15 +51,57 @@ proc ::review::reset {} {
     return $S
 }
 
+# The settings in force at the start of a session: the defaults, with whatever
+# the user saved over the top. Each setting is an ordinary option variable
+# (::reviewopt(key), registered at the end of this file), so Review Settings
+# behaves like every other preference - an edit is written to the options file
+# with the rest of them and read back at the next start.
+#
+# A hand-edited options file must not decide how deep a pass searches, so the
+# loaded values are clamped here as well as in setValue.
+proc ::review::saved {} {
+    variable DEFAULTS
+    variable MAX_MPV
+    variable MIN_DEPTH
+    variable MAX_DEPTH
+    set S $DEFAULTS
+    foreach key [dict keys $DEFAULTS] {
+        if {[info exists ::reviewopt($key)] &&
+            [string is integer -strict $::reviewopt($key)]} {
+            dict set S $key $::reviewopt($key)
+        }
+    }
+    if {[dict get $S mpv] < 1} { dict set S mpv 1 }
+    if {[dict get $S mpv] > $MAX_MPV} { dict set S mpv $MAX_MPV }
+    if {[dict get $S depth] < $MIN_DEPTH} { dict set S depth $MIN_DEPTH }
+    if {[dict get $S depth] > $MAX_DEPTH} { dict set S depth $MAX_DEPTH }
+    if {[dict get $S var_lines] < 0} { dict set S var_lines 0 }
+    if {[dict get $S mpv] < 2} {
+        dict set S var_lines 0
+    } elseif {[dict get $S var_lines] > [dict get $S mpv]} {
+        dict set S var_lines [dict get $S mpv]
+    }
+    if {[dict get $S var_cp] < 0} { dict set S var_cp 0 }
+    return $S
+}
+
+# Write the working copy where the options file reads it. Called by setValue, so
+# a value the setter refused is never saved.
+proc ::review::save {} {
+    variable S
+    if {![dict size $S]} { return }
+    foreach {key value} $S { set ::reviewopt($key) $value }
+}
+
 proc ::review::all {} {
     variable S
-    if {![dict size $S]} { reset }
+    if {![dict size $S]} { set S [::review::saved] }
     return $S
 }
 
 proc ::review::get {key} {
     variable S
-    if {![dict size $S]} { reset }
+    if {![dict size $S]} { set S [::review::saved] }
     if {![dict exists $S $key]} { error "unknown review setting: $key" }
     return [dict get $S $key]
 }
@@ -122,6 +164,7 @@ proc ::review::setValue {key value} {
             return "var_lines cannot exceed mpv ([dict get $S mpv])"
         }
     }
+    ::review::save
     return ""
 }
 
@@ -556,4 +599,14 @@ proc ::review::selectLines {lines {played ""}} {
         lappend out $pv
     }
     return $out
+}
+
+
+# Every setting is a saved option. options.store keeps a value the options file
+# already carried and writes the default for one that is new; the array element
+# is the variable options.write saves, like ::showEvalBar($w) in main.tcl.
+if {[llength [info commands options.store]]} {
+    foreach key [dict keys [::review::defaults]] {
+        options.store ::reviewopt($key) [dict get [::review::defaults] $key]
+    }
 }

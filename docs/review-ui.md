@@ -88,6 +88,12 @@ the edit is not lost; nothing is clamped behind the user's back. `var_lines` is
 capped by `mpv`, so its box follows `mpv` rather than offering a number the
 setter would reject.
 
+The five rows are ordinary options (`::reviewopt(mpv)` and so on, registered
+with `options.store`), so they are written to the options file with the rest of
+the user's preferences and read back at the next start. A value in a hand-edited
+options file is clamped to the same range before it is used: the file must not be
+able to decide that a pass searches at depth 0.
+
 **Threads and Hash are not in this dialog.** They are properties of the engine
 preset — the whole point of the preset work in #382 — and are set from the
 window's own controls. The dialog shows them read-only, under the five rows, as
