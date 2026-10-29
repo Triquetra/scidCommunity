@@ -48,6 +48,9 @@ jobs:
       - name: Engine preset duplicate
         run: tclsh tests/tcl/engine_duplicate.tcl
 
+      - name: Help keys
+        run: tclsh tests/tcl/help_keys.tcl
+
       - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl
 
