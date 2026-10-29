@@ -890,6 +890,7 @@ translate B EngineAddLocal {Adicione um mecanismo local}
 translate B EngineAddRemote {Adicionar um mecanismo remoto}
 translate B EngineReload {Recarregue o mecanismo atual}
 translate B EngineClone {Crie uma cópia do mecanismo atual}
+translate B EngineDuplicate {Duplicar}
 translate B EngineDelete {Exclua o mecanismo atual}
 translate B EngineOpenAnalysis {Análise aberta}
 

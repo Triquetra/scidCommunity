@@ -918,6 +918,7 @@ translate J EngineAddLocal {Додајте локални мотор}
 translate J EngineAddRemote {Додајте удаљени мотор}
 translate J EngineReload {Поново учитајте тренутни мотор}
 translate J EngineClone {Направите копију тренутног мотора}
+translate J EngineDuplicate {Дуплирај}
 translate J EngineDelete {Избришите тренутни мотор}
 translate J EngineOpenAnalysis {Отворена анализа}
 

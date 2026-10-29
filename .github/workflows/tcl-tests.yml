@@ -45,6 +45,9 @@ jobs:
       - name: Review UI
         run: tclsh tests/tcl/review_ui.tcl
 
+      - name: Engine preset duplicate
+        run: tclsh tests/tcl/engine_duplicate.tcl
+
       - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl
 

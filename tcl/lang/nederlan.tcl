@@ -907,6 +907,7 @@ translate N EngineAddLocal {Voeg een lokale engine toe}
 translate N EngineAddRemote {Voeg een externe motor toe}
 translate N EngineReload {Herlaad de huidige engine}
 translate N EngineClone {Maak een kopie van de huidige engine}
+translate N EngineDuplicate {Dupliceren}
 translate N EngineDelete {Verwijder de huidige engine}
 translate N EngineOpenAnalysis {Analyse openen}
 

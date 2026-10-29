@@ -917,6 +917,7 @@ translate D EngineAddLocal {Fügen Sie eine lokale Engine hinzu}
 translate D EngineAddRemote {Fügen Sie eine Remote-Engine hinzu}
 translate D EngineReload {Laden Sie die aktuelle Engine neu}
 translate D EngineClone {Erstellen Sie eine Kopie der aktuellen Engine}
+translate D EngineDuplicate {Duplizieren}
 translate D EngineDelete {Löschen Sie die aktuelle Engine}
 translate D EngineOpenAnalysis {Offene Analyse}
 

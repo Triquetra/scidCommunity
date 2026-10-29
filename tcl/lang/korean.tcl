@@ -918,6 +918,7 @@ translate k EngineAddLocal {위치 엔진 추가}
 translate k EngineAddRemote {원격 엔진 추가}
 translate k EngineReload {현재 엔진을 다시 로드합니다.}
 translate k EngineClone {현재 엔진의 활동을 참여합니다.}
+translate k EngineDuplicate {복제}
 translate k EngineDelete {현재 엔진 삭제}
 translate k EngineOpenAnalysis {공개 분석}
 

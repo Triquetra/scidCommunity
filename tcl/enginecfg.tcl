@@ -64,6 +64,19 @@ proc ::enginecfg::add {enginecfg} {
     return [::enginecfg::save $enginecfg true]
 }
 
+# Return a copy of an engine's config under a name not yet in the list.
+# The copy is the complete spec - command, arguments, directory, the UCI
+# options and the search limits - because a duplicate exists to become a
+# second preset of the same binary that differs only in how it is used.
+# The raw element count is kept: a legacy nine-element entry copies as nine,
+# so its copy still falls back to the global limits and writes no Limits line,
+# while an entry whose limits were all cleared copies as ten with the empty
+# dict that overrides those globals.
+proc ::enginecfg::duplicate {enginecfg} {
+    lset enginecfg 0 [::enginecfg::uniquename [lindex $enginecfg 0]]
+    return $enginecfg
+}
+
 # Remove an engine from the "Engine list" file.
 # Returns true if the engine was removed
 proc ::enginecfg::remove {name} {
