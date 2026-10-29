@@ -25,6 +25,7 @@ proc checkEq {name got want} {
 set root [file normalize [file join [file dirname [info script]] .. ..]]
 source [file join $root tcl tools accuracy.tcl]
 source [file join $root tcl tools move_labels.tcl]
+source [file join $root tcl tools score_seed.tcl]
 source [file join $root tcl enginecfg.tcl]
 source [file join $root tcl tools engine_limits.tcl]
 source [file join $root tcl tools game_review.tcl]
@@ -277,6 +278,349 @@ feed InfoConfig {}
 feed InfoBestMove {}
 pump
 checkEq "and the pass that owns it still closes it" $::closed {20}
+
+puts "the caller-side procs are there"
+
+# Asserted by absence on the pre-change module: every section below needs one of
+# these, so naming them first makes the RED side report each missing anchor
+# instead of stopping at the first call. `lineScore`/`blankState` and friends are
+# internal and are exercised through the five public ones.
+foreach helper {positions lines verdicts run status cancel} {
+    check "::reviewdriver::$helper exists" \
+        [expr {[llength [info commands ::reviewdriver::$helper]] > 0}]
+}
+
+puts "the positions a pass searches"
+
+# The game commands do not exist yet in this harness, so a `positions` that read
+# the board to build a position string would fail here rather than quietly pass:
+# every position has to come out of the map it is handed.
+set ::engines(list) {}
+set map [::review::mainLineMap [list {position startpos moves} e2e4 e7e5 g1f3 b8c6]]
+checkEq "one pair per searched position, in search order" \
+    [::reviewdriver::positions $map 4 0] [list \
+        [list 0 "position startpos moves"] \
+        [list 1 "position startpos moves e2e4"] \
+        [list 2 "position startpos moves e2e4 e7e5"] \
+        [list 3 "position startpos moves e2e4 e7e5 g1f3"] \
+        [list 4 "position startpos moves e2e4 e7e5 g1f3 b8c6"]]
+::review::reset
+checkEq "a book end starts the pass one position earlier" \
+    [::reviewdriver::positions $map 4 3] [list \
+        [list 2 "position startpos moves e2e4 e7e5"] \
+        [list 3 "position startpos moves e2e4 e7e5 g1f3"] \
+        [list 4 "position startpos moves e2e4 e7e5 g1f3 b8c6"]]
+checkEq "an empty plan asks for no position" [::reviewdriver::positions $map 0 0] {}
+checkEq "a book that covers the game asks for none either" \
+    [::reviewdriver::positions $map 4 5] {}
+
+puts "the lines a pass keeps"
+
+# MultiPV index order, never sorted by score: the third slot here is the worst
+# one, and it stays third. The `cp` is the engine's own number for the side to
+# move, which is the mover of the move this position precedes.
+set r [dict create 0 [dict create \
+    1 {20 34 cp {e2e4 e7e5}} \
+    2 {19 12 cp {d2d4 d7d5}} \
+    3 {18 -8 cp {c2c4}}]]
+checkEq "index order, not score order" [::reviewdriver::lines $r 0 3] \
+    [list [list 34 {e2e4 e7e5}] [list 12 {d2d4 d7d5}] [list -8 {c2c4}]]
+checkEq "trimmed to the mpv the pass asked for" [::reviewdriver::lines $r 0 2] \
+    [list [list 34 {e2e4 e7e5}] [list 12 {d2d4 d7d5}]]
+checkEq "a position nobody searched has no lines" [::reviewdriver::lines $r 9 3] {}
+checkEq "and no mpv means no lines" [::reviewdriver::lines $r 0 0] {}
+
+set sparse [dict create 0 [dict create \
+    1 {20 34 cp {e2e4}} \
+    3 {18 5 cp {c2c4}}]]
+checkEq "a missing slot is absent, not renumbered" \
+    [::reviewdriver::lines $sparse 0 3] [list [list 34 {e2e4}] [list 5 {c2c4}]]
+
+set odd [dict create 0 [dict create \
+    1 {20 34 cp {e2e4}} \
+    2 {20 90 lowerbound {d2d4}} \
+    3 {20 90 upperbound {c2c4}} \
+    4 {20 34 cp {}} \
+    5 {20 "" cp {g1f3}}]]
+checkEq "a bound, an empty pv and an empty score are not lines" \
+    [::reviewdriver::lines $odd 0 5] [list [list 34 {e2e4}]]
+
+set mate [dict create 0 [dict create 1 {20 3 mate {e2e4 e7e5}}]]
+checkEq "a mate becomes the encoding the labels and the graph share" \
+    [::reviewdriver::lines $mate 0 1] [list [list 99700 {e2e4 e7e5}]]
+
+puts "what the engine's lines say about each move"
+
+set vmap [::review::mainLineMap [list {position startpos moves} e2e4 e7e5 g1f3 b8c6]]
+set vres [dict create \
+    0 [dict create \
+        1 {20 30 cp {e2e4 e7e5}} \
+        2 {20 20 cp {d2d4 d7d5}}] \
+    1 [dict create \
+        1 {20 40 cp {c7c5}} \
+        2 {20 25 cp {e7e5 g1f3}} \
+        3 {20 10 cp {d7d5}}] \
+    2 [dict create \
+        1 {20 50 cp {d2d4}} \
+        2 {20 40 cp {b1c3}}] \
+    3 [dict create \
+        1 {20 -120 cp {e7e6}}] \
+    4 [dict create \
+        1 {20 800 cp {g8f6}}]]
+set verd [::reviewdriver::verdicts $vmap $vres]
+checkEq "every move whose reference position was searched has a verdict" \
+    [dict keys $verd] {1 2 3 4}
+# The move the engine preferred: best, and the eval is the best line's own score.
+checkEq "the move the engine preferred is best" [dict get $verd 1] {best 30}
+# Ranked second by the engine, so the move's own line is the "after" figure.
+checkEq "a ranked move is judged against its own line" [dict get $verd 2] {excellent -25}
+# Nowhere in the MultiPV window: the searched successor answers instead, negated
+# because the side to move there is the opponent.
+checkEq "a move outside the window falls back to its successor" \
+    [dict get $verd 3] {excellent 120}
+checkEq "a big drop past the window is a blunder" [dict get $verd 4] {blunder 800}
+
+set short [dict remove $vres 4]
+checkEq "with no successor the label still exists" \
+    [lindex [dict get [::reviewdriver::verdicts $vmap $short] 4] 0] excellent
+checkEq {and the comment carries no [%eval]} \
+    [lindex [dict get [::reviewdriver::verdicts $vmap $short] 4] 1] {}
+
+puts "a pass over a game: search first, write after"
+
+# The sc_* layer, stubbed the way tests/tcl/game_review.tcl stubs it: what is
+# under test is which calls are made and in what order.
+set ::events {}
+set ::fakeMainLine [list {position startpos moves} e2e4 e7e5 g1f3 b8c6]
+set ::fakeLen 4
+set ::fakeLoc 2
+set ::fakeLevel 0
+set ::fakeNums {}
+set ::fakeExit {}
+set ::fakeVars {}
+set ::fakeComment ""
+proc sc_pos {args} {
+    switch -- [lindex $args 0] {
+        location { return $::fakeLoc }
+        fen { return "$::fakeLoc/$::fakeLevel" }
+        getComment { return $::fakeComment }
+        setComment {
+            lappend ::events [list setComment [lindex $args 1]]
+            set ::fakeComment [lindex $args 1]
+            return ""
+        }
+    }
+    return ""
+}
+proc sc_move {args} {
+    set what [lindex $args 0]
+    set n [lindex $args 1]
+    switch -- $what {
+        ply {
+            if {$n <= $::fakeLen} {
+                set ::fakeLoc $n
+                set ::fakeLevel 0
+                set ::fakeNums {}
+                set ::fakeExit {}
+            }
+        }
+        forward {
+            if {$n eq ""} { set n 1 }
+            incr ::fakeLoc $n
+        }
+        back { incr ::fakeLoc -1 }
+    }
+    return ""
+}
+proc sc_var {args} {
+    switch -- [lindex $args 0] {
+        level  { return $::fakeLevel }
+        number { return [lindex $::fakeNums end] }
+        count  { return 0 }
+        list   { return $::fakeVars }
+        enter {
+            lappend ::fakeExit $::fakeLoc
+            lappend ::fakeNums [lindex $args 1]
+            incr ::fakeLevel
+            incr ::fakeLoc
+            return ""
+        }
+        exit {
+            if {$::fakeLevel == 0} { error "No such variation!" }
+            set ::fakeLoc [lindex $::fakeExit end]
+            set ::fakeExit [lrange $::fakeExit 0 end-1]
+            set ::fakeNums [lrange $::fakeNums 0 end-1]
+            incr ::fakeLevel -1
+            return ""
+        }
+        create {
+            lappend ::events {var create}
+            lappend ::fakeExit $::fakeLoc
+            lappend ::fakeNums 0
+            incr ::fakeLevel
+            return ""
+        }
+    }
+    return ""
+}
+proc sc_game {args} {
+    if {[lindex $args 0] eq "UCI_mainLine"} { return $::fakeMainLine }
+    return ""
+}
+namespace eval ::uci { proc sc_move_add {moves} { return 0 } }
+
+# Every engine message and every write lands in one log, so the order they
+# happened in is a fact about the run rather than an assumption.
+proc feedEvent {msgType msgData} {
+    lappend ::events [list msg $msgType]
+    {*}$::engine_callback [list $msgType $msgData]
+}
+proc onRunProgress {done total} { lappend ::runProgress [list $done $total] }
+
+::review::reset
+::review::setValue var_lines 1
+set runcfg {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {
+    {Threads 8 integer 1 1 128}
+    {Hash 256 spin 16 1 4096}
+    {MultiPV 3 spin 1 1 10}
+}}
+set ::sent {}
+set ::closed {}
+set ::runProgress {}
+set ::events {}
+
+checkEq "a pass over the whole line starts" \
+    [::reviewdriver::run $runcfg -progress ::onRunProgress] ""
+checkEq "and reports that it is searching" [dict get [::reviewdriver::status] state] searching
+checkEq "with every position of the line to search" \
+    [dict get [::reviewdriver::status] total] 5
+checkEq "nothing is written before the engine has answered" $::events {}
+
+feedEvent InfoConfig {Threads 8 Hash 256 MultiPV 3}
+checkEq "the first position searched is the start of the line" \
+    [lindex $::sent end] {send 20 Go {{position startpos moves} {depth 18}}}
+
+feedEvent InfoPV {1 20 22 900 300 0 0 120 30 cp 0 e2e4 e7e5}
+feedEvent InfoPV {2 20 22 900 300 0 0 120 20 cp 0 d2d4 d7d5}
+feedEvent InfoBestMove {}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 40 cp 0 c7c5}
+feedEvent InfoPV {2 20 22 900 300 0 0 120 25 cp 0 e7e5 g1f3}
+feedEvent InfoPV {3 20 22 900 300 0 0 120 10 cp 0 d7d5}
+feedEvent InfoBestMove {}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 50 cp 0 d2d4}
+feedEvent InfoPV {2 20 22 900 300 0 0 120 40 cp 0 b1c3}
+feedEvent InfoBestMove {}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 -120 cp 0 e7e6}
+feedEvent InfoBestMove {}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 800 cp 0 g8f6}
+feedEvent InfoBestMove {}
+pump
+
+set st [::reviewdriver::status]
+checkEq "the pass finished" [dict get $st state] done
+checkEq "every position answered" [dict get $st searched] 5
+checkEq "every move was written" [dict get $st written] 4
+checkEq "none was refused" [dict get $st failed] 0
+checkEq "the cursor was verified back where the pass found it" [dict get $st restored] 1
+checkEq "which is where the reader left it" [list $::fakeLoc $::fakeLevel] {2 0}
+checkEq "progress reports each finished position" [lindex $::runProgress 0] {1 5}
+checkEq "all of them" [llength $::runProgress] 5
+
+# The write phase may only begin once the engine is done with the game: a write
+# moves the board, and the position strings came from a snapshot of it.
+set lastBest -1
+set firstWrite -1
+set i 0
+foreach e $::events {
+    if {[lindex $e 0] eq "msg" && [lindex $e 1] eq "InfoBestMove"} { set lastBest $i }
+    if {$firstWrite < 0 && ([lindex $e 0] eq "setComment" || [string equal $e {var create}])} {
+        set firstWrite $i
+    }
+    incr i
+}
+check "nothing is written until the last InfoBestMove" \
+    [expr {$lastBest >= 0 && $firstWrite > $lastBest}]
+
+set comments {}
+foreach e $::events {
+    if {[lindex $e 0] eq "setComment"} { lappend comments [lindex $e 1] }
+}
+checkEq "the verdicts are written once each, in ply order" $comments [list \
+    {[best] [%eval +0.30]} \
+    {[excellent] [%eval -0.25]} \
+    {[excellent] [%eval +1.20]} \
+    {[blunder] [%eval +8.00]}]
+checkEq {and the [%eval] token reads back as the score that was written} \
+    [::seed::score [lindex $comments 2]] 120
+checkEq "a mate round-trips through the same token" \
+    [::seed::score [::review::commentText best [::movelabels::mateToCp 3]]] \
+    [::movelabels::mateToCp 3]
+
+puts "a refused write is collected, not fatal"
+
+# The board has two plies but the map says four: the last two writes are refused
+# and the first two still land.
+set ::fakeLen 2
+set ::events {}
+set ::runProgress {}
+::review::reset
+::review::setValue var_lines 0
+checkEq "a second pass starts" [::reviewdriver::run $runcfg] ""
+feedEvent InfoConfig {Threads 8 Hash 256 MultiPV 3}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 30 cp 0 e2e4 e7e5}
+feedEvent InfoPV {2 20 22 900 300 0 0 120 40 cp 0 c7c5}
+feedEvent InfoPV {3 20 22 900 300 0 0 120 25 cp 0 e7e5}
+feedEvent InfoPV {4 20 22 900 300 0 0 120 10 cp 0 d7d5}
+feedEvent InfoBestMove {}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 40 cp 0 c7c5}
+feedEvent InfoPV {2 20 22 900 300 0 0 120 25 cp 0 e7e5 g1f3}
+feedEvent InfoBestMove {}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 50 cp 0 d2d4}
+feedEvent InfoBestMove {}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 -120 cp 0 e7e6}
+feedEvent InfoBestMove {}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 800 cp 0 g8f6}
+feedEvent InfoBestMove {}
+pump
+
+set st [::reviewdriver::status]
+checkEq "the pass still finished" [dict get $st state] done
+checkEq "the moves that fit were written" [dict get $st written] 2
+checkEq "the ones that did not are counted, not fatal" [dict get $st failed] 2
+checkEq "and their reasons are kept" [dict get $st errors] \
+    {{ply 3 is not in this game} {ply 4 is not in this game}}
+set ::fakeLen 4
+
+puts "refusing to start"
+
+set ::sent {}
+checkEq "no engine is a refusal, not a silent choice" [::reviewdriver::run ""] \
+    {no engine selected}
+checkEq "and nothing was opened" $::sent {}
+checkEq "an engine that never announced MultiPV is refused" \
+    [::reviewdriver::run {Plain /usr/bin/plain {} {} 0 0 {} 1 {{Threads 2}}}] \
+    {the engine does not advertise MultiPV}
+checkEq "nothing was opened for it either" $::sent {}
+
+::review::reset
+checkEq "the first of two passes starts" [::reviewdriver::run $runcfg] ""
+checkEq "a second pass over the same connection is refused" \
+    [::reviewdriver::run $runcfg] {engine 20 is already running a pass}
+checkEq "and the running pass is left alone" \
+    [dict get [::reviewdriver::status] state] searching
+
+puts "a cancelled pass writes nothing"
+
+feedEvent InfoConfig {Threads 8 Hash 256 MultiPV 3}
+feedEvent InfoPV {1 20 22 900 300 0 0 120 30 cp 0 e2e4 e7e5}
+feedEvent InfoBestMove {}
+set ::events {}
+checkEq "cancelling the run stops it" [::reviewdriver::cancel] 1
+checkEq "the pass is cancelled" [dict get [::reviewdriver::status] state] cancelled
+checkEq "nothing is written" $::events {}
+checkEq "and the reader is left where the pass found them" \
+    [list $::fakeLoc $::fakeLevel] {2 0}
+pump
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]
