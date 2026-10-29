@@ -82,6 +82,11 @@ proc ::review::saved {} {
         dict set S var_lines [dict get $S mpv]
     }
     if {[dict get $S var_cp] < 0} { dict set S var_cp 0 }
+    # The flags are on or off, and setValue takes only 0 or 1: a file that says 2
+    # must not open the dialog on a value pressing OK would refuse.
+    foreach flag {move_comment_wait skip_book} {
+        if {[dict get $S $flag] != 0} { dict set S $flag 1 }
+    }
     return $S
 }
 
