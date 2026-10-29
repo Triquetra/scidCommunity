@@ -868,6 +868,7 @@ translate Q EngineTime {Дата}
 translate Q EngineNew {новий}
 translate Q EngineEdit {Редагувати}
 translate Q EngineRequired {Поля, виділені жирним шрифтом, є обов’язковими; інші необов'язкові}
+translate Q EngineNameInUse {Двигун з іменем %s вже існує. Зберегти цей як %s?}
 translate Q EngineProtocol {Протокол зв'язку}
 translate Q EngineNotation {Нотація ходів}
 translate Q EngineFlipEvaluation {Перевернути перспективу оцінки}

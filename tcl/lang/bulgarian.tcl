@@ -908,6 +908,7 @@ translate g EngineTime {Дата}
 translate g EngineNew {Нов}
 translate g EngineEdit {Редактиране}
 translate g EngineRequired {Полетата с удебелен шрифт са задължителни; други не са задължителни}
+translate g EngineNameInUse {Вече има двигател с име %s. Да се запази този като %s?}
 translate g EngineProtocol {Комуникационен протокол}
 translate g EngineNotation {Нотиране на ходовете}
 translate g EngineFlipEvaluation {Обърнете перспективата за оценка}

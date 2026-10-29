@@ -875,6 +875,7 @@ translate H EngineTime {Dátum}
 translate H EngineNew {Új}
 translate H EngineEdit {Szerkesztés}
 translate H EngineRequired {A vastagbetûs mezõk szükségesek, a többiek kihagyhatók.}
+translate H EngineNameInUse {Már létezik %s nevű motor. Mentse ezt %s néven?}
 translate H EngineProtocol {Kommunikációs protokoll}
 translate H EngineNotation {A mozdulatok jelölése}
 translate H EngineFlipEvaluation {Fordítsa meg az értékelési perspektívát}

@@ -908,6 +908,7 @@ translate k EngineTime {데이트}
 translate k EngineNew {새로운}
 translate k EngineEdit {편집하다}
 translate k EngineRequired {항구의 필드는 필수입니다. 다른 것들은 선택 사항입니다}
+translate k EngineNameInUse {%s 이름의 엔진이 이미 있습니다. 이 엔진을 %s(으)로 저장하시겠습니까?}
 translate k EngineProtocol {통신사}
 translate k EngineNotation {운동의 표기}
 translate k EngineFlipEvaluation {평가를 뒤집다}

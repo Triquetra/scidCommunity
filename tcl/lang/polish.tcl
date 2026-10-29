@@ -907,6 +907,7 @@ translate P EngineTime {Data}
 translate P EngineNew {Nowy}
 translate P EngineEdit {Edytuj}
 translate P EngineRequired {Pola pogrubione są wymagane; pozostałe są opcjonalne}
+translate P EngineNameInUse {Silnik o nazwie %s już istnieje. Zapisać ten jako %s?}
 translate P EngineProtocol {Protokół komunikacji}
 translate P EngineNotation {Notacja posunięć}
 translate P EngineFlipEvaluation {Odwróć perspektywę oceny}

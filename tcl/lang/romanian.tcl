@@ -908,6 +908,7 @@ translate L EngineTime {Data}
 translate L EngineNew {Nou}
 translate L EngineEdit {Edita}
 translate L EngineRequired {Câmpurile cu caractere aldine sunt obligatorii; altele sunt optionale}
+translate L EngineNameInUse {Există deja un motor numit %s. Salvați acesta ca %s?}
 translate L EngineProtocol {Protocol de comunicare}
 translate L EngineNotation {Notarea mișcărilor}
 translate L EngineFlipEvaluation {Flip perspectiva de evaluare}

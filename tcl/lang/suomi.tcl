@@ -906,6 +906,7 @@ translate U EngineTime {Pvm}
 translate U EngineNew {Uusi}
 translate U EngineEdit {Muokkaa}
 translate U EngineRequired {Lihavoidut kentät ovat pakollisia}
+translate U EngineNameInUse {Nimellä %s on jo moottori. Tallennetaanko tämä nimellä %s?}
 translate U EngineProtocol {Viestintäprotokolla}
 translate U EngineNotation {Merkintä liikkeistä}
 translate U EngineFlipEvaluation {Käännä arvioinnin näkökulma}

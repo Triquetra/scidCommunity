@@ -872,6 +872,7 @@ translate C EngineTime {Datum}
 translate C EngineNew {Nov}
 translate C EngineEdit {Editace}
 translate C EngineRequired {Tun vyznaen poloky jsou povinn; ostatn jsou voliteln}
+translate C EngineNameInUse {Engine s nazvem %s jiz existuje. Ulozit tento jako %s?}
 translate C EngineProtocol {Komunikan protokol}
 translate C EngineNotation {Zpis tah}
 translate C EngineFlipEvaluation {Flip hodnocen perspektivy}

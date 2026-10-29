@@ -867,6 +867,7 @@ translate Z EngineTime {Tarehe}
 translate Z EngineNew {Mpya}
 translate Z EngineEdit {Hariri}
 translate Z EngineRequired {Maeneo yenye herufi nzito yanahitajika; wengine ni hiari}
+translate Z EngineNameInUse {Injini iitwayo %s ipo tayari. Hifadhi hii kama %s?}
 translate Z EngineProtocol {Itifaki ya mawasiliano}
 translate Z EngineNotation {Nukuu ya hatua}
 translate Z EngineFlipEvaluation {Geuza mtazamo wa tathmini}
