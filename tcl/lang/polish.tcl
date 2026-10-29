@@ -334,7 +334,7 @@ menuText P OptionsMovesKey "Uzupełnianie z klawiatury" 0 \
 menuText P OptionsMovesShowVarArrows "Pokaż strzałki dla wariantów" 0 {Włącz/wyłącz strzałki pokazujące posunięcia w wariantach}
 menuText P OptionsMovesShowEngineVariationArrows "Pokaż strzałki dla wariantów silnika" 0 {Włącz/wyłącz strzałki linii PV silnika w trybie multiPV}
 menuText P OptionsMovesGlossOfDanger "Kolorowe oznaczenie zagrożeń" 0 {Włącz/wyłącz kolorowe oznaczenie stopnia zagrożenia}
-translate E OptionsGlistWheelRows {Liczba wierszy przewijanych kółkiem myszy}
+translate P OptionsGlistWheelRows {Liczba wierszy przewijanych kółkiem myszy}
 translate P OptionsMovesTreeDepth {Domyślna liczba półposunięć w oknie drzewa wariantów}
 translate P OptionsMovesEnginePvLength {Długość wyświetlanych linii PV silnika}
 menuText P OptionsNumbers "Format liczb" 0 {Wybierz format liczb}
@@ -592,7 +592,7 @@ translate P ErrNotOpen {To nie jest otwarta baza.}
 translate P ErrReadOnly {Ta baza jest tylko do odczytu; nie można jej zmienić.}
 translate P ErrSearchInterrupted {Wyszukiwanie przerwano; wyniki są niepełne.}
 translate P ErrNoClockComments {W tej partii nie znaleziono komentarzy zegara [%clk]. Aby użyć tej funkcji, dodaj czasy zegara w oknie komentarzy (Ctrl+E).}
-translate E ErrFileInUse {Błąd: plik jest już używany. Zamknij inne aplikacje korzystające z tej bazy danych.}
+translate P ErrFileInUse {Błąd: plik jest już używany. Zamknij inne aplikacje korzystające z tej bazy danych.}
 
 # Drag and drop
 translate P DndCannotOpenUri {Nie można otworzyć adresu URI}
@@ -861,12 +861,17 @@ translate P Informant+-- {Białe mają miażdżącą przewagę}
 translate P AutoComment {Automatyczny komentarz}
 translate P AutoCommentTooltip {Wygeneruj komentarz AI dla bieżącej pozycji}
 translate P AnalysisAutoCommentTooltip {Wygeneruj komentarz AI dla całej partii}
-translate E MoveLabelBest {Najlepsze}
-translate E MoveLabelExcellent {Znakomite}
-translate E MoveLabelGood {Dobre}
-translate E MoveLabelInaccuracy {Niedokładność}
-translate E MoveLabelMistake {Błąd}
-translate E MoveLabelBlunder {Poważny błąd}
+translate P MoveLabelBest {Najlepsze}
+translate P MoveLabelExcellent {Znakomite}
+translate P MoveLabelGood {Dobre}
+translate P MoveLabelInaccuracy {Niedokładność}
+translate P MoveLabelMistake {Błąd}
+translate P MoveLabelBlunder {Poważny błąd}
+translate P MoveLabelBrilliant {Genialny}
+translate P MoveLabelGreat {Świetny}
+translate P MoveLabelMiss {Przegapiona szansa}
+translate P MoveLabelForced {Wymuszony}
+translate P MoveLabelBook {Teoria}
 translate P GameComment {Komentarz do partii}
 translate P GameCommentTooltip {Przeskanuj partię pod kątem opisanych posunięć i wygeneruj podsumowanie AI}
 translate P TimeMs {Czas (ms)}
