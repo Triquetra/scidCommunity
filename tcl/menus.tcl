@@ -275,7 +275,10 @@ $m  add command -label ToolsAnalysis -command "::enginelist::choose"
 $m  add command -label ToolsRapidAnnotate \
     -accelerator "Ctrl+Shift+A" -command ::rapid_annotate::commit
 # The engine window no longer carries the batch annotator; it is still a tool.
-$m  add command -label [tr GameComment] -command ::analysis_auto_comment::batch_generate
+# The label is the key, not its text: the menu re-reads every label through tr()
+# when the language changes (menus.tcl translateMenuLabels/setLanguageMenus), so
+# an entry built from an already-translated string would stay in that language.
+$m  add command -label GameComment -command ::analysis_auto_comment::batch_generate
 $m add separator
 $m add checkbutton -label ToolsFilterGraph \
     -accelerator "Ctrl+Shift+G" -variable filterGraph -command tools::graphs::filter::Open
