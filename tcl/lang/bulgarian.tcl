@@ -875,6 +875,18 @@ translate g MoveLabelForced {Принуден}
 translate g MoveLabelBook {Теория}
 translate g GameComment {Коментар на играта}
 translate g GameCommentTooltip {Сканирайте играта за анотирани ходове и генерирайте резюме на AI}
+translate g ReviewGameButton {Преглед на партията}
+translate g ReviewGameButtonTooltip {Прегледай всеки ход от главния вариант и му дай оценка}
+translate g ReviewMoveButton {Коментар на хода}
+translate g ReviewMoveButtonTooltip {Оцени изиграния ход и го запиши}
+translate g ReviewSettings {Настройки на прегледа}
+translate g ReviewVarLines {Варианти за запис}
+translate g ReviewVarCp {Граница на вариантите (cp)}
+translate g ReviewMoveWait {Изчакай дълбочината на прегледа}
+translate g ReviewFromPreset {%s (от профила на машината)}
+translate g ReviewProgress {Преглед на позиция %s от %s}
+translate g ReviewWaitForDepth {Изчакване на дълбочина %s}
+translate g ReviewFailed {Прегледът е неуспешен: %s}
 translate g TimeMs {Време (ms)}
 
 

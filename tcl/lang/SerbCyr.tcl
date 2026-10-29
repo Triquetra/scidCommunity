@@ -875,6 +875,18 @@ translate J MoveLabelForced {Принудан}
 translate J MoveLabelBook {Теорија}
 translate J GameComment {Гаме Цоммент}
 translate J GameCommentTooltip {Скенирајте игру за обележеним потезима и генеришете АИ резиме}
+translate J ReviewGameButton {Преглед партије}
+translate J ReviewGameButtonTooltip {Прегледај сваки потез главне линије и означи га}
+translate J ReviewMoveButton {Коментар потеза}
+translate J ReviewMoveButtonTooltip {Означи одиграни потез одавде и упиши га}
+translate J ReviewSettings {Подешавања прегледа}
+translate J ReviewVarLines {Варијанте за упис}
+translate J ReviewVarCp {Граница варијанти (cp)}
+translate J ReviewMoveWait {Чекај дубину прегледа}
+translate J ReviewFromPreset {%s (из профила мотора)}
+translate J ReviewProgress {Преглед позиције %s од %s}
+translate J ReviewWaitForDepth {Чекање на дубину %s}
+translate J ReviewFailed {Преглед није успео: %s}
 translate J TimeMs {време(мс)}
 
 

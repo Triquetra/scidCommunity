@@ -183,6 +183,11 @@ checkEq "by default it waits for the review depth" [::review::moveCommentPlan 12
 checkEq "at the review depth it writes" [::review::moveCommentPlan 18] now
 checkEq "deeper than the review depth writes too" [::review::moveCommentPlan 22] now
 checkEq "with no depth reported it waits" [::review::moveCommentPlan ""] 18
+# A preset may carry a deeper limit than the setting; the caller passes it in,
+# because only the caller knows which engine the pass will run on.
+checkEq "a deeper target is what it waits for" [::review::moveCommentPlan 20 30] 30
+checkEq "and at that target it writes" [::review::moveCommentPlan 30 30] now
+checkEq "an empty target is the setting" [::review::moveCommentPlan 12 ""] 18
 ::review::setValue move_comment_wait 0
 checkEq "immediate mode writes whatever the engine has" [::review::moveCommentPlan 4] now
 checkEq "and writes even with nothing to report" [::review::moveCommentPlan ""] now
@@ -530,6 +535,48 @@ fakeCursor 5 {} {} 10
 ::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}
 check "with a null move nothing is dropped" \
     [expr {[lsearch -exact $::calls {add pvBest}] >= 0}] $::calls
+
+puts "\nsaved settings"
+# Review Settings is an ordinary preference: the values are option variables, and
+# the working copy starts from them. This is what a restart looks like.
+::review::reset
+set ::reviewopt(depth) 25
+set ::reviewopt(mpv) 2
+set ::reviewopt(var_lines) 2
+set ::review::S [dict create]
+checkEq "a saved depth is the one in force" [::review::get depth] 25
+checkEq "and a saved mpv" [::review::get mpv] 2
+checkEq "and a saved variation count" [::review::get var_lines] 2
+checkEq "the settings that were never saved keep their default" \
+    [::review::get var_cp] 0
+::review::setValue depth 30
+checkEq "a change is written where the options file reads it" $::reviewopt(depth) 30
+::review::setValue depth 0
+checkEq "and a refused change is not written" $::reviewopt(depth) 30
+# A hand-edited options file must not decide how the pass searches.
+set ::reviewopt(depth) 0
+set ::reviewopt(mpv) 99
+set ::reviewopt(var_lines) 40
+set ::review::S [dict create]
+checkEq "a saved depth below the floor is raised to it" [::review::get depth] 6
+checkEq "a saved mpv above the ceiling is lowered to it" [::review::get mpv] 5
+checkEq "and var_lines follows the mpv it was saved with" [::review::get var_lines] 5
+set ::reviewopt(mpv) 1
+set ::review::S [dict create]
+checkEq "one line means no variations at all" [::review::get var_lines] 0
+set ::reviewopt(depth) "deep"
+set ::review::S [dict create]
+checkEq "a value that is not a number is ignored" [::review::get depth] 18
+set ::reviewopt(move_comment_wait) 2
+set ::review::S [dict create]
+checkEq "a flag saved above 1 is on, not invalid" [::review::get move_comment_wait] 1
+checkEq "and the setter accepts what was loaded" \
+    [::review::setValue move_comment_wait [::review::get move_comment_wait]] ""
+set ::reviewopt(skip_book) -4
+set ::review::S [dict create]
+checkEq "a negative flag is on as well" [::review::get skip_book] 1
+array unset ::reviewopt
+::review::reset
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

@@ -866,6 +866,18 @@ translate G MoveLabelForced {Αναγκαστική}
 translate G MoveLabelBook {Θεωρία}
 translate G GameComment {Σχόλιο παιχνιδιού}
 translate G GameCommentTooltip {Σαρώστε το παιχνίδι για σχολιασμένες κινήσεις και δημιουργήστε περίληψη AI}
+translate G ReviewGameButton {Έλεγχος παρτίδας}
+translate G ReviewGameButtonTooltip {Έλεγξε κάθε κίνηση της κύριας γραμμής και χαρακτήρισέ την}
+translate G ReviewMoveButton {Σχόλιο κίνησης}
+translate G ReviewMoveButtonTooltip {Χαρακτήρισε την κίνηση από εδώ και γράψε την}
+translate G ReviewSettings {Ρυθμίσεις ελέγχου}
+translate G ReviewVarLines {Παραλλαγές προς εγγραφή}
+translate G ReviewVarCp {Περιθώριο παραλλαγών (cp)}
+translate G ReviewMoveWait {Αναμονή για το βάθος ελέγχου}
+translate G ReviewFromPreset {%s (από το προφίλ μηχανής)}
+translate G ReviewProgress {Έλεγχος θέσης %s από %s}
+translate G ReviewWaitForDepth {Αναμονή για βάθος %s}
+translate G ReviewFailed {Ο έλεγχος απέτυχε: %s}
 translate G TimeMs {Χρόνος(ms)}
 
 

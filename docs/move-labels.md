@@ -132,3 +132,5 @@ be replayed, an early novelty marked out of book) as well as on fixed contexts;
 
 - `docs/comment-facts.md` — the deterministic facts a comment is allowed to
   state, from `tcl/tools/comment_facts.tcl`.
+- `docs/review-ui.md` — the engine window's Game Review and Move Comment
+  buttons, which is what turns these labels into a game's comments.

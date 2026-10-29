@@ -835,6 +835,18 @@ translate Q MoveLabelForced {Вимушений}
 translate Q MoveLabelBook {Теорія}
 translate Q GameComment {Коментар гри}
 translate Q GameCommentTooltip {Скануйте гру на наявність анотованих ходів і створюйте зведення ШІ}
+translate Q ReviewGameButton {Огляд партії}
+translate Q ReviewGameButtonTooltip {Оглянь кожен хід головного варіанта й оціни його}
+translate Q ReviewMoveButton {Коментар до ходу}
+translate Q ReviewMoveButtonTooltip {Оціни зроблений хід і запиши його}
+translate Q ReviewSettings {Налаштування огляду}
+translate Q ReviewVarLines {Варіанти для запису}
+translate Q ReviewVarCp {Поріг варіантів (cp)}
+translate Q ReviewMoveWait {Чекати глибину огляду}
+translate Q ReviewFromPreset {%s (з профілю двигуна)}
+translate Q ReviewProgress {Огляд позиції %s з %s}
+translate Q ReviewWaitForDepth {Очікування глибини %s}
+translate Q ReviewFailed {Огляд не вдався: %s}
 translate Q TimeMs {Час (мс)}
 
 

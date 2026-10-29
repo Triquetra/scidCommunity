@@ -860,6 +860,18 @@ translate K MoveLabelForced {Forçada}
 translate K MoveLabelBook {Teoria}
 translate K GameComment {Comentari del joc}
 translate K GameCommentTooltip {Escaneja el joc per trobar moviments anotats i genera un resum de l'IA}
+translate K ReviewGameButton {Revisió de la partida}
+translate K ReviewGameButtonTooltip {Revisa cada jugada de la línia principal i etiqueta-la}
+translate K ReviewMoveButton {Comentari de la jugada}
+translate K ReviewMoveButtonTooltip {Etiqueta la jugada feta des d'aquí i escriu-la}
+translate K ReviewSettings {Configuració de la revisió}
+translate K ReviewVarLines {Variants a escriure}
+translate K ReviewVarCp {Marge de variants (cp)}
+translate K ReviewMoveWait {Espera la profunditat de la revisió}
+translate K ReviewFromPreset {%s (del perfil del motor)}
+translate K ReviewProgress {S'està revisant la posició %s de %s}
+translate K ReviewWaitForDepth {S'està esperant la profunditat %s}
+translate K ReviewFailed {La revisió ha fallat: %s}
 translate K TimeMs {Temps (ms)}
 
 

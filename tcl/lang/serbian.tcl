@@ -1321,6 +1321,18 @@ translate Y MoveLabelBook {Teorija}
 translate Y GameComment {Game Comment}
 # ====== TODO To be translated ======
 translate Y GameCommentTooltip {Scan game for annotated moves and generate AI summary}
+translate Y ReviewGameButton {Pregled partije}
+translate Y ReviewGameButtonTooltip {Pregledaj svaki potez glavne linije i označi ga}
+translate Y ReviewMoveButton {Komentar poteza}
+translate Y ReviewMoveButtonTooltip {Označi odigrani potez odavde i upiši ga}
+translate Y ReviewSettings {Podešavanja pregleda}
+translate Y ReviewVarLines {Varijante za upis}
+translate Y ReviewVarCp {Granica varijanti (cp)}
+translate Y ReviewMoveWait {Čekaj dubinu pregleda}
+translate Y ReviewFromPreset {%s (iz profila motora)}
+translate Y ReviewProgress {Pregled pozicije %s od %s}
+translate Y ReviewWaitForDepth {Čekanje na dubinu %s}
+translate Y ReviewFailed {Pregled nije uspeo: %s}
 # ====== TODO To be translated ======
 translate Y TimeMs {Time(ms)}
 # ====== TODO To be translated ======

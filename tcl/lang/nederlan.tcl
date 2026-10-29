@@ -864,6 +864,18 @@ translate N MoveLabelForced {Gedwongen}
 translate N MoveLabelBook {Theorie}
 translate N GameComment {Spelcommentaar}
 translate N GameCommentTooltip {Scan het spel op geannoteerde zetten en genereer een AI-samenvatting}
+translate N ReviewGameButton {Partij beoordelen}
+translate N ReviewGameButtonTooltip {Beoordeel elke zet van de hoofdlijn en geef er een label}
+translate N ReviewMoveButton {Zetcommentaar}
+translate N ReviewMoveButtonTooltip {Beoordeel de gespeelde zet vanaf hier en schrijf die in}
+translate N ReviewSettings {Instellingen voor beoordeling}
+translate N ReviewVarLines {Varianten om te schrijven}
+translate N ReviewVarCp {Variantmarge (cp)}
+translate N ReviewMoveWait {Wacht op de beoordelingsdiepte}
+translate N ReviewFromPreset {%s (uit het engineprofiel)}
+translate N ReviewProgress {Positie %s van %s wordt beoordeeld}
+translate N ReviewWaitForDepth {Wachten op diepte %s}
+translate N ReviewFailed {Beoordeling mislukt: %s}
 translate N TimeMs {Tijd (ms)}
 
 

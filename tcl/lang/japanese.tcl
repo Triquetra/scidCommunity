@@ -875,6 +875,18 @@ translate A MoveLabelForced {強制}
 translate A MoveLabelBook {定跡}
 translate A GameComment {ゲームコメント}
 translate A GameCommentTooltip {注釈付きの動きのゲームをスキャンし、AI サマリーを生成します}
+translate A ReviewGameButton {ゲームの検討}
+translate A ReviewGameButtonTooltip {本手順のすべての指し手を検討して評価する}
+translate A ReviewMoveButton {指し手のコメント}
+translate A ReviewMoveButtonTooltip {ここで指した手を評価して書き込む}
+translate A ReviewSettings {検討の設定}
+translate A ReviewVarLines {書き込む変化}
+translate A ReviewVarCp {変化のしきい値 (cp)}
+translate A ReviewMoveWait {検討の深さを待つ}
+translate A ReviewFromPreset {%s（エンジンのプリセット）}
+translate A ReviewProgress {局面 %s / %s を検討中}
+translate A ReviewWaitForDepth {深さ %s を待機中}
+translate A ReviewFailed {検討に失敗しました: %s}
 translate A TimeMs {時間(ミリ秒)}
 
 

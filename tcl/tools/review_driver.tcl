@@ -23,6 +23,15 @@ variable seq 0
 
 set ::reviewdriver::ENGINE_ID 20
 
+# Whether an engine window may take this connection id. Window ids come from the
+# same pool as every other engine connection, and ::engine::connect closes
+# whatever already holds the id it is given, so a window opened on the pass's id
+# would take the pass's engine - and the pass would take the window's.
+# ::enginewin::Open asks this before it takes an id.
+proc ::reviewdriver::reservedId {id} {
+    return [expr {[string equal $id $::reviewdriver::ENGINE_ID]}]
+}
+
 proc ::reviewdriver::start {enginecfg positions mpv depth onprogress ondone} {
     variable job
     variable seq

@@ -152,7 +152,9 @@ set helpText(P,Index) {<h1>Indeks tematów pomocy ScidCommunity</h1>
   <ul>
   <li><a Comment>Edytor komentarzy</a></li>
   <li><a Annotating><b>Komentowanie partii</b></a></li> 
-  <li><a GameComment>Komentowanie partii</a> (przycisk w oknie silnika)</li>
+  <li><a Annotating><b>Komentowanie partii</b></a></li> 
+  <li><a BatchAnnotate>Komentowanie partii w trybie zbiorczym</a> (komentarze AI)</li>
+  <li><a ReviewMoveButton><b>Komentarz do ruchu</b></a> (przycisk w oknie silnika)</li>
   <li><a Searches CommentsSearch>Wyszukiwanie w komentarzach</a></li>
   </ul>
   
@@ -208,6 +210,7 @@ set helpText(P,Index) {<h1>Indeks tematów pomocy ScidCommunity</h1>
   <h3>P</h3>
   <ul>
   <li><a PGN>Okno PGN</a></li>
+  <li><a ReviewGameButton><b>Przegląd partii</b></a> (przycisk w oknie silnika)</li>
   <li><a PGNTablebase>Okno PGN: przycisk Table Base</a></li>
   <li><a PGNChessCom>Okno PGN: przycisk chess.com</a></li>
   <li><a PGNLichess>Okno PGN: przycisk lichess.org</a></li>
@@ -235,6 +238,7 @@ set helpText(P,Index) {<h1>Indeks tematów pomocy ScidCommunity</h1>
   <li><a Reports Opening>Okno Raportu debiutowego</a></li>
   <li><a Reports Player>Okno raportu o zawodniku</a></li>
   <li><a Graphs Rating>Wykres rankingu</a></li>
+  <li><a ReviewSettings><b>Ustawienia przeglądu</b></a> (okno silnika)</li>
   </ul>
   
   <h3>S</h3>
@@ -261,6 +265,11 @@ set helpText(P,Index) {<h1>Indeks tematów pomocy ScidCommunity</h1>
   <li><a OpeningTrainer>Trening: Debiuty</a></li>
   <li><a TacticsTrainer>Trening: Taktyka</a></li>
   <li><a Crosstable><b>Okno tabeli turnieju</b></a></li>
+  </ul>
+  
+  <h3>U</h3>
+  <ul>
+  <li><a ReviewSettings><b>Ustawienia przeglądu</b></a> (okno silnika)</li>
   </ul>
   
   <h3>W</h3>
@@ -2532,47 +2541,177 @@ set helpText(P,PGNChessDB) {<h1>Okno PGN: przycisk chessdb Engine Tree</h1>
 }
 
 ####################
-### Pomoc przycisku Komentarz do Partii w Oknie Silnika:
+### Pomoc przycisku Przegląd partii w Oknie Silnika:
 
-set helpTitle(P,GameComment) "Przycisk Komentarz do Partii"
-set helpText(P,GameComment) {<h1>Okno silnika: Przycisk Komentarz do Partii</h1>
+set helpTitle(P,ReviewGameButton) "Przycisk Przegląd partii"
+set helpText(P,ReviewGameButton) {<h1>Okno silnika: Przycisk Przegląd partii</h1>
   <p>
- Przycisk <b>Komentarz do Partii</b> w oknie <a Engine>Silnika</a> umożliwia
-  automatyczne generowanie komentarzy sztucznej inteligencji (AI) dla całej partii w trybie adnotacji zbiorczej.
+  Przycisk <b>Przegląd partii</b> w oknie <a Engine>Silnika</a> przegląda główną
+  linię otwartej partii: silnik przeszukuje kolejno wszystkie pozycje tej linii,
+  a przegląd zachowuje wynik dla każdej z nich.
   </p>
-  
+
   <h3>Jak to działa</h3>
   <p>
-  Gdy klikniesz przycisk, ScidCommunity przeszukuje całą partię pod kątem posunięć z adnotacjami
-  (posunięć z NAG-ami lub istniejącymi komentarzami). Dla każdego takiego posunięcia:
-  <ul>
-  <li>pobiera oceny z chmury jako kontekst</li>
-  <li>używa istniejących wariantów PGN jako „Ground Truth” linii silnika</li>
-  <li>zapyta AI, dlaczego rekomendowana linia jest najlepsza albo dlaczego zagrane posunięcie było błędem</li>
-  <li>dopisuje wygenerowany komentarz do istniejącego komentarza przy posunięciu</li>
-  </ul>
+  Przegląd korzysta z własnego połączenia z silnikiem, więc nie zakłóca analizy,
+  którą widzisz w oknie. Szachownica też się nie przesuwa: pozycje pochodzą z
+  głównej linii w chwili naciśnięcia przycisku, możesz więc pracować dalej.
+  Przegląd obejmuje tylko główną linię - posunięcia w wariantach nie są
+  przeglądane.
   </p>
-  
+  <p>
+  W czasie pracy okno pokazuje <b>Przeglądanie pozycji N z M</b> oraz przycisk
+  <b>Anuluj</b>. Anulowanie zatrzymuje przegląd i nic nie zapisuje. Przycisk jest
+  aktywny, gdy partia jest otwarta i wybrany jest silnik; w trakcie przeglądu oba
+  przyciski przeglądu są wyłączone, więc nie można rozpocząć drugiego przeglądu
+  ponad pierwszym.
+  </p>
+
+  <h3>Ustawienia</h3>
+  <p>
+  Głębokość przeszukiwania, liczbę linii i to, które z nich trafiają do partii
+  jako warianty, ustawia się w <a ReviewSettings><b>Ustawieniach przeglądu</b></a>.
+  Liczby Threads i Hash należą do profilu silnika i są tam pokazywane tylko do
+  odczytu, dzięki czemu każdy przegląd tego silnika korzysta z tych samych
+  zasobów.
+  </p>
+
+  <h3>Jedno posunięcie zamiast całej partii</h3>
+  <p>
+  <a ReviewMoveButton><b>Komentarz do ruchu</b></a> opisuje tylko posunięcie
+  zagrane z bieżącej pozycji - to tańszy sposób, gdy wyjaśnienia wymaga jedno
+  posunięcie.
+  </p>
+
+  <p><footer>(Zaktualizowano: ScidCommunity, październik 2026)</footer></p>
+}
+
+
+####################
+### Pomoc przycisku Komentarz do ruchu w Oknie Silnika:
+
+set helpTitle(P,ReviewMoveButton) "Przycisk Komentarz do ruchu"
+set helpText(P,ReviewMoveButton) {<h1>Okno silnika: Przycisk Komentarz do ruchu</h1>
+  <p>
+  Przycisk <b>Komentarz do ruchu</b> w oknie <a Engine>Silnika</a> opisuje jedno
+  posunięcie: to zagrane z pozycji na szachownicy. Silnik przeszukuje pozycję
+  przed posunięciem i pozycję po nim, bo ocena posunięcia potrzebuje obu liczb -
+  ile było warte i co przyniosło.
+  </p>
+
+  <h3>Kiedy przycisk jest aktywny</h3>
+  <p>
+  Potrzebna jest partia, wybrany silnik i posunięcie po bieżącej pozycji. Na
+  ostatniej pozycji partii nie ma czego opisywać, a w wariancie numeracja
+  posunięć znaczy co innego: przegląd obejmuje główną linię, więc tam przycisk
+  jest wyłączony.
+  </p>
+
+  <h3>Czekanie na głębokość przeglądu</h3>
+  <p>
+  Gdy opcja <b>Czekaj na głębokość przeglądu</b> jest włączona (domyślnie, w
+  <a ReviewSettings>Ustawieniach przeglądu</a>), komentarz ma być tym, który
+  napisałby pełny przegląd, więc płytka analiza nie wystarcza: przeszukiwanie
+  idzie na głębokości przeglądu, a wiersz stanu mówi, na jaką głębokość czeka. Po
+  wyłączeniu tej opcji używana jest analiza z okna, o ile tylko ma jakąś liczbę -
+  to znaczy "zapisz to, co silnik ma teraz", bez przeszukiwania tej samej
+  pozycji dwa razy.
+  </p>
+
+  <p><footer>(Zaktualizowano: ScidCommunity, październik 2026)</footer></p>
+}
+
+####################
+### Pomoc Ustawień przeglądu w Oknie Silnika:
+
+set helpTitle(P,ReviewSettings) "Ustawienia przeglądu"
+set helpText(P,ReviewSettings) {<h1>Okno silnika: Ustawienia przeglądu</h1>
+  <p>
+  <b>Ustawienia przeglądu</b> w oknie <a Engine>Silnika</a> zawierają wybory
+  czytane przez przegląd. Pięć liczb i jedna reguła:
+  </p>
+  <ul>
+  <li><b>Linie</b>: ile linii silnika zachowuje każda pozycja (MultiPV), od 1
+    do 5.</li>
+  <li><b>Głębokość</b>: jak głęboko przeszukiwana jest każda pozycja. To także
+    głębokość, na którą czeka <a ReviewMoveButton>Komentarz do ruchu</a>, gdy
+    włączona jest opcja <b>Czekaj na głębokość przeglądu</b>.</li>
+  <li><b>Warianty do zapisania</b>: ile linii silnika trafia do partii jako
+    warianty przy każdym posunięciu. Zero nie zapisuje nic, a liczba nie może
+    przekroczyć liczby linii.</li>
+  <li><b>Margines wariantów (cp)</b>: jak bardzo inna linia może być słabsza od
+    najlepszej, aby została zapisana; linia słabsza bardziej to szum i jest
+    odrzucana.</li>
+  <li><b>Czekaj na głębokość przeglądu</b>: czy komentarz do posunięcia czeka na
+    głębokość przeglądu, zamiast korzystać z analizy już widocznej na ekranie -
+    patrz <a ReviewMoveButton>Komentarz do ruchu</a>.</li>
+  </ul>
+
+  <h3>Czego tu nie ma</h3>
+  <p>
+  Threads i Hash należą do profilu silnika, nie do przeglądu: ustawia się je
+  przyciskami okna silnika i zapisuje razem z silnikiem. Okno pokazuje je tylko
+  do odczytu, aby liczby były widoczne tam, gdzie są liczby przeglądu.
+  </p>
+
+  <h3>Odrzucona wartość</h3>
+  <p>
+  Wartość, której przegląd nie może przyjąć - liczba spoza zakresu pola albo
+  więcej wariantów niż linii - jest odrzucana, a powód pojawia się pod polami.
+  Okno zostaje otwarte na odrzuconej wartości, więc można ją poprawić bez utraty
+  reszty zmian.
+  </p>
+
+  <p><footer>(Zaktualizowano: ScidCommunity, październik 2026)</footer></p>
+}
+
+####################
+### Pomoc komentarzy AI w trybie zbiorczym:
+###
+### Przycisk Komentarz do Partii zniknął z okna silnika, a tryb zbiorczy nadal da
+### się wywołać po nazwie (::analysis_auto_comment::batch_generate).
+
+set helpTitle(P,BatchAnnotate) "Komentowanie partii w trybie zbiorczym"
+set helpText(P,BatchAnnotate) {<h1>Komentowanie partii w trybie zbiorczym</h1>
+  <p>
+  ScidCommunity potrafi wygenerować komentarze AI dla całej partii naraz, w
+  trybie zbiorczym. Dawniej służył do tego przycisk <b>Komentarz do Partii</b> w
+  oknie silnika. Tego przycisku już nie ma; użyj <menu>Narzędzia</menu> >
+  <menu>Komentarz do Partii</menu> (albo wywołaj
+  <b>::analysis_auto_comment::batch_generate</b> ze skryptu). Otwiera on to samo
+  okno co dawniej, a jego działanie się nie zmieniło.
+  </p>
+  <p>
+  Okno zbiorcze przeszukuje partię w poszukiwaniu posunięć z symbolem adnotacji
+  (NAG innym niż znacznik diagramu) i zawsze dodaje ostatnią pozycję partii, żeby
+  ją podsumować. Dla każdego z nich pobiera oceny z chmury jako kontekst, używa
+  istniejących wariantów PGN jako „ground truth” linii silnika, pyta AI,
+  dlaczego rekomendowana linia jest najlepsza albo dlaczego zagrane posunięcie
+  było błędem, i dopisuje wygenerowany komentarz do istniejącego komentarza przy
+  posunięciu. Jego jedynym argumentem jest identyfikator silnika, który
+  przekazywał przycisk; można go pominąć.
+  </p>
+
   <h3>Wybór dostawcy i modelu</h3>
   <p>
-  Funkcja komentowania partii wymaga dostawcy AI i modelu. W oknie komentowania
-  partii kliknij <b>Settings...</b>, wybierz dostawcę — Google Gemini, DeepSeek,
-  OpenCode Console, usługę zgodną z API OpenAI, np. bramkę lub vLLM, albo lokalny
-  serwer, np. Ollama lub LM Studio — a następnie wybierz model. Jeśli nie
-  skonfigurowano tych ustawień, program zaproponuje ich otwarcie. Wysłanie
-  zapytania o komentarz nastąpi dopiero po wybraniu dostawcy i modelu.
-  Przycisk <b>Load Models</b> pobiera listę modeli oferowanych przez dostawcę.
-  Wybór zostanie zapisany po kliknięciu OK.
+  Komentowanie zbiorcze potrzebuje dostawcy AI i modelu, zanim cokolwiek
+  zapisze. Naciśnij raz <b>Settings...</b> w oknie, wybierz dostawcę - Google
+  Gemini, DeepSeek, OpenCode Console, punkt końcowy zgodny z OpenAI (np. bramkę
+  lub vLLM) albo serwer lokalny, taki jak Ollama lub LM Studio - a następnie
+  model. Gdy nic nie jest ustawione, okno proponuje otwarcie tych ustawień; żadne
+  zapytanie do AI nie zostanie wysłane, dopóki dostawca i model nie są wybrane.
+  <b>Load Models</b> pyta dostawcę o dostępne modele. Wybór zapisuje się po
+  naciśnięciu OK.
   </p>
-  
-  <h3>Użycie</h3>
+
+  <h3>Zastosowania</h3>
   <p>
-  Ta funkcja jest idealna do szybkiego dodawania notatek edukacyjnych do partii, którą już
-  przeanalizowałeś silnikiem. Szanuje Twoje lokalne warianty, dzięki czemu wyjaśnienia AI
-  są zgodne z Twoją konkretną analizą silnika.
+  To najszybszy sposób dodania notatek edukacyjnych do partii, którą już
+  przeanalizowałeś silnikiem. Funkcja szanuje Twoje lokalne warianty, dzięki
+  czemu wyjaśnienia AI są zgodne z Twoją analizą.
   </p>
-  
-  <p><footer>(Updated: scidCommunity, October 2026)</footer></p>
+
+  <p><footer>(Zaktualizowano: ScidCommunity, październik 2026)</footer></p>
 }
 
 
@@ -3442,7 +3581,12 @@ set helpText(P,Engine) {<h1>Okna silnika</h1>
     jako warianty.</li>
   <li><b>Konfiguracja</b> <button tb_eng_config>: Pokazuje lub ukrywa panel
     konfiguracji silnika.</li>
-  <li><a GameComment><b>Komentarz do Partii</b></a>: Generuje komentarze dla wszystkich pozycji w partii.</li>
+  <li><a ReviewGameButton><b>Przegląd partii</b></a>: Przegląda główną linię
+    partii, przeszukując każdą jej pozycję.</li>
+  <li><a ReviewMoveButton><b>Komentarz do ruchu</b></a>: Opisuje posunięcie
+    zagrane z bieżącej pozycji i nic więcej.</li>
+  <li><a ReviewSettings><b>Ustawienia przeglądu</b></a>: Głębokość, linie,
+    warianty i głębokość, na którą czeka komentarz do ruchu.</li>
   </ul>
 
   <h3>Sterowanie</h3>

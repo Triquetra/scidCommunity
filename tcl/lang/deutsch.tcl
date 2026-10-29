@@ -874,6 +874,18 @@ translate D MoveLabelForced {Erzwungen}
 translate D MoveLabelBook {Theorie}
 translate D GameComment {Partie Kritik}
 translate D GameCommentTooltip {Durchsuchen Sie das Spiel nach kommentierten Zügen und erstellen Sie eine KI-Zusammenfassung}
+translate D ReviewGameButton {Partie prüfen}
+translate D ReviewGameButtonTooltip {Alle Züge der Hauptvariante prüfen und bewerten}
+translate D ReviewMoveButton {Zugkommentar}
+translate D ReviewMoveButtonTooltip {Den gespielten Zug bewerten und eintragen}
+translate D ReviewSettings {Einstellungen der Prüfung}
+translate D ReviewVarLines {Zu schreibende Varianten}
+translate D ReviewVarCp {Variantenabstand (cp)}
+translate D ReviewMoveWait {Auf die Prüfungstiefe warten}
+translate D ReviewFromPreset {%s (aus dem Motorprofil)}
+translate D ReviewProgress {Position %s von %s wird geprüft}
+translate D ReviewWaitForDepth {Warte auf Tiefe %s}
+translate D ReviewFailed {Prüfung fehlgeschlagen: %s}
 translate D TimeMs {Zeit (ms)}
 
 

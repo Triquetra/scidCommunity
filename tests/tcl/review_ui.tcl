@@ -1,0 +1,488 @@
+#!/usr/bin/env tclsh
+# Copyright (C) 2026 David Crandall
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# review_ui.tcl -- the engine window's two review buttons, without Tk.
+#
+#   tclsh tests/tcl/review_ui.tcl
+#
+# Everything a widget would otherwise have to decide lives here: which button
+# is live, which positions a pass searches, what the settings dialog holds and
+# what it stores. The Tk glue in tcl/windows/engine.tcl stays a few lines of
+# widget calls, and is guarded so a missing widget or engine is a no-op.
+
+set fails 0
+set checks 0
+proc check {label cond {detail ""}} {
+    incr ::checks
+    if {$cond} {
+        puts "  ok   $label"
+    } else {
+        incr ::fails
+        if {$detail eq ""} { puts "  FAIL $label" } else { puts "  FAIL $label -- $detail" }
+    }
+}
+proc checkEq {label got want} {
+    check $label [expr {$got eq $want}] "got '$got' want '$want'"
+}
+
+set root [file normalize [file join [file dirname [info script]] .. ..]]
+source [file join $root tcl tools accuracy.tcl]
+source [file join $root tcl tools move_labels.tcl]
+source [file join $root tcl tools score_seed.tcl]
+source [file join $root tcl tools game_review.tcl]
+source [file join $root tcl tools review_ui.tcl]
+
+# The English text of every key this file adds, so a label is asserted as
+# something a reader would recognise rather than as a key name, and so the key
+# set the language files must carry is written down in one place. A tclsh test
+# has no language files; tr() returns the key when a tag is unknown, which is
+# what Scid itself does for an untranslated string.
+array set ::EN {
+    ReviewGameButton        {Game Review}
+    ReviewGameButtonTooltip {Review every move of the main line and label it}
+    ReviewMoveButton        {Move Comment}
+    ReviewMoveButtonTooltip {Label the move played from here and write it in}
+    ReviewSettings          {Review Settings}
+    ReviewVarLines          {Variations to write}
+    ReviewVarCp             {Variation margin (cp)}
+    ReviewMoveWait          {Wait for the review depth}
+    ReviewFromPreset        {%s (from engine preset)}
+    ReviewProgress          {Reviewing position %s of %s}
+    ReviewWaitForDepth      {Waiting for depth %s}
+    ReviewFailed            {Review failed: %s}
+    Lines                   {Lines}
+    Depth                   {Depth}
+}
+proc tr {tag} {
+    if {[info exists ::EN($tag)]} { return $::EN($tag) }
+    return $tag
+}
+# The keys that must be in every language file: the fourteen above are Scid's
+# already, and the twelve new ones are the assertion at the end of this file.
+set ::NEWKEYS {
+    ReviewGameButton ReviewGameButtonTooltip ReviewMoveButton
+    ReviewMoveButtonTooltip ReviewSettings ReviewVarLines ReviewVarCp
+    ReviewMoveWait ReviewFromPreset ReviewProgress ReviewWaitForDepth
+    ReviewFailed
+}
+
+puts "the positions a pass searches"
+
+# ::review::searchPlies owns the arithmetic (which positions, and the one after
+# the last move); the UI's job is only to turn those indexes into the position
+# strings the driver sends. Both are pinned here because a bug in this mapping
+# is a pass that searches the wrong position - silent, and expensive.
+set ml [list {position startpos moves} e2e4 e7e5 g1f3 b8c6]
+set map [::review::mainLineMap $ml]
+set pairs [::reviewui::positions $map 4 0]
+checkEq "one position per move, plus the one after the last" [llength $pairs] 5
+checkEq "the first pair is the start position" \
+    [lindex $pairs 0] {0 {position startpos moves}}
+checkEq "the second is after move 1" \
+    [lindex $pairs 1] {1 {position startpos moves e2e4}}
+checkEq "and the last is after move 4" \
+    [lindex $pairs 4] {4 {position startpos moves e2e4 e7e5 g1f3 b8c6}}
+
+# Book skipping starts the plan later; the positions follow the plan, they are
+# not derived a second time.
+checkEq "bookEnd shortens the plan" \
+    [llength [::reviewui::positions $map 4 3]] 3
+checkEq "and the pass starts at the position before the first planned move" \
+    [lindex [::reviewui::positions $map 4 3] 0] {2 {position startpos moves e2e4 e7e5}}
+
+checkEq "no moves is no positions" [::reviewui::positions $map 0 0] {}
+checkEq "a map with no positions at all is no positions" \
+    [::reviewui::positions [::review::mainLineMap {}] 0 0] {}
+
+# A null move is a fresh header in the middle of the list, and the positions
+# after it start from that header rather than from the moves before it.
+set fen "position fen 8/8/8/8/8/8/8/K6k b - - 0 1 moves"
+set nullmap [::review::mainLineMap [list {position startpos moves} a1a2 $fen h1h2]]
+set npairs [::reviewui::positions $nullmap 3 0]
+checkEq "the null move does not shift the indexes" [llength $npairs] 4
+checkEq "the ply before the null move is an ordinary position" \
+    [lindex $npairs 1] [list 1 {position startpos moves a1a2}]
+checkEq "the position after the null move is the header itself" \
+    [lindex $npairs 2] [list 2 $fen]
+checkEq "and the ply after it builds on that header" \
+    [lindex $npairs 3] [list 3 "$fen h1h2"]
+
+# A position the map cannot name is left out rather than searched as the empty
+# string, which is a Go with no position in it.
+set shortmap [dict create plies 2 moves {1 e2e4 2 e7e5} \
+    positions [list 0 {position startpos moves} 1 {position startpos moves e2e4}]]
+checkEq "an unnameable position is dropped" \
+    [::reviewui::positions $shortmap 2 0] \
+    [list [list 0 {position startpos moves}] [list 1 {position startpos moves e2e4}]]
+
+# Move Comment searches two positions - the one before the move and the one
+# after it - which is not a plan ::review::searchPlies produces: it is the same
+# mapping applied to a list the caller already has.
+checkEq "a list of positions can be named directly" \
+    [::reviewui::specs $map [list 2 3]] \
+    [list [list 2 {position startpos moves e2e4 e7e5}] \
+          [list 3 {position startpos moves e2e4 e7e5 g1f3}]]
+checkEq "and an index the map does not have is dropped" \
+    [::reviewui::specs $map [list 3 9]] \
+    [list [list 3 {position startpos moves e2e4 e7e5 g1f3}]]
+checkEq "no indexes, no pairs" [::reviewui::specs $map {}] {}
+
+# The driver card (kanban t_41770d0a) adds ::reviewdriver::positions with this
+# same contract. When it is there, use it: one implementation.
+namespace eval ::reviewdriver {}
+proc ::reviewdriver::positions {map plies bookEnd} { return "driver-owned" }
+checkEq "the driver's mapping is used when it exists" \
+    [::reviewui::positions $map 4 0] driver-owned
+rename ::reviewdriver::positions {}
+
+puts "which button is live"
+
+# One dict in, one dict out: the window asks this before it draws the bar and
+# after every event that can change the answer - a new game, an engine starting
+# or stopping, a pass starting, finishing or being cancelled. `reason` is for
+# the log and for tests, not for the user: a disabled button keeps its tooltip.
+set live [dict create game 20 engine Stockfish pass {} move e2e4]
+set b [::reviewui::buttons $live]
+checkEq "with a game and an engine, Game Review is live" [dict get $b review] normal
+checkEq "and so is Move Comment" [dict get $b movecomment] normal
+checkEq "nothing to cancel" [dict get $b cancel] disabled
+checkEq "and no reason to give" [dict get $b reason] ""
+
+set nogame [dict replace $live game 0]
+checkEq "no game: Game Review is disabled" [dict get [::reviewui::buttons $nogame] review] disabled
+checkEq "no game: the reason says so" [dict get [::reviewui::buttons $nogame] reason] {no game}
+checkEq "no game: Move Comment is disabled too" \
+    [dict get [::reviewui::buttons $nogame] movecomment] disabled
+
+set noengine [dict replace $live engine {}]
+checkEq "no engine: Game Review is disabled" \
+    [dict get [::reviewui::buttons $noengine] review] disabled
+checkEq "no engine: the reason says so" \
+    [dict get [::reviewui::buttons $noengine] reason] {no engine}
+checkEq "no engine: Move Comment is disabled" \
+    [dict get [::reviewui::buttons $noengine] movecomment] disabled
+
+# The last position of the game has no move after it, so there is nothing for
+# Move Comment to label; the whole line can still be reviewed.
+set atEnd [dict replace $live move {}]
+checkEq "last position: nothing to comment" \
+    [dict get [::reviewui::buttons $atEnd] movecomment] disabled
+checkEq "last position: the game can still be reviewed" \
+    [dict get [::reviewui::buttons $atEnd] review] normal
+checkEq "last position: no reason against the review" \
+    [dict get [::reviewui::buttons $atEnd] reason] ""
+
+# A pass owns the engine it runs on, and the window's buttons must not start a
+# second one over it. Cancel is the way out, so it is live in every pass state.
+set busy [dict replace $live pass searching]
+checkEq "a running pass disables Game Review" [dict get [::reviewui::buttons $busy] review] disabled
+checkEq "and Move Comment, which shares the window" \
+    [dict get [::reviewui::buttons $busy] movecomment] disabled
+checkEq "but Cancel is live" [dict get [::reviewui::buttons $busy] cancel] normal
+checkEq "with a reason" [dict get [::reviewui::buttons $busy] reason] {pass running}
+checkEq "Cancel stays live while the pass writes" \
+    [dict get [::reviewui::buttons [dict replace $live pass writing]] cancel] normal
+
+# The window calls this from event handlers: a key that is missing must come
+# back as a disabled button, never as an error that leaves the bar stale.
+checkEq "an empty state is a disabled pair, not an error" \
+    [dict get [::reviewui::buttons {}] review] disabled
+checkEq "and its Cancel is disabled" [dict get [::reviewui::buttons {}] cancel] disabled
+
+puts "what the settings dialog holds"
+
+# The dialog owns five settings. Threads and Hash are not among them: they belong
+# to the engine preset (#382), and a second place to set them is a second place
+# to get them wrong. The dialog shows them, read-only, from the preset.
+::review::reset
+set s [::reviewui::settings]
+checkEq "five rows, no threads, no hash" [dict keys $s] {mpv depth var_lines var_cp move_comment_wait}
+checkEq "at their defaults" [dict get $s depth] 18
+checkEq "and mpv with them" [dict get $s mpv] 3
+
+set good [dict create mpv 4 depth 24 var_lines 2 var_cp 40 move_comment_wait 0]
+checkEq "a valid dialog is stored without complaint" [::reviewui::applySettings $good] {}
+checkEq "and reads straight back" [::reviewui::settings] $good
+
+# One refused field must not lose the four that were fine: the user pressed OK
+# once, and a dialog that silently drops the whole edit is worse than a refusal.
+set bad [dict create mpv 4 depth 24 var_lines 9 var_cp 50 move_comment_wait 1]
+set why [::reviewui::applySettings $bad]
+checkEq "one refusal, for the one bad field" [llength $why] 1
+checkEq "naming the setting and the cap" [lindex $why 0] {var_lines cannot exceed mpv (4)}
+checkEq "the other fields still land" [dict get [::reviewui::settings] move_comment_wait] 1
+checkEq "and the refused one keeps what it had" [dict get [::reviewui::settings] var_lines] 2
+
+# A value that is not a number is a refusal too, not an error out of the dialog.
+set why [::reviewui::applySettings \
+    [dict create mpv 3 depth deep var_lines 1 var_cp 0 move_comment_wait 1]]
+checkEq "a nonsense depth is refused by name" [lindex $why 0] {depth must be a whole number}
+checkEq "and the fields after it still land" [dict get [::reviewui::settings] var_lines] 1
+
+# mpv is applied before var_lines, so one edit that lowers both is honoured
+# rather than refused: the dialog order is the order the setter's rules need.
+::review::reset
+set why [::reviewui::applySettings \
+    [dict create mpv 2 depth 18 var_lines 5 var_cp 0 move_comment_wait 1]]
+checkEq "lowering mpv and leaving var_lines high is refused once" [llength $why] 1
+checkEq "with the mpv it was lowered to" [lindex $why 0] {var_lines cannot exceed mpv (2)}
+checkEq "so var_lines is what mpv allows" [dict get [::reviewui::settings] var_lines] 0
+
+# A field the dialog does not have is ignored rather than stored.
+checkEq "an unknown field is not a setting" \
+    [::reviewui::applySettings [dict create threads 8]] {}
+
+puts "the preset's read-only line"
+
+set enginecfg {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 \
+    {{Threads 8 integer 1 1 128} {Hash 256 spin 16 1 4096} {MultiPV 1 spin 1 1 10}}}
+checkEq "threads and hash, from the preset" \
+    [::reviewui::presetLimits $enginecfg] {Threads 8, Hash 256 MB}
+checkEq "one of the two is enough" \
+    [::reviewui::presetLimits {X /x {} {} 0 0 {} 1 {{Threads 4 integer 1 1 128}}}] {Threads 4}
+checkEq "an engine that advertises neither shows nothing" \
+    [::reviewui::presetLimits {X /x {} {} 0 0 {} 1 {}}] ""
+
+# The line under the dialog's own fields: the numbers, and where they come from.
+checkEq "the note says where they come from" \
+    [::reviewui::presetNote $enginecfg] {Threads 8, Hash 256 MB (from engine preset)}
+checkEq "no preset values, no note" \
+    [::reviewui::presetNote {X /x {} {} 0 0 {} 1 {}}] ""
+
+puts "the move comment's gate"
+
+# ::review::moveCommentPlan already decides now-or-wait (merged with #378): with
+# move_comment_wait set, a comment waits until the analysis reaches the review
+# depth, because a verdict written from a depth-12 result is not the verdict the
+# user asked for. The window needs that decision as something it can put in the
+# status line and act on, so it is handed back as one dict.
+::review::reset
+set st [::reviewui::moveCommentStatus 20]
+checkEq "deep enough: write now" [dict get $st action] now
+checkEq "and there is nothing to wait for" [dict get $st depth] ""
+checkEq "too shallow: wait" [dict get [::reviewui::moveCommentStatus 12] action] wait
+checkEq "and say which depth it waits for" [dict get [::reviewui::moveCommentStatus 12] depth] 18
+checkEq "nothing analysed yet is a wait too" [dict get [::reviewui::moveCommentStatus ""] action] wait
+checkEq "a nonsense depth is a wait, not a write" \
+    [dict get [::reviewui::moveCommentStatus deep] action] wait
+
+::review::setValue move_comment_wait 0
+checkEq "with the wait turned off, write whatever the engine has" \
+    [dict get [::reviewui::moveCommentStatus 4] action] now
+::review::setValue depth 24
+::review::setValue move_comment_wait 1
+checkEq "the depth it waits for is the review's own" \
+    [dict get [::reviewui::moveCommentStatus 20] depth] 24
+
+# The status line: one string, empty when there is nothing to say.
+checkEq "waiting says what it waits for" \
+    [::reviewui::moveCommentMessage 12] {Waiting for depth 24}
+checkEq "and says nothing once it can write" [::reviewui::moveCommentMessage 30] ""
+
+puts "the progress line"
+
+checkEq "a pass says where it is" [::reviewui::progressText 2 7] {Reviewing position 2 of 7}
+checkEq "the first position is the first" [::reviewui::progressText 0 7] {Reviewing position 0 of 7}
+checkEq "a pass with no positions says nothing" [::reviewui::progressText 0 0] ""
+
+# A failed pass has to say so, in the window, with the reason the driver or the
+# board gave: an empty status line after Cancel is fine, after a failure it is a
+# silent no-op.
+checkEq "a failure names its reason" \
+    [::reviewui::failedText {ply 12 is not in this game}] \
+    {Review failed: ply 12 is not in this game}
+checkEq "no reason, no failure text" [::reviewui::failedText ""] ""
+
+# The two buttons' own labels and tooltips come from the tables above, so the
+# window never holds a user-visible string.
+checkEq "the Game Review button's text" [::reviewui::label ReviewGameButton] {Game Review}
+checkEq "its tooltip" [::reviewui::label ReviewGameButtonTooltip] \
+    {Review every move of the main line and label it}
+checkEq "the Move Comment button's text" [::reviewui::label ReviewMoveButton] {Move Comment}
+checkEq "the settings dialog's title" [::reviewui::label ReviewSettings] {Review Settings}
+foreach key {mpv depth var_lines var_cp move_comment_wait} {
+    check "the $key row has a label" \
+        [expr {[::reviewui::settingLabel $key] ne "" && [::reviewui::settingLabel $key] ne $key}]
+}
+checkEq "an unknown row has no label" [::reviewui::settingLabel colour] ""
+
+puts "the keys every language file must carry"
+
+# Scid ships one file per language, and a string that reaches only English
+# leaves every other user with an English button in a translated window. The
+# check is written from ::NEWKEYS so the list here cannot drift from the module,
+# and the file list is read from the tree so a new language file fails loudly
+# instead of being silently untranslated.
+set langDir [file join $root tcl lang]
+set langCodes [dict create \
+    english.tcl E    czech.tcl C      deutsch.tcl D    francais.tcl F \
+    greek.tcl G      hungary.tcl H    italian.tcl I    nederlan.tcl N \
+    norsk.tcl O      polish.tcl P     portbr.tcl B     russian.tcl R \
+    serbian.tcl Y    spanish.tcl S    suomi.tcl U      swedish.tcl W \
+    chinese.tcl M    turkish.tcl T    SerbCyr.tcl J    japanese.tcl A \
+    romanian.tcl L   hebrew.tcl V     swahili.tcl Z    hindi.tcl h \
+    ukrainian.tcl Q  bengali.tcl b    korean.tcl k     bulgarian.tcl g \
+    catalan.tcl K]
+# Not language files: the tools that maintain them.
+set langTools {checklangs.tcl propagatelang.tcl removedeadlang.tcl removetoken.tcl}
+set langOnDisk {}
+foreach f [glob -nocomplain [file join $langDir *.tcl]] {
+    if {[lsearch -exact $langTools [file tail $f]] >= 0} { continue }
+    lappend langOnDisk [file tail $f]
+}
+checkEq "every language file on disk is one this test knows the code for" \
+    [lsort $langOnDisk] [lsort [dict keys $langCodes]]
+
+proc langText {file} {
+    set fh [open $file r]
+    fconfigure $fh -encoding utf-8
+    set text [read $fh]
+    close $fh
+    return $text
+}
+
+set missingAll {}
+foreach file [lsort [dict keys $langCodes]] {
+    set code [dict get $langCodes $file]
+    set text [langText [file join $langDir $file]]
+    set missing {}
+    foreach key $::NEWKEYS {
+        if {![regexp "translate $code $key \\{(.+?)\\}" $text -> word] ||
+            [string trim $word] eq ""} {
+            lappend missing $key
+        }
+    }
+    check "$file carries the twelve review keys" [expr {![llength $missing]}] \
+        "missing: $missing"
+    if {[llength $missing]} { lappend missingAll $file }
+}
+check "no language file is missing a review key" [expr {![llength $missingAll]}] \
+    "files: $missingAll"
+
+# And the English text is the text this test asserts the labels against, so a
+# label that reads "Lines" here and "MultiPV" there fails.
+set english [langText [file join $langDir english.tcl]]
+foreach key $::NEWKEYS {
+    regexp "translate E $key \\{(.+?)\\}" $english -> word
+    checkEq "english.tcl says what the label shows ($key)" $word $::EN($key)
+}
+
+# Spot checks that these are translations and not the English text a
+# propagation run left behind.
+regexp {translate D ReviewGameButton \{(.+?)\}} [langText [file join $langDir deutsch.tcl]] -> de
+regexp {translate F ReviewMoveButton \{(.+?)\}} [langText [file join $langDir francais.tcl]] -> fr
+regexp {translate M ReviewProgress \{(.+?)\}} [langText [file join $langDir chinese.tcl]] -> zh
+check "german Game Review is not the English word" [expr {$de ne "Game Review"}] "got '$de'"
+check "french Move Comment is not the English word" [expr {$fr ne "Move Comment"}] "got '$fr'"
+check "chinese progress keeps both placeholders" \
+    [expr {[llength [regexp -all -inline {%s} $zh]] == 2}] "got '$zh'"
+
+puts "the depth a one-move comment searches at"
+
+# Move Comment runs the same pass over one move. Which depth it uses is the
+# setting's decision: with move_comment_wait on, the comment has to be the one a
+# review would have written, so the pass searches at the review's depth and the
+# status line says what it is waiting for. With the wait off, the analysis the
+# window is already showing is good enough and nothing waits.
+::review::reset
+set d [::reviewui::moveCommentDepth 20]
+checkEq "the analysis is deep enough: search at what it has" [dict get $d depth] 20
+checkEq "and do not make the user wait" [dict get $d wait] 0
+set d [::reviewui::moveCommentDepth 12]
+checkEq "too shallow: search at the review's depth" [dict get $d depth] 18
+checkEq "and say we are waiting" [dict get $d wait] 1
+checkEq "nothing analysed: the review's depth, waiting" \
+    [dict get [::reviewui::moveCommentDepth ""] depth] 18
+# A preset with its own deeper limit raises the depth a review searches at
+# (::review::effective), so Move Comment has to wait for that depth and search to
+# it, not to the setting: one move cannot get two verdicts at two depths.
+set d [::reviewui::moveCommentDepth 20 30]
+checkEq "the preset's deeper floor is the depth to search" [dict get $d depth] 30
+checkEq "and an analysis at 20 is not deep enough for it" [dict get $d wait] 1
+set d [::reviewui::moveCommentDepth 30 30]
+checkEq "at the preset's depth the comment can be written" [dict get $d depth] 30
+checkEq "and nothing waits" [dict get $d wait] 0
+checkEq "the status line waits for the preset's depth too" \
+    [::reviewui::moveCommentMessage 20 30] \
+    [format [::reviewui::tr ReviewWaitForDepth] 30]
+checkEq "an empty target still means the review's own depth" \
+    [dict get [::reviewui::moveCommentDepth 12] depth] 18
+
+# A pass that lost its engine comes back through the same callback as a finished
+# one, with the positions that answered. The short set is a failure, not a
+# review, and the user is told why instead of watching the status line vanish.
+checkEq "a full set is a finished review" [::reviewui::interruptedText 10 10] ""
+checkEq "more than asked for is finished too" [::reviewui::interruptedText 12 10] ""
+checkEq "a short set says how far it got" [::reviewui::interruptedText 3 10] \
+    "Review failed: the engine stopped after 3 of 10 positions"
+checkEq "nothing answered is still a failure" [::reviewui::interruptedText 0 1] \
+    "Review failed: the engine stopped after 0 of 1 positions"
+checkEq "no total to compare with says nothing" [::reviewui::interruptedText 3 ""] ""
+checkEq "and neither does an empty pass" [::reviewui::interruptedText 0 0] ""
+::review::setValue move_comment_wait 0
+checkEq "with the wait off, a shallow analysis is still enough" \
+    [dict get [::reviewui::moveCommentDepth 4] depth] 4
+# 0 is what the depth map holds for a position whose analysis is queued and has
+# not answered yet; it is not a depth to search at.
+checkEq "a queued position is not a depth to search" \
+    [dict get [::reviewui::moveCommentDepth 0] depth] 18
+checkEq "and it does not wait for a number that is already there" \
+    [dict get [::reviewui::moveCommentDepth 0] wait] 0
+checkEq "and nothing waits" [dict get [::reviewui::moveCommentDepth 4] wait] 0
+::review::reset
+
+puts "the dialog's spin boxes"
+
+# A spinbox needs bounds, and they have to agree with what ::review::setValue
+# accepts: a box that offers a value the setter refuses is a dialog that cannot
+# be completed.
+foreach key {mpv depth var_lines var_cp move_comment_wait} {
+    set range [::reviewui::settingRange $key]
+    check "$key has a range" [expr {[llength $range] == 2}]
+    lassign $range lo hi
+    set now [::review::get $key]
+    check "$key's current value is inside its range" [expr {$now >= $lo && $now <= $hi}] \
+        "now $now, range $range"
+    check "$key's range agrees with the setter" \
+        [expr {[::review::setValue $key $lo] eq "" && [::review::setValue $key $hi] eq ""}] \
+        "range $range refused by setValue"
+    ::review::reset
+}
+checkEq "an unknown row has no range" [::reviewui::settingRange colour] ""
+::review::reset
+checkEq "the mpv range stops where the setter does" \
+    [lindex [::reviewui::settingRange mpv] 1] 5
+# The dialog asks about the mpv the user is editing, not the stored one, so the
+# variation box can offer the lines a raised MultiPV allows.
+checkEq "a pending mpv raises the variation box" \
+    [lindex [::reviewui::settingRange var_lines 5] 1] 5
+checkEq "and one line means no variations at all" \
+    [lindex [::reviewui::settingRange var_lines 1] 1] 0
+checkEq "with no mpv given it reads the stored one" \
+    [lindex [::reviewui::settingRange var_lines] 1] [::review::get mpv]
+checkEq "and so does the depth range" \
+    [lindex [::reviewui::settingRange depth] 0] 6
+
+puts "\nthe engine window's guards (read, not run: this harness has no Tk)"
+
+# tcl/windows/engine.tcl cannot be loaded here, and each of these is one clause
+# in a loop or a line in a <Destroy> binding. Both are invisible until the case
+# they exist for happens - a window opened on the pass's own connection, or a
+# window closed while its pass is still searching - so they are asserted as text.
+set engineSrc [langText [file join $root tcl windows engine.tcl]]
+check "a window never takes the pass's connection id" \
+    [regexp {while \{\[winfo exists \.engineWin\$id\] \|\| \[::enginewin::idReserved \$id\]\}} $engineSrc]
+check "and a viewer's window neither" \
+    [regexp {while \{\[info exists ::enginewin::pgnviewer\(\$id\)\] \|\| \[::enginewin::idReserved \$id\]\}} $engineSrc]
+check "closing a window stops its pass" \
+    [regexp {catch \{ ::enginewin::reviewCancel \$id \}} $engineSrc]
+check "and drops the results the pass was writing" \
+    [regexp {unset -nocomplain ::enginewin::reviewresults\(\$id\)} $engineSrc]
+check "a pass that lost its engine is reported, not stored" \
+    [regexp {::reviewui::interruptedText \[dict size \$results\] \$total} $engineSrc]
+check "the settings dialog asks about the mpv being edited" \
+    [regexp {::reviewui::settingRange var_lines \$mpv} $engineSrc]
+
+puts "\n$checks checks, $fails failures"
+exit [expr {$fails ? 1 : 0}]
