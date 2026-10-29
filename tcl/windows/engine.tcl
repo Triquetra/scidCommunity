@@ -127,12 +127,14 @@ proc ::enginewin::seedChart {id} {
         if {[dict exists $depths $i]} { dict unset depths $i }
         incr count
     }
-    # Every way out of the walk comes through here, a break included. -1 is "no
-    # position at all" and 0 is the main-line base ply, which is what the saved
-    # ply counter points at; the saved ply is the last resort either way.
+    # Every way out of the walk comes through here, a break included. 0 means
+    # the variation could not be re-entered but the board is on the saved
+    # main-line base - a known position, and not the absolute ply counter, which
+    # points somewhere else entirely when the cursor was inside a variation.
+    # Only -1 ("no position at all") needs the saved counter as a last resort.
     set restored 0
     catch { set restored [::review::cursorRestore $cursor] }
-    if {$restored <= 0} { catch { sc_move ply $ply0 } }
+    if {$restored < 0} { catch { sc_move ply $ply0 } }
     # Accuracy means something only when the stored scores cover the game: the
     # chart carries a missing ply forward, so a handful of evaluations would be
     # averaged as if the line between them had been played.

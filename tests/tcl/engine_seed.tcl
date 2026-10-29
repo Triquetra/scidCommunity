@@ -407,6 +407,32 @@ if {[have ::enginewin::seedChart]} {
         [expr {[llength [lsearch -all -inline -exact $::board::moves {sc_move ply 1}]] == 1}]
 }
 
+puts "\n== a restore that falls back keeps the saved base =="
+if {[have ::enginewin::seedChart]} {
+    ::board::reset 6 [dict create 1 {[%eval 0.20]}]
+    set ::enginewin::pv_(depths,$id) [dict create]
+    set ::enginewin::pv_(seeded,$id) {}
+    set ::chart::points {}
+    # The cursor is at absolute ply 7, two levels down, branching from ply 4.
+    sc_move ply 4
+    sc_var enter 2
+    sc_var enter 1
+    sc_move forward 1
+    # A restore that reports 0 could not re-enter the variation and left the
+    # board on the saved main-line base: that base is a known position and must
+    # be kept. The absolute counter (7) is a different position altogether.
+    rename ::review::cursorRestore ::review::cursorRestoreReal
+    proc ::review::cursorRestore {state} { sc_move ply 4 ; return 0 }
+    set ::board::moves {}
+    set count [::enginewin::seedChart $id]
+    checkEq "the walk still seeded the main line" $count 1
+    checkEq "the board is on the saved base" [sc_pos location] 4
+    check "and the fallback did not jump to the absolute ply" \
+        [expr {[lsearch -exact $::board::moves {sc_move ply 7}] < 0}]
+    rename ::review::cursorRestore {}
+    rename ::review::cursorRestoreReal ::review::cursorRestore
+}
+
 # ----------------------------------------- finding 3: the empty-score label --
 puts "\n== the chart's click path passes an empty score =="
 if {[have ::enginewin::seedLabel]} {
