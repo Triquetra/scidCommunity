@@ -284,6 +284,9 @@ proc ::review::cursorSave {} {
 # point (`::review::writeMove` does exactly that), so the path it entered is
 # checked against the recorded ply counter and level, and a mismatch retreats to
 # the base ply rather than guessing.
+# 1 when the exact path is restored; 0 when the line is gone and the board is
+# left on the main-line base ply, which is still a known position; -1 when even
+# that could not be done and the caller has to choose a safe position.
 proc ::review::cursorRestore {state} {
     set exact 0
     if {[catch {
@@ -301,12 +304,12 @@ proc ::review::cursorRestore {state} {
         if {[sc_pos location] == [dict get $state loc]
                 && [sc_var level] == [llength [dict get $state path]]} {
             set exact 1
-        } else {
-            catch { sc_move ply $base }
+        } elseif {[catch { sc_move ply $base }]} {
+            set exact -1
         }
     }]} {
-        set exact 0
-        catch { sc_move ply [dict get $state base] }
+        set exact -1
+        if {![catch { sc_move ply [dict get $state base] }]} { set exact 0 }
     }
     return $exact
 }
@@ -389,17 +392,16 @@ proc ::review::writeMove {ply label eval_cp lines} {
     # No `return` inside the catch body: Tcl turns it into TCL_RETURN, the catch
     # reports a failure and the handler would undo a write that succeeded.
     set out ""
-    # Whether the cursor is back where it was found, exactly. The refusal path
-    # and the write path both restore it; only an unexpected error, or a restore
-    # that could not find the line again, leaves the start of the line as the one
-    # position that is always valid.
-    set exact 0
+    # The restore result: 1 exact, 0 left on the base ply (known), -1 unknown.
+    # The refusal path and the write path both restore the cursor; only -1 needs
+    # the start of the line as a position that is always valid.
+    set restore 1
     if {[catch {
         set cursor [cursorSave]
         sc_move ply $ply
         if {[sc_pos location] != $ply} {
             set out "ply $ply is not in this game"
-            set exact [cursorRestore $cursor]
+            set restore [cursorRestore $cursor]
         } else {
             # Which line is the game's own move, so it is not inserted as a
             # variation of itself. "" when the move cannot be read - a null move
@@ -435,15 +437,16 @@ proc ::review::writeMove {ply label eval_cp lines} {
                     lappend existing $first
                 }
             }
-            set exact [cursorRestore $cursor]
+            set restore [cursorRestore $cursor]
         }
     } err]} {
         set out $err
+        set restore -1
     }
-    # A restore that fell back to the base ply did not fail the write: the
-    # comment has landed and the reason is still "". What is left is to leave the
-    # board somewhere known, and the start of the line always is.
-    if {!$exact} { catch { sc_move ply 0 } }
+    # A restore that fell back to the base ply did not fail the write, and that
+    # base is a known position: leave it. Only when the cursor could not be
+    # placed at all does the start of the line become the safe choice.
+    if {$restore < 0} { catch { sc_move ply 0 } }
     return $out
 }
 

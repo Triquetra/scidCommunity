@@ -503,8 +503,10 @@ fakeCursor 5 {1} {3} 10
 set ::fakeVarCounts [dict create "3,0" 1]
 checkEq "a write whose line is gone still counts as written" \
     [::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}] {}
-checkEq "and the board falls back to the start of the line" \
-    [list $::fakeLoc $::fakeLevel] {0 0}
+# The base ply the restore reached is a known position: keep it rather than
+# jumping to the start of the game.
+checkEq "and the board is left on the base ply" \
+    [list $::fakeLoc $::fakeLevel] {3 0}
 
 # A null move at the ply being written: there is no move to drop from the
 # engine's lines, so the best line is inserted rather than discarded on a guess.
