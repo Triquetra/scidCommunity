@@ -948,6 +948,34 @@ proc ::enginewin::reviewSettings {id} {
         grid $w.f.v$key -row $row -column 1 -sticky w -padx {10 0} -pady 2
         incr row
     }
+    # var_lines is capped by mpv, so its box follows the mpv box while the user
+    # edits: opening with MultiPV 3 and raising it to 5 has to offer 4 and 5
+    # lines without closing the dialog. The range comes from ::reviewui, which
+    # also lowers a var_lines the new mpv no longer allows.
+    if {[winfo exists $w.f.vmpv] && [winfo exists $w.f.vvar_lines]} {
+        set ::enginewin::reviewtraceptr($id) [trace add variable \
+            ::enginewin::reviewsetting($id,mpv) write \
+            [list apply {{id w args} {
+                set mpv $::enginewin::reviewsetting($id,mpv)
+                if {![string is integer -strict $mpv]} { return }
+                set hi [lindex [::reviewui::settingRange var_lines $mpv] 1]
+                catch { $w.f.vvar_lines configure -to $hi }
+                catch {
+                    if {$::enginewin::reviewsetting($id,var_lines) > $hi} {
+                        set ::enginewin::reviewsetting($id,var_lines) $hi
+                    }
+                }
+            }} $id $w]
+        bind $w <Destroy> [list apply {{id w} {
+            if {"%W" ne $w} { return }
+            catch {
+                trace remove variable ::enginewin::reviewsetting($id,mpv) write \
+                    $::enginewin::reviewtraceptr($id)
+            }
+            unset -nocomplain ::enginewin::reviewtraceptr($id)
+        }} $id $w]
+    }
+
     set note ""
     if {$name ne ""} {
         catch { set note [::reviewui::presetNote [::enginecfg::get $name]] }

@@ -423,6 +423,12 @@ checkEq "and neither does an empty pass" [::reviewui::interruptedText 0 0] ""
 ::review::setValue move_comment_wait 0
 checkEq "with the wait off, a shallow analysis is still enough" \
     [dict get [::reviewui::moveCommentDepth 4] depth] 4
+# 0 is what the depth map holds for a position whose analysis is queued and has
+# not answered yet; it is not a depth to search at.
+checkEq "a queued position is not a depth to search" \
+    [dict get [::reviewui::moveCommentDepth 0] depth] 18
+checkEq "and it does not wait for a number that is already there" \
+    [dict get [::reviewui::moveCommentDepth 0] wait] 0
 checkEq "and nothing waits" [dict get [::reviewui::moveCommentDepth 4] wait] 0
 ::review::reset
 
@@ -447,6 +453,14 @@ checkEq "an unknown row has no range" [::reviewui::settingRange colour] ""
 ::review::reset
 checkEq "the mpv range stops where the setter does" \
     [lindex [::reviewui::settingRange mpv] 1] 5
+# The dialog asks about the mpv the user is editing, not the stored one, so the
+# variation box can offer the lines a raised MultiPV allows.
+checkEq "a pending mpv raises the variation box" \
+    [lindex [::reviewui::settingRange var_lines 5] 1] 5
+checkEq "and one line means no variations at all" \
+    [lindex [::reviewui::settingRange var_lines 1] 1] 0
+checkEq "with no mpv given it reads the stored one" \
+    [lindex [::reviewui::settingRange var_lines] 1] [::review::get mpv]
 checkEq "and so does the depth range" \
     [lindex [::reviewui::settingRange depth] 0] 6
 
@@ -467,6 +481,8 @@ check "and drops the results the pass was writing" \
     [regexp {unset -nocomplain ::enginewin::reviewresults\(\$id\)} $engineSrc]
 check "a pass that lost its engine is reported, not stored" \
     [regexp {::reviewui::interruptedText \[dict size \$results\] \$total} $engineSrc]
+check "the settings dialog asks about the mpv being edited" \
+    [regexp {::reviewui::settingRange var_lines \$mpv} $engineSrc]
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

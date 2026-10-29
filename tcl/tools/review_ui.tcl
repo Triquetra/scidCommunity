@@ -240,7 +240,11 @@ proc ::reviewui::moveCommentDepth {depth_now {target ""}} {
     set st [::reviewui::moveCommentStatus $depth_now $target]
     if {[dict get $st action] eq "now"} {
         set depth $target
-        if {[string is integer -strict $depth_now]} { set depth $depth_now }
+        # 0 is the window's "queued, nothing back yet" marker, not a depth: a
+        # `go depth 0` searches nothing at all.
+        if {[string is integer -strict $depth_now] && $depth_now > 0} {
+            set depth $depth_now
+        }
         return [dict create depth $depth wait 0]
     }
     return [dict create depth $target wait 1]
@@ -259,7 +263,7 @@ variable ::reviewui::SETTING_RANGES {
     move_comment_wait {0 1}
 }
 
-proc ::reviewui::settingRange {key} {
+proc ::reviewui::settingRange {key {mpv ""}} {
     variable ::reviewui::SETTING_RANGES
     if {![dict exists $::reviewui::SETTING_RANGES $key]} { return "" }
     set range [dict get $::reviewui::SETTING_RANGES $key]
@@ -267,7 +271,9 @@ proc ::reviewui::settingRange {key} {
     # number the setter refuses. mpv 1 means no alternatives at all, and then the
     # only value the setter takes is 0.
     if {$key eq "var_lines"} {
-        set mpv [::review::get mpv]
+        if {$mpv eq "" || ![string is integer -strict $mpv]} {
+            set mpv [::review::get mpv]
+        }
         set hi [expr {$mpv < 2 ? 0 : $mpv}]
         return [list [lindex $range 0] $hi]
     }
