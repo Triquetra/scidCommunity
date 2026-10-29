@@ -55,6 +55,11 @@ checkEq "a negative score label" [::seed::label -120] {-1.20}
 checkEq "a mate label" [::seed::label 99700] {#3}
 checkEq "a mate against" [::seed::label -99700] {#-3}
 checkEq "a mate already delivered" [::seed::label 100000] {#0}
+# The chart's click path calls a point's callback with an empty score, so the
+# label has to answer "" rather than format nothing.
+set err [catch { ::seed::label "" } emptyLabel]
+checkEq "an empty score does not raise" $err 0
+checkEq "and has no label" $emptyLabel {}
 
 # The chart can show scores from the side to move; the stored value is White's.
 checkEq "white's chart keeps the stored sign" [::seed::forSide -35 black white] -35
