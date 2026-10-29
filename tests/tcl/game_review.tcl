@@ -325,6 +325,15 @@ proc sc_var {args} {
             incr ::fakeLevel
             return ""
         }
+        delete {
+            if {$::fakeLevel == 0} { error "No such variation!" }
+            lappend ::calls {var delete}
+            set ::fakeLoc [lindex $::fakeExit end]
+            set ::fakeExit [lrange $::fakeExit 0 end-1]
+            set ::fakeNums [lrange $::fakeNums 0 end-1]
+            incr ::fakeLevel -1
+            return ""
+        }
     }
     return ""
 }
@@ -535,6 +544,32 @@ fakeCursor 5 {} {} 10
 ::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}
 check "with a null move nothing is dropped" \
     [expr {[lsearch -exact $::calls {add pvBest}] >= 0}] $::calls
+
+puts "a rejected variation move is a refusal"
+
+# ::uci::sc_move_add answers 1 when the game refuses a move. Half a line is not a
+# line: the variation is deleted and the refusal is reported, so a caller that
+# counts successful writes does not count a partial one.
+::review::reset
+::review::setValue var_lines 1
+set ::fakeComment ""
+set ::fakeMainLine [list {position startpos moves} m1 m2 m3 pvBest m5]
+set ::fakeVars {}
+fakeCursor 5 {} {} 10
+namespace eval ::uci {
+    proc sc_move_add {moves} {
+        lappend ::calls [list add $moves]
+        if {$moves eq "pvAlt"} { return 1 }
+        return 0
+    }
+}
+set why [::review::writeMove 4 blunder -120 {{-120 pvBest} {-200 pvAlt}}]
+check "a variation the game refuses is reported" [expr {$why ne ""}]
+check "and names the move that was rejected" [string match {*pvAlt*} $why]
+check "the half-written variation is deleted, not left behind" \
+    [expr {[lsearch -exact $::calls {var delete}] >= 0}] $::calls
+check {the comment still landed with its [%eval]} \
+    [string match {*%eval*} $::fakeComment]
 
 puts "\nsaved settings"
 # Review Settings is an ordinary preference: the values are option variables, and
