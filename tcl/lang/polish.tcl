@@ -1,9 +1,44 @@
+
 ### Polskie menu i komunikaty dla ScidCommunity.
+
 # Contributed by Michal Rudolf and Adam Umiastowski.(Scid)
-# Aktualizacja ScidCommunity v5.1.4.23  by Szustan 
+# Aktualizacja ScidCommunity v5.1.4.49  by Szustan 
 
-#   addLanguage P Polish 0 utf-8
-
+# addLanguage P Polish 0 utf-8
+# Tekst nazw menu i komunikatów pomocy na pasku stanu w języku polskim.
+# Część programu Scid (Shane's Chess Information Database).
+# Instrukcje dotyczące dodawania nowego języka:
+# (1) Wybierz kod literowy dla języka. Obecnie przypisane kody to:
+#      E=angielski, D=niemiecki, F=francuski, S=hiszpański, B=portugalski brazylijski,
+#      P=polski, N=holenderski, W=szwedzki, O=norweski, C=czeski, H=węgierski,
+#      Y=serbski.
+# (2) Edytuj poniższy kod zawierający wiersze „addLanguage ...” i dodaj swój
+#     nowy język. Ostatnia cyfra w każdym wierszu to indeks
+#     litery, którą należy podkreślić w menu, licząc od 0 jako pierwszej litery.
+#
+# (3) Skopiuj poniższą sekcję zawierającą szczegóły angielskiego menu i komunikatów pomocy (wszystkie
+#     polecenia zaczynające się od „menuText E ...”, „helpMsg E ...” lub
+#     „translate E ...”) i zamień wszystkie litery „E” na literę, którą
+#     przypisałeś nowemu językowi.
+#
+# (4) Napisz tłumaczenia. Wymaga to zmiany wszystkiego, co znajduje się „w cudzysłowie”
+#     lub {w nawiasach klamrowych} w poleceniach menuText, helpMsg i translate.
+#     Polecenie menu ma format:
+#         menuText L tag „Nazwa...” podkreślenie {Komunikat pomocy...}
+#
+#     Komunikat pomocy na pasku stanu dla przycisku ma format:
+#         helpMsg L tag {Komunikat pomocy...}
+#
+#     Ogólne tłumaczenie słowa lub komunikatu ma format:
+#         translate L tag {komunikat...}
+#     gdzie „L” to litera języka, „tag” to nazwa pozycji menu
+#     lub nazwa widżetu przycisku, a „podkreślenie” to indeks litery,
+#     którą należy podkreślić, licząc od zera jako pierwszej litery. Dwie pozycje menu
+#     pojawiające się w tym samym menu powinny mieć różne litery z podkreśleniem.
+#     W razie wątpliwości wystarczy ustawić je wszystkie na „0”, a ja przypiszę sensowne litery z podkreśleniem,
+#     gdy wasze tłumaczenia zostaną włączone do Scid.
+#
+# Uzupełnienia, poprawki? E-mail: sgh@users.sourceforge.net
 
 proc setLanguage_P {} {
 
@@ -65,7 +100,7 @@ menuText P EditDelete "Usuń wariant" 0 {Usuń wariant dla tego posunięcia}
 menuText P EditFirst "Ustaw wariant jako pierwszy" 5 \
   {Ustaw ten wariant pierwszym na liście}
 menuText P EditMain "Promuj wariant do linii głównej" 21 \
-  {Ustaw ten wariant linią główną}
+  {Ustaw ten wariant jako linia główna}
 menuText P EditTrial "Tryb próbny" 0 \
   {Uruchom/zatrzymaj tryb próbny, do sprawdzania pomysłów na szachownicy}
 menuText P EditStrip "Usuń " 3 {Usuń komentarze lub warianty z tej partii}
@@ -90,7 +125,7 @@ menuText P EditPaste "Wklej ostatnią partię ze schowka" 0 \
   {Wklej tutaj aktywną partię ze schowka}
 menuText P EditPastePGN "Wklej tekst ze schowka jako partię PGN..." 18 \
   {Zinterpretuj tekst ze schowka jako partię w notacji PGN i wklej ją tutaj}
-menuText P EditNullMove "Ruch zerowy" 0 {Wstaw ruch zerowy (pomiń ruch)}
+menuText P EditNullMove "Posunięcie zerowe" 0 {Wstawia posunięcie zerowe}  
 menuText P EditSetup "Ustaw pozycję ..." 0 \
   {Ustaw pozycję początkową dla tej partii}
 menuText P EditCopyBoard "Kopiuj pozycję jako FEN" 6 \
@@ -129,10 +164,10 @@ menuText P PlayTournament "Rozegraj turniej silników" 0 \
 menuText P Search "Szukaj" 0
 menuText P SearchReset "Resetuj filtr" 0 {Wyczyść filtr, tak aby uwzględniał wszystkie partie}
 menuText P SearchNegate "Odwróć filtr" 0 {Odwróć filtr, aby uwzględniał tylko partie wykluczone}
-menuText P SearchCurrent "Bieżąca pozycja..." 0 {Szukaj bieżącej pozycji na szachownicy}
+menuText P SearchCurrent "Bieżąca pozycja..." 0 {Szukaj wg bieżącej pozycji na szachownicy}
 menuText P SearchHeader "Nagłówek..." 0 {Szukaj wg nagłówka (zawodnik, turniej itd.)}
 menuText P SearchMaterial "Materiał/wzorzec..." 0 {Szukaj wg materiału lub wzorca na szachownicy}
-menuText P SearchComments "Wyszukaj komentarze..." 0 {Wyszukaj komentarze do gier w bieżącym filtrze}
+menuText P SearchComments "Szukaj w komentarzach..." 0 {Przeszukuje komentarze w partiach bieżącego filtra}
 menuText P SearchUsing "Użyj pliku wyszukiwania..." 0 {Szukaj za pomocą pliku opcji wyszukiwania}
 
 # Windows menu:
@@ -154,9 +189,9 @@ menuText P WindowsTree "Drzewo wariantów" 0 {Otwórz/zamknij okno drzewa warian
 menuText P WindowsBook "Okno księgi debiutowej" 0 {Otwórz/zamknij okno księgi debiutowej}
 menuText P WindowsCorrChess "Okno gry korespondencyjnej" 0 {Otwórz/zamknij okno partii korespondencyjnych}
 menuText P WindowsGraph "Wykres analizy" 0 {Otwórz okno wykresu czasu posunięć i ocen}
-menuText P WindowsPresentationBoard "Tablica prezentacyjna" 0 {Otwórz/zamknij okno zawierające tylko tablicę, które znajduje się za płytą główną, dla projektora lub drugiego ekranu}
-menuText P WindowsPresentationFreeze "Zamroź tablicę prezentacyjną" 0 {Zatrzymaj/wznów tablicę prezentacyjną, aby można było poruszać się po grze tak, aby publiczność jej nie widziała}
-translate P PresentationFrozen {Zamrożone - tablica prezentacyjna nie podąża}
+menuText P WindowsPresentationBoard "Szachownica prezentacyjna" 0 {Otwiera lub zamyka osobne okno z samą szachownicą, które śledzi główną szachownicę. Przydatne przy projektorze lub drugim ekranie}
+menuText P WindowsPresentationFreeze "Zatrzymaj szachownicę prezentacyjną" 0 {Zatrzymuje lub wznawia aktualizację szachownicy prezentacyjnej, aby można było przeglądać partię bez pokazywania tego publiczności}
+translate P PresentationFrozen {Zatrzymana — szachownica prezentacyjna nie jest aktualizowana}
 
 menuText P WindowsEPD "Okno EPD..." 0 {Otwórz edytor okna EPD (pliku pozycji)}
 
@@ -189,11 +224,11 @@ menuText P ToolsAnalysis "Okno analizy..." 0 \
 menuText P ToolsAnalysis2 "Silnik analizy nr 2..." 17 \
   {Uruchom/zatrzymaj drugi silnik analizy szachowej}
 menuText P ToolsCross "Tabela turniejowa" 0 {Pokaż tabelę turniejową dla tej partii}
-menuText P ToolsFilterGraph "Wykres filtra (wzgl.) " 12 {Otwórz/zamknij okno wykresu filtra dla wartości względnych}
-menuText P ToolsAbsFilterGraph "Wykres filtra (bezwzgl.)" 7 {Otwórz/zamknij okno wykresu filtra dla wartości bezwzględnych}
+menuText P ToolsFilterGraph "Wykres filtra (wzgl.) " 12 {Otwórz/zamknij okno wykresu dla wartości względnych}
+menuText P ToolsAbsFilterGraph "Wykres filtra (bezwzgl.)" 7 {Otwórz/zamknij okno wykresu dla wartości bezwzględnych}
 menuText P ToolsOpReport "Raport debiutowy" 0 {Wygeneruj raport debiutowy dla bieżącej pozycji}
-menuText P ToolsOpenBaseAsTree "Otwórz bazę jako drzewo wariantów..." 0   {Otwórz bazę i użyj jej w oknie drzewa wariantów}
-menuText P ToolsOpenRecentBaseAsTree "Otwórz ostatnią bazę jako drzewo wariantów" 0   {Otwórz ostatnią bazę i użyj jej w oknie drzewa wariantów}
+menuText P ToolsOpenBaseAsTree "Otwórz bazę jako drzewo wariantów..." 0   {Otwórz bazę w oknie drzewa wariantów}
+menuText P ToolsOpenRecentBaseAsTree "Otwórz ostatnią bazę jako drzewo wariantów" 0   {Otwórz ostatnią bazę w oknie drzewa wariantów}
 menuText P ToolsTracker "Śledzenie figur"  6 {Otwórz okno śledzenia bierek}
 menuText P ToolsTraining "Trening"  0 {Narzędzia treningowe (taktyka, debiuty...) }
 menuText P ToolsPlayVsEngine "Graj z silnikiem"  0 {Rozegraj partię z silnikiem szachowym}
@@ -206,7 +241,7 @@ menuText P ToolsTrainFics "Graj na FICS"  0 {Graj na freechess.org}
 menuText P ToolsEngineTournament "Turniej silników"  0 {Rozpocznij turniej między silnikami szachowymi}
 menuText P ToolsTimeAnalysis "Analiza czasu" 0 {Pokaż wykres czasu na zegarze dla bieżącej partii}
 menuText P ToolsBookTuning "Dostrajanie księgi debiutowej" 0 {Dostrajanie księgi debiutowej}
-menuText P ToolsRapidAnnotate "Adnotuj na podstawie wykresu wyników" 0 {Zapisz oceny i adnotacje wykresu wyników silnika w bieżącej grze (Ctrl+Shift+A)}
+menuText P ToolsRapidAnnotate "Adnotacje z wykresu analizy silnika" 0 {Zapisuje oceny i adnotacje z wykresu analizy silnika w bieżącej partii (Ctrl+Shift+A)}
 menuText P ToolsDownloadTWIC "Pobierz partie TWIC" 0 {Pobierz najnowsze partie The Week In Chess (TWIC)}
 menuText P ToolsConnectHardware "Podłącz urządzenia" 8 {Podłącz zewnętrzny sprzęt}
 menuText P ToolsConnectHardwareConfigure "Konfiguruj..." 0 {Skonfiguruj zewnętrzny sprzęt i połączenie}
@@ -241,7 +276,7 @@ menuText P ToolsImportOne "Importuj jedną partię PGN..." 0 \
   {Importuj partię z tekstu PGN}
 menuText P ToolsImportFile "Importuj partie z pliku PGN..." 7 {Importuj partie z plików PGN}
 menuText P FileImportRTF "Importuj partię z pliku RTF..." 0 \
-  {Importuj partię z pliku RTF utworzonego przez program scidCommunity.}
+  {Importuj partię z pliku RTF utworzonego przez program ScidCommunity.}
 menuText P ToolsStartEngine1 "Uruchom silnik 1" 13  {Uruchom silnik 1}
 menuText P ToolsStartEngine2 "Uruchom silnik 2" 13  {Uruchom silnik 2}
 menuText P ToolsCaptureBoard "Zapisz aktualną planszę jako obraz..." 5  {Zapisz aktualny układ figur na szachownicy jako plik graficzny.}
@@ -282,12 +317,12 @@ menuText P OptionsMovesHighlightLastMoveArrow "Pokaż strzałkę" 0 {Pokaż strz
 menuText P OptionsMovesHighlightLastMoveNag "Pokaż symbole adnotacji" 0
 menuText P OptionsMovesHighlightLastMoveEval "Pokaż symbole oceny" 0
 menuText P OptionsMoves "Posunięcia" 0 {Opcje wprowadzania posunięć}
-menuText P OptionsGamelist "Lista gier" 0 {Opcje listy gier}
+menuText E OptionsGamelist "Lista partii" 0 {Opcje listy partii}
 menuText P OptionsMovesAnimate "Czas animacji" 1 \
   {Ustaw czas trwania animacji posunięć}
 menuText P OptionsMovesDelay "Opóźnienie automatycznego odtwarzania..." 1 \
   {Ustaw opóźnienie czasowe dla trybu automatycznego odtwarzania}
-menuText P OptionsMovesCoord "Wprowadzanie posunięć wg współrzędnych (np g1f3)" 0 \
+menuText P OptionsMovesCoord "Wprowadzanie posunięć wg współrzędnych (np.g1f3)" 0 \
   {Akceptuj wprowadzanie posunięć w formacie współrzędnych (np. "g1f3")}
 menuText P OptionsMovesSuggest "Pokaż sugerowane posunięcia" 0 \
   {Włącz/wyłącz sugerowanie posunięć}
@@ -297,11 +332,11 @@ menuText P OptionsMovesLichess "Format adnotacji Lichess/ChessBase" 0 {Użyj for
 menuText P OptionsMovesKey "Uzupełnianie z klawiatury" 0 \
   {Włącz/wyłącz automatyczne uzupełnianie posunięć z klawiatury}
 menuText P OptionsMovesShowVarArrows "Pokaż strzałki dla wariantów" 0 {Włącz/wyłącz strzałki pokazujące posunięcia w wariantach}
-menuText P OptionsMovesShowEngineVariationArrows "Pokaż strzałki dla wariantów silnika" 0 {Włącz/wyłącz strzałki pokazujące linie wariantów silnika w trybie multiPV}
+menuText P OptionsMovesShowEngineVariationArrows "Pokaż strzałki dla wariantów silnika" 0 {Włącz/wyłącz strzałki linii PV silnika w trybie multiPV}
 menuText P OptionsMovesGlossOfDanger "Kolorowe oznaczenie zagrożeń" 0 {Włącz/wyłącz kolorowe oznaczenie stopnia zagrożenia}
-translate P OptionsGlistWheelRows {Rzędy na wycięcie koła}
+translate E OptionsGlistWheelRows {Liczba wierszy przewijanych kółkiem myszy}
 translate P OptionsMovesTreeDepth {Domyślna liczba półposunięć w oknie drzewa wariantów}
-translate P OptionsMovesEnginePvLength {Długość wyświetlacza PV silnika}
+translate P OptionsMovesEnginePvLength {Długość wyświetlanych linii PV silnika}
 menuText P OptionsNumbers "Format liczb" 0 {Wybierz format liczb}
 menuText P OptionsTheme "Motyw" 0 {Zmień wygląd interfejsu}
 menuText P OptionsWindows "Okna" 0 {Opcje okien}
@@ -557,7 +592,7 @@ translate P ErrNotOpen {To nie jest otwarta baza.}
 translate P ErrReadOnly {Ta baza jest tylko do odczytu; nie można jej zmienić.}
 translate P ErrSearchInterrupted {Wyszukiwanie przerwano; wyniki są niepełne.}
 translate P ErrNoClockComments {W tej partii nie znaleziono komentarzy zegara [%clk]. Aby użyć tej funkcji, dodaj czasy zegara w oknie komentarzy (Ctrl+E).}
-translate P ErrFileInUse {Błąd: plik jest już używany. Zamknij każdą inną aplikację korzystającą z tej bazy danych.}
+translate E ErrFileInUse {Błąd: plik jest już używany. Zamknij inne aplikacje korzystające z tej bazy danych.}
 
 # Drag and drop
 translate P DndCannotOpenUri {Nie można otworzyć adresu URI}
@@ -651,17 +686,17 @@ menuText P TreeHelpIndex "Indeks pomocy" 0
 menuText P TreeFindGames "Znajdź partie z adnotacją NAG" 0 {Utwórz listę partii, w których to posunięcie ma symbol adnotacji.}
 translate P SaveCache {Zapisz pamięć podręczną}
 translate P Training {Trening}
-translate P TreeTrainingEndOfLine {Osiągnięto koniec linii.}
-translate P TreeTrainingMoveNotInBase {Tego ruchu nie ma w bazie danych.}
+translate P TreeTrainingEndOfLine {Koniec wariantu.}
+translate P TreeTrainingMoveNotInBase {Tego posunięcia brak w bazie danych.}
 translate P LockTree {Zablokuj}
 translate P TreeDepth {Półposunięcia:}
 translate P TreeLocked {zablokowane}
 translate P TreeBest {Najlepsze}
 translate P TreeBestGames {Najlepsze partie z drzewa wariantów}
 translate P TreeFindAnyAnn {dowolna adnotacja}
-translate P TreeFindStalePos {Bieżąca pozycja nie odpowiada pozycji w drzewie wariantów, dla której zapisano adnotację.\nWróć do tej pozycji i spróbuj ponownie.}
-# Note: the next message is the tree window title row. After editing it,
-# check the tree window to make sure it lines up with the actual columns.
+translate P TreeFindStalePos {Bieżąca pozycja nie odpowiada pozycji w drzewie wariantów.\nWróć do tej pozycji i spróbuj ponownie.}
+# Uwaga: następny wpis to nagłówek okna drzewa. Po jego edycji sprawdź okno drzewa,
+# aby upewnić się, że tekst jest poprawnie wyrównany względem kolumn.
 translate P TreeTitleRow \
   {    Posunięcia                ECO       Częstość     Wynik ŚrElo  Perf  śrDł ŚrRok  %Remisów  %Wygr.}
 translate P TreeTotal {RAZEM}
@@ -770,7 +805,7 @@ translate P GraphAbsFilterTitle "Wykres filtra: częstość partii"
 translate P GraphWinPctTitle "Wykres filtra: % wygranych (1-0 i 0-1) w bieżącej pozycji wg roku"
 translate P ConfigureFilter "Skonfiguruj osie X dla roku, rankingu i posunięć"
 translate P FilterEstimate "Szacuj"
-translate P TitleFilterGraph "scidCommunity: Wykres filtra"
+translate P TitleFilterGraph "ScidCommunity: Wykres filtra"
 translate P WinPct "% wygranych"
 translate P GraphLine "Wykres liniowy"
 translate P GraphBar "Wykres słupkowy"
@@ -826,17 +861,12 @@ translate P Informant+-- {Białe mają miażdżącą przewagę}
 translate P AutoComment {Automatyczny komentarz}
 translate P AutoCommentTooltip {Wygeneruj komentarz AI dla bieżącej pozycji}
 translate P AnalysisAutoCommentTooltip {Wygeneruj komentarz AI dla całej partii}
-translate P MoveLabelBest {Najlepszy}
-translate P MoveLabelExcellent {Znakomity}
-translate P MoveLabelGood {Dobry}
-translate P MoveLabelInaccuracy {Nieścisłość}
-translate P MoveLabelMistake {Błąd}
-translate P MoveLabelBlunder {Rażący błąd}
-translate P MoveLabelBrilliant {Genialny}
-translate P MoveLabelGreat {Świetny}
-translate P MoveLabelMiss {Przegapiona szansa}
-translate P MoveLabelForced {Wymuszony}
-translate P MoveLabelBook {Teoria}
+translate E MoveLabelBest {Najlepsze}
+translate E MoveLabelExcellent {Znakomite}
+translate E MoveLabelGood {Dobre}
+translate E MoveLabelInaccuracy {Niedokładność}
+translate E MoveLabelMistake {Błąd}
+translate E MoveLabelBlunder {Poważny błąd}
 translate P GameComment {Komentarz do partii}
 translate P GameCommentTooltip {Przeskanuj partię pod kątem opisanych posunięć i wygeneruj podsumowanie AI}
 translate P TimeMs {Czas (ms)}
@@ -902,14 +932,14 @@ menuText P PgnHelpIndex "Indeks" 0
 translate P PgnWindowTitle {Okno PGN - partia %u}
 
 # Notation pane (PGN window) button tooltips:
-translate P TBLookupTooltip {Wyszukiwanie bazy tabel na Lichess}
-translate P LichessEvalTooltip {Ocena chmury Lichess dla aktualnej pozycji}
-translate P LichessUploadTooltip {Prześlij grę na Lichess.org}
-translate P ChessComTooltip {Otwórz grę na tablicy analitycznej Chess.com}
-translate P ChessDBTooltip {Otwórz aktualną pozycję w ChessDB.cn}
-translate P LichessOpenExTooltip {Eksplorator otwarcia Lichess dla bieżącej pozycji}
-translate P LichessMonitorTooltip {Wstrzymaj/Wznów aktualizacje na żywo}
-translate P LucasChessNoMacOS {Silniki Lucas Chess nie są dostępne dla systemu macOS}
+translate P TBLookupTooltip {Baza końcówek na Lichess}
+translate P LichessEvalTooltip {Ocena bieżącej pozycji w chmurze Lichess}
+translate P LichessUploadTooltip {Prześlij partię do Lichess.org}
+translate P ChessComTooltip {Otwórz partię na szachownicy analitycznej Chess.com}
+translate P ChessDBTooltip {Otwórz bieżącą pozycję w ChessDB.cn}
+translate P LichessOpenExTooltip {Eksplorator debiutów Lichess dla bieżącej pozycji}
+translate P LichessMonitorTooltip {Wstrzymaj/wznów aktualizacje na żywo}
+translate P LucasChessNoMacOS {Silniki Lucas Chess nie są dostępne w systemie macOS}
 
 # Crosstable window menus:
 menuText P CrosstabFile "Plik" 0
@@ -1112,9 +1142,9 @@ translate P StripTags {Usuń znaczniki PGN}
 translate P StripTag {Usuń znacznik}
 translate P Cleaner {Zestaw zadań}
 translate P CleanerHelp {
-Zestaw zadań pozwala wykonać od razu kilka operacji porządkowania bazy. Operacje wybrane z listy
-zostaną wykonane na aktualnej bazie.
-Do klasyfikacji debiutowej i usuwania duplikatów partii użyte zostaną aktualne ustawienia.}
+Zestaw zadań pozwala wykonać od razu kilka operacji porządkowania bazy. Operacje wybrane z listy zostaną wykonane na aktualnej bazie.
+Do klasyfikacji debiutowej i usuwania duplikatów partii użyte zostaną aktualne ustawienia.
+}
 translate P CleanerConfirm {
 Po rozpoczęciu porządkowania nie będzie można go przerwać!
 
@@ -1126,7 +1156,7 @@ Czy na pewno chcesz rozpocząć wybrane zadania?
 translate P TwinCheckUndelete {aby przełączyć; "u" przywraca obie)}
 translate P TwinCheckprevPair {Poprzednia para}
 translate P TwinChecknextPair {Następna para}
-translate P TwinChecker {scidCommunity: sprawdzanie duplikatów partii}
+translate P TwinChecker {ScidCommunity: sprawdzanie duplikatów partii}
 translate P TwinCheckTournament {Partie w turnieju:}
 translate P TwinCheckNoTwin {Brak duplikatów  }
 translate P TwinCheckNoTwinfound {Nie wykryto duplikatów tej partii.\nAby pokazać duplikaty w tym oknie, najpierw użyj funkcji "Usuń duplikaty partii...". }
@@ -1137,7 +1167,7 @@ translate P TwinCheckNoDelete {W tej bazie nie ma partii do usunięcia.}
 translate P TwinCriteria1 { Twoje ustawienia wyszukiwania duplikatów mogą sprawić, że\npartie niebędące duplikatami, ale z podobnymi posunięciami, zostaną oznaczone jako duplikaty.}
 translate P TwinCriteria2 {Jeśli wybierzesz "Nie" dla "te same posunięcia", zaleca się wybranie "Tak" dla ustawień kolorów, turnieju, miejsca, rundy, roku i miesiąca.\nCzy mimo to kontynuować i usunąć duplikaty? }
 translate P TwinCriteria3 {Zaleca się wybranie "Tak" dla co najmniej    dwóch ustawień: "to samo miejsce", "ta sama runda" i "ten sam rok".\nCzy mimo to kontynuować i usunąć duplikaty?}
-translate P TwinCriteriaConfirm {scidCommunity: potwierdź ustawienia wyszukiwania duplikatów}
+translate P TwinCriteriaConfirm {ScidCommunity: potwierdź ustawienia wyszukiwania duplikatów}
 translate P TwinChangeTag "Zmień następujące znaczniki partii:\n\n"
 translate P AllocRatingDescription "To polecenie użyje bieżącego pliku sprawdzania pisowni do dodania rankingów Elo do partii w tej bazie. Jeżeli zawodnik nie ma bieżącego rankingu, ale jego ranking z czasu partii jest podany w pliku sprawdzania pisowni, ten ranking zostanie dodany."
 translate P RatingOverride "Nadpisz istniejące niezerowe rankingi"
@@ -1519,10 +1549,10 @@ translate P CopyErrNotOpen {nie jest otwarta}
 translate P LightSquares {Jasne pola}
 translate P DarkSquares {Ciemne pola}
 translate P PickColorFromScreen {Wybierz kolor z ekranu}
-translate P SaveCurrentColors {Zapisz aktualne kolory}
-translate P SaveCurrentColorsHint {Dodaj aktualne kolory planszy do listy ustawień wstępnych}
-translate P RemoveSavedColor {Usuń zapisane ustawienie wstępne kolorów}
-translate P ColorPresetExists {Te kolory są już zapisane jako ustawienie wstępne %d}
+translate P SaveCurrentColors {Zapisz bieżące kolory}
+translate P SaveCurrentColorsHint {Dodaj bieżące kolory szachownicy do listy zapisanych zestawów}
+translate P RemoveSavedColor {Usuń ten zapisany zestaw kolorów}
+translate P ColorPresetExists {Te kolory są już zapisane jako zestaw %d}
 translate P SelectedSquares {Zaznaczone pola}
 translate P SuggestedSquares {Pola sugerowanych posunięć}
 translate P WhitePieces {Białe bierki}
@@ -2068,37 +2098,36 @@ translate P RtfExportTitle {Eksportuj do pliku RTF}
 translate P RtfExportError {Błąd podczas eksportu do RTF}
 translate P RtfImportTitle {Importuj plik RTF}
 translate P RtfImportError {Błąd podczas importu pliku RTF}
-translate P RtfNotScidFile {Ten plik nie został wyeksportowany przez scidCommunity z zachowaniem formatowania komentarzy lub jest uszkodzony.}
+translate P RtfNotScidFile {Ten plik nie został wyeksportowany przez ScidCommunity z zachowaniem formatowania komentarzy lub jest uszkodzony.}
 translate P RtfImportSuccess {Partia została pomyślnie zaimportowana do bazy schowka.}
 translate P RtfImportSuccessMulti {%d partii zostało pomyślnie zaimportowanych do bazy schowka.}
 }
-# end of english.tcl
+# end of polish.tcl
 
 
 ############################################################
 #
 # Polish tip of the day
-# Aktualizacja tip of the day ScidCommunity  by Szustan 
+# Aktualizacja tip of the day ScidCommunity v.5.1.4.48  by Szustan 
 
 set tips(P) {
-
   {
     ScidCommunity posiada ponad 40 <a Index>stron pomocy</a>, a w większości okien
     naciśnięcie klawisza <b>F1</b> wyświetli stronę pomocy dotyczącą
     danego okna.
   }
   {
-    Niektóre okna ScidCommunity (np. okno Informacji o partii, <a Switcher>Przełącznik baz danych</a> itp 
+  Niektóre okna ScidCommunity (np. okno <b>Informacja o partii</b>, <a Switcher>Przełącznik baz danych</a> itp. 
     ) mają menu kontekstowe prawego przycisku myszy. Wypróbuj
     prawy przycisk myszy w każdym oknie, aby sprawdzić, czy jest dostępne
     i jakie funkcje oferuje.
   }
- {
+  {
     ScidCommunity oferuje kilka sposobów wprowadzania posunięć szachowych, pozwalając
     wybrać ten, który najbardziej odpowiada. Możesz używać myszy
     (z podpowiedziami posunięć lub bez) albo klawiatury
     (z uzupełnianiem posunięć lub bez). Więcej szczegółów znajdziesz na stronie
-    pomocy <a Moves>wprowadzanie posunięć szachowych</a>.
+    pomocy <a Moves>Wprowadzanie posunięć szachowych</a>.
   }
   {
     Jeśli często otwierasz te same bazy danych, dodaj dla każdej z nich
@@ -2106,18 +2135,18 @@ set tips(P) {
     otwierać je szybciej z menu zakładek.
   }
   {
-    Możesz śledzić najważniejsze turnieje szachowe na żywo, korzystając z funkcji <b>Otwórz turniej  Lichess</b> w menu <b>Plik</b>. ScidCommunity będzie automatycznie monitorować i aktualizować trwające partie.
+    Możesz śledzić najważniejsze turnieje szachowe na żywo, korzystając z funkcji <b>Otwórz turnieje  Lichess</b> w menu <b>Plik</b>. ScidCommunity będzie automatycznie monitorować i aktualizować trwające partie na żywo.
   }
   {
     Wszystkie posunięcia bieżącej partii (wraz z wariantami i komentarzami) możesz
-    przeglądać w <a PGN>oknie PGN</a>.
+    przeglądać w <a PGN>Oknie PGN</a>.
     W oknie PGN możesz przejść do dowolnego posunięcia klikając na nie
     lewym przyciskiem myszy, lub użyć środkowego bądź prawego przycisku myszy,
     aby zobaczyć podgląd danej pozycji.
   }
   {
     Możesz kopiować partie z jednej bazy danych do drugiej metodą przeciągnij i upuść
-    lewym przyciskiem myszy w oknie <a Switcher>Przełącznika baz danych</a>.
+    lewym przyciskiem myszy w oknie <a Switcher>Przełącznik baz danych</a>.
   }
   {
     ScidCommunity obsługuje pliki PGN, nawet skompresowane programem Gzip
@@ -2127,18 +2156,13 @@ set tips(P) {
     <a Switcher>Przełącznika baz danych</a>.
   }
   {
-    Jeśli często korzystasz z dużej bazy danych w oknie <a Tree >Drzewo wariantów</a>,
-    warto wybrać opcję <b>Wypełnij plik pamięci podręcznej</b> z menu Plik
-    w oknie Drzewo wariantów. Pozwoli to zapamiętać statystyki drzewa dla wielu typowych
-    pozycji debiutowych, przyspieszając dostęp do drzewa w tej bazie.
+    Okno <a Tree>Drzewo wariantów</a> pokazuje wszystkie posunięcia wykonane z bieżącej pozycji,
+    ale jeśli chcesz zobaczyć wszystkie kolejności posunięć, którymi osiągnięto tę pozycję, 
+    możesz je znaleźć,  generując
+    <a Reports Opening>Raport debiutowy</a>.
   }
   {
-    Okno <a Tree>Drzewo wariantów</a> pokazuje wszystkie posunięcia zagrane z bieżącej pozycji,
-    ale jeśli chcesz zobaczyć również wszystkie drogi, którymi można do niej dojść,
-    możesz je znaleźć generując <a Reports Opening>Raport debiutowy</a>.
-  }
-  {
-    Aby szybko zaimportować własne partie z serwisów internetowych, użyj funkcji <b>Importuj moje partie z Lichess</b> lub <b>Importuj moje partie z chess.com</b> w menu <b>Plik</b>. Wystarczy podać nazwę użytkownika i datę początkową, aby pobrać partie wraz z pełnymi metadanymi.
+    Aby szybko zaimportować własne partie z serwisów internetowych, użyj funkcji <b>Importuj moje partie z Lichess</b> albo <b>Importuj moje partie z chess.com</b> w menu <b>Plik</b>. Wystarczy podać nazwę użytkownika i datę początkową, aby pobrać partie wraz z pełnymi metadanymi.
   }
   {
     W oknie <a GameList>Lista partii</a> naciśnij lewy lub prawy przycisk myszy
@@ -2146,33 +2170,33 @@ set tips(P) {
   }
   {
     W oknie <a PInfo>Informacja o zawodniku</a> (otwieranym przez kliknięcie na
-    nazwisko zawodnika w obszarze Informacja o partii pod szachownicą głównego okna)
+    nazwisko zawodnika w obszarze <b>Informacja o partii </b> pod szachownicą głównego okna)
     możesz łatwo ustawić <a Searches Filter>Filtr</a>, aby wyświetlić wszystkie partie
     danego zawodnika z określonym wynikiem — wystarczy kliknąć na wartość wyświetloną
     <red>czerwonym tekstem</red>.
   }
   {
-    Podczas analizy debiutu bardzo przydatne może być wykonanie
-    <a Searches Board>Wyszukiwania pozycji</a> z opcją <b>Piony</b> lub
-    <b>Kolumny</b> na ważnej pozycji debiutowej — może to ujawnić inne debiuty
+    Podczas analizy debiutu warto wykonać <a Searches Board>Wyszukiwanie
+    wg pozycji </a>, korzystając z opcji <b>Piony</b> lub <b>Kolumny</b> 
+    dla ważnej pozycji debiutowej. Pozwala to znaleźć inne debiuty
     prowadzące do tej samej struktury pionowej.
   }
   {
-    W oknie Informacja o partii (pod szachownicą) możesz kliknąć prawym
+    W oknie <b>Informacja o partii </b> (pod szachownicą) możesz kliknąć prawym
     przyciskiem myszy, aby wyświetlić menu dostosowywania. Na przykład możesz
     ukryć w ScidCommunity następne posunięcie, co jest przydatne podczas treningu polegającego
     na odgadywaniu posunięć w trakcie przeglądania partii.
   }
   {
-    Jeśli często przeprowadzasz rozległą <a Maintenance>Obsługę</a> dużej
-    bazy danych, możesz wykonać kilka zadań konserwacyjnych jednocześnie
-    używając <a Maintenance Cleaner>Zestaw zadań</a>.
+    Jeśli często wykonujesz różne zadania związane z <a Maintenance>Obsługa</a>
+    dużej bazy danych, możesz przeprowadzić kilka z nich jednocześnie za pomocą
+    <a Maintenance Cleaner>Zestaw zadań</a> w oknie <b> Obsługa </b>
   }
   {
     <a PGN>Okno PGN</a> zawiera przyciski szybkiego dostępu umożliwiające przesłanie bieżącej partii do serwisu <b>Lichess.org</b> lub <b>Chess.com</b>. Pozwala to natychmiast skorzystać z ich zaawansowanej analizy silnikiem w chmurze oraz funkcji udostępniania.
   }
   {
-    Jeśli posiadasz dużą bazę danych, w której większość partii ma podaną datę turnieju,
+    Jeśli posiadasz dużą bazę danych, w której większość partii ma podaną datę turnieju
     i chcesz ułożyć partie w kolejności chronologicznej, rozważ <a Sorting>Sortowanie</a>
     według daty turnieju, a następnie nazwy turnieju — zamiast według daty partii i nazwy
     turnieju. Pozwoli to grupować razem partie z tego samego turnieju, rozgrywanego
@@ -2180,13 +2204,14 @@ set tips(P) {
   }
   {
     Przed <a Maintenance Twins>Usuwaniem duplikatów partii</a> warto
-    <a Maintenance Spellcheck>Sprawdzić pisownię</a> w bazie danych, ponieważ
-    pozwoli to ScidCommunity wykryć więcej dubletów i oznaczyć je do usunięcia.
+    <a Maintenance Spellcheck>Sprawdzić pisownię nazw</a> w bazie danych, ponieważ
+    pozwoli to ScidCommunity wykryć więcej duplikatów i oznaczyć je do usunięcia.
   }
   {
     <a Flags>Flagi</a> są przydatne do oznaczania partii w bazie danych cechami,
     których możesz później szukać — np. struktura pionowa, taktyka itp.
-    Możesz przeszukiwać według flag za pomocą <a Searches Header>Wyszukiwania nagłówków</a>.
+    Możesz przeszukiwać bazę wg flag za pomocą <a Searches 
+    Header>Wyszukiwania nagłówków</a>.
   }
   {
     Aby znaleźć najważniejsze partie (z wysoko ocenianymi przeciwnikami)
@@ -2198,15 +2223,16 @@ set tips(P) {
     Użyj przycisku <b>chessdb Engine Tree</b> w <a PGN>Okno PGN</a>, aby skorzystać z bazy danych  <b>ChessDB.cn</b>. Zawiera ona miliardy przeanalizowanych pozycji i ocen komputerowych dla niemal każdego debiutu.
   }
   {
-    Świetnym sposobem nauki debiutu z wykorzystaniem dużej bazy danych jest
-    włączenie trybu treningowego w oknie <a Tree>Drzewo wariantów</a>, a następnie gra
-    przeciwko bazie, aby zobaczyć, które warianty są najczęściej grane.
+    Świetnym sposobem na naukę debiutu z wykorzystaniem dużej bazy danych jest
+    włączenie trybu treningowego w oknie <a Tree>Drzewo wariantów</a> i rozgrywanie partii na podstawie bazy,
+    aby sprawdzić, które warianty występują najczęściej.
   }
   {
     Jeśli masz otwarte dwie bazy danych i chcesz przeglądać statystyki
-    <a Tree>Drzewa wariantów</a> pierwszej, analizując jednocześnie partię z drugiej,
-    naciśnij przycisk <b>Zablokuj</b> w oknie Drzewo wariantów, aby przypiąć je do
-    pierwszej bazy, a następnie przełącz się na drugą bazę.
+    <a Tree>Drzewa wariantów</a> pierwszej bazy, analizując jednocześnie
+    partie z drugiej, naciśnij przycisk <b>Zablokuj</b> w oknie
+    <b>Drzewo wariantów </b>, aby zablokować je na  pierwszej bazie,
+    a następnie przełącz się na drugą bazę.
   }
   {
     <a Tmt>Wyszukiwarka turniejów</a> przydaje się nie tylko do znajdowania
@@ -2215,7 +2241,7 @@ set tips(P) {
     turniejów rozegranych w danym kraju.
   }
   {
-    W oknie przeszukiwania <a Searches Material>Materiał/wzorzec</a> zdefiniowanych
+    W oknie wyszukiwania <a Searches Material>Materiał/wzorzec</a> zdefiniowanych
     jest wiele typowych wzorców, które mogą być przydatne podczas nauki
     debiutów lub gry środkowej.
   }
@@ -2227,7 +2253,7 @@ set tips(P) {
     szukana sytuacja wystąpiła tylko chwilowo.
   }
   {
-    Jeśli osiągniesz końcówkę z 7 lub mniej figurami, kliknij przycisk <b>Table Base</b> w Oknie <aOknie PGN>PGN</a>, aby uzyskać perfekcyjną analizę z baz tabel końcowych Lichess.
+    Jeśli osiągniesz końcówkę z 7 lub mniej figurami, kliknij przycisk <b>Table Base</b> w <a PGN>Okno PGN</a>, aby uzyskać perfekcyjną analizę z baz tabel końcowych Lichess.
   }
   {
     Jeśli posiadasz ważną bazę danych, której nie chcesz przypadkowo zmienić,
@@ -2237,23 +2263,23 @@ set tips(P) {
   {
     Jeśli używasz programu XBoard lub WinBoard (lub innego programu szachowego,
     który potrafi skopiować pozycję szachową w notacji FEN do schowka)
-    i chcesz przenieść bieżącą pozycję do ScidCommunity, najszybszym i najwygodniejszym
-    sposobem jest wybranie <b>Kopiuj pozycję</b> z menu Plik w XBoard/WinBoard,
-    a następnie <b>Wklej pozycję startową</b> z menu Edycja w ScidCommunity.
+    i chcesz przenieść bieżącą pozycję do ScidCommunity, najszybszym i
+    najwygodniejszym  sposobem jest wybranie <b>Kopiuj pozycję</b> z menu
+    Plik w XBoard/WinBoard (lub innym programie) , a następnie <b>Wklej pozycję jako FEN</b> z menu
+    <b>Edycja</b> w ScidCommunity.
   }
   {
-    W <a Searches Header>Wyszukiwaniu nagłówków</a> nazwy zawodników, turniejów,
+    W <a Searches Header>Wyszukiwaniu wg nagłówka</a> nazwy zawodników, turniejów,
     miejsc i rund są wyszukiwane bez rozróżniania wielkości liter i mogą pasować
     w dowolnym miejscu nazwy. Możesz wybrać wyszukiwanie z użyciem symboli wieloznacznych
-    z rozróżnianiem wielkości liter
-    (gdzie "?" = dowolny pojedynczy znak, a "*" = zero lub więcej znaków)
-    wpisując tekst wyszukiwania "w cudzysłowie". Na przykład wpisz "*BEL"
+    z rozróżnianiem wielkości liter (gdzie "?" = dowolny pojedynczy znak, a "*" = zero lub
+    więcej znaków)l wpisując tekst wyszukiwania "w cudzysłowie". Na przykład wpisz "*BEL"
     (wraz ze znakami cudzysłowu) w polu miejsca, aby znaleźć wszystkie partie
     rozegrane w Belgii, ale nie w Belgradzie.
   }
   {
     Jeśli chcesz poprawić posunięcie w partii bez utraty kolejnych posunięć,
-    otwórz okno <b>wklej tekst...</b> w menu <b>Edycja</b>, naciśnij przycisk
+    otwórz okno <b>Wklej tekst ze schowka...</b> w menu <b>Edycja</b>, naciśnij przycisk
     <b>Wklej bieżącą partię</b>, teraz popraw błędne posunięcie, a następnie
     naciśnij <a Import>Importuj</a>.
   }
@@ -2272,7 +2298,7 @@ set tips(P) {
   }
   {
     <a Reports Opening>Raport debiutowy</a> jest doskonałym narzędziem do pogłębionej
-    nauki danej pozycji. Możesz zobaczyć, jak dobrze wypada w praktyce, czy
+    nauki danej pozycji. Możesz zobaczyć, jak dobrze jest ona oceniana, czy
     prowadzi do częstych krótkich remisów oraz jakie są typowe motywy pozycyjne.
   }
   {
@@ -2286,17 +2312,18 @@ set tips(P) {
     Jeśli przeglądasz debiuty w bazie danych za pomocą <a Tree>Drzewo wariantów</a>,
     możesz uzyskać przydatny przegląd ostatnich wyników bieżącego debiutu
     oraz statystyki wśród wysoko ocenianych zawodników, otwierając
-    okno statystyk (skrót: Ctrl+I).
+    <b>Okno statystyk </b> (skrót: Ctrl+I).
   }
   {
     Po wykonaniu <a Searches>Wyszukiwania</a> możesz łatwo przeglądać wszystkie
     pasujące partie przytrzymując <b>Ctrl</b> i naciskając klawisz strzałki
     <b>W górę</b> lub <b>W dół</b>, aby załadować poprzednią lub następną
-    partię z <a Searches Filter>filtru</a>.
+    partię z <a Searches Filter>filtra</a>.
   }
   {
-    Okna mogą być zadokowane przez zaznaczenie odpowiedniej opcji w menu Opcje.
+    Okna mogą być zadokowane przez zaznaczenie odpowiedniej opcji w menu <b>Opcje</b>.
     Zakładki można przeciągać i upuszczać między panelami oraz układać
     klikając prawym przyciskiem myszy na widżecie zakładek.
   }
 }
+########################################
