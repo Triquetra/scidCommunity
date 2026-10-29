@@ -343,8 +343,13 @@ proc ::enginelist::applyEdit {index fields} {
 #   is not a clash, and neither is a new entry whose placeholder is at index.
 proc ::enginelist::nameTaken {index name} {
     global engines
-    set found [lsearch -exact -index 0 $engines(list) $name]
-    return [expr {$found >= 0 && $found != $index}]
+    # All of them, not the first: a list that already carries the name twice
+    # (an older engines.dat, before this check existed) is a clash whichever of
+    # the two is being edited.
+    foreach found [lsearch -all -exact -index 0 $engines(list) $name] {
+        if {$found != $index} { return true }
+    }
+    return false
 }
 
 # ::enginelist::saveEdit
@@ -358,7 +363,11 @@ proc ::enginelist::nameTaken {index name} {
 #   leaves both the list and the file as they were.
 proc ::enginelist::saveEdit {index fields} {
     global engines
-    set name [lindex $fields 0]
+    # The list is read by name, and two names that differ only in surrounding
+    # space read as one: store the trimmed form and check that.
+    set name [string trim [lindex $fields 0]]
+    if {$name eq ""} { return false }
+    lset fields 0 $name
     if {[::enginelist::nameTaken $index $name]} {
         set suggestion [::enginecfg::uniquename $name]
         set answer [tk_messageBox -title scidCommunity -icon question \

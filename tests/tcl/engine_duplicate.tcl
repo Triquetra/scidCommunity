@@ -253,6 +253,32 @@ checkEq "without a question" [llength $::asked] 0
 checkEq "and keeps its limits" \
     [dict get [::enginelimits::of [lindex $::engines(list) 0]] depth] 66
 
+puts "a duplicate already in the file is a clash either way round"
+# engines.dat written before this check existed can carry the same name twice.
+# Editing the first copy must still see the second one.
+set ::engines(list) [list \
+    [list Deep /x {} {} 0 0 {} 1 {}] \
+    [list Deep /x {} {} 0 0 {} 1 {}]]
+check "the later copy is a clash" [::enginelist::nameTaken 1 Deep]
+check "and so is the earlier one" [::enginelist::nameTaken 0 Deep]
+
+puts "a name that differs only in space is the same name"
+set ::engines(list) [list \
+    [list Deep /x {} {} 0 0 {} 1 {}] \
+    [list Other /x {} {} 0 0 {} 1 {}]]
+set ::answer no
+set ::asked {}
+set spaced [list { Deep } /x {} {} 0 0 {} 1 {}]
+checkEq "the clash is seen through the spaces" [::enginelist::saveEdit 1 $spaced] false
+checkEq "and the question offers a free name" \
+    [string match {*Deep (1)*} $::asked] 1
+set ::answer yes
+checkEq "accepting stores the suggested name" [::enginelist::saveEdit 1 $spaced] true
+checkEq "under the suggestion" [lindex [lindex $::engines(list) 1] 0] {Deep (1)}
+checkEq "a name of nothing but spaces is not a name" \
+    [::enginelist::saveEdit 0 [list {   } /x {} {} 0 0 {} 1 {}]] false
+checkEq "and the entry is untouched" [lindex [lindex $::engines(list) 0] 0] Deep
+
 puts "the story end to end: duplicate, rename, reload"
 set ::engines(list) [list {Deep /x {--threads 8} /opt 2800 100 \
     {white 1 none false normal {}} 1 {{Threads 8} {Hash 512}} {depth 66 movetime 300000}}]
