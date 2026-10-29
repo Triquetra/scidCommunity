@@ -25,6 +25,8 @@ proc checkEq {name got want} {
 set root [file normalize [file join [file dirname [info script]] .. ..]]
 source [file join $root tcl tools accuracy.tcl]
 source [file join $root tcl tools move_labels.tcl]
+source [file join $root tcl enginecfg.tcl]
+source [file join $root tcl tools engine_limits.tcl]
 source [file join $root tcl tools game_review.tcl]
 source [file join $root tcl tools review_driver.tcl]
 
@@ -75,6 +77,19 @@ checkEq "an engine that advertises nothing leaves them unset" \
     [dict get [::review::engineDefaults {X /x {} {} 0 0 {} 1 {}}] threads] {}
 checkEq "and then ::review's value is the fallback" \
     [dict get [::review::effective {X /x {} {} 0 0 {} 1 {}}] threads] [::review::get threads]
+
+puts "where the depth comes from"
+set ::engines(list) [list \
+    [list Plain /x {} {} 0 0 {} 1 {} {}] \
+    [list Deep /x {} {} 0 0 {} 1 {} [dict create depth 30]] \
+    [list Shallow /x {} {} 0 0 {} 1 {} [dict create depth 12]]]
+::review::reset
+checkEq "a preset with no limits leaves the review depth alone" \
+    [dict get [::review::effective [::enginecfg::get Plain]] depth] 18
+checkEq "a deeper preset raises it" \
+    [dict get [::review::effective [::enginecfg::get Deep]] depth] 30
+checkEq "a shallower preset does not lower it" \
+    [dict get [::review::effective [::enginecfg::get Shallow]] depth] 18
 
 puts "a pass over three positions"
 set ::progress {}

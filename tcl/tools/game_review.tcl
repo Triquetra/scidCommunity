@@ -160,7 +160,19 @@ proc ::review::effective {enginecfg} {
     if {$mpv < 2} {
         set mpv 2
     }
-    return [dict create threads $threads hash $hash mpv $mpv depth [get depth]]
+    # The preset's own search limits apply here too, but the review's depth is a
+    # floor rather than a default: a preset set up to browse at depth 12 must not
+    # shallow out a verdict. A preset that has no Limits element falls back to
+    # the review's values, which is what an engines.dat from an older version is.
+    set depth [get depth]
+    if {[llength $enginecfg] >= 1 && [info exists ::engines(list)] &&
+        [info commands ::enginelimits::forName] ne ""} {
+        set preset [::enginelimits::forName [lindex $enginecfg 0]]
+        if {[dict get $preset depth] ne "" && [dict get $preset depth] > $depth} {
+            set depth [dict get $preset depth]
+        }
+    }
+    return [dict create threads $threads hash $hash mpv $mpv depth $depth]
 }
 
 # Cross-field problems, for a dialog that wants to show them all at once.
