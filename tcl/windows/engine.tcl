@@ -805,7 +805,8 @@ proc ::enginewin::reviewStart {id positions depth} {
     # A new pass replaces the old results; if it is cancelled, the window must
     # not be left holding a previous game's (or previous run's) lines.
     unset -nocomplain ::enginewin::reviewresults($id)
-    set ::enginewin::reviewpass($id) [dict create state searching token ""]
+    set ::enginewin::reviewpass($id) [dict create \
+        state searching token "" total [llength $positions]]
     if {[catch {
         set token [::reviewdriver::start $enginecfg $positions [dict get $eff mpv] $depth \
             [list ::enginewin::reviewProgress $id] [list ::enginewin::reviewDone $id]]
@@ -896,6 +897,19 @@ proc ::enginewin::reviewProgress {id done total ply lines} {
 }
 
 proc ::enginewin::reviewDone {id results} {
+    # A pass that lost its engine reports the positions that answered through
+    # the same callback as a finished one. Fewer results than positions is a
+    # review that did not happen: say so, and keep nothing to write from.
+    set total 0
+    catch { set total [dict get $::enginewin::reviewpass($id) total] }
+    set why [::reviewui::interruptedText [dict size $results] $total]
+    if {$why ne ""} {
+        unset -nocomplain ::enginewin::reviewresults($id)
+        unset -nocomplain ::enginewin::reviewpass($id)
+        set ::enginewin::reviewstatus($id) $why
+        ::enginewin::reviewRefresh $id
+        return
+    }
     # The results stay here, keyed by ply, for the writeback slice: this window
     # starts the pass and reports it, and writing labels, [%eval] and variations
     # into the game is what the next pass of this work does.

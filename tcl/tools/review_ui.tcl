@@ -213,6 +213,21 @@ proc ::reviewui::failedText {reason} {
     return [format [::reviewui::tr ReviewFailed] $reason]
 }
 
+# Why a pass that came back with fewer positions than it asked for is not a
+# finished review. "" when every position answered.
+#
+# The driver reports an engine that died mid-pass through the same callback it
+# uses for success, with the positions that did finish: without this, the status
+# line simply disappears and an incomplete set of results looks like a review.
+# The results are dropped by the caller - a half-searched game is not something
+# to write labels from - so the message is the only thing the user gets.
+proc ::reviewui::interruptedText {done total} {
+    if {![string is integer -strict $total] || $total < 1} { return "" }
+    if {[string is integer -strict $done] && $done >= $total} { return "" }
+    return [::reviewui::failedText \
+        "the engine stopped after $done of $total positions"]
+}
+
 # The depth a one-move comment searches at, and whether anything has to wait.
 #
 # With move_comment_wait on (the default) the comment has to be the one a review

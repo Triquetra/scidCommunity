@@ -408,6 +408,18 @@ checkEq "the status line waits for the preset's depth too" \
     [format [::reviewui::tr ReviewWaitForDepth] 30]
 checkEq "an empty target still means the review's own depth" \
     [dict get [::reviewui::moveCommentDepth 12] depth] 18
+
+# A pass that lost its engine comes back through the same callback as a finished
+# one, with the positions that answered. The short set is a failure, not a
+# review, and the user is told why instead of watching the status line vanish.
+checkEq "a full set is a finished review" [::reviewui::interruptedText 10 10] ""
+checkEq "more than asked for is finished too" [::reviewui::interruptedText 12 10] ""
+checkEq "a short set says how far it got" [::reviewui::interruptedText 3 10] \
+    "Review failed: the engine stopped after 3 of 10 positions"
+checkEq "nothing answered is still a failure" [::reviewui::interruptedText 0 1] \
+    "Review failed: the engine stopped after 0 of 1 positions"
+checkEq "no total to compare with says nothing" [::reviewui::interruptedText 3 ""] ""
+checkEq "and neither does an empty pass" [::reviewui::interruptedText 0 0] ""
 ::review::setValue move_comment_wait 0
 checkEq "with the wait off, a shallow analysis is still enough" \
     [dict get [::reviewui::moveCommentDepth 4] depth] 4
@@ -453,6 +465,8 @@ check "closing a window stops its pass" \
     [regexp {catch \{ ::enginewin::reviewCancel \$id \}} $engineSrc]
 check "and drops the results the pass was writing" \
     [regexp {unset -nocomplain ::enginewin::reviewresults\(\$id\)} $engineSrc]
+check "a pass that lost its engine is reported, not stored" \
+    [regexp {::reviewui::interruptedText \[dict size \$results\] \$total} $engineSrc]
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]
