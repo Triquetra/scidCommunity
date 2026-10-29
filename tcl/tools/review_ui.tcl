@@ -183,8 +183,8 @@ proc ::reviewui::label {key} {
 # ::review::moveCommentPlan owns the rule (it is ::review's setting and its
 # depth); this only turns "now, or the depth to wait for" into a dict the window
 # can branch on without re-parsing a number that is either "now" or a depth.
-proc ::reviewui::moveCommentStatus {depth_now} {
-    set plan [::review::moveCommentPlan $depth_now]
+proc ::reviewui::moveCommentStatus {depth_now {target ""}} {
+    set plan [::review::moveCommentPlan $depth_now $target]
     if {[string equal $plan now]} {
         return [dict create action now depth ""]
     }
@@ -192,8 +192,8 @@ proc ::reviewui::moveCommentStatus {depth_now} {
 }
 
 # The status line for that decision: "" once the comment can be written.
-proc ::reviewui::moveCommentMessage {depth_now} {
-    set st [::reviewui::moveCommentStatus $depth_now]
+proc ::reviewui::moveCommentMessage {depth_now {target ""}} {
+    set st [::reviewui::moveCommentStatus $depth_now $target]
     if {[dict get $st action] eq "now"} { return "" }
     return [format [::reviewui::tr ReviewWaitForDepth] [dict get $st depth]]
 }
@@ -220,9 +220,9 @@ proc ::reviewui::failedText {reason} {
 # searches at the review's depth. With it off the window's own analysis is the
 # answer whenever it has a number at all: that is what "write whatever the engine
 # has now" means, and re-searching it at 18 would be doing the work twice.
-proc ::reviewui::moveCommentDepth {depth_now} {
-    set target [::review::get depth]
-    set st [::reviewui::moveCommentStatus $depth_now]
+proc ::reviewui::moveCommentDepth {depth_now {target ""}} {
+    if {$target eq ""} { set target [::review::get depth] }
+    set st [::reviewui::moveCommentStatus $depth_now $target]
     if {[dict get $st action] eq "now"} {
         set depth $target
         if {[string is integer -strict $depth_now]} { set depth $depth_now }

@@ -383,9 +383,10 @@ proc ::review::cursorRestore {state} {
 # move_comment_wait set (the default), the button waits until the running
 # analysis reaches the review depth; without it, it writes whatever the engine
 # has now. Returns "now", or the depth it is waiting for.
-proc ::review::moveCommentPlan {depth_now} {
+proc ::review::moveCommentPlan {depth_now {depth ""}} {
     set s [all]
-    set target [dict get $s depth]
+    set target $depth
+    if {$target eq ""} { set target [dict get $s depth] }
     if {![dict get $s move_comment_wait]} { return now }
     if {$depth_now ne "" && [string is integer -strict $depth_now] && $depth_now >= $target} {
         return now

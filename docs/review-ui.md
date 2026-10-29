@@ -59,7 +59,9 @@ When it may start is `::review::moveCommentPlan`:
 - with `move_comment_wait` on (the default) the comment has to be the one a
   review would have written, so a shallower analysis is not good enough: the pass
   searches at the review's depth, and the bar says `Waiting for depth 18` until
-  it gets there;
+  it gets there. That depth is the *effective* one (`::review::effective`): an
+  engine preset with its own deeper limit raises it, so a review and a one-move
+  comment of the same position cannot disagree at two depths;
 - with `move_comment_wait` off, whatever the window's own analysis has already
   reached is good enough, and nothing waits — the depth shown in the bar's depth
   box is the depth used.
@@ -131,7 +133,8 @@ widget would otherwise have to decide:
   good fields still landed and the refused one kept its old value, with the
   spin-box ranges checked against what `::review::setValue` accepts;
 - **the one-move depth**, from `moveCommentPlan`, for a deep analysis, a shallow
-  one, nothing analysed, and the wait turned off;
+  one, nothing analysed, the wait turned off, and a preset that raises the depth
+  the review would use;
 - **the key set**: the twelve new strings are present in all 29
   `tcl/lang/*.tcl` files, the file list is read from the tree so a new language
   file fails loudly, and the English text is the text the labels are asserted

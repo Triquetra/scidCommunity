@@ -183,6 +183,11 @@ checkEq "by default it waits for the review depth" [::review::moveCommentPlan 12
 checkEq "at the review depth it writes" [::review::moveCommentPlan 18] now
 checkEq "deeper than the review depth writes too" [::review::moveCommentPlan 22] now
 checkEq "with no depth reported it waits" [::review::moveCommentPlan ""] 18
+# A preset may carry a deeper limit than the setting; the caller passes it in,
+# because only the caller knows which engine the pass will run on.
+checkEq "a deeper target is what it waits for" [::review::moveCommentPlan 20 30] 30
+checkEq "and at that target it writes" [::review::moveCommentPlan 30 30] now
+checkEq "an empty target is the setting" [::review::moveCommentPlan 12 ""] 18
 ::review::setValue move_comment_wait 0
 checkEq "immediate mode writes whatever the engine has" [::review::moveCommentPlan 4] now
 checkEq "and writes even with nothing to report" [::review::moveCommentPlan ""] now

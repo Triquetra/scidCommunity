@@ -394,6 +394,20 @@ checkEq "too shallow: search at the review's depth" [dict get $d depth] 18
 checkEq "and say we are waiting" [dict get $d wait] 1
 checkEq "nothing analysed: the review's depth, waiting" \
     [dict get [::reviewui::moveCommentDepth ""] depth] 18
+# A preset with its own deeper limit raises the depth a review searches at
+# (::review::effective), so Move Comment has to wait for that depth and search to
+# it, not to the setting: one move cannot get two verdicts at two depths.
+set d [::reviewui::moveCommentDepth 20 30]
+checkEq "the preset's deeper floor is the depth to search" [dict get $d depth] 30
+checkEq "and an analysis at 20 is not deep enough for it" [dict get $d wait] 1
+set d [::reviewui::moveCommentDepth 30 30]
+checkEq "at the preset's depth the comment can be written" [dict get $d depth] 30
+checkEq "and nothing waits" [dict get $d wait] 0
+checkEq "the status line waits for the preset's depth too" \
+    [::reviewui::moveCommentMessage 20 30] \
+    [format [::reviewui::tr ReviewWaitForDepth] 30]
+checkEq "an empty target still means the review's own depth" \
+    [dict get [::reviewui::moveCommentDepth 12] depth] 18
 ::review::setValue move_comment_wait 0
 checkEq "with the wait off, a shallow analysis is still enough" \
     [dict get [::reviewui::moveCommentDepth 4] depth] 4

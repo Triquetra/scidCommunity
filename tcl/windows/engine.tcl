@@ -861,9 +861,18 @@ proc ::enginewin::reviewMove {id} {
         set depths $::enginewin::pv_(depths,$id)
         if {[dict exists $depths $here]} { set depth_now [dict get $depths $here] }
     }
-    set plan [::reviewui::moveCommentDepth $depth_now]
+    # The depth the review would search at, which is the preset's own floor when
+    # that is deeper than the setting: a comment has to agree with a review, or
+    # the same move gets two verdicts at two depths.
+    set target ""
+    set name ""
+    catch { set name $::enginewin_lastengine($id) }
+    if {$name ne ""} {
+        catch { set target [dict get [::review::effective [::enginecfg::get $name]] depth] }
+    }
+    set plan [::reviewui::moveCommentDepth $depth_now $target]
     set positions [::reviewui::specs $map [list $here [expr {$here + 1}]]]
-    set msg [::reviewui::moveCommentMessage $depth_now]
+    set msg [::reviewui::moveCommentMessage $depth_now $target]
     if {$msg eq ""} { set msg [::reviewui::progressText 0 [llength $positions]] }
     set ::enginewin::reviewstatus($id) $msg
     ::enginewin::reviewStart $id $positions [dict get $plan depth]
