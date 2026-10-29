@@ -63,8 +63,10 @@ proc ::seed::forSide {cp side scoreside} {
 }
 
 # The score as the graph's label shows it: pawns with a sign, or #N for a mate.
+# A missing score has no label; the chart's click path passes "" here.
 proc ::seed::label {cp} {
     variable MATE_CP
+    if {$cp eq ""} { return "" }
     # A mate is anything past this: the encodings only ever reach it that way.
     if {abs($cp) >= $MATE_CP - 100 * 60} {
         set dist [expr {abs($cp) >= $MATE_CP ? 0 : int(($MATE_CP - abs($cp)) / 100)}]
