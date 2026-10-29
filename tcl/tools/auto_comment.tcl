@@ -153,6 +153,47 @@ proc ::auto_comment::providerList {} {
     return {none local ollama openai opencode gemini deepseek}
 }
 
+# ::auto_comment::providerLabel
+#   What the provider combo shows for a stored id. The options file stores the
+#   id, so the two must be different strings for the two channels a user cannot
+#   tell apart from an id: "local" and "ollama" are both Ollama to anyone who
+#   does not already know that one is a server on this machine and the other is
+#   a paid hosted service. The label says which is which; the id never changes.
+proc ::auto_comment::providerLabel {provider} {
+    switch -- $provider {
+        none     { return "No model" }
+        local    { return "Ollama - local server" }
+        ollama   { return "Ollama Cloud (hosted)" }
+        openai   { return "OpenAI-compatible endpoint" }
+        opencode { return "OpenCode Console" }
+        gemini   { return "Google Gemini" }
+        deepseek { return "DeepSeek" }
+    }
+    return $provider
+}
+
+# ::auto_comment::providerLabels
+#   The combobox values: one label per stored id, in providerList order.
+proc ::auto_comment::providerLabels {} {
+    set out {}
+    foreach id [::auto_comment::providerList] {
+        lappend out [::auto_comment::providerLabel $id]
+    }
+    return $out
+}
+
+# ::auto_comment::providerFromLabel
+#   The stored id behind a label, or "" when the label belongs to no provider.
+#   Matching is exact: a hand-edited options file or a stale dialog is not a
+#   reason to guess which channel the user meant.
+proc ::auto_comment::providerFromLabel {label} {
+    set want [string trim $label]
+    foreach id [::auto_comment::providerList] {
+        if {[::auto_comment::providerLabel $id] eq $want} { return $id }
+    }
+    return ""
+}
+
 # ::auto_comment::providerReady
 #   Empty when the selected provider has what it needs, otherwise the reason it
 #   cannot run - shown to the user instead of a request that silently fails.
@@ -696,15 +737,67 @@ proc ::auto_comment::syncModelCombo {combo} {
         -values [::auto_comment::modelChoices $::auto_comment::provider]
 }
 
+# ::auto_comment::syncProviderCombo
+#   Show the stored provider in a provider combobox, and offer the labels. The
+#   widget holds the label while ::auto_comment::provider holds the id, so a
+#   caller that changes the provider (a test, a restored session) has one place
+#   to bring the display back in step.
+proc ::auto_comment::syncProviderCombo {combo} {
+    if {![winfo exists $combo]} { return "" }
+    $combo configure -values [::auto_comment::providerLabels]
+    $combo set [::auto_comment::providerLabel $::auto_comment::provider]
+    return [$combo get]
+}
+
+# ::auto_comment::pickProvider
+#   Take the provider the user picked out of a label. Returns the stored id, or
+#   "" when the label is not one of ours (nothing is changed then, so an
+#   unreadable value cannot silently move the user to another channel).
+proc ::auto_comment::pickProvider {label} {
+    set id [::auto_comment::providerFromLabel $label]
+    if {$id ne ""} { set ::auto_comment::provider $id }
+    return $id
+}
+
+# ::auto_comment::chooseProvider
+#   The settings dialog's <<ComboboxSelected>> handler: store the id the label
+#   names, put the display back if the label was stale, and show that channel's
+#   section.
+proc ::auto_comment::chooseProvider {w} {
+    ::auto_comment::pickProvider [$w.content.provider get]
+    ::auto_comment::syncProviderCombo $w.content.provider
+    ::auto_comment::syncProviderSections $w
+}
+
+# ::auto_comment::chooseProviderForModel
+#   The Game Comment dialog's handler: the same label-to-id step, then the model
+#   field follows the provider it now names.
+proc ::auto_comment::chooseProviderForModel {combo modelCombo} {
+    ::auto_comment::pickProvider [$combo get]
+    ::auto_comment::syncProviderCombo $combo
+    ::auto_comment::syncModelCombo $modelCombo
+}
+
+# ::auto_comment::refreshAfterSettings
+#   Bring the calling dialog's provider and model comboboxes back in step after
+#   the settings dialog closes: both may have been changed there.
+proc ::auto_comment::refreshAfterSettings {modelCombo providerCombo} {
+    ::auto_comment::syncProviderCombo $providerCombo
+    ::auto_comment::syncModelCombo $modelCombo
+}
+
 # ::auto_comment::openSettings
 #   Opens the settings dialog and, once it is closed, refreshes the supplied
-#   model combobox in case the provider or model was changed there.
+#   comboboxes in case the provider or model was changed there.
 #
-proc ::auto_comment::openSettings {combo} {
+proc ::auto_comment::openSettings {combo {providerCombo ""}} {
     ::auto_comment::configureApiKey
     if {[winfo exists .autoCommentConfig]} {
+        # The script runs when the dialog is destroyed, so `winfo exists` has to
+        # be evaluated then: in the old double-quoted bind it was substituted
+        # here, the test became a constant, and the refresh never ran.
         bind .autoCommentConfig <Destroy> \
-            "+if {![winfo exists .autoCommentConfig]} { ::auto_comment::syncModelCombo $combo }"
+            "+if {!\[winfo exists .autoCommentConfig\]} { ::auto_comment::refreshAfterSettings {$combo} {$providerCombo} }"
     }
 }
 
@@ -793,11 +886,14 @@ proc ::auto_comment::configureApiKey {} {
     # Provider selector
     ttk::label $w.content.provlbl -text "LLM Provider:"
     pack $w.content.provlbl -anchor w
-    ttk::combobox $w.content.provider -textvariable ::auto_comment::provider \
-        -values [::auto_comment::providerList] -state readonly -width 18
+    # The combo shows a label and the options file keeps the id: see
+    # providerLabel. Without the label the two Ollama channels read as
+    # "local" and "ollama", which is the same product twice.
+    ttk::combobox $w.content.provider \
+        -values [::auto_comment::providerLabels] -state readonly -width 28
     pack $w.content.provider -anchor w -pady {0 10}
     bind $w.content.provider <<ComboboxSelected>> \
-        [list ::auto_comment::syncProviderSections $w]
+        [list ::auto_comment::chooseProvider $w]
 
     # --- none ---
     ttk::label $w.content.note -justify left -wraplength 420 -text \
@@ -946,6 +1042,7 @@ proc ::auto_comment::configureApiKey {} {
     bind $w <Return> [list ::auto_comment::saveSettings $w]
     bind $w <Escape> "destroy $w"
 
+    ::auto_comment::syncProviderCombo $w.content.provider
     ::auto_comment::syncProviderSections $w
     ::auto_comment::fitWindow $w
 }
@@ -1563,31 +1660,78 @@ proc ::auto_comment::parseOllamaTags {raw} {
     return [lsort -dictionary [lsort -unique $chat]]
 }
 
-# ::auto_comment::fetchOllamaModels
-#   The hosted model list from ollama.com's /api/tags. It answers without a key,
-#   so the list is usable before one is entered, and the key rides the https
-#   connection when there is one.
-proc ::auto_comment::fetchOllamaModels {} {
-    # The base is https by construction, and the list needs no key to be read;
-    # the key is attached only when one is stored. --proto-redir keeps a
-    # redirect from downgrading that keyed request to cleartext.
-    set cmd [list curl -s -L --proto-redir =https --max-time 15 \
-        -H {Accept: application/json}]
+# ::auto_comment::fetchTagModels
+#   Ask an Ollama-style server for its native model list, keeping the models that
+#   can chat. `apiRoot` is the native API root ("https://ollama.com/api",
+#   "http://localhost:11434/api"), and the request goes to its /tags.
+#   Returns {answered models}: `answered` is 0 when the request failed, so a
+#   caller can tell a server that does not serve that path (LM Studio, vLLM, a
+#   gateway) from an Ollama with nothing able to answer.
+#
+#   Both Ollama channels use this: the local one speaks the same native API as
+#   the hosted one, and the native list is the only one that says which models
+#   can chat. /v1/models lists an embedding model (nomic-embed-text) exactly
+#   like a chat model, and offering it only produces a failed request.
+proc ::auto_comment::fetchTagModels {apiRoot {key ""}} {
+    # --fail: a server that answers /api/tags with a 404 (LM Studio, vLLM) must
+    # count as "no native list", or its empty body would suppress the generic
+    # fallback that exists for exactly those servers.
+    set cmd [list curl -s -L --fail --max-time 15 -H {Accept: application/json}]
+    # A keyed request must not be redirected down to cleartext; the hosted base
+    # is https by construction, a local one usually is not.
+    if {[regexp -nocase {^https://} $apiRoot]} { lappend cmd --proto-redir =https }
     set authfile ""
-    if {$::auto_comment::ollamaKey ne ""} {
+    if {$key ne ""} {
         if {![catch {set authfile [::auto_comment::writeCurlConfig \
-                "Authorization: Bearer $::auto_comment::ollamaKey"]} err]} {
+                "Authorization: Bearer $key"]} err]} {
             lappend cmd --config $authfile
         } else {
             ::auto_comment::logDebug "Auto Comment: cannot write the auth file: $err"
         }
     }
-    lappend cmd "$::auto_comment::ollamaBase/tags"
+    lappend cmd [string trimright $apiRoot /]/tags
     set raw ""
     set failed [catch {exec {*}$cmd 2>@1} raw]
     if {$authfile ne ""} { catch {file delete -force $authfile} }
-    if {$failed} { return {} }
-    return [::auto_comment::parseOllamaTags $raw]
+    if {$failed} { return [list 0 {}] }
+    # A 200 is not enough: a server that answers unknown paths with its web UI
+    # returns HTML, which parses to no models - and a valid empty models array
+    # must not be treated the same way, or an Ollama with no chat model would
+    # get the unfiltered generic list. Only a body with a models array is the
+    # native list.
+    if {![regexp {"models"\s*:} $raw]} { return [list 0 {}] }
+    return [list 1 [::auto_comment::parseOllamaTags $raw]]
+}
+
+# ::auto_comment::fetchOllamaModels
+#   The hosted model list from ollama.com's /api/tags. It answers without a key,
+#   so the list is usable before one is entered, and the key rides the https
+#   connection when there is one.
+proc ::auto_comment::fetchOllamaModels {} {
+    lassign [::auto_comment::fetchTagModels $::auto_comment::ollamaBase \
+        $::auto_comment::ollamaKey] answered models
+    if {!$answered} { return {} }
+    return $models
+}
+
+# ::auto_comment::localModelList
+#   The local channel's models and the URLs they were asked for, as a two-element
+#   list. The local server is asked for /api/tags first and the same
+#   capability filter is applied as on the hosted channel; a server that does not
+#   answer that path falls back to the generic /v1/models list, which is
+#   reported unfiltered because nothing is known about those models.
+#
+#   The targets are returned with the models, not recomputed by the caller: the
+#   failure warning must name what was actually tried, and a second computation
+#   can drift from the first.
+proc ::auto_comment::localModelList {} {
+    set base [::auto_comment::baseUrl $::auto_comment::localUrl]
+    if {$base eq ""} { return [list {} {}] }
+    set tagUrl "$base/api/tags"
+    lassign [::auto_comment::fetchTagModels "$base/api"] answered models
+    if {$answered} { return [list $models [list $tagUrl]] }
+    return [list [::auto_comment::fetchUrlModels $base ""] \
+                 [::auto_comment::targetUrls $base]]
 }
 
 proc ::auto_comment::loadModels {combo provider} {
@@ -1604,9 +1748,11 @@ proc ::auto_comment::loadModels {combo provider} {
             set models [::auto_comment::fetchDeepSeekModels]
         }
         local {
+            # The local channel speaks Ollama's native API too, so its list is
+            # the native one when the server has it: /v1/models answers with the
+            # embedding models as well, and the chat endpoint cannot use them.
             set label "the local server"
-            set targets [::auto_comment::targetUrls $::auto_comment::localUrl]
-            set models [::auto_comment::fetchUrlModels $::auto_comment::localUrl ""]
+            lassign [::auto_comment::localModelList] models targets
         }
         openai {
             set label "the endpoint"

@@ -30,7 +30,11 @@ source [file join $::scidTclDir tools accuracy.tcl]
 
 namespace eval enginewin {}
 
-# Persistent depth and movetime values (shared across all engines)
+# Legacy depth and movetime values, shared across all engines. They are only a
+# fallback now: search limits belong to the engine preset (tools/engine_limits.tcl)
+# and each window keeps its own copy, so "Stockfish Deep" and "Stockfish Quick"
+# can differ in the limit that matters most. Options written by an older version
+# still load here and seed any preset that has no limits of its own.
 if {![info exists ::enginewin::depth_limit]} {
     set ::enginewin::depth_limit ""
 }
@@ -39,6 +43,10 @@ if {![info exists ::enginewin::movetime_limit]} {
 }
 ::options.store ::enginewin::depth_limit
 ::options.store ::enginewin::movetime_limit
+
+# Per-window limits, taken from the preset when the engine is opened.
+if {![info exists ::enginewin::depth]} { array set ::enginewin::depth {} }
+if {![info exists ::enginewin::movetime]} { array set ::enginewin::movetime {} }
 
 # Flag to show save options reminder only once per session
 set ::enginewin::limits_reminder_shown false
@@ -622,14 +630,14 @@ proc ::enginewin::createButtonsBar {id btn display} {
         -style Toolbutton -direction above -menu $btn.menus.hash
 
     ttk::label $btn.depth_label -text "[tr Depth]:" -style Toolbutton
-    ttk::entry $btn.depth -textvariable ::enginewin::depth_limit -width 6 -justify right \
+    ttk::entry $btn.depth -textvariable ::enginewin::depth($id) -width 6 -justify right \
         -validate key -validatecommand {expr {[string is integer %P] || [string length %P] == 0}}
     bind $btn.depth <Return> "::enginewin::applyLimits $id"
     bind $btn.depth <FocusOut> "::enginewin::applyLimits $id"
     ::utils::tooltip::Set $btn.depth "Search depth limit (leave empty for unlimited)"
 
     ttk::label $btn.movetime_label -text "[tr TimeMs]:" -style Toolbutton
-    ttk::entry $btn.movetime -textvariable ::enginewin::movetime_limit -width 8 -justify right \
+    ttk::entry $btn.movetime -textvariable ::enginewin::movetime($id) -width 8 -justify right \
         -validate key -validatecommand {expr {[string is integer %P] || [string length %P] == 0}}
     bind $btn.movetime <Return> "::enginewin::applyLimits $id"
     bind $btn.movetime <FocusOut> "::enginewin::applyLimits $id"
@@ -667,14 +675,22 @@ proc ::enginewin::createButtonsBar {id btn display} {
 
 # Apply depth and movetime limits and restart engine if running
 proc ::enginewin::applyLimits {id} {
-    # Show reminder about saving options (only once per session)
-    if {!$::enginewin::limits_reminder_shown && \
-        ($::enginewin::depth_limit ne "" || $::enginewin::movetime_limit ne "")} {
+    # A half-typed number must not reach the preset: put the stored values back.
+    if {![::enginelimits::valid depth $::enginewin::depth($id)] ||
+        ![::enginelimits::valid movetime $::enginewin::movetime($id)]} {
+        ::enginewin::loadLimits $id
+        return
+    }
+    # Limits belong to the engine preset, so they follow that engine everywhere
+    # and no longer need a separate "Save Options" step.
+    set name $::enginewin_lastengine($id)
+    set lim [list depth $::enginewin::depth($id) movetime $::enginewin::movetime($id)]
+    if {[::enginelimits::saveFor $name $lim] && !$::enginewin::limits_reminder_shown} {
         set ::enginewin::limits_reminder_shown true
         tk_messageBox -title "scidCommunity" -type ok -icon info \
-            -message "Engine depth and time limits have been set.\n\nTo have these settings automatically loaded when you start Scid, select \"Save Options\" from the Options menu before exiting."
+            -message "The depth and time limits are now saved with the engine preset \"$name\"."
     }
-    
+
     # If engine is running, restart it with new limits
     set state $::enginewin::engState($id)
     if {[string match *.run $state] || [string match *.autorun $state]} {
@@ -1055,10 +1071,30 @@ if {$multipv != 1 && [info exists ::enginewin::scorePV1($id)]} {
     }
 }
 
+# Take the search limits (and autorun cadence) from the engine's preset.
+# Any key the preset leaves unset falls back to the legacy global settings.
+proc ::enginewin::loadLimits {id {name ""}} {
+    if {$name eq ""} {
+        set name $::enginewin_lastengine($id)
+    }
+    set fallback [list depth $::enginewin::depth_limit \
+                       movetime $::enginewin::movetime_limit]
+    set lim [::enginelimits::forName $name $fallback]
+    set ::enginewin::depth($id) [dict get $lim depth]
+    set ::enginewin::movetime($id) [dict get $lim movetime]
+    if {[dict get $lim autorun] ne ""} {
+        # The Autorun menu's radio values are one-element lists; the variable
+        # must have the same shape or the menu shows no selection.
+        set ::enginewin_autorun($id) [list [list movetime [dict get $lim autorun]]]
+    }
+    return $lim
+}
+
 # Invoked when the engine's name changes.
 # Update the window's title and ::enginewin_lastengine accordingly.
 proc ::enginewin::updateEngineName {id name} {
     set ::enginewin_lastengine($id) $name
+    ::enginewin::loadLimits $id $name
     set w .engineWin$id
     if { [info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id) } {
         set w .pv$::enginewin::pgnviewer($id).engineWin$id
@@ -1431,14 +1467,9 @@ proc ::enginewin::callback {id msg} {
             ::enginewin::updateChart $id $msgData
         }
         "InfoBestMove" {
-            # Build expected limits from global variables for comparison
-            set expectedLimits {}
-            if {$::enginewin::depth_limit ne ""} {
-                lappend expectedLimits [list depth $::enginewin::depth_limit]
-            }
-            if {$::enginewin::movetime_limit ne ""} {
-                lappend expectedLimits [list movetime $::enginewin::movetime_limit]
-            }
+            # The limits this search was started with
+            set expectedLimits [::enginelimits::goLimits \
+                [list depth $::enginewin::depth($id) movetime $::enginewin::movetime($id)]]
             if {$pv_(limits,$id) eq $expectedLimits
                 && $pv_(pos,$id) eq $::enginewin::m_(position,$id)} {
                 ::enginewin::saveAccumulatedPVs $id
@@ -1561,14 +1592,9 @@ proc ::enginewin::sendPosition {id position plyInMainLine} {
     if {$::enginewin::pv_(postponed,$id) eq "" || ![analyzeMainLine $id]} {
         set ::enginewin::pv_(postponed,$id) ""
         set m_(posPly,$id) $plyInMainLine
-        # Build limits from persistent depth and movetime values
-        set limits {}
-        if {$::enginewin::depth_limit ne ""} {
-            lappend limits [list depth $::enginewin::depth_limit]
-        }
-        if {$::enginewin::movetime_limit ne ""} {
-            lappend limits [list movetime $::enginewin::movetime_limit]
-        }
+        # Limits come from the engine preset, with the legacy globals as fallback
+        set limits [::enginelimits::goLimits \
+            [list depth $::enginewin::depth($id) movetime $::enginewin::movetime($id)]]
         ::engine::send $id Go [list $position $limits]
     }
 }

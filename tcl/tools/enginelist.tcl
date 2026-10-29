@@ -32,11 +32,26 @@ proc engine {arglist} {
     # puts this option here for compatibility with previous file format (?!)
     if {! [info exists newEngine(UCI)]} { set newEngine(UCI) 0 }
     if {! [info exists newEngine(UCIoptions)]} { set newEngine(UCIoptions) "" }
+    # Search limits travel with the preset (see tools/engine_limits.tcl).
+    # File-sourced arguments can only ever be strings, so a bare integer is
+    # accepted as the depth, and anything else must be the dict itself.
+    set hasLimits [info exists newEngine(Limits)]
+    if {!$hasLimits} { set newEngine(Limits) "" }
+    if {[string is integer -strict $newEngine(Limits)]} {
+        set newEngine(Limits) [dict create depth $newEngine(Limits)]
+    } elseif {[catch {dict size $newEngine(Limits)}]} {
+        set newEngine(Limits) {}
+    }
 
-    lappend engines(list) [list $newEngine(Name) $newEngine(Cmd) \
+    set entry [list $newEngine(Name) $newEngine(Cmd) \
             $newEngine(Args) $newEngine(Dir) \
             $newEngine(Elo) $newEngine(Time) \
             $newEngine(URL) $newEngine(UCI) $newEngine(UCIoptions)]
+    # Only a file that actually had the attribute gets the tenth element: a
+    # nine-element entry is a legacy preset whose limits fall back to the old
+    # global settings.
+    if {$hasLimits} { lappend entry $newEngine(Limits) }
+    lappend engines(list) $entry
     return 1
 }
 

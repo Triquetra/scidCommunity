@@ -36,6 +36,8 @@ jobs:
 
       - name: Game review settings
         run: tclsh tests/tcl/game_review.tcl
+      - name: Engine preset limits
+        run: tclsh tests/tcl/engine_limits.tcl
 
       - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl

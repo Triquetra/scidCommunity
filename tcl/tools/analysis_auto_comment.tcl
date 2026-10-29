@@ -72,8 +72,10 @@ proc ::analysis_auto_comment::batch_generate {{engineId ""}} {
 
     ttk::label $w.content.modellbl -text "LLM Provider:"
     pack $w.content.modellbl -anchor w
-    ttk::combobox $w.content.provider -textvariable ::auto_comment::provider \
-        -values [::auto_comment::providerList] -state readonly -width 18
+    # The labels are what the user sees; ::auto_comment::provider keeps the id
+    # the options file stores (see ::auto_comment::providerLabel).
+    ttk::combobox $w.content.provider \
+        -values [::auto_comment::providerLabels] -state readonly -width 28
     pack $w.content.provider -anchor w -pady {0 5}
 
     ttk::label $w.content.model2lbl -text "Model:"
@@ -84,14 +86,15 @@ proc ::analysis_auto_comment::batch_generate {{engineId ""}} {
     # Keep the model list in step with the selected provider so the user can
     # choose the model each time the dialog is opened.
     bind $w.content.provider <<ComboboxSelected>> \
-        [list ::auto_comment::syncModelCombo $w.content.model]
+        [list ::auto_comment::chooseProviderForModel $w.content.provider $w.content.model]
+    ::auto_comment::syncProviderCombo $w.content.provider
     ::auto_comment::syncModelCombo $w.content.model
 
     ttk::frame $w.buttons -padding {0 5}
     pack $w.buttons -fill x
 
     ttk::button $w.buttons.settings -text "Settings..." \
-        -command [list ::auto_comment::openSettings $w.content.model]
+        -command [list ::auto_comment::openSettings $w.content.model $w.content.provider]
     pack $w.buttons.settings -side left -padx 5
 
     ttk::button $w.buttons.start -text "Start" -command {
