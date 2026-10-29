@@ -916,6 +916,7 @@ translate U EngineAddLocal {Lisää paikallinen moottori}
 translate U EngineAddRemote {Lisää etämoottori}
 translate U EngineReload {Lataa nykyinen moottori uudelleen}
 translate U EngineClone {Luo kopio nykyisestä moottorista}
+translate U EngineDuplicate {Monista}
 translate U EngineDelete {Poista nykyinen moottori}
 translate U EngineOpenAnalysis {Avaa analyysi}
 

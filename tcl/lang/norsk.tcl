@@ -887,6 +887,7 @@ translate O EngineAddLocal {Legg til en lokal motor}
 translate O EngineAddRemote {Legg til en ekstern motor}
 translate O EngineReload {Last inn gjeldende motor på nytt}
 translate O EngineClone {Lag en kopi av gjeldende motor}
+translate O EngineDuplicate {Dupliser}
 translate O EngineDelete {Slett gjeldende motor}
 translate O EngineOpenAnalysis {Åpne Analyse}
 

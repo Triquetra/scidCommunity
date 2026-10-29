@@ -884,6 +884,7 @@ translate R EngineAddLocal {Добавить локальный движок}
 translate R EngineAddRemote {Добавить удаленный двигатель}
 translate R EngineReload {Перезагрузить текущий движок}
 translate R EngineClone {Создать действующую движку}
+translate R EngineDuplicate {Дублировать}
 translate R EngineDelete {Удалить текущий движок}
 translate R EngineOpenAnalysis {Открытый анализ}
 

@@ -888,6 +888,7 @@ translate I EngineAddLocal {Aggiunge un motore locale}
 translate I EngineAddRemote {Aggiunge un motore remoto}
 translate I EngineReload {Ricarica il motore corrente}
 translate I EngineClone {Crea una copia del motore corrente}
+translate I EngineDuplicate {Duplica}
 translate I EngineDelete {Elimina il motore corrente}
 translate I EngineOpenAnalysis {Apri analisi}
 

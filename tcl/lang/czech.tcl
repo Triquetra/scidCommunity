@@ -882,6 +882,7 @@ translate C EngineAddLocal {Pidejte mstn motor}
 translate C EngineAddRemote {Pidejte vzdlen motor}
 translate C EngineReload {Znovu natte aktuln motor}
 translate C EngineClone {Vytvote kopii aktulnho motoru}
+translate C EngineDuplicate {Duplikovat}
 translate C EngineDelete {Smazat aktuln motor}
 translate C EngineOpenAnalysis {Otevřená analýza}
 

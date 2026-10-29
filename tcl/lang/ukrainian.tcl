@@ -878,6 +878,7 @@ translate Q EngineAddLocal {Додайте локальний двигун}
 translate Q EngineAddRemote {Додайте віддалений двигун}
 translate Q EngineReload {Перезавантажте поточний двигун}
 translate Q EngineClone {Створіть копію поточного движка}
+translate Q EngineDuplicate {Дублювати}
 translate Q EngineDelete {Видалити поточний механізм}
 translate Q EngineOpenAnalysis {Відкрити аналіз}
 

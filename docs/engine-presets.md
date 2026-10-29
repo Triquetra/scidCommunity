@@ -50,13 +50,35 @@ byte-identical to what an older version wrote; the legacy global options
 (`enginewin::depth_limit` / `enginewin::movetime_limit`) still apply to it.
 Those globals remain stored for this reason and are no longer edited by the UI.
 
+## Duplicating a preset
+
+The engines list (Tools → Analysis) has **Duplicate**: the selected preset is
+copied as a *complete* spec — command, arguments, directory, the whole
+`UCIoptions` list and `Limits` — under a name made unique by
+`::enginecfg::uniquename` (`Stockfish` → `Stockfish (1)`), and the copy opens in
+the edit dialog so it can be renamed to what it is for (`Stockfish Quick
+Review`). The copy is written to `engines.dat` at once, so cancelling the rename
+leaves a usable preset behind.
+
+The copy keeps the source's *shape*: a legacy nine-element entry copies as nine
+elements (no `Limits` line, still falling back to the global options), while an
+entry whose limits were all cleared copies as ten with the explicit empty dict.
+Padding every copy to ten would turn "this preset says nothing" into "override
+the globals with nothing", and dropping element 9 would turn a cleared preset
+back into a legacy one.
+
+`::enginelist::applyEdit` carries element 9 across an ordinary edit as well: the
+dialog shows the other nine fields, and renaming a preset used to erase its
+limits.
+
 ## Where the code lives
 
 - `tcl/tools/engine_limits.tcl` — the entry layout, validation, `Go` limit
   building and preset lookup (`::enginelimits::forName`).
 - `tcl/tools/enginelist.tcl` — reads the file; accepts `Limits` as a dict, or a
   bare integer as the depth.
-- `tcl/enginecfg.tcl` — writes the file, preserving element 9.
+- `tcl/enginecfg.tcl` — writes the file, preserving element 9, and
+  `::enginecfg::duplicate` copies a preset as a complete spec.
 - `tcl/windows/engine.tcl` — `::enginewin::loadLimits` takes a window's limits
   from its preset; `applyLimits` stores them back.
 

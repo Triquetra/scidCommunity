@@ -917,6 +917,7 @@ translate P EngineAddLocal {Dodaj silnik lokalny}
 translate P EngineAddRemote {Dodaj silnik zdalny}
 translate P EngineReload {Wczytaj ponownie bieżący silnik}
 translate P EngineClone {Utwórz kopię bieżącego silnika}
+translate P EngineDuplicate {Duplikuj}
 translate P EngineDelete {Usuń bieżący silnik}
 translate P EngineOpenAnalysis {Otwórz analizę}
 

@@ -909,6 +909,7 @@ translate G EngineAddLocal {Προσθέστε έναν τοπικό κινητ�
 translate G EngineAddRemote {Προσθέστε έναν απομακρυσμένο κινητήρα}
 translate G EngineReload {Φορτώστε ξανά τον τρέχοντα κινητήρα}
 translate G EngineClone {Δημιουργήστε ένα αντίγραφο του τρέχοντος κινητήρα}
+translate G EngineDuplicate {Αντιγραφή}
 translate G EngineDelete {Διαγράψτε τον τρέχοντα κινητήρα}
 translate G EngineOpenAnalysis {Ανοιχτή Ανάλυση}
 

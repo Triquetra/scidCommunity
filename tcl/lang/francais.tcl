@@ -890,6 +890,7 @@ translate F EngineAddLocal {Ajouter un moteur local}
 translate F EngineAddRemote {Ajouter un moteur distant}
 translate F EngineReload {Recharger le moteur actuel}
 translate F EngineClone {Créer une copie du moteur actuel}
+translate F EngineDuplicate {Dupliquer}
 translate F EngineDelete {Supprimer le moteur actuel}
 translate F EngineOpenAnalysis {Open Analysis}
 

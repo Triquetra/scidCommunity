@@ -878,6 +878,7 @@ translate V EngineAddLocal {הוסף מנוע מקומי}
 translate V EngineAddRemote {הוסף מנוע מרוחק}
 translate V EngineReload {טען מחדש את המנוע הנוכחי}
 translate V EngineClone {צור עותק של המנוע הנוכחי}
+translate V EngineDuplicate {שכפל}
 translate V EngineDelete {מחק את המנוע הנוכחי}
 translate V EngineOpenAnalysis {פתח את הניתוח}
 

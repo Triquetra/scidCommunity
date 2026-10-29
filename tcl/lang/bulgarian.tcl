@@ -918,6 +918,7 @@ translate g EngineAddLocal {Добавете локален двигател}
 translate g EngineAddRemote {Добавете дистанционен двигател}
 translate g EngineReload {Презаредете текущия двигател}
 translate g EngineClone {Създайте копие на текущия двигател}
+translate g EngineDuplicate {Дублирай}
 translate g EngineDelete {Изтрийте текущия двигател}
 translate g EngineOpenAnalysis {Отворете Анализ}
 

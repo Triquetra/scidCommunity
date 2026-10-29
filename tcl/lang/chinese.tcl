@@ -853,6 +853,7 @@ translate M EngineAddLocal {Add a local engine}
 translate M EngineAddRemote {Add a remote engine}
 translate M EngineReload {Reload the current engine}
 translate M EngineClone {Create a copy of the current engine}
+translate M EngineDuplicate {复制}
 translate M EngineDelete {Delete the current engine}
 translate M EngineOpenAnalysis {开放分析}
 

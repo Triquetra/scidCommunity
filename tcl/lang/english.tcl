@@ -917,6 +917,7 @@ translate E EngineAddLocal {Add a local engine}
 translate E EngineAddRemote {Add a remote engine}
 translate E EngineReload {Reload the current engine}
 translate E EngineClone {Create a copy of the current engine}
+translate E EngineDuplicate {Duplicate}
 translate E EngineDelete {Delete the current engine}
 translate E EngineOpenAnalysis {Open Analysis}
 

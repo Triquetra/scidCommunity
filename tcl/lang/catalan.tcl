@@ -903,6 +903,7 @@ translate K EngineAddLocal {Afegeix motor local}
 translate K EngineAddRemote {Afegeix motor en remot}
 translate K EngineReload {Recarrega motor actual}
 translate K EngineClone {Crea una còpia del motor actual}
+translate K EngineDuplicate {Duplica}
 translate K EngineDelete {Esborra el motor actual}
 translate K EngineOpenAnalysis {Anàlisi oberta}
 

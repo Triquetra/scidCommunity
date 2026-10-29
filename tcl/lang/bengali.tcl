@@ -877,6 +877,7 @@ translate b EngineAddLocal {একটি স্থানীয় ইঞ্জ�
 translate b EngineAddRemote {একটি দূরবর্তী ইঞ্জিন যোগ করুন}
 translate b EngineReload {বর্তমান ইঞ্জিন পুনরায় লোড করুন}
 translate b EngineClone {বর্তমান ইঞ্জিনের একটি অনুলিপি তৈরি করুন}
+translate b EngineDuplicate {অনুলিপি করুন}
 translate b EngineDelete {বর্তমান ইঞ্জিন মুছুন}
 translate b EngineOpenAnalysis {খোলা বিশ্লেষণ}
 

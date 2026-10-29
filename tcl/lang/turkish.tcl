@@ -881,6 +881,7 @@ translate T EngineAddLocal {Yerel bir motor ekleyin}
 translate T EngineAddRemote {Uzak motor ekleme}
 translate T EngineReload {Mevcut motoru yeniden yükleyin}
 translate T EngineClone {Geçerli motorun bir kopyasını oluşturun}
+translate T EngineDuplicate {Çoğalt}
 translate T EngineDelete {Mevcut motoru sil}
 translate T EngineOpenAnalysis {Açık Analiz}
 

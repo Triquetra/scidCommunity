@@ -250,6 +250,9 @@ proc ::enginelist::choose {} {
     dialogbutton $f.edit -text $::tr(EngineEdit...) -command {
         ::enginelist::edit [lindex [.enginelist.list.list selection] 0]
     }
+    dialogbutton $f.duplicate -text $::tr(EngineDuplicate...) -command {
+        ::enginelist::duplicate [lindex [.enginelist.list.list selection] 0]
+    }
     dialogbutton $f.delete -text $::tr(Delete...) -command {
         ::enginelist::delete [lindex [.enginelist.list.list selection] 0]
     }
@@ -270,7 +273,7 @@ proc ::enginelist::choose {} {
         destroy .enginelist
     }
     packbuttons right $f.cancel $f.ok $f.open
-    pack $f.lucaschess $f.add $f.edit $f.delete -side left -padx 1
+    pack $f.lucaschess $f.add $f.edit $f.duplicate $f.delete -side left -padx 1
 
     ::enginelist::sort
     focus $w.list.list
@@ -313,6 +316,43 @@ proc ::enginelist::delete {index} {
     return true
     }
     return false
+}
+
+# ::enginelist::applyEdit
+#   Stores the fields the edit dialog shows over the entry at index, and
+#   returns the stored entry.
+#   The dialog shows name, command, args, dir, elo, time, url, uci and options,
+#   which is nine elements. Element 9 (the search limits) is not in the dialog,
+#   so it is carried over unchanged - and only for an entry that had it, since a
+#   legacy nine-element entry must stay nine elements to keep falling back to
+#   the global limits. Without this, renaming a preset erased its limits.
+proc ::enginelist::applyEdit {index fields} {
+    global engines
+    set e [lindex $engines(list) $index]
+    if {$e eq ""} { return "" }
+    if {[llength $e] >= 10} {
+        lappend fields [lindex $e 9]
+    }
+    set engines(list) [lreplace $engines(list) $index $index $fields]
+    return $fields
+}
+
+# ::enginelist::duplicate
+#   Copies the preset at index as a complete spec (see ::enginecfg::duplicate),
+#   writes the "Engine list" file and opens the copy for editing, so the user
+#   can rename it: "Stockfish Deep" -> "Stockfish Quick Review".
+#   Returns the new name, or "" if there was nothing to copy.
+proc ::enginelist::duplicate {index} {
+    global engines
+    if {$index eq "" || $index < 0} { return "" }
+    set newName [::enginecfg::add [::enginecfg::duplicate [lindex $engines(list) $index]]]
+    if {$newName eq ""} { return "" }
+    ::enginelist::sort
+    set newIndex [lsearch -exact -index 0 $engines(list) $newName]
+    if {$newIndex >= 0} {
+        ::enginelist::edit $newIndex
+    }
+    return $newName
 }
 
 # ::enginelist::edit
@@ -464,11 +504,12 @@ proc ::enginelist::edit {index} {
             tk_messageBox -title scidCommunity -icon info \
                     -message "The Name, Command and Directory fields must not be empty."
         } else {
-            set newEntry [list $engines(newName) $engines(newCmd) \
+            # applyEdit adds back whatever the dialog does not show (element 9).
+            ::enginelist::applyEdit $engines(newIndex) [list \
+                    $engines(newName) $engines(newCmd) \
                     $engines(newArgs) $engines(newDir) \
                     $engines(newElo) $engines(newTime) \
                     $engines(newURL) $engines(newUCI) $engines(newOptions) ]
-            set engines(list) [lreplace $engines(list) $engines(newIndex) $engines(newIndex) $newEntry]
             ::engineNoWin::saveEngineSetup editEngine
             ::enginelist::sort
             ::enginecfg::write

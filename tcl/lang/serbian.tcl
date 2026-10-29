@@ -1385,6 +1385,7 @@ translate Y EngineAddRemote {Add a remote engine}
 translate Y EngineReload {Reload the current engine}
 # ====== TODO To be translated ======
 translate Y EngineClone {Create a copy of the current engine}
+translate Y EngineDuplicate {Dupliraj}
 # ====== TODO To be translated ======
 translate Y EngineDelete {Delete the current engine}
 # ====== TODO To be translated ======
