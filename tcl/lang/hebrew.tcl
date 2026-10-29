@@ -835,6 +835,18 @@ translate V MoveLabelForced {כפוי}
 translate V MoveLabelBook {תיאוריה}
 translate V GameComment {הערת משחק}
 translate V GameCommentTooltip {סרוק משחק לאיתור מהלכים מוערים והפק סיכום בינה מלאכותית}
+translate V ReviewGameButton {סקירת המשחק}
+translate V ReviewGameButtonTooltip {סקור כל מסע בקו הראשי ותן לו תווית}
+translate V ReviewMoveButton {הערת מסע}
+translate V ReviewMoveButtonTooltip {תן תווית למסע ששוחק מכאן וכתוב אותו}
+translate V ReviewSettings {הגדרות הסקירה}
+translate V ReviewVarLines {וריאציות לכתיבה}
+translate V ReviewVarCp {מרווח וריאציות (cp)}
+translate V ReviewMoveWait {המתן לעומק הסקירה}
+translate V ReviewFromPreset {%s (מהגדרות המנוע)}
+translate V ReviewProgress {סוקר עמדה %s מתוך %s}
+translate V ReviewWaitForDepth {ממתין לעומק %s}
+translate V ReviewFailed {הסקירה נכשלה: %s}
 translate V TimeMs {זמן (ms)}
 
 

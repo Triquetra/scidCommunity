@@ -873,6 +873,18 @@ translate U MoveLabelForced {Pakotettu}
 translate U MoveLabelBook {Teoria}
 translate U GameComment {Pelin kommentti}
 translate U GameCommentTooltip {Etsi pelistä selostettuja liikkeitä ja luo tekoälyn yhteenveto}
+translate U ReviewGameButton {Pelin tarkastus}
+translate U ReviewGameButtonTooltip {Tarkasta päälinjan jokainen siirto ja merkitse se}
+translate U ReviewMoveButton {Siirron kommentti}
+translate U ReviewMoveButtonTooltip {Merkitse tästä pelattu siirto ja kirjoita se}
+translate U ReviewSettings {Tarkastuksen asetukset}
+translate U ReviewVarLines {Kirjoitettavat muunnelmat}
+translate U ReviewVarCp {Muunnelman raja (cp)}
+translate U ReviewMoveWait {Odota tarkastuksen syvyyttä}
+translate U ReviewFromPreset {%s (moottorin asetuksista)}
+translate U ReviewProgress {Tarkastetaan asemaa %s / %s}
+translate U ReviewWaitForDepth {Odotetaan syvyyttä %s}
+translate U ReviewFailed {Tarkastus epäonnistui: %s}
 translate U TimeMs {Aika (ms)}
 
 

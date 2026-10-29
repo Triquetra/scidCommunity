@@ -874,6 +874,18 @@ translate P MoveLabelForced {Wymuszony}
 translate P MoveLabelBook {Teoria}
 translate P GameComment {Komentarz do partii}
 translate P GameCommentTooltip {Przeskanuj partię pod kątem opisanych posunięć i wygeneruj podsumowanie AI}
+translate P ReviewGameButton {Przegląd partii}
+translate P ReviewGameButtonTooltip {Przejrzyj każdy ruch głównego wariantu i go oceń}
+translate P ReviewMoveButton {Komentarz do ruchu}
+translate P ReviewMoveButtonTooltip {Oceń zagrany ruch i zapisz go}
+translate P ReviewSettings {Ustawienia przeglądu}
+translate P ReviewVarLines {Warianty do zapisania}
+translate P ReviewVarCp {Margines wariantów (cp)}
+translate P ReviewMoveWait {Czekaj na głębokość przeglądu}
+translate P ReviewFromPreset {%s (z profilu silnika)}
+translate P ReviewProgress {Przeglądanie pozycji %s z %s}
+translate P ReviewWaitForDepth {Oczekiwanie na głębokość %s}
+translate P ReviewFailed {Przegląd nie powiódł się: %s}
 translate P TimeMs {Czas (ms)}
 
 

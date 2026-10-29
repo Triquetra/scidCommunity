@@ -875,6 +875,18 @@ translate L MoveLabelForced {Forțată}
 translate L MoveLabelBook {Teorie}
 translate L GameComment {Comentariu joc}
 translate L GameCommentTooltip {Scanează jocul pentru mișcări adnotate și generează un rezumat AI}
+translate L ReviewGameButton {Analiza partidei}
+translate L ReviewGameButtonTooltip {Analizează fiecare mutare a liniei principale și eticheteaz-o}
+translate L ReviewMoveButton {Comentariu la mutare}
+translate L ReviewMoveButtonTooltip {Etichetează mutarea jucată de aici și scrie-o}
+translate L ReviewSettings {Setările analizei}
+translate L ReviewVarLines {Variante de scris}
+translate L ReviewVarCp {Marja variantelor (cp)}
+translate L ReviewMoveWait {Așteaptă adâncimea analizei}
+translate L ReviewFromPreset {%s (din profilul motorului)}
+translate L ReviewProgress {Se analizează poziția %s din %s}
+translate L ReviewWaitForDepth {Se așteaptă adâncimea %s}
+translate L ReviewFailed {Analiza a eșuat: %s}
 translate L TimeMs {Timp (ms)}
 
 

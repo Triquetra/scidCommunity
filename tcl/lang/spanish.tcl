@@ -891,6 +891,18 @@ translate S MoveLabelForced {Forzada}
 translate S MoveLabelBook {Teoría}
 translate S GameComment {Comentario del juego}
 translate S GameCommentTooltip {Escanee el juego en busca de movimientos anotados y genere un resumen de IA}
+translate S ReviewGameButton {Revisión de la partida}
+translate S ReviewGameButtonTooltip {Revisa cada jugada de la línea principal y etiquétala}
+translate S ReviewMoveButton {Comentario de la jugada}
+translate S ReviewMoveButtonTooltip {Etiqueta la jugada realizada desde aquí y escríbela}
+translate S ReviewSettings {Ajustes de la revisión}
+translate S ReviewVarLines {Variantes que escribir}
+translate S ReviewVarCp {Margen de variantes (cp)}
+translate S ReviewMoveWait {Esperar la profundidad de la revisión}
+translate S ReviewFromPreset {%s (del perfil del motor)}
+translate S ReviewProgress {Revisando la posición %s de %s}
+translate S ReviewWaitForDepth {Esperando la profundidad %s}
+translate S ReviewFailed {La revisión falló: %s}
 translate S TimeMs {Tiempo (ms)}
 
 

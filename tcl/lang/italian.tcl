@@ -845,6 +845,18 @@ translate I MoveLabelForced {Forzata}
 translate I MoveLabelBook {Teoria}
 translate I GameComment {Commento del gioco}
 translate I GameCommentTooltip {Scansiona il gioco per individuare le mosse annotate e generare un riepilogo dell'IA}
+translate I ReviewGameButton {Revisione della partita}
+translate I ReviewGameButtonTooltip {Rivedi ogni mossa della linea principale e assegnale un giudizio}
+translate I ReviewMoveButton {Commento della mossa}
+translate I ReviewMoveButtonTooltip {Giudica la mossa giocata da qui e scrivila}
+translate I ReviewSettings {Impostazioni della revisione}
+translate I ReviewVarLines {Varianti da scrivere}
+translate I ReviewVarCp {Soglia delle varianti (cp)}
+translate I ReviewMoveWait {Attendi la profondità della revisione}
+translate I ReviewFromPreset {%s (dal profilo del motore)}
+translate I ReviewProgress {Revisione della posizione %s di %s}
+translate I ReviewWaitForDepth {In attesa della profondità %s}
+translate I ReviewFailed {Revisione non riuscita: %s}
 translate I TimeMs {Tempo (ms)}
 
 

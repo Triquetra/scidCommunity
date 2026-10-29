@@ -847,6 +847,18 @@ translate B MoveLabelForced {Forçada}
 translate B MoveLabelBook {Teoria}
 translate B GameComment {Comentário do jogo}
 translate B GameCommentTooltip {Analisa o jogo em busca de movimentos anotados e gere um resumo de IA}
+translate B ReviewGameButton {Análise da partida}
+translate B ReviewGameButtonTooltip {Analise cada lance da linha principal e classifique-o}
+translate B ReviewMoveButton {Comentário do lance}
+translate B ReviewMoveButtonTooltip {Classifique o lance jogado daqui e escreva-o}
+translate B ReviewSettings {Configurações da análise}
+translate B ReviewVarLines {Variantes a escrever}
+translate B ReviewVarCp {Margem das variantes (cp)}
+translate B ReviewMoveWait {Aguardar a profundidade da análise}
+translate B ReviewFromPreset {%s (do perfil do motor)}
+translate B ReviewProgress {Analisando posição %s de %s}
+translate B ReviewWaitForDepth {Aguardando profundidade %s}
+translate B ReviewFailed {A análise falhou: %s}
 translate B TimeMs {Tempo (ms)}
 
 

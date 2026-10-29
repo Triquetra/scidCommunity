@@ -834,6 +834,18 @@ translate h MoveLabelForced {बाध्य}
 translate h MoveLabelBook {सिद्धांत}
 translate h GameComment {खेल टिप्पणी}
 translate h GameCommentTooltip {एनोटेटेड चालों के लिए गेम को स्कैन करें और एआई सारांश तैयार करें}
+translate h ReviewGameButton {गेम समीक्षा}
+translate h ReviewGameButtonTooltip {मुख्य लाइन के हर चाल की समीक्षा करें और उसे वर्ग दें}
+translate h ReviewMoveButton {चाल टिप्पणी}
+translate h ReviewMoveButtonTooltip {यहाँ से खेली गई चाल को वर्ग दें और लिखें}
+translate h ReviewSettings {समीक्षा सेटिंग्स}
+translate h ReviewVarLines {लिखने के लिए वेरिएशन}
+translate h ReviewVarCp {वेरिएशन अंतर (cp)}
+translate h ReviewMoveWait {समीक्षा गहराई की प्रतीक्षा करें}
+translate h ReviewFromPreset {%s (इंजन प्रीसेट से)}
+translate h ReviewProgress {स्थिति %s / %s की समीक्षा हो रही है}
+translate h ReviewWaitForDepth {गहराई %s की प्रतीक्षा}
+translate h ReviewFailed {समीक्षा विफल: %s}
 translate h TimeMs {समय(एमएस)}
 
 

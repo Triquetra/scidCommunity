@@ -845,6 +845,18 @@ translate W MoveLabelForced {Tvingat}
 translate W MoveLabelBook {Teori}
 translate W GameComment {Spelkommentar}
 translate W GameCommentTooltip {Skanna spelet efter kommenterade drag och generera AI-sammanfattningar}
+translate W ReviewGameButton {Granska partiet}
+translate W ReviewGameButtonTooltip {Granska varje drag i huvudlinjen och ge det en etikett}
+translate W ReviewMoveButton {Dragkommentar}
+translate W ReviewMoveButtonTooltip {Etikettera draget som spelades härifrån och skriv in det}
+translate W ReviewSettings {Inställningar för granskning}
+translate W ReviewVarLines {Varianter att skriva}
+translate W ReviewVarCp {Variantmarginal (cp)}
+translate W ReviewMoveWait {Vänta på granskningsdjupet}
+translate W ReviewFromPreset {%s (från motorprofilen)}
+translate W ReviewProgress {Granskar ställning %s av %s}
+translate W ReviewWaitForDepth {Väntar på djup %s}
+translate W ReviewFailed {Granskningen misslyckades: %s}
 translate W TimeMs {Tid(ms)}
 
 

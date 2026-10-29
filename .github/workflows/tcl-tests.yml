@@ -42,6 +42,9 @@ jobs:
       - name: Review driver
         run: tclsh tests/tcl/review_driver.tcl
 
+      - name: Review UI
+        run: tclsh tests/tcl/review_ui.tcl
+
       - name: Provider layer
         run: tclsh tests/tcl/auto_comment_provider.tcl
 

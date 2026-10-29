@@ -839,6 +839,18 @@ translate C MoveLabelForced {Vynucený}
 translate C MoveLabelBook {Teorie}
 translate C GameComment {Koment ke he}
 translate C GameCommentTooltip {Naskenujte hru pro anotovan pohyby a vygenerujte souhrn AI}
+translate C ReviewGameButton {Prohlídka partie}
+translate C ReviewGameButtonTooltip {Projdi všechny tahy hlavní varianty a ohodnoť je}
+translate C ReviewMoveButton {Komentář k tahu}
+translate C ReviewMoveButtonTooltip {Ohodnoť zahraný tah odsud a zapiš ho}
+translate C ReviewSettings {Nastavení prohlídky}
+translate C ReviewVarLines {Varianty k zápisu}
+translate C ReviewVarCp {Mez variant (cp)}
+translate C ReviewMoveWait {Čekat na hloubku prohlídky}
+translate C ReviewFromPreset {%s (z předvolby motoru)}
+translate C ReviewProgress {Prohlíží se pozice %s z %s}
+translate C ReviewWaitForDepth {Čeká se na hloubku %s}
+translate C ReviewFailed {Prohlídka selhala: %s}
 translate C TimeMs {as (ms)}
 
 

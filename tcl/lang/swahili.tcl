@@ -834,6 +834,18 @@ translate Z MoveLabelForced {Lazima}
 translate Z MoveLabelBook {Nadharia}
 translate Z GameComment {Maoni ya Mchezo}
 translate Z GameCommentTooltip {Changanua mchezo kwa hatua zilizofafanuliwa na utoe muhtasari wa AI}
+translate Z ReviewGameButton {Mapitio ya mchezo}
+translate Z ReviewGameButtonTooltip {Pitia kila hatua ya mstari mkuu na ipe lebo}
+translate Z ReviewMoveButton {Maoni ya hatua}
+translate Z ReviewMoveButtonTooltip {Ipe lebo hatua iliyochezwa hapa na iandike}
+translate Z ReviewSettings {Mipangilio ya mapitio}
+translate Z ReviewVarLines {Mibadala ya kuandika}
+translate Z ReviewVarCp {Tofauti ya mibadala (cp)}
+translate Z ReviewMoveWait {Subiri kina cha mapitio}
+translate Z ReviewFromPreset {%s (kutoka wasifu wa injini)}
+translate Z ReviewProgress {Inapitia nafasi %s kati ya %s}
+translate Z ReviewWaitForDepth {Inasubiri kina %s}
+translate Z ReviewFailed {Mapitio yameshindikana: %s}
 translate Z TimeMs {Saa(ms)}
 
 

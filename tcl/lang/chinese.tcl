@@ -810,6 +810,18 @@ translate M MoveLabelForced {被迫}
 translate M MoveLabelBook {定式}
 translate M GameComment {游戏评论}
 translate M GameCommentTooltip {扫描游戏中带注释的动作并生成 AI 摘要}
+translate M ReviewGameButton {对局复盘}
+translate M ReviewGameButtonTooltip {复盘主变例中的每一步并给出评语}
+translate M ReviewMoveButton {着法评注}
+translate M ReviewMoveButtonTooltip {评注此处走出的着法并写入}
+translate M ReviewSettings {复盘设置}
+translate M ReviewVarLines {要写入的变化}
+translate M ReviewVarCp {变化差距 (cp)}
+translate M ReviewMoveWait {等待复盘深度}
+translate M ReviewFromPreset {%s（来自引擎预设）}
+translate M ReviewProgress {正在复盘第 %s / %s 个局面}
+translate M ReviewWaitForDepth {正在等待深度 %s}
+translate M ReviewFailed {复盘失败：%s}
 translate M TimeMs {时间（毫秒）}
 
 

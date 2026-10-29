@@ -153,6 +153,8 @@ proc ::enginewin::onNewGame {id} {
     set ::enginewin::m_(newgame,$id) true
     ::stored_eval::clear $id
     ::rapid_annotate::onNewGame
+    # A new game is a new main line: what Move Comment could do has changed.
+    catch { ::enginewin::reviewRefresh $id }
     set w .engineWin$id
     if { [info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id) } {
         set w .pv$::enginewin::pgnviewer($id).engineWin$id
@@ -658,19 +660,284 @@ proc ::enginewin::createButtonsBar {id btn display} {
         -command "::enginewin::toggleConfigPane $id"
     $btn.config state pressed
 
-    ttk::button $btn.gamecomment -text [tr GameComment] \
-        -command "::analysis_auto_comment::batch_generate $id"
-    ::utils::tooltip::Set $btn.gamecomment [tr GameCommentTooltip]
+    ttk::button $btn.gamereview -text [::reviewui::label ReviewGameButton] \
+        -command [list ::enginewin::reviewGame $id]
+    ::utils::tooltip::Set $btn.gamereview [::reviewui::label ReviewGameButtonTooltip]
+
+    ttk::button $btn.movecomment -text [::reviewui::label ReviewMoveButton] \
+        -command [list ::enginewin::reviewMove $id]
+    ::utils::tooltip::Set $btn.movecomment [::reviewui::label ReviewMoveButtonTooltip]
+
+    ttk::button $btn.reviewsettings -text [::reviewui::label ReviewSettings] \
+        -command [list ::enginewin::reviewSettings $id]
+    ::utils::tooltip::Set $btn.reviewsettings [::reviewui::label ReviewSettings]
+
+    # Live only while a pass runs: a pass has its own engine connection and the
+    # only thing the user can do with it is stop it.
+    ttk::button $btn.reviewcancel -text [tr Cancel] \
+        -command [list ::enginewin::reviewCancel $id]
+    set ::enginewin::reviewstatus($id) ""
+    ttk::label $btn.reviewstatus -textvariable ::enginewin::reviewstatus($id) \
+        -anchor w
 
     grid $btn.startStop $btn.lock $btn.addbestmove $btn.addlines \
          $btn.multipv $btn.depth_label $btn.depth $btn.movetime_label $btn.movetime \
          $btn.autorun $btn.threads $btn.hash \
-         $btn.overflow x $btn.gamecomment $btn.config -sticky ew
+         $btn.overflow x $btn.gamereview $btn.movecomment $btn.reviewsettings \
+         $btn.reviewcancel $btn.reviewstatus $btn.config -sticky ew
     grid columnconfigure $btn 12 -weight 1
     grid remove $btn.overflow
 
     set collapsible [dict create autorun "Autoscan" threads "CPUs" hash "Hash"]
     bind $btn <Configure> [list ::collapseMenubuttons %W overflow $collapsible]
+    ::enginewin::reviewRefresh $id
+}
+
+########################################################################
+### Game Review and Move Comment
+###
+### Two buttons over one engine pass. The pass (::reviewdriver) runs on its own
+### connection, so neither button disturbs the analysis the user is watching, and
+### neither touches the board: the positions come from ::review's own snapshot of
+### the main line. What a finished pass does to the game - labels, [%eval] and
+### variations - belongs to the writeback slice; this window starts the pass,
+### shows where it has got to with a Cancel beside it, and keeps the results.
+###
+### Everything decided here is decided in tcl/tools/review_ui.tcl, where a tclsh
+### test can reach it. The glue below is guarded: no widget, no engine, no
+### driver, no pass - and no error in the middle of a game.
+########################################################################
+
+array set ::enginewin::reviewstatus {}
+array set ::enginewin::reviewsetting {}
+
+# The toplevel of this engine's window: an embedded PGN viewer's engine window
+# lives under the viewer, not at .engineWin.
+proc ::enginewin::reviewWindow {id} {
+    if {[info exists ::enginewin::pgnviewer($id)] && $::enginewin::pgnviewer($id)} {
+        return .pv$::enginewin::pgnviewer($id).engineWin$id
+    }
+    return .engineWin$id
+}
+
+# The facts ::reviewui::buttons needs, read from the window and the board.
+proc ::enginewin::reviewState {id} {
+    set state [dict create game 0 engine "" pass "" move ""]
+    # The engine this window analyses with. Its preset is where Threads, Hash and
+    # MultiPV come from (::review::effective reads them from there), so the pass
+    # is configured from the same one the window shows.
+    set name ""
+    catch { set name $::enginewin_lastengine($id) }
+    if {$name ne ""} { dict set state engine $name }
+    if {[info exists ::enginewin::reviewpass($id)]} {
+        dict set state pass [dict get $::enginewin::reviewpass($id) state]
+    }
+    if {[catch { set map [::review::mainLineMap [sc_game UCI_mainLine]] }]} {
+        return $state
+    }
+    dict set state game [dict get $map plies]
+    # Move Comment labels the move played FROM here, so the last position of the
+    # game has nothing to offer, and inside a variation the move indexes mean
+    # something else: the pass covers the main line.
+    if {[llength [info commands sc_var]] && [sc_var level] == 0} {
+        if {![catch { set here [sc_pos location] }]} {
+            catch { dict set state move [::review::playedMove $map [expr {$here + 1}]] }
+        }
+    }
+    return $state
+}
+
+# Put the bar in the state ::reviewui::buttons says it is in. Never touches the
+# status line: the pass owns that.
+proc ::enginewin::reviewRefresh {id} {
+    set w [::enginewin::reviewWindow $id]
+    if {![winfo exists $w.btn.gamereview]} { return }
+    set b [::reviewui::buttons [::enginewin::reviewState $id]]
+    # -state, not `state`: ttk's state subcommand takes flags (disabled,
+    # !disabled), while ::reviewui answers in the widget-state vocabulary.
+    catch { $w.btn.gamereview configure -state [dict get $b review] }
+    catch { $w.btn.movecomment configure -state [dict get $b movecomment] }
+    catch { $w.btn.reviewcancel configure -state [dict get $b cancel] }
+}
+
+# Start the pass over `positions` ({ply spec} pairs) at `depth`. "" when it did
+# not start, which is not an error: the window has already said why.
+proc ::enginewin::reviewStart {id positions depth} {
+    set w [::enginewin::reviewWindow $id]
+    if {![winfo exists $w.btn.gamereview]} { return "" }
+    if {[llength [info commands ::reviewdriver::start]] == 0} { return "" }
+    if {[llength $positions] == 0} {
+        set ::enginewin::reviewstatus($id) [::reviewui::progressText 0 0]
+        ::enginewin::reviewRefresh $id
+        return ""
+    }
+    set name ""
+    catch { set name $::enginewin_lastengine($id) }
+    if {$name eq ""} { return "" }
+    set enginecfg [::enginecfg::get $name]
+    set eff [::review::effective $enginecfg]
+    set token ""
+    set ::enginewin::reviewpass($id) [dict create state searching token ""]
+    if {[catch {
+        set token [::reviewdriver::start $enginecfg $positions [dict get $eff mpv] $depth \
+            [list ::enginewin::reviewProgress $id] [list ::enginewin::reviewDone $id]]
+    } err]} {
+        # A refused start is a message, not a broken button: the driver says id
+        # 20 is already running a pass, or the engine could not be opened.
+        unset -nocomplain ::enginewin::reviewpass($id)
+        set ::enginewin::reviewstatus($id) [::reviewui::failedText $err]
+        ::enginewin::reviewRefresh $id
+        return ""
+    }
+    dict set ::enginewin::reviewpass($id) token $token
+    ::enginewin::reviewRefresh $id
+    return $token
+}
+
+# Game Review: the whole main line, from where the plan says to start.
+#
+# bookEnd is 0: the pass starts at the first move. Asking a book where the game
+# leaves it would be a second search before the first, and ::review::startPly
+# already knows what to do with the answer once something supplies it.
+proc ::enginewin::reviewGame {id} {
+    set w [::enginewin::reviewWindow $id]
+    if {![winfo exists $w.btn.gamereview]} { return }
+    if {[catch { set map [::review::mainLineMap [sc_game UCI_mainLine]] }]} { return }
+    set positions [::reviewui::positions $map [dict get $map plies] 0]
+    set name ""
+    catch { set name $::enginewin_lastengine($id) }
+    if {$name eq ""} { return }
+    set depth [dict get [::review::effective [::enginecfg::get $name]] depth]
+    set ::enginewin::reviewstatus($id) [::reviewui::progressText 0 [llength $positions]]
+    ::enginewin::reviewStart $id $positions $depth
+}
+
+# Move Comment: the move played from here, and only that move.
+#
+# Two positions, the one before the move and the one after it, because a verdict
+# needs both scores: what the move was worth and what it brought. The depth comes
+# from moveCommentPlan - if the window's own analysis has already reached the
+# review's depth, comment from that and wait for nothing; otherwise search at the
+# review's depth and say so.
+proc ::enginewin::reviewMove {id} {
+    set w [::enginewin::reviewWindow $id]
+    if {![winfo exists $w.btn.movecomment]} { return }
+    if {[catch { set map [::review::mainLineMap [sc_game UCI_mainLine]] }]} { return }
+    if {[catch { set here [sc_pos location] }]} { return }
+    if {[llength [info commands sc_var]] && [sc_var level] != 0} { return }
+    if {[::review::playedMove $map [expr {$here + 1}]] eq ""} { return }
+    # What the window has already reached for the position before the move: the
+    # depth map the Autorun pass fills in. A missing entry is "nothing yet".
+    set depth_now ""
+    if {[info exists ::enginewin::pv_(depths,$id)]} {
+        set depths $::enginewin::pv_(depths,$id)
+        if {[dict exists $depths $here]} { set depth_now [dict get $depths $here] }
+    }
+    set plan [::reviewui::moveCommentDepth $depth_now]
+    set positions [::reviewui::specs $map [list $here [expr {$here + 1}]]]
+    set msg [::reviewui::moveCommentMessage $depth_now]
+    if {$msg eq ""} { set msg [::reviewui::progressText 0 [llength $positions]] }
+    set ::enginewin::reviewstatus($id) $msg
+    ::enginewin::reviewStart $id $positions [dict get $plan depth]
+}
+
+# Cancel: no further positions, nothing written.
+proc ::enginewin::reviewCancel {id} {
+    if {[info exists ::enginewin::reviewpass($id)]} {
+        set token [dict get $::enginewin::reviewpass($id) token]
+        catch { ::reviewdriver::stop $token }
+        unset -nocomplain ::enginewin::reviewpass($id)
+    }
+    set ::enginewin::reviewstatus($id) ""
+    ::enginewin::reviewRefresh $id
+}
+
+# The driver's callbacks. They take the id first because the driver calls a
+# command with plain arguments: [list ::enginewin::reviewProgress $id].
+proc ::enginewin::reviewProgress {id done total ply lines} {
+    set ::enginewin::reviewstatus($id) [::reviewui::progressText $done $total]
+}
+
+proc ::enginewin::reviewDone {id results} {
+    # The results stay here, keyed by ply, for the writeback slice: this window
+    # starts the pass and reports it, and writing labels, [%eval] and variations
+    # into the game is what the next pass of this work does.
+    set ::enginewin::reviewresults($id) $results
+    unset -nocomplain ::enginewin::reviewpass($id)
+    set ::enginewin::reviewstatus($id) ""
+    ::enginewin::reviewRefresh $id
+}
+
+# The settings dialog: the five settings the pass's own decisions read.
+#
+# Threads and Hash are deliberately not here. They belong to the engine preset
+# (#382) and are set from the window's own controls; the dialog shows what the
+# preset carries, read-only, so the numbers are visible where the review's are.
+proc ::enginewin::reviewSettings {id} {
+    set w [::enginewin::reviewWindow $id].reviewSettings
+    if {[winfo exists $w]} {
+        raise $w
+        return
+    }
+    set name ""
+    catch { set name $::enginewin_lastengine($id) }
+    toplevel $w
+    wm title $w [::reviewui::label ReviewSettings]
+    catch { wm transient $w [::enginewin::reviewWindow $id] }
+    ttk::frame $w.f -padding 10
+    grid $w.f -sticky news
+    set row 0
+    foreach key [::reviewui::settingKeys] {
+        lassign [::reviewui::settingRange $key] lo hi
+        set ::enginewin::reviewsetting($id,$key) [::review::get $key]
+        ttk::label $w.f.l$key -text "[::reviewui::settingLabel $key]:" -anchor w
+        ttk::spinbox $w.f.v$key -from $lo -to $hi -increment 1 -width 6 \
+            -textvariable ::enginewin::reviewsetting($id,$key)
+        grid $w.f.l$key -row $row -column 0 -sticky w -pady 2
+        grid $w.f.v$key -row $row -column 1 -sticky w -padx {10 0} -pady 2
+        incr row
+    }
+    set note ""
+    if {$name ne ""} {
+        catch { set note [::reviewui::presetNote [::enginecfg::get $name]] }
+    }
+    if {$note ne ""} {
+        ttk::label $w.f.preset -text $note -anchor w
+        grid $w.f.preset -row $row -column 0 -columnspan 2 -sticky w -pady {8 0}
+        incr row
+    }
+    # A refusal is shown here rather than in a message box: the dialog stays open
+    # on the value that was refused, so it can be corrected without losing the
+    # rest of the edit. The variable exists before the label names it.
+    set ::enginewin::reviewwhy($id) ""
+    ttk::label $w.f.why -textvariable ::enginewin::reviewwhy($id) -anchor w
+    grid $w.f.why -row $row -column 0 -columnspan 2 -sticky w -pady {8 0}
+    incr row
+    ttk::frame $w.b
+    grid $w.b -row $row -column 0 -columnspan 2 -sticky e -pady {10 0}
+    ttk::button $w.b.ok -text [tr OK] \
+        -command [list ::enginewin::reviewSettingsApply $id $w]
+    ttk::button $w.b.cancel -text [tr Cancel] -command [list destroy $w]
+    grid $w.b.ok $w.b.cancel -padx 4
+    catch { grab $w }
+    return $w
+}
+
+proc ::enginewin::reviewSettingsApply {id w} {
+    if {![winfo exists $w]} { return }
+    set values [dict create]
+    foreach key [::reviewui::settingKeys] {
+        if {[info exists ::enginewin::reviewsetting($id,$key)]} {
+            dict set values $key $::enginewin::reviewsetting($id,$key)
+        }
+    }
+    set why [::reviewui::applySettings $values]
+    if {[llength $why]} {
+        set ::enginewin::reviewwhy($id) [join $why "; "]
+        return
+    }
+    destroy $w
+    ::enginewin::reviewRefresh $id
 }
 
 # Apply depth and movetime limits and restart engine if running
@@ -1337,6 +1604,9 @@ if {[array exists ::enginewin::pvBestMove]} {
         ::enginewin::toggleConfigPane $id hide
     }
     set ::enginewin::engState($id) $newState
+    # An engine that has just started, stopped or died changes what the review
+    # buttons can do. Guarded: the window may not have its bar yet.
+    catch { ::enginewin::reviewRefresh $id }
 }
 
 proc ::enginewin::stateFollow {id} {string match f* $::enginewin::engState($id)}

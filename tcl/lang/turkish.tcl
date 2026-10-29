@@ -838,6 +838,18 @@ translate T MoveLabelForced {Zorunlu}
 translate T MoveLabelBook {Teori}
 translate T GameComment {Oyun Yorumu}
 translate T GameCommentTooltip {Açıklamalı hareketler için oyunu tarayın ve AI özeti oluşturun}
+translate T ReviewGameButton {Oyun incelemesi}
+translate T ReviewGameButtonTooltip {Ana hattaki her hamleyi incele ve etiketle}
+translate T ReviewMoveButton {Hamle yorumu}
+translate T ReviewMoveButtonTooltip {Buradan oynanan hamleyi etiketle ve yaz}
+translate T ReviewSettings {İnceleme ayarları}
+translate T ReviewVarLines {Yazılacak varyantlar}
+translate T ReviewVarCp {Varyant aralığı (cp)}
+translate T ReviewMoveWait {İnceleme derinliğini bekle}
+translate T ReviewFromPreset {%s (motor profilinden)}
+translate T ReviewProgress {%s / %s konumu inceleniyor}
+translate T ReviewWaitForDepth {%s derinliği bekleniyor}
+translate T ReviewFailed {İnceleme başarısız: %s}
 translate T TimeMs {Zaman(ms)}
 
 

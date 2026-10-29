@@ -844,6 +844,18 @@ translate O MoveLabelForced {Tvunget}
 translate O MoveLabelBook {Teori}
 translate O GameComment {Spillkommentar}
 translate O GameCommentTooltip {Skann spillet for kommenterte trekk og generer AI-sammendrag}
+translate O ReviewGameButton {Vurder partiet}
+translate O ReviewGameButtonTooltip {Vurder hvert trekk i hovedlinjen og sett en merkelapp}
+translate O ReviewMoveButton {Trekkkommentar}
+translate O ReviewMoveButtonTooltip {Vurder trekket som ble spilt herfra og skriv det inn}
+translate O ReviewSettings {Innstillinger for vurdering}
+translate O ReviewVarLines {Varianter som skal skrives}
+translate O ReviewVarCp {Variantmargin (cp)}
+translate O ReviewMoveWait {Vent på vurderingsdybden}
+translate O ReviewFromPreset {%s (fra motorprofilen)}
+translate O ReviewProgress {Vurderer stilling %s av %s}
+translate O ReviewWaitForDepth {Venter på dybde %s}
+translate O ReviewFailed {Vurderingen mislyktes: %s}
 translate O TimeMs {Tid (ms)}
 
 

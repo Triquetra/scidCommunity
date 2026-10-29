@@ -847,6 +847,18 @@ translate F MoveLabelForced {Forcé}
 translate F MoveLabelBook {Théorie}
 translate F GameComment {Commentaire du jeu}
 translate F GameCommentTooltip {Analysez le jeu pour rechercher des mouvements annotés et générez un résumé de l'IA}
+translate F ReviewGameButton {Analyse de la partie}
+translate F ReviewGameButtonTooltip {Analyser tous les coups de la ligne principale et les annoter}
+translate F ReviewMoveButton {Commentaire du coup}
+translate F ReviewMoveButtonTooltip {Annoter le coup joué ici et l'insérer}
+translate F ReviewSettings {Réglages de l'analyse}
+translate F ReviewVarLines {Variantes à écrire}
+translate F ReviewVarCp {Écart des variantes (cp)}
+translate F ReviewMoveWait {Attendre la profondeur d'analyse}
+translate F ReviewFromPreset {%s (profil du moteur)}
+translate F ReviewProgress {Analyse de la position %s sur %s}
+translate F ReviewWaitForDepth {En attente de la profondeur %s}
+translate F ReviewFailed {Échec de l'analyse : %s}
 translate F TimeMs {Temps (ms)}
 
 

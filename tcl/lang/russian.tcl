@@ -841,6 +841,18 @@ translate R MoveLabelForced {Вынужденный}
 translate R MoveLabelBook {Теория}
 translate R GameComment {Комментарий к игре}
 translate R GameCommentTooltip {Сканируйте игру на предмет аннотированных ходов и сгенерируйте сводку AI.}
+translate R ReviewGameButton {Разбор партии}
+translate R ReviewGameButtonTooltip {Разбери каждый ход главного варианта и оцени его}
+translate R ReviewMoveButton {Комментарий к ходу}
+translate R ReviewMoveButtonTooltip {Оцени сделанный ход и запиши его}
+translate R ReviewSettings {Настройки разбора}
+translate R ReviewVarLines {Варианты для записи}
+translate R ReviewVarCp {Порог вариантов (cp)}
+translate R ReviewMoveWait {Ждать глубину разбора}
+translate R ReviewFromPreset {%s (из профиля движка)}
+translate R ReviewProgress {Разбор позиции %s из %s}
+translate R ReviewWaitForDepth {Ожидание глубины %s}
+translate R ReviewFailed {Разбор не удался: %s}
 translate R TimeMs {Время (мс)}
 
 
