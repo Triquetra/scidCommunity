@@ -96,11 +96,18 @@ proc ::enginewin::seedChart {id} {
     set n 0
     catch { set n [expr {[llength $::enginewin::m_(mainLine,$id)] - 1}] }
     if {$n < 1} { return 0 }
+    # The walk below is a main-line walk, but the board may not be on the main
+    # line: the ply counter cannot describe a variation, and `sc_move ply` only
+    # ever lands on the main line. So the whole cursor is saved before the first
+    # move and restored after the last - see ::review::cursorSave.
+    set cursor [::review::cursorSave]
     # The seeded plies are marked in their own map, not in the depth map: Autorun
     # tests for them so it does not re-search a stored score, but a manual search
     # still reaches updateChart's depth check and replaces the point, which a
     # marker of 100000 in the depth map would have blocked.
     upvar ::enginewin::pv_(seeded,$id) seeded
+    upvar ::enginewin::pv_(depths,$id) depths
+    if {![info exists depths]} { set depths [dict create] }
     set seeded [dict create]
     set count 0
     for {set i 1} {$i <= $n} {incr i} {
@@ -115,9 +122,19 @@ proc ::enginewin::seedChart {id} {
         ::chart::setDataPoint $canvas $i [::seed::forSide $cp $side $scoreside] \
             [list ::enginewin::seedLabel]
         dict set seeded $i 1
+        # A depth entry left by an earlier pass would gate a manual search at
+        # this ply again, so it goes with the marker.
+        if {[dict exists $depths $i]} { dict unset depths $i }
         incr count
     }
-    catch { sc_move ply $ply0 }
+    # Every way out of the walk comes through here, a break included. 0 means
+    # the variation could not be re-entered but the board is on the saved
+    # main-line base - a known position, and not the absolute ply counter, which
+    # points somewhere else entirely when the cursor was inside a variation.
+    # Only -1 ("no position at all") needs the saved counter as a last resort.
+    set restored 0
+    catch { set restored [::review::cursorRestore $cursor] }
+    if {$restored < 0} { catch { sc_move ply $ply0 } }
     # Accuracy means something only when the stored scores cover the game: the
     # chart carries a missing ply forward, so a handful of evaluations would be
     # averaged as if the line between them had been played.
@@ -134,18 +151,20 @@ proc ::enginewin::seedChart {id} {
 # The chart calls a point's callback as {xIndex score}, so this takes exactly
 # those two arguments; anything else raises on hover.
 proc ::enginewin::seedLabel {ply score} {
+    set mv [expr {($ply + 1) / 2}]
+    set suffix [expr {$ply % 2 ? "." : "..."}]
     # A click calls the callback with an empty score, the way chartCallback
-    # treats it: navigate to the ply instead of formatting a label.
+    # treats it: navigate to the ply instead of formatting a label. The label
+    # itself is discarded by ::chart::_onClick, so it only has to be a string -
+    # formatting an empty score would raise inside a Tk callback.
     if {$score eq ""} {
         catch {
             sc_move start
             sc_move forward $ply
             ::notify::PosChanged -pgn
         }
-        return ""
+        return "$mv$suffix stored"
     }
-    set mv [expr {($ply + 1) / 2}]
-    set suffix [expr {$ply % 2 ? "." : "..."}]
     return "$mv$suffix stored\n[::seed::label $score]"
 }
 
@@ -1714,6 +1733,9 @@ proc ::enginewin::connectEngine {id enginename} {
     ::enginewin::changeState $id paused.closed
 
     set ::enginewin::pv_(depths,$id) [dict create]
+    # The seeded markers belong to the same chart as the depths: a new engine
+    # must not inherit them, or Autorun would skip a ply nothing has searched.
+    set ::enginewin::pv_(seeded,$id) [dict create]
     set ::enginewin::pv_(pos,$id) ""
     set ::enginewin::pv_(limits,$id) ""
     set ::enginewin::pv_(btm,$id) 0
