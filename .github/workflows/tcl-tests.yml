@@ -83,6 +83,12 @@ jobs:
       - name: Annotate dialog syntax
         run: tclsh tests/tcl/annotate_dialog_syntax.tcl
 
+      # The dialog's note in the language files: the key is in every file, and
+      # the languages listed in the harness carry a translation rather than the
+      # English placeholder the string was added with.
+      - name: Annotate i18n
+        run: tclsh tests/tcl/annotate_i18n.tcl
+
       - name: Review UI
         run: tclsh tests/tcl/review_ui.tcl
 

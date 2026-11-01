@@ -1738,7 +1738,7 @@ translate W Hash {Hashminne}
 translate W OwnBook {Använd schackmotorbok}
 translate W BookFile {Öppningsbok}
 translate W AnnotateVariations {Kommentera variationer}
-translate W AnnotateVariationsMainLineOnly {Variations: main line only (review mode)}
+translate W AnnotateVariationsMainLineOnly {Variationer: endast huvudvariant (granskningsläge)}
 translate W ShortAnnotations {Korta kommentarer}
 translate W addAnnotatorTag {Lägg till kommentator-tagg}
 translate W AddScoreToShortAnnotations {Lägg till värdering till korta kommentarer}
