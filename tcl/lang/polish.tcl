@@ -884,6 +884,7 @@ translate P ReviewVarLines {Liczba wariantów do zapisania}
 translate P ReviewVarCp {Różnica ocen wariantów (cp)}
 translate P ReviewMoveWait {Czekaj na osiągnięcie zadanej głębokości analizy}
 translate P ReviewMovetime {Limit czasu (ms)}
+translate P ReviewEstimatedRating {ocena wyniku (z tej partii)}
 translate P StopNow {Zatrzymaj teraz}
 translate P StopAfterThisGame {Zatrzymaj po tej partii}
 translate P ReviewFromPreset {%s (z ustawień silnika)}
@@ -902,7 +903,7 @@ translate P ReviewCoachLevelLabel {Poziom}
 translate P ReviewCoachOpeningLabel {Debiut}
 translate P ReviewCoachPhase {ruchy %d-%d - celność W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate P ReviewReportMarker {Recenzja gry}
-translate P ReviewReportSide {%s: dokładność %s%%, ACPL %d, szacunkowe Elo %d}
+translate P ReviewReportSide {%s: dokładność %s%%, ACPL %d}
 translate P ReviewReportLabels {%s: %s}
 translate P ReviewReportKeyMoments {Kluczowe momenty: %s}
 translate P ReviewReportPhases {Fazy: %s}

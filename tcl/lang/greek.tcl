@@ -876,6 +876,7 @@ translate G ReviewVarLines {Παραλλαγές προς εγγραφή}
 translate G ReviewVarCp {Περιθώριο παραλλαγών (cp)}
 translate G ReviewMoveWait {Αναμονή για το βάθος ελέγχου}
 translate G ReviewMovetime {Όριο χρόνου (ms)}
+translate G ReviewEstimatedRating {αξιολόγηση απόδοσης (από αυτή την παρτίδα)}
 translate G StopNow {Stop now}
 translate G StopAfterThisGame {Stop after this game}
 translate G ReviewFromPreset {%s (από το προφίλ μηχανής)}
@@ -894,7 +895,7 @@ translate G ReviewCoachLevelLabel {Επίπεδο}
 translate G ReviewCoachOpeningLabel {Ανοιγμα}
 translate G ReviewCoachPhase {μετακινείται %d-%d - ακρίβεια W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate G ReviewReportMarker {Κριτική παιχνιδιού}
-translate G ReviewReportSide {%s: %s%% ακρίβεια, ACPL %d, εκτιμώμενο Elo %d}
+translate G ReviewReportSide {%s: %s%% ακρίβεια, ACPL %d}
 translate G ReviewReportLabels {%s ετικέτες: %s}
 translate G ReviewReportKeyMoments {Βασικές στιγμές: %s}
 translate G ReviewReportPhases {Φάσεις: %s}

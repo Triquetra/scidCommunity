@@ -884,6 +884,7 @@ translate D ReviewVarLines {Zu schreibende Varianten}
 translate D ReviewVarCp {Variantenabstand (cp)}
 translate D ReviewMoveWait {Auf die Prüfungstiefe warten}
 translate D ReviewMovetime {Zeitlimit (ms)}
+translate D ReviewEstimatedRating {Leistungswertung (aus dieser Partie)}
 translate D StopNow {Stop now}
 translate D StopAfterThisGame {Stop after this game}
 translate D ReviewFromPreset {%s (aus dem Motorprofil)}
@@ -902,7 +903,7 @@ translate D ReviewCoachLevelLabel {Ebene}
 translate D ReviewCoachOpeningLabel {Öffnung}
 translate D ReviewCoachPhase {bewegt sich %d-%d - Genauigkeit W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate D ReviewReportMarker {Spielrezension}
-translate D ReviewReportSide {%s: %s%% Genauigkeit, ACPL %d, geschätzte Elo %d}
+translate D ReviewReportSide {%s: %s%% Genauigkeit, ACPL %d}
 translate D ReviewReportLabels {%s Labels: %s}
 translate D ReviewReportKeyMoments {Schlüsselmomente: %s}
 translate D ReviewReportPhases {Phasen: %s}

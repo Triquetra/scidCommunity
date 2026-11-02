@@ -855,6 +855,7 @@ translate W ReviewVarLines {Varianter att skriva}
 translate W ReviewVarCp {Variantmarginal (cp)}
 translate W ReviewMoveWait {Vänta på granskningsdjupet}
 translate W ReviewMovetime {Tidsgräns (ms)}
+translate W ReviewEstimatedRating {prestationsvärdering (från detta parti)}
 translate W StopNow {Stop now}
 translate W StopAfterThisGame {Stop after this game}
 translate W ReviewFromPreset {%s (från motorprofilen)}
@@ -873,7 +874,7 @@ translate W ReviewCoachLevelLabel {Nivå}
 translate W ReviewCoachOpeningLabel {Öppning}
 translate W ReviewCoachPhase {flyttar %d-%d - noggrannhet W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate W ReviewReportMarker {Spelrecension}
-translate W ReviewReportSide {%s: %s%% noggrannhet, ACPL %d, uppskattad Elo %d}
+translate W ReviewReportSide {%s: %s%% noggrannhet, ACPL %d}
 translate W ReviewReportLabels {%s etiketter: %s}
 translate W ReviewReportKeyMoments {Viktiga ögonblick: %s}
 translate W ReviewReportPhases {Faser: %s}

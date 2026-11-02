@@ -852,6 +852,7 @@ translate H ReviewVarLines {Kiírandó változatok}
 translate H ReviewVarCp {Változat-küszöb (cp)}
 translate H ReviewMoveWait {Várás az áttekintés mélységére}
 translate H ReviewMovetime {Időkorlát (ms)}
+translate H ReviewEstimatedRating {teljesítményértékelés (ebből a játszmából)}
 translate H StopNow {Stop now}
 translate H StopAfterThisGame {Stop after this game}
 translate H ReviewFromPreset {%s (a motorprofilból)}
@@ -870,7 +871,7 @@ translate H ReviewCoachLevelLabel {Szint}
 translate H ReviewCoachOpeningLabel {Nyílás}
 translate H ReviewCoachPhase {mozog %d-%d - pontosság W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate H ReviewReportMarker {Játék ismertető}
-translate H ReviewReportSide {%s: %s%% pontosság, ACPL %d, becsült elo %d}
+translate H ReviewReportSide {%s: %s%% pontosság, ACPL %d}
 translate H ReviewReportLabels {%s címkék: %s}
 translate H ReviewReportKeyMoments {Legfontosabb pillanatok: %s}
 translate H ReviewReportPhases {Fázisok: %s}

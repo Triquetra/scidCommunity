@@ -851,6 +851,7 @@ translate R ReviewVarLines {Варианты для записи}
 translate R ReviewVarCp {Порог вариантов (cp)}
 translate R ReviewMoveWait {Ждать глубину разбора}
 translate R ReviewMovetime {Ограничение времени (ms)}
+translate R ReviewEstimatedRating {оценка уровня игры (по этой партии)}
 translate R StopNow {Stop now}
 translate R StopAfterThisGame {Stop after this game}
 translate R ReviewFromPreset {%s (из профиля движка)}
@@ -869,7 +870,7 @@ translate R ReviewCoachLevelLabel {Уровень}
 translate R ReviewCoachOpeningLabel {Открытие}
 translate R ReviewCoachPhase {ходы %d-%d - точность W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate R ReviewReportMarker {Обзор игры}
-translate R ReviewReportSide {%s: точность %s%%, ACPL %d, расчетное Эло %d}
+translate R ReviewReportSide {%s: точность %s%%, ACPL %d}
 translate R ReviewReportLabels {Ярлыки %s: %s}
 translate R ReviewReportKeyMoments {Ключевые моменты: %s}
 translate R ReviewReportPhases {Фазы: %s}

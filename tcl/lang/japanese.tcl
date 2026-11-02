@@ -885,6 +885,7 @@ translate A ReviewVarLines {書き込む変化}
 translate A ReviewVarCp {変化のしきい値 (cp)}
 translate A ReviewMoveWait {検討の深さを待つ}
 translate A ReviewMovetime {時間制限 (ms)}
+translate A ReviewEstimatedRating {パフォーマンス評価（この対局から）}
 translate A StopNow {Stop now}
 translate A StopAfterThisGame {Stop after this game}
 translate A ReviewFromPreset {%s（エンジンのプリセット）}
@@ -903,7 +904,7 @@ translate A ReviewCoachLevelLabel {レベル}
 translate A ReviewCoachOpeningLabel {オープニング}
 translate A ReviewCoachPhase {移動 %d-%d - 精度 W %.1f%% B %.1f%%、ACPL W %d B %d。}
 translate A ReviewReportMarker {ゲームレビュー}
-translate A ReviewReportSide {%s: %s%% 精度、ACPL %d、推定 Elo %d}
+translate A ReviewReportSide {%s: %s%% 精度、ACPL %d}
 translate A ReviewReportLabels {%s ラベル: %s}
 translate A ReviewReportKeyMoments {重要な瞬間: %s}
 translate A ReviewReportPhases {フェーズ: %s}

@@ -874,6 +874,7 @@ translate N ReviewVarLines {Varianten om te schrijven}
 translate N ReviewVarCp {Variantmarge (cp)}
 translate N ReviewMoveWait {Wacht op de beoordelingsdiepte}
 translate N ReviewMovetime {Tijdslimiet (ms)}
+translate N ReviewEstimatedRating {prestatiebeoordeling (uit deze partij)}
 translate N StopNow {Stop now}
 translate N StopAfterThisGame {Stop after this game}
 translate N ReviewFromPreset {%s (uit het engineprofiel)}
@@ -892,7 +893,7 @@ translate N ReviewCoachLevelLabel {Niveau}
 translate N ReviewCoachOpeningLabel {Opening}
 translate N ReviewCoachPhase {beweegt %d-%d - nauwkeurigheid W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate N ReviewReportMarker {Spelrecensie}
-translate N ReviewReportSide {%s: %s%% nauwkeurigheid, ACPL %d, geschatte Elo %d}
+translate N ReviewReportSide {%s: %s%% nauwkeurigheid, ACPL %d}
 translate N ReviewReportLabels {%s labels: %s}
 translate N ReviewReportKeyMoments {Belangrijke momenten: %s}
 translate N ReviewReportPhases {Fasen: %s}

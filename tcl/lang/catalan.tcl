@@ -870,6 +870,7 @@ translate K ReviewVarLines {Variants a escriure}
 translate K ReviewVarCp {Marge de variants (cp)}
 translate K ReviewMoveWait {Espera la profunditat de la revisió}
 translate K ReviewMovetime {Límit de temps (ms)}
+translate K ReviewEstimatedRating {valoració de rendiment (d'aquesta partida)}
 translate K StopNow {Stop now}
 translate K StopAfterThisGame {Stop after this game}
 translate K ReviewFromPreset {%s (del perfil del motor)}
@@ -888,7 +889,7 @@ translate K ReviewCoachLevelLabel {Nivell}
 translate K ReviewCoachOpeningLabel {Obertura}
 translate K ReviewCoachPhase {moviments %d-%d - precisió W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate K ReviewReportMarker {Revisió del joc}
-translate K ReviewReportSide {%s: %s%% de precisió, ACPL %d, Elo estimat %d}
+translate K ReviewReportSide {%s: %s%% de precisió, ACPL %d}
 translate K ReviewReportLabels {%s etiquetes: %s}
 translate K ReviewReportKeyMoments {Moments clau: %s}
 translate K ReviewReportPhases {Fases: %s}

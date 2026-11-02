@@ -885,6 +885,7 @@ translate k ReviewVarLines {기록할 변화}
 translate k ReviewVarCp {변화 폭 (cp)}
 translate k ReviewMoveWait {검토 깊이를 기다림}
 translate k ReviewMovetime {시간 한도 (ms)}
+translate k ReviewEstimatedRating {퍼포먼스 레이팅 (이 대국 기준)}
 translate k StopNow {Stop now}
 translate k StopAfterThisGame {Stop after this game}
 translate k ReviewFromPreset {%s (엔진 프리셋에서)}
@@ -903,7 +904,7 @@ translate k ReviewCoachLevelLabel {수준}
 translate k ReviewCoachOpeningLabel {열기}
 translate k ReviewCoachPhase {%d-%d 이동 - 정확도 W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate k ReviewReportMarker {게임 리뷰}
-translate k ReviewReportSide {%s: %s%% 정확도, ACPL %d, 예상 Elo %d}
+translate k ReviewReportSide {%s: %s%% 정확도, ACPL %d}
 translate k ReviewReportLabels {%s 레이블: %s}
 translate k ReviewReportKeyMoments {주요 순간: %s}
 translate k ReviewReportPhases {단계: %s}

@@ -883,6 +883,7 @@ translate U ReviewVarLines {Kirjoitettavat muunnelmat}
 translate U ReviewVarCp {Muunnelman raja (cp)}
 translate U ReviewMoveWait {Odota tarkastuksen syvyyttä}
 translate U ReviewMovetime {Aikaraja (ms)}
+translate U ReviewEstimatedRating {suoritustaso (tästä pelistä)}
 translate U StopNow {Stop now}
 translate U StopAfterThisGame {Stop after this game}
 translate U ReviewFromPreset {%s (moottorin asetuksista)}
@@ -901,7 +902,7 @@ translate U ReviewCoachLevelLabel {Taso}
 translate U ReviewCoachOpeningLabel {Avaus}
 translate U ReviewCoachPhase {siirrot %d-%d - tarkkuus W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate U ReviewReportMarker {Pelin tarkastus}
-translate U ReviewReportSide {%s: tarkkuus %s%%, ACPL %d, arvioitu Elo %d}
+translate U ReviewReportSide {%s: tarkkuus %s%%, ACPL %d}
 translate U ReviewReportLabels {%s: tunnisteet %s}
 translate U ReviewReportKeyMoments {Tärkeimmät hetket: %s}
 translate U ReviewReportPhases {Vaiheet: %s}

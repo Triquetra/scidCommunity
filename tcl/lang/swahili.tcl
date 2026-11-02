@@ -844,6 +844,7 @@ translate Z ReviewVarLines {Mibadala ya kuandika}
 translate Z ReviewVarCp {Tofauti ya mibadala (cp)}
 translate Z ReviewMoveWait {Subiri kina cha mapitio}
 translate Z ReviewMovetime {Kikomo cha muda (ms)}
+translate Z ReviewEstimatedRating {alama ya utendaji (kutoka mchezo huu)}
 translate Z StopNow {Stop now}
 translate Z StopAfterThisGame {Stop after this game}
 translate Z ReviewFromPreset {%s (kutoka wasifu wa injini)}
@@ -862,7 +863,7 @@ translate Z ReviewCoachLevelLabel {Kiwango}
 translate Z ReviewCoachOpeningLabel {Ufunguzi}
 translate Z ReviewCoachPhase {husogeza %d-%d - usahihi W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate Z ReviewReportMarker {Tathmini ya mchezo}
-translate Z ReviewReportSide {%s: %s%% usahihi, ACPL %d, inakadiriwa Elo %d}
+translate Z ReviewReportSide {%s: %s%% usahihi, ACPL %d}
 translate Z ReviewReportLabels {%s lebo: %s}
 translate Z ReviewReportKeyMoments {Matukio muhimu: %s}
 translate Z ReviewReportPhases {Awamu: %s}

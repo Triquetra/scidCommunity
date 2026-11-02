@@ -855,6 +855,7 @@ translate I ReviewVarLines {Varianti da scrivere}
 translate I ReviewVarCp {Soglia delle varianti (cp)}
 translate I ReviewMoveWait {Attendi la profondità della revisione}
 translate I ReviewMovetime {Limite di tempo (ms)}
+translate I ReviewEstimatedRating {valutazione di rendimento (da questa partita)}
 translate I StopNow {Stop now}
 translate I StopAfterThisGame {Stop after this game}
 translate I ReviewFromPreset {%s (dal profilo del motore)}
@@ -873,7 +874,7 @@ translate I ReviewCoachLevelLabel {Livello}
 translate I ReviewCoachOpeningLabel {Apertura}
 translate I ReviewCoachPhase {mosse %d-%d - precisione W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate I ReviewReportMarker {Revisione della partita}
-translate I ReviewReportSide {%s: precisione %s%%, ACPL %d, Elo stimato %d}
+translate I ReviewReportSide {%s: precisione %s%%, ACPL %d}
 translate I ReviewReportLabels {Etichette %s: %s}
 translate I ReviewReportKeyMoments {Momenti chiave: %s}
 translate I ReviewReportPhases {Fasi: %s}

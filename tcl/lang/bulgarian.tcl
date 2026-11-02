@@ -885,6 +885,7 @@ translate g ReviewVarLines {Варианти за запис}
 translate g ReviewVarCp {Граница на вариантите (cp)}
 translate g ReviewMoveWait {Изчакай дълбочината на прегледа}
 translate g ReviewMovetime {Ограничение на времето (ms)}
+translate g ReviewEstimatedRating {оценка на представянето (от тази партия)}
 translate g StopNow {Stop now}
 translate g StopAfterThisGame {Stop after this game}
 translate g ReviewFromPreset {%s (от профила на машината)}
@@ -903,7 +904,7 @@ translate g ReviewCoachLevelLabel {Ниво}
 translate g ReviewCoachOpeningLabel {Отваряне}
 translate g ReviewCoachPhase {движи %d-%d - точност W %.1f%% B %.1f%%, ACPL W %d B %d.}
 translate g ReviewReportMarker {Преглед на играта}
-translate g ReviewReportSide {%s: %s%% точност, ACPL %d, прогнозно Elo %d}
+translate g ReviewReportSide {%s: %s%% точност, ACPL %d}
 translate g ReviewReportLabels {%s етикети: %s}
 translate g ReviewReportKeyMoments {Ключови моменти: %s}
 translate g ReviewReportPhases {Фази: %s}
