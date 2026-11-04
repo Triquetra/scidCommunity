@@ -45,6 +45,11 @@ source [file join $root tcl tools review_verify.tcl]
 source [file join $root tcl tools review_annotate.tcl]
 source [file join $root tcl tools batch_annotate.tcl]
 source [file join $root tcl tools rapid_annotate.tcl]
+# The progress board: the writers end their run through it now -- rapid
+# annotate's progressDone reads ::reviewprogress::job, and the batch's
+# completion ends the pane's job. Every upstream harness that drives a writer
+# sources it (rapid_annotate.tcl:90, batch_annotate.tcl:241, finish_game.tcl:53).
+source [file join $root tcl tools review_progress.tcl]
 source [file join $root tests tcl game_stub.tcl]
 
 # The application the batch and rapid writers report to. The game itself is the
@@ -270,6 +275,11 @@ puts "\n  the batch annotator"
 ::fx::reset
 resetCalls
 set ::batch_annotate::base 0
+# Production reaches writeGame only after start_engines has opened the run's
+# pipes, and the write now ends with check_completion, which reads them. Seed
+# the run the way production leaves it: one live pipe, still working.
+set ::batch_annotate::pipes {pipe0}
+set ::batch_annotate::engine_state(pipe0) idle
 set bres [::fx::results]
 set bp [dict create map $map plan {1 2 3 4} plies 4 bookEnd 0 mpv 3]
 ::batch_annotate::writeGame pipe0 1 $map {1 2 3 4} 0 $bp $bres $visible
