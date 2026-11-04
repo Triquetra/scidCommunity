@@ -840,6 +840,8 @@ translate Z ReviewMoveButton {Maoni ya hatua}
 translate Z ReviewMoveButtonTooltip {Ipe lebo hatua iliyochezwa hapa na iandike}
 translate Z ReviewSettings {Mipangilio ya mapitio}
 translate Z ReviewSettingsTooltip {Configure the review settings}
+translate Z ReviewVerifier {Injini ya uthibitishaji}
+translate Z ReviewVerifierOff {Imezimwa (hakuna uthibitisho)}
 translate Z ReviewVarLines {Mibadala ya kuandika}
 translate Z ReviewVarCp {Tofauti ya mibadala (cp)}
 translate Z ReviewMoveWait {Subiri kina cha mapitio}

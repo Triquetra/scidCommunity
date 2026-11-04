@@ -845,6 +845,8 @@ translate C ReviewMoveButton {Komentář k tahu}
 translate C ReviewMoveButtonTooltip {Ohodnoť zahraný tah odsud a zapiš ho}
 translate C ReviewSettings {Nastavení prohlídky}
 translate C ReviewSettingsTooltip {Configure the review settings}
+translate C ReviewVerifier {Ověřovací engine}
+translate C ReviewVerifierOff {Vypnuto (bez ověření)}
 translate C ReviewVarLines {Varianty k zápisu}
 translate C ReviewVarCp {Mez variant (cp)}
 translate C ReviewMoveWait {Čekat na hloubku prohlídky}

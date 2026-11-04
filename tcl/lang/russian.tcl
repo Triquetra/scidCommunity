@@ -847,6 +847,8 @@ translate R ReviewMoveButton {Комментарий к ходу}
 translate R ReviewMoveButtonTooltip {Оцени сделанный ход и запиши его}
 translate R ReviewSettings {Настройки разбора}
 translate R ReviewSettingsTooltip {Configure the review settings}
+translate R ReviewVerifier {Проверяющий движок}
+translate R ReviewVerifierOff {Выключено (без проверки)}
 translate R ReviewVarLines {Варианты для записи}
 translate R ReviewVarCp {Порог вариантов (cp)}
 translate R ReviewMoveWait {Ждать глубину разбора}

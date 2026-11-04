@@ -866,6 +866,8 @@ translate K ReviewMoveButton {Comentari de la jugada}
 translate K ReviewMoveButtonTooltip {Etiqueta la jugada feta des d'aquí i escriu-la}
 translate K ReviewSettings {Configuració de la revisió}
 translate K ReviewSettingsTooltip {Configure the review settings}
+translate K ReviewVerifier {Motor de verificació}
+translate K ReviewVerifierOff {Desactivat (sense verificació)}
 translate K ReviewVarLines {Variants a escriure}
 translate K ReviewVarCp {Marge de variants (cp)}
 translate K ReviewMoveWait {Espera la profunditat de la revisió}

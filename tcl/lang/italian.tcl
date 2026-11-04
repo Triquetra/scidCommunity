@@ -851,6 +851,8 @@ translate I ReviewMoveButton {Commento della mossa}
 translate I ReviewMoveButtonTooltip {Giudica la mossa giocata da qui e scrivila}
 translate I ReviewSettings {Impostazioni della revisione}
 translate I ReviewSettingsTooltip {Configure the review settings}
+translate I ReviewVerifier {Motore di verifica}
+translate I ReviewVerifierOff {Disattivato (nessuna verifica)}
 translate I ReviewVarLines {Varianti da scrivere}
 translate I ReviewVarCp {Soglia delle varianti (cp)}
 translate I ReviewMoveWait {Attendi la profondità della revisione}

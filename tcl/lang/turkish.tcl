@@ -844,6 +844,8 @@ translate T ReviewMoveButton {Hamle yorumu}
 translate T ReviewMoveButtonTooltip {Buradan oynanan hamleyi etiketle ve yaz}
 translate T ReviewSettings {İnceleme ayarları}
 translate T ReviewSettingsTooltip {Configure the review settings}
+translate T ReviewVerifier {Doğrulama motoru}
+translate T ReviewVerifierOff {Kapalı (doğrulama yok)}
 translate T ReviewVarLines {Yazılacak varyantlar}
 translate T ReviewVarCp {Varyant aralığı (cp)}
 translate T ReviewMoveWait {İnceleme derinliğini bekle}

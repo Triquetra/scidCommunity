@@ -881,6 +881,8 @@ translate J ReviewMoveButton {Коментар потеза}
 translate J ReviewMoveButtonTooltip {Означи одиграни потез одавде и упиши га}
 translate J ReviewSettings {Подешавања прегледа}
 translate J ReviewSettingsTooltip {Configure the review settings}
+translate J ReviewVerifier {Мотор за проверу}
+translate J ReviewVerifierOff {Искључено (без провере)}
 translate J ReviewVarLines {Варијанте за упис}
 translate J ReviewVarCp {Граница варијанти (cp)}
 translate J ReviewMoveWait {Чекај дубину прегледа}

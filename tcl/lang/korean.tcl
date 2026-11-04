@@ -881,6 +881,8 @@ translate k ReviewMoveButton {수 코멘트}
 translate k ReviewMoveButtonTooltip {여기서 둔 수를 평가하고 기록하세요}
 translate k ReviewSettings {검토 설정}
 translate k ReviewSettingsTooltip {Configure the review settings}
+translate k ReviewVerifier {검증 엔진}
+translate k ReviewVerifierOff {끄 (검증 없음)}
 translate k ReviewVarLines {기록할 변화}
 translate k ReviewVarCp {변화 폭 (cp)}
 translate k ReviewMoveWait {검토 깊이를 기다림}

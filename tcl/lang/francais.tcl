@@ -853,6 +853,8 @@ translate F ReviewMoveButton {Commentaire du coup}
 translate F ReviewMoveButtonTooltip {Annoter le coup joué ici et l'insérer}
 translate F ReviewSettings {Réglages de l'analyse}
 translate F ReviewSettingsTooltip {Configure the review settings}
+translate F ReviewVerifier {Moteur de vérification}
+translate F ReviewVerifierOff {Désactivé (aucune vérification)}
 translate F ReviewVarLines {Variantes à écrire}
 translate F ReviewVarCp {Écart des variantes (cp)}
 translate F ReviewMoveWait {Attendre la profondeur d'analyse}

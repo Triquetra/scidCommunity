@@ -880,6 +880,8 @@ translate D ReviewMoveButton {Zugkommentar}
 translate D ReviewMoveButtonTooltip {Aktuellen Zug bewerten und eintragen}
 translate D ReviewSettings {Einstellungen der Prüfung}
 translate D ReviewSettingsTooltip {Bewertungsvorgaben konfigurieren}
+translate D ReviewVerifier {Prüf-Engine}
+translate D ReviewVerifierOff {Aus (keine Prüfung)}
 translate D ReviewVarLines {Zu schreibende Varianten}
 translate D ReviewVarCp {Variantenabstand (cp)}
 translate D ReviewMoveWait {Auf die Prüfungstiefe warten}

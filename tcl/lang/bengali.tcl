@@ -840,6 +840,8 @@ translate b ReviewMoveButton {চালের মন্তব্য}
 translate b ReviewMoveButtonTooltip {এখান থেকে খেলা চালটি লেবেল করুন ও লিখুন}
 translate b ReviewSettings {পর্যালোচনার সেটিংস}
 translate b ReviewSettingsTooltip {Configure the review settings}
+translate b ReviewVerifier {যাচাইকরণ ইঞ্জিন}
+translate b ReviewVerifierOff {বন্ধ (কোনো যাচাই নেই)}
 translate b ReviewVarLines {যে ভ্যারিয়েশনগুলো লিখতে হবে}
 translate b ReviewVarCp {ভ্যারিয়েশনের ব্যবধান (cp)}
 translate b ReviewMoveWait {পর্যালোচনার গভীরতার জন্য অপেক্ষা করুন}

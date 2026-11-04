@@ -881,6 +881,8 @@ translate L ReviewMoveButton {Comentariu la mutare}
 translate L ReviewMoveButtonTooltip {Etichetează mutarea jucată de aici și scrie-o}
 translate L ReviewSettings {Setările analizei}
 translate L ReviewSettingsTooltip {Configure the review settings}
+translate L ReviewVerifier {Motor de verificare}
+translate L ReviewVerifierOff {Oprit (fără verificare)}
 translate L ReviewVarLines {Variante de scris}
 translate L ReviewVarCp {Marja variantelor (cp)}
 translate L ReviewMoveWait {Așteaptă adâncimea analizei}

@@ -816,6 +816,8 @@ translate M ReviewMoveButton {着法评注}
 translate M ReviewMoveButtonTooltip {评注此处走出的着法并写入}
 translate M ReviewSettings {复盘设置}
 translate M ReviewSettingsTooltip {Configure the review settings}
+translate M ReviewVerifier {验证引擎}
+translate M ReviewVerifierOff {关闭（不验证）}
 translate M ReviewVarLines {要写入的变化}
 translate M ReviewVarCp {变化差距 (cp)}
 translate M ReviewMoveWait {等待复盘深度}

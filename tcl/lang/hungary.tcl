@@ -848,6 +848,8 @@ translate H ReviewMoveButton {Lépésmegjegyzés}
 translate H ReviewMoveButtonTooltip {Az innen játszott lépés értékelése és beírása}
 translate H ReviewSettings {Áttekintés beállításai}
 translate H ReviewSettingsTooltip {Configure the review settings}
+translate H ReviewVerifier {Ellenőrző motor}
+translate H ReviewVerifierOff {Kikapcsolva (nincs ellenőrzés)}
 translate H ReviewVarLines {Kiírandó változatok}
 translate H ReviewVarCp {Változat-küszöb (cp)}
 translate H ReviewMoveWait {Várás az áttekintés mélységére}

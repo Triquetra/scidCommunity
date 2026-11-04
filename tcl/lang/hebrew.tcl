@@ -841,6 +841,8 @@ translate V ReviewMoveButton {הערת מסע}
 translate V ReviewMoveButtonTooltip {תן תווית למסע ששוחק מכאן וכתוב אותו}
 translate V ReviewSettings {הגדרות הסקירה}
 translate V ReviewSettingsTooltip {Configure the review settings}
+translate V ReviewVerifier {מנוע אימות}
+translate V ReviewVerifierOff {כבוי (ללא אימות)}
 translate V ReviewVarLines {וריאציות לכתיבה}
 translate V ReviewVarCp {מרווח וריאציות (cp)}
 translate V ReviewMoveWait {המתן לעומק הסקירה}

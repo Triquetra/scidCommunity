@@ -880,6 +880,8 @@ translate P ReviewMoveButton {Komentarz do posunięcia}
 translate P ReviewMoveButtonTooltip {Oceń podświetlone posunięcie i zapisz w partii}
 translate P ReviewSettings {Ustawienia analizy}
 translate P ReviewSettingsTooltip {Ustaw parametry analizy}
+translate P ReviewVerifier {Silnik weryfikujący}
+translate P ReviewVerifierOff {Wyłączony (bez weryfikacji)}
 translate P ReviewVarLines {Liczba wariantów do zapisania}
 translate P ReviewVarCp {Różnica ocen wariantów (cp)}
 translate P ReviewMoveWait {Czekaj na osiągnięcie zadanej głębokości analizy}

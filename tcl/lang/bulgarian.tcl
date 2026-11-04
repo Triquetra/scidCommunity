@@ -881,6 +881,8 @@ translate g ReviewMoveButton {Коментар на хода}
 translate g ReviewMoveButtonTooltip {Оцени изиграния ход и го запиши}
 translate g ReviewSettings {Настройки на прегледа}
 translate g ReviewSettingsTooltip {Configure the review settings}
+translate g ReviewVerifier {Проверяващ двигател}
+translate g ReviewVerifierOff {Изключено (без проверка)}
 translate g ReviewVarLines {Варианти за запис}
 translate g ReviewVarCp {Граница на вариантите (cp)}
 translate g ReviewMoveWait {Изчакай дълбочината на прегледа}
