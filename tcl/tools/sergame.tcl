@@ -771,7 +771,7 @@ namespace eval sergame {
       ::engineNoWin::initEngine $id $name [list ::sergame::message $n]
     } err]} {
       tk_messageBox -title "scidCommunity: error starting engine" -icon warning -type ok \
-        -message "Unable to start the program:\n[toAbsPath [lindex $engineData 1]]"
+        -message "Unable to start the program:\n[lindex $engineData 1]"
       return 1
     }
     # What this connection keeps. The opponent starts level and without a move;

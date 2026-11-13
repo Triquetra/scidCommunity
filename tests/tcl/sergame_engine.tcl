@@ -502,7 +502,6 @@ proc sc_game {sub args} {
     return 1
 }
 proc sc_var {args} { return "" }
-proc toAbsPath {path} { return $path }
 proc sc_base {args} { return 1 }
 namespace eval ::game {}
 proc ::game::Clear {} { return "" }
