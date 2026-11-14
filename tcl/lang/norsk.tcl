@@ -1896,6 +1896,10 @@ translate O SpecificOpening {Spesifikk åpning}
 translate O StartNewGame {Start nytt spill}
 translate O Opening {Åpning}
 translate O StartFromCurrentPosition {Start fra nåværende posisjon}
+translate O ShowDigitalClock {Show digital clock}
+translate O ClockFromGame {Start from the time recorded in the game}
+translate O ClocksContinued {Clocks continued from the game}
+translate O ClocksRestarted {Clocks restarted}
 translate O FixedDepth {Fast dybde}
 translate O Nodes {Noder} 
 translate O Depth {Dybde}
