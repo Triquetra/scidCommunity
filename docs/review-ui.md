@@ -439,6 +439,17 @@ the setting still shows it on. The cache is kept across passes. A local failure 
 the engine going away — falls back to a cloud evaluation if one is held, and the
 position's source is published with the result it produced.
 
+**A reply that never comes cannot hang the pass.** A depth-only pass waits for the
+lookup before it searches anything, so a transport that reports nothing would
+leave the review on its first position for ever — which is what a Windows Tcl does
+when the program it was handed will not start (a channel, no error, no readable
+event). `::reviewdriver::cloudDeadline` bounds that wait (15 s, longer than curl's
+own 10 s cap); when it passes the position is searched locally, the cloud is done
+with for the run (`::reviewcloud::giveUp`, counted in the status as
+`cloudTimeouts`), and the pass moves on. The transport also resolves curl with
+`auto_execok` before opening the pipe, so a machine without it takes the Tcl
+`http` fallback instead of opening a pipe that can never answer.
+
 The chosen **source and depth** are recorded per position in the run's status
 (`::reviewdriver::status` → `sources`, ply → `{source cloud|local depth N}`), so a
 report or a future UI can say where a verdict came from. Nothing else changes: the

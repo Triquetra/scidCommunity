@@ -159,34 +159,43 @@ proc ::lichess_eval::cloudEvalAsync {fen variant mpv callback} {
     set urlFen [string map {" " "%20" "/" "%2F" "+" "%2B" "?" "%3F" "&" "%26" "=" "%3D" "#" "%23" "%" "%25"} $fen]
     set url "$::lichess_eval::apiUrl?fen=$urlFen&multiPv=$mpv&variant=$variant"
 
-    if {[catch {
-        set fd [open [list | curl -s --max-time 10 -H {Accept: */*} \
-            -w {|HTTP%{http_code}} $url] r]
-    } err]} {
-        # curl is not on PATH. The synchronous query above falls back to the Tcl
-        # http package from here; this is that fallback's asynchronous twin -
-        # ::http::geturl with -command returns at once and answers from the event
-        # loop, so the caller still is not blocked - and its reply goes through
-        # onCloudEvalHttp, which maps the status onto the same
-        # <ok> <data> <err> contract onCloudEvalData reports.
-        if {![catch {package require http}]} {
-            catch {package require tls}
-            catch {::http::register https 443 ::tls::socket}
-            if {![catch {
-                ::http::geturl $url -timeout 10000 \
-                    -command [list ::lichess_eval::onCloudEvalHttp $callback]
-            }]} {
-                return ""
-            }
+    # Resolve curl before opening the pipe. A pipe to a program that is not
+    # there is not reliably an error: on Windows Tcl a failed program leaves a
+    # channel that never reports EOF, so a caller waiting for the reply waits
+    # for ever (the cloud pre-pass hanging on its first position). Resolving
+    # first means a machine without curl takes the fallback below instead.
+    set curl [auto_execok curl]
+    set err "curl is not on PATH"
+    if {$curl ne ""} {
+        if {![catch {
+            set fd [open [list | $curl -s --max-time 10 -H {Accept: */*} \
+                -w {|HTTP%{http_code}} $url] r]
+        } err]} {
+            fconfigure $fd -blocking 0 -buffering full
+            set asyncBuf($fd) ""
+            set asyncReq($fd) [list $callback]
+            fileevent $fd readable [list ::lichess_eval::onCloudEvalData $fd]
+            return $fd
         }
-        after idle [list {*}$callback 0 "" $err]
-        return ""
     }
-    fconfigure $fd -blocking 0 -buffering full
-    set asyncBuf($fd) ""
-    set asyncReq($fd) [list $callback]
-    fileevent $fd readable [list ::lichess_eval::onCloudEvalData $fd]
-    return $fd
+    # No curl, or a pipe that would not open. The synchronous query above falls
+    # back to the Tcl http package from here; this is that fallback's
+    # asynchronous twin - ::http::geturl with -command returns at once and
+    # answers from the event loop, so the caller still is not blocked - and its
+    # reply goes through onCloudEvalHttp, which maps the status onto the same
+    # <ok> <data> <err> contract onCloudEvalData reports.
+    if {![catch {package require http}]} {
+        catch {package require tls}
+        catch {::http::register https 443 ::tls::socket}
+        if {![catch {
+            ::http::geturl $url -timeout 10000 \
+                -command [list ::lichess_eval::onCloudEvalHttp $callback]
+        }]} {
+            return ""
+        }
+    }
+    after idle [list {*}$callback 0 "" $err]
+    return ""
 }
 
 # ::lichess_eval::onCloudEvalHttp
