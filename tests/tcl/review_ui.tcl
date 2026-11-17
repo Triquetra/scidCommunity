@@ -278,6 +278,14 @@ checkEq "a move the game refused is reported, not swallowed" \
     [::reviewui::statusText [passState done written 3 failed 1 \
         errors {{ply 4 is not in this game}}]] \
     {Review failed: ply 4 is not in this game}
+# A mark the move had no room for is not a refused move: the verdict comment and
+# its [%eval] are in the game, the run is done, and the one-line status has
+# nothing to report. The marks are kept in the state's warnings for a report to
+# read (a completed review that said "Review failed: ply 22: no room for the +=
+# assessment" was the bug this rule closes).
+checkEq "a mark left out does not turn a written review into a failure" \
+    [::reviewui::statusText [passState done written 7 failed 0 \
+        warnings {{ply 22: no room for the += assessment}}]] ""
 checkEq "an empty state is idle" [::reviewui::statusText {}] ""
 
 puts "what the settings dialog holds"

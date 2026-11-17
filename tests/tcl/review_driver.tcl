@@ -1313,11 +1313,14 @@ checkEq "and not reported as a failed diagram" [dict get $st failed] 0
 checkEq "the mark is on the first move" [nagsAt 1] "?? --+"
 ::review::reset
 
-puts "a full move cannot take the mark, and says so"
+puts "a full move cannot take the mark, and the review is still written"
 
 # AddNag has fixed capacity (MAX_NAGS 8) and sc_pos ignores its refusal. A move
-# already carrying seven NAGs gets the comment but not the mark; that is a
-# partial write and has to be reported, not counted as clean.
+# already carrying seven NAGs gets the comment and the [%eval] but not the mark.
+# That is a mark left out, not a refused verdict: the review is written and its
+# state says done, and the pass reports the mark as a warning (a completed
+# review that said "Review failed: ply 22: no room for the += assessment" is
+# what the reader saw on a real game).
 ::review::reset
 set ::fakeMainLine [list {position startpos moves} e2e4 e7e5 g1f3 b8c6]
 set ::fakeLen 4
@@ -1340,12 +1343,14 @@ feedEvent InfoPV {1 20 22 900 300 0 0 120 800 cp 0 g8f6}
 feedEvent InfoBestMove {}
 pump
 set st [::reviewdriver::status]
-checkEq "the mark that did not fit is a failed move" [dict get $st failed] 1
-checkEq "and nothing is counted as written" [dict get $st written] 0
-check "the reason names the mark" \
-    [expr {[string first {no room for the ?? mark} [dict get $st errors]] >= 0}]
-check "and the diagram's own failure is kept too" \
-    [expr {[string first {no room for the diagram mark} [dict get $st errors]] >= 0}]
+checkEq "the move is written" [dict get $st written] 1
+checkEq "and is not a failed move" [dict get $st failed] 0
+checkEq "so the pass still says done" [dict get $st state] done
+check "the warning names the mark" \
+    [expr {[string first {no room for the ?? mark} [dict get $st warnings]] >= 0}]
+check "and the diagram's own warning is kept too" \
+    [expr {[string first {no room for the diagram mark} [dict get $st warnings]] >= 0}]
+checkEq "neither is reported as an error" [dict get $st errors] {}
 check "the comment still landed" \
     [expr {[string first {[blunder]} [dict get $::fakeComments 4]] >= 0}]
 ::review::reset

@@ -1460,6 +1460,13 @@ proc ::reviewdriver::writeRun {p results {corrections ""}} {
         if {[dict exists $counts errors]} {
             dict set state errors [dict get $counts errors]
         }
+        # A mark the move had no room for is not a refused verdict: the comment,
+        # its [%eval] and the variation are in the game, and only the NAG beside
+        # the word is missing. They are kept apart from `errors` so a completed
+        # review is not reported as a failed one.
+        if {[dict exists $counts warnings]} {
+            dict set state warnings [dict get $counts warnings]
+        }
     }
     # The labels and the report are in the game now. Put the reader back and
     # redraw before the coach starts: prose can take minutes, and a review the
@@ -1567,6 +1574,7 @@ proc ::reviewdriver::writeResults {p results} {
     set written 0
     set failed 0
     set errors {}
+    set warnings {}
     set engineName ""
     catch { set engineName [lindex [dict get $p engine] 0] }
     set verdicts [::reviewdriver::verdicts $map $results]
@@ -1681,9 +1689,17 @@ proc ::reviewdriver::writeResults {p results} {
                     lappend markErr "ply $ply: $ex"
                 }
             }
-            foreach e $markErr { lappend errors $e }
-            if {$err ne ""} { lappend errors $err }
-            if {[llength $markErr] || $err ne ""} {
+            # A mark the move had no room for is a warning, not a refused move:
+            # AddNag has a fixed capacity of eight and sc_pos ignores its
+            # refusal, so a move that arrived already annotated loses the
+            # symbol. The verdict comment, its [%eval] and any variation are in
+            # the game, which is what the review is for; reporting the pass as
+            # failed over a NAG it could not place was wrong (a completed
+            # review read "Review failed: ply 22: no room for the +=
+            # assessment").
+            foreach e $markErr { lappend warnings $e }
+            if {$err ne ""} {
+                lappend errors $err
                 incr failed
             } else {
                 incr written
@@ -1732,7 +1748,7 @@ proc ::reviewdriver::writeResults {p results} {
     }
     # The counts, not the state: runDone owns the status dict, so a -writer that
     # is not this proc reports in the same vocabulary.
-    return [dict create written $written failed $failed errors $errors]
+    return [dict create written $written failed $failed errors $errors warnings $warnings]
 }
 
 # Write a variation line, one node at a time, ascending, from the verdicts the
@@ -1770,6 +1786,7 @@ proc ::reviewdriver::writeLine {p results} {
     set written 0
     set failed 0
     set errors {}
+    set warnings {}
     set engineName ""
     catch { set engineName [lindex [dict get $p engine] 0] }
     set verdicts [::reviewdriver::verdicts $map $results]
@@ -1795,19 +1812,29 @@ proc ::reviewdriver::writeLine {p results} {
         }
         # writeNode answers with a list of reasons: one move's verdict can land
         # while its alternatives are refused, and each reason is kept as its own
-        # entry in the count (the same vocabulary writeResults reports in).
-        incr failed
+        # entry (the same vocabulary writeResults reports in). A reason about a
+        # mark that would not fit - "no room for the ?? mark", the assessment or
+        # the diagram - is a warning: the node's verdict comment and its [%eval]
+        # are in the game, so the node was written. Anything else is a node this
+        # pass could not address, and it is counted as failed.
         set stale 0
+        set refused 0
         foreach why $err {
+            if {[string first "no room for the" $why] >= 0} {
+                lappend warnings $why
+                continue
+            }
             lappend errors $why
+            set refused 1
             # The line is not the one the map described - an anchor renumbered
             # under the write - so this node cannot be addressed, and neither can
             # any node after it on the same line: nothing further is written.
             if {[string first "is not on this line" $why] >= 0} { set stale 1 }
         }
+        if {$refused} { incr failed } else { incr written }
         if {$stale} { break }
     }
-    return [dict create written $written failed $failed errors $errors]
+    return [dict create written $written failed $failed errors $errors warnings $warnings]
 }
 
 # Put the cursor back and say whether it landed exactly. Never raises: a restore
