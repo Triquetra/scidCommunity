@@ -397,7 +397,11 @@ proc ::reviewcloud::arrived {handle ok data {err ""}} {
     if {$ok && [string trim $data] eq ""} { set ok 0 }
     set entry ""
     if {$ok} {
-        set entry [::reviewcloud::parse $data [dict get $req fen]]
+        # Parsing a body this code has never seen must not be able to strand the
+        # pass: the handle is already out of `pending`, so an exception here
+        # would be a reply nobody hears and a position nobody searches. A body
+        # that will not parse is no reply.
+        catch { set entry [::reviewcloud::parse $data [dict get $req fen]] }
     } else {
         # No curl, no network, a timeout: the whole pass stops asking rather
         # than paying the same wait at every position.
@@ -432,5 +436,26 @@ proc ::reviewcloud::drop {handle} {
     variable pending
     unset -nocomplain entries($handle)
     unset -nocomplain pending($handle)
+    return
+}
+
+# This pass stops asking: the transport did not answer inside the pass's own
+# deadline, so the position is searched locally and the rest of the pass does not
+# pay the same wait. The handle is dropped, so a reply that lands after the
+# deadline is a reply to a question nobody is waiting on any more.
+#
+# The deadline exists because a transport failure is not always reported. A
+# curl that never answers, or a Windows Tcl handed a program it could not start
+# (the channel exists, the readable event never comes), leaves a depth-only pass
+# waiting on a reply that is not coming: the review sits on its first position
+# for ever. Whatever the cause, a pass that waits for ever is worse than a pass
+# that searches the position itself.
+proc ::reviewcloud::giveUp {handle} {
+    variable pending
+    variable entries
+    variable unusable
+    set unusable 1
+    unset -nocomplain pending($handle)
+    unset -nocomplain entries($handle)
     return
 }

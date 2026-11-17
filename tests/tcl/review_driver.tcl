@@ -3146,5 +3146,53 @@ checkEq "the stopped position settles and the next one searches" [lindex $::sent
     {send 20 Go {{position startpos moves e2e4} {{depth 18} {movetime 900}}}}
 checkEq "one position was settled" $::cprogress {{1 2}}
 
+puts "\na cloud reply that never arrives does not leave the pass waiting"
+
+# A transport that starts and then says nothing. On Windows a Tcl handed a
+# program it could not start hands back exactly that: a channel, no error, and no
+# readable event ever. The depth-only pass would wait for that reply for ever -
+# the review that stops on its first position and never moves (reported against
+# the cloud pre-pass) - so the wait carries a deadline, and a position whose
+# reply does not come is searched locally instead. The rest of the pass stops
+# asking, because one dead transport is not worth fifteen seconds a position.
+set ::queries 0
+proc ::lichess_eval::cloudEvalAsync {fen variant mpv callback} {
+    incr ::queries
+    return ""
+}
+# The time-capped pass above is still searching its second position; a second
+# run cannot start beside it, so it is stopped first.
+foreach stale [array names ::reviewdriver::job] {
+    ::reviewdriver::stop $stale
+}
+pump
+::reviewcloud::reset
+set ::sent {}
+set ::cprogress {}
+set wpositions {{1 {position startpos}} {2 {position startpos moves e2e4}}}
+set wtoken [::reviewdriver::start $enginecfg $wpositions 3 {depth 18 movetime {}} \
+    onCloudProgress {} 1 standard]
+feed InfoConfig {}
+checkEq "the pass asked the cloud" $::queries 1
+checkEq "and no search was started while it waits" \
+    [lsearch -index 2 $::sent Go] -1
+checkEq "and the wait carries a deadline" \
+    [expr {[dict exists $::reviewdriver::job($wtoken) cloudTimer]}] 1
+# The deadline passes: the position is searched locally and the cloud is done
+# with for this pass.
+::reviewdriver::cloudTimedOut $wtoken [list $wtoken 0]
+checkEq "the deadline searches the position itself" [lindex $::sent end] \
+    {send 20 Go {{position startpos} {{depth 18}}}}
+checkEq "and the pass stops asking" [::reviewcloud::enabled] 0
+checkEq "with the timeout on the record" \
+    [dict get [::reviewdriver::status] cloudTimeouts] 1
+feed InfoBestMove {}
+checkEq "the next position is searched without a query" \
+    [list $::queries [lindex $::sent end]] \
+    {1 {send 20 Go {{position startpos moves e2e4} {{depth 18}}}}}
+feed InfoBestMove {}
+pump
+checkEq "and the pass finishes" [dict get [::reviewdriver::status] state] done
+
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

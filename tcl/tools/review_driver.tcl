@@ -393,8 +393,13 @@ proc ::reviewdriver::next {token} {
         }
         if {$action eq "wait"} {
             # The lookup decides whether this position is searched at all; the
-            # pass continues from ::reviewdriver::cloudArrived.
+            # pass continues from ::reviewdriver::cloudArrived. The wait is
+            # bounded: a transport that never reports back (a curl that hangs, a
+            # Windows Tcl handed a program it could not start) would otherwise
+            # leave the pass on this position for ever - the review that stops on
+            # its first position and never moves.
             dict set job($token) waiting [list $token $index]
+            ::reviewdriver::cloudDeadline $token
             return
         }
         dict set job($token) waiting ""
@@ -520,6 +525,7 @@ proc ::reviewdriver::cloudWaitDone {token handle entry} {
     variable job
     if {![info exists job($token)]} { return }
     set j $job($token)
+    ::reviewdriver::cloudDeadlineOff $token
     dict set job($token) waiting ""
     set index [dict get $j index]
     lassign [lindex [dict get $j positions] $index] ply spec
@@ -544,6 +550,48 @@ proc ::reviewdriver::cloudWaitDone {token handle entry} {
     return
 }
 
+# How long a depth-only pass waits for a cloud reply before searching the
+# position itself. A real lookup is one cheap HTTP call with a ten-second cap on
+# curl's own side; this is the backstop for the transport that never reports back
+# at all, which is the one failure a timeout cannot see.
+proc ::reviewdriver::cloudWaitMs {} {
+    return 15000
+}
+
+# Start the backstop for the position the pass is waiting on.
+proc ::reviewdriver::cloudDeadline {token} {
+    variable job
+    if {![info exists job($token)]} { return }
+    ::reviewdriver::cloudDeadlineOff $token
+    dict set job($token) cloudTimer \
+        [after [::reviewdriver::cloudWaitMs] [list ::reviewdriver::cloudTimedOut $token [dict get $job($token) waiting]]]
+    return
+}
+
+# Cancel it. Called when the reply lands and when the run ends: an `after` that
+# fires against a job nobody is holding is a stray callback at best.
+proc ::reviewdriver::cloudDeadlineOff {token} {
+    variable job
+    if {![info exists job($token)]} { return }
+    catch { after cancel [dict get $job($token) cloudTimer] }
+    catch { dict unset job($token) cloudTimer }
+    return
+}
+
+# The reply did not come. The pass searches the position itself and stops asking
+# for the rest of the run: a review that waits for ever on its first position is
+# the worst outcome available, and one slow position is not worth the risk of it.
+proc ::reviewdriver::cloudTimedOut {token handle} {
+    variable job
+    variable state
+    if {![info exists job($token)]} { return }
+    if {[dict get $job($token) waiting] ne $handle} { return }
+    catch { ::reviewcloud::giveUp $handle }
+    catch { dict incr state cloudTimeouts }
+    ::reviewdriver::cloudWaitDone $token $handle ""
+    return
+}
+
 proc ::reviewdriver::finish {token} {
     variable job
     variable state
@@ -551,6 +599,7 @@ proc ::reviewdriver::finish {token} {
         return
     }
     set j $job($token)
+    ::reviewdriver::cloudDeadlineOff $token
     set id [dict get $j id]
     set results [dict get $j results]
     set done [dict get $j ondone]
