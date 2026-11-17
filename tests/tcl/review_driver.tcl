@@ -110,15 +110,22 @@ puts "what a pass runs with"
 ::review::reset
 checkEq "threads come from the engine's config" [dict get [::review::effective $enginecfg] threads] 8
 checkEq "and so does hash" [dict get [::review::effective $enginecfg] hash] 256
-checkEq "a review always asks for two lines" [dict get [::review::effective $enginecfg] mpv] 3
+# Lines is the preset's MultiPV now, floored at two: a verdict needs a second
+# line, so one line cannot be a review.
+checkEq "the preset's MultiPV is the pass's line count" \
+    [dict get [::review::effective $enginecfg] mpv] 2
 ::review::setValue threads 2
 checkEq "the preset still wins over a ::review value" \
     [dict get [::review::effective $enginecfg] threads] 8
-::review::setValue mpv 1
-checkEq "one line is raised to two" [dict get [::review::effective $enginecfg] mpv] 2
+set three {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {{MultiPV 3 spin 1 1 10}}}
+checkEq "a preset asking for three lines gets three" \
+    [dict get [::review::effective $three] mpv] 3
 set wide {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {{MultiPV 5 spin 1 1 10}}}
 checkEq "a preset asking for more lines is respected" \
     [dict get [::review::effective $wide] mpv] 5
+set enormous {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {{MultiPV 60 spin 1 1 256}}}
+checkEq "and one asking for sixty is capped at what a review can use" \
+    [dict get [::review::effective $enormous] mpv] 5
 ::review::reset
 ::review::setValue threads 4
 ::review::setValue hash_mb 64
@@ -145,37 +152,33 @@ checkEq "and one below both keeps its hash" \
     [dict get [::review::effective $modest] hash] 128
 ::review::reset
 
-puts "where the depth comes from"
-set ::engines(list) [list \
-    [list Plain /x {} {} 0 0 {} 1 {} {}] \
-    [list Deep /x {} {} 0 0 {} 1 {} [dict create depth 30 movetime 900]] \
-    [list Shallow /x {} {} 0 0 {} 1 {} [dict create depth 12]]]
+puts "where the depth and the cap come from"
+# The engine preset's Limits, and nothing else. A review used to hold a second
+# copy of both numbers and take the deeper of the two, so a depth-12 review
+# searched 30 (0.1 s a position against 80 s on Stockfish with three lines).
+set plain {Plain /x {} {} 0 0 {} 1 {} {}}
+set deep {Deep /x {} {} 0 0 {} 1 {} {depth 30 movetime 900}}
+set shallow {Shallow /x {} {} 0 0 {} 1 {} {depth 12}}
+set ::engines(list) [list $plain $deep $shallow]
 ::review::reset
-checkEq "a preset with no limits leaves the review depth alone" \
-    [dict get [::review::effective [::enginecfg::get Plain]] depth] 18
-# The review's depth is the pass's depth, whatever the preset's own search limits
-# say: the preset's Limits are what that preset's searches run at, and taking the
-# deeper of the two made a depth-12 review search at 30 (0.1 s a position against
-# 80 s on Stockfish with three lines).
-checkEq "a deeper preset does not raise it" \
-    [dict get [::review::effective [::enginecfg::get Deep]] depth] 18
-checkEq "a shallower preset does not lower it" \
-    [dict get [::review::effective [::enginecfg::get Shallow]] depth] 18
-# And the time cap comes from the same place, in the other direction: a preset
-# with no cap leaves the pass uncapped, a preset with one caps it, and the
-# review's own value replaces the preset's rather than being combined with it.
+checkEq "a preset with no Limits: the unconfigured depth" \
+    [dict get [::review::effective $plain] depth] 18
+checkEq "a preset's depth is the pass's depth" \
+    [dict get [::review::effective $deep] depth] 30
+checkEq "a shallow one is the pass's depth too" \
+    [dict get [::review::effective $shallow] depth] 12
 checkEq "a preset with no cap leaves the pass uncapped" \
-    [dict get [::review::effective [::enginecfg::get Plain]] movetime] ""
+    [dict get [::review::effective $plain] movetime] ""
 checkEq "the preset's cap reaches the pass" \
-    [dict get [::review::effective [::enginecfg::get Deep]] movetime] 900
-::review::setValue movetime 2000
-checkEq "the review's own cap replaces the preset's" \
-    [dict get [::review::effective [::enginecfg::get Deep]] movetime] 2000
-checkEq "and the review's depth is still the pass's, cap or no cap" \
-    [dict get [::review::effective [::enginecfg::get Deep]] depth] 18
-::review::reset
-checkEq "clearing the cap puts the preset's back" \
-    [dict get [::review::effective [::enginecfg::get Deep]] movetime] 900
+    [dict get [::review::effective $deep] movetime] 900
+# There is no review-side number left to override it with: the setter does not
+# know these keys at all.
+checkEq "a review cannot set a depth" [::review::setValue depth 18] \
+    {unknown setting: depth}
+checkEq "nor a cap" [::review::setValue movetime 2000] \
+    {unknown setting: movetime}
+checkEq "and the preset's answer stands" \
+    [dict get [::review::effective $deep] movetime] 900
 
 puts "a pass over three positions"
 set ::progress {}
@@ -227,22 +230,19 @@ checkEq "the deepest line is kept, not the last" [lindex [dict get $first 1] 0] 
 checkEq "and the second MultiPV slot too" [lindex [dict get $first 2] 0] 8
 checkEq "positions after the first are recorded" [lindex [dict get [dict get $::done 6] 1] 0] 11
 
-# The four shapes the precedence table can produce, as Go messages: the driver
-# hands ::enginelimits::goLimits the dict ::review::passLimits built, so neither
-# the pass nor a caller string-builds "go depth N movetime M".
+# The shapes the preset can produce, as Go messages: the driver hands
+# ::enginelimits::goLimits the dict ::review::passLimits built, so neither the
+# pass nor a caller string-builds "go depth N movetime M".
 puts "the go command a capped pass sends"
-checkEq "no cap either side: depth alone" \
-    [::enginelimits::goLimits [::review::passLimits {depth 18 movetime 0} {depth {} movetime {}}]] \
+checkEq "no cap: depth alone" \
+    [::enginelimits::goLimits [::review::passLimits {depth {} movetime {}}]] \
     {{depth 18}}
-checkEq "the preset's cap only" \
-    [::enginelimits::goLimits [::review::passLimits {depth 18 movetime 0} {depth {} movetime 900}]] \
+checkEq "a cap: both bounds in one message" \
+    [::enginelimits::goLimits [::review::passLimits {depth {} movetime 900}]] \
     {{depth 18} {movetime 900}}
-checkEq "the review's cap only" \
-    [::enginelimits::goLimits [::review::passLimits {depth 18 movetime 2000} {depth {} movetime {}}]] \
-    {{depth 18} {movetime 2000}}
-checkEq "both: the review's cap, and the review's depth over the preset's" \
-    [::enginelimits::goLimits [::review::passLimits {depth 18 movetime 2000} {depth 30 movetime 900}]] \
-    {{depth 18} {movetime 2000}}
+checkEq "the preset's own depth and cap" \
+    [::enginelimits::goLimits [::review::passLimits {depth 30 movetime 900}]] \
+    {{depth 30} {movetime 900}}
 
 set ::sent {}
 set cappedcfg {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {}}
@@ -938,30 +938,30 @@ checkEq "a depth must be a whole number" \
     [::reviewdriver::run $runcfg -depth deep] {-depth must be a whole number}
 checkEq "and neither was that" $::sent {}
 
-# The cap is read from ::review::effective, exactly as the depth is, so a run
-# cannot pick a different cap from the one Review Settings shows. The Go carries
-# both when both are set: the engine stops at whichever comes first.
+# The cap is the engine preset's, read through ::review::effective exactly as the
+# depth is, so a run cannot search on a bound the reader never set anywhere. The
+# Go carries both when both are set: the engine stops at whichever comes first.
 puts "a capped run"
-set ::engines(list) [list \
-    [list Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {} [dict create movetime 900]]]
+set capped {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {} {movetime 900}}
+set ::engines(list) [list $capped]
 ::review::reset
-::review::setValue movetime 1500
 set ::events {}
 set ::sent {}
-checkEq "a capped run starts" [::reviewdriver::run $runcfg -plies {1}] ""
-feedEvent InfoConfig {Threads 8 Hash 256 MultiPV 3}
-checkEq "and its Go carries the review's cap, not the preset's" [lindex $::sent end] \
-    {send 20 Go {{position startpos moves} {{depth 18} {movetime 1500}}}}
-::reviewdriver::cancel
-pump
-# With no cap of its own the pass runs on the preset's.
-::review::setValue movetime 0
-set ::events {}
-set ::sent {}
-checkEq "an uncapped run starts" [::reviewdriver::run $runcfg -plies {1}] ""
+checkEq "a capped run starts" [::reviewdriver::run $capped -plies {1}] ""
 feedEvent InfoConfig {Threads 8 Hash 256 MultiPV 3}
 checkEq "and its Go carries the preset's cap" [lindex $::sent end] \
     {send 20 Go {{position startpos moves} {{depth 18} {movetime 900}}}}
+::reviewdriver::cancel
+pump
+# A preset with no cap leaves the pass uncapped: `go depth N` and no time bound.
+set uncapped {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {} {}}
+set ::engines(list) [list $uncapped]
+set ::events {}
+set ::sent {}
+checkEq "an uncapped run starts" [::reviewdriver::run $uncapped -plies {1}] ""
+feedEvent InfoConfig {Threads 8 Hash 256 MultiPV 3}
+checkEq "and its Go carries the depth alone" [lindex $::sent end] \
+    {send 20 Go {{position startpos moves} {{depth 18}}}}
 ::reviewdriver::cancel
 pump
 set ::engines(list) {}
@@ -3098,12 +3098,16 @@ checkEq "the engine's line reaches the pane, with its score and its moves" \
 feedEvent InfoPV {2 18 20 800 250 0 0 110 60 cp 0 d7d5}
 checkEq "and a second MultiPV slot is its own line" \
     [dict get [::reviewprogress::job] lines] {{1.  d20  -1.00  c5} {2.  d18  -0.60  d5}}
-# The lines belong to the position that is being searched: when the pass moves
-# on, the pane drops them rather than showing one position's lines under another
-# position's board.
+# The lines stay up when the pass moves on: a depth-12 pass changes position
+# more than ten times a second, so a block blanked at every change is empty
+# whenever the reader looks. The new position's first report replaces them.
 feedEvent InfoBestMove {}
-checkEq "the next position has no lines until its own arrive" \
-    [dict get [::reviewprogress::job] lines] {}
+checkEq "the last lines stay up as the next position starts" \
+    [dict get [::reviewprogress::job] lines] \
+    {{1.  d20  -1.00  c5} {2.  d18  -0.60  d5}}
+feedEvent InfoPV {1 18 20 900 300 0 0 120 40 cp 0 d2d4}
+checkEq "and its own first report replaces them" \
+    [dict get [::reviewprogress::job] lines] {{1.  d18  +0.40  d4}}
 checkEq "and follows the search into the variation" \
     [dict get [::reviewprogress::job] spec] [dict get $map positions 4]
 checkEq "the board being the position the variation's move made" \

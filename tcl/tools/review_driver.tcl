@@ -979,9 +979,8 @@ proc ::reviewdriver::status {} {
 #   -force 0|1      judge every node of the line, not just the unlabelled ones
 #                   (the driver half of the skip rule; no UI row sets it)
 #
-# There is no -movetime: the time cap is ::review::movetime or the preset's
-# Limits.movetime (::review::passLimits), so the pass and the settings dialog
-# cannot disagree about it.
+# There is no -movetime: the time cap is the preset's Limits.movetime
+# (::review::passLimits), and a pass has no cap of its own to disagree with it.
 proc ::reviewdriver::run {engine args} {
     variable pass
     variable state

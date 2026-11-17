@@ -207,7 +207,7 @@ proc ::reviewcloud::depth {entry} {
 # The evaluation as the driver's own line dict - MultiPV index -> {depth score
 # type pv} - or "" when the reply cannot serve this pass.
 #
-# The lines the verdict needs are ::review::mpv of them: `great` and `brilliant`
+# The lines the verdict needs are the preset's MultiPV of them: `great` and `brilliant`
 # are decided against the alternatives, so a MultiPV-1 reply is not a shortcut,
 # it is a different answer. A short reply is therefore no reply.
 proc ::reviewcloud::lines {entry mpv} {

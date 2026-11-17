@@ -76,6 +76,7 @@ array set ::EN {
     ReviewVerifierOff       {Off (no verification)}
     Lines                   {Lines}
     Depth                   {Depth}
+    Hash                    {Hash}
 }
 proc tr {tag} {
     if {[info exists ::EN($tag)]} { return $::EN($tag) }
@@ -290,36 +291,34 @@ checkEq "an empty state is idle" [::reviewui::statusText {}] ""
 
 puts "what the settings dialog holds"
 
-# The dialog owns twelve settings. Threads and Hash are not among them: they
-# belong to the engine preset (#382), and a second place to set them is a second
-# place to get them wrong. The dialog shows them, read-only, from the preset.
+# The dialog owns ten settings. Threads, Hash, Lines (MultiPV), Depth and the time
+# cap are not among them: they belong to the engine preset (#382, and its Limits),
+# and a second place to hold them was the second copy the pass then had to choose
+# between. The dialog shows them, read-only, from the preset.
 ::review::reset
 set s [::reviewui::settings]
-checkEq "thirteen rows, no threads, no hash" [dict keys $s] \
-    {mpv depth movetime var_lines var_cp move_comment_wait diagram opening_errors opening_window tactical_exercises coach cloud_eval verifier}
-checkEq "at their defaults" [dict get $s depth] 18
-checkEq "with no time cap of its own" [dict get $s movetime] 0
-checkEq "and mpv with them" [dict get $s mpv] 3
+checkEq "ten rows, none of them the engine's" [dict keys $s] \
+    {var_lines var_cp move_comment_wait diagram opening_errors opening_window tactical_exercises coach cloud_eval verifier}
+checkEq "a variation to write by default" [dict get $s var_lines] 1
 checkEq "the cloud pre-pass on unless it is turned off" [dict get $s cloud_eval] 1
 checkEq "the coach off unless it is asked for" [dict get $s coach] 0
 # The verifier is off by default: today's behaviour exactly, and the labels are
 # written as the search produced them.
 checkEq "and no verifier engine" [dict get $s verifier] ""
 
-set good [dict create mpv 4 depth 24 movetime 1500 var_lines 2 var_cp 40 \
-    move_comment_wait 0 diagram 1 opening_errors 1 opening_window 15 \
-    tactical_exercises 1 coach 1 cloud_eval 1 verifier ""]
+set good [dict create var_lines 2 var_cp 40 move_comment_wait 0 diagram 1 \
+    opening_errors 1 opening_window 15 tactical_exercises 1 coach 1 \
+    cloud_eval 1 verifier ""]
 checkEq "a valid dialog is stored without complaint" [::reviewui::applySettings $good] {}
 checkEq "and reads straight back" [::reviewui::settings] $good
-checkEq "the cap is stored as the review's own option" $::reviewopt(movetime) 1500
-# 0 is a value, not a blank: it takes the cap back off, which is how a user who
-# set one returns to the preset's.
-checkEq "clearing the cap is applied like any other value" \
-    [::reviewui::applySettings [dict create movetime 0]] {}
-checkEq "and is remembered" [::review::get movetime] 0
-# Back to the full edit, which the next block starts from.
-checkEq "the whole dialog applies again" [::reviewui::applySettings $good] {}
-checkEq "with its cap" [::review::get movetime] 1500
+checkEq "the variation count is stored as the review's own option" \
+    $::reviewopt(var_lines) 2
+# A dialog dict is keyed by the dialog's own fields: one that carries a number the
+# review no longer holds (an older harness, a stale dict) is ignored, not stored -
+# there is nothing on the review side to store it in.
+checkEq "an engine number in the dict is not a review setting" \
+    [::reviewui::applySettings [dict create depth 24]] {}
+checkEq "and the rest of the edit landed" [::review::get coach] 1
 
 puts "\nthe verifier engine row"
 
@@ -362,95 +361,57 @@ unset ::engines(list)
 checkEq "the whole dialog applies again after the verifier rows" \
     [::reviewui::applySettings $good] {}
 
-# One refused field must not lose the four that were fine: the user pressed OK
-# once, and a dialog that silently drops the whole edit is worse than a refusal.
-set bad [dict create mpv 4 depth 24 var_lines 9 var_cp 50 move_comment_wait 1]
+# One refused field must not lose the others: the user pressed OK once, and a
+# dialog that silently drops the whole edit is worse than a refusal.
+set bad [dict create var_lines 9 var_cp 50 move_comment_wait 1]
 set why [::reviewui::applySettings $bad]
 checkEq "one refusal, for the one bad field" [llength $why] 1
-checkEq "naming the setting and the cap" [lindex $why 0] {var_lines cannot exceed mpv (4)}
+checkEq "naming the setting and its ceiling" [lindex $why 0] {var_lines must be 0..5}
 checkEq "the other fields still land" [dict get [::reviewui::settings] move_comment_wait] 1
-checkEq "and the refused one keeps what it had" [dict get [::reviewui::settings] var_lines] 2
+checkEq "and the refused one keeps what it had" \
+    [dict get [::reviewui::settings] var_lines] 2
 
 # A value that is not a number is a refusal too, not an error out of the dialog.
 set why [::reviewui::applySettings \
-    [dict create mpv 3 depth deep var_lines 1 var_cp 0 move_comment_wait 1]]
-checkEq "a nonsense depth is refused by name" [lindex $why 0] {depth must be a whole number}
-checkEq "and the fields after it still land" [dict get [::reviewui::settings] var_lines] 1
+    [dict create var_lines many var_cp 0 move_comment_wait 1]]
+checkEq "a nonsense number is refused by name" [lindex $why 0] \
+    {var_lines must be a whole number}
+checkEq "and the fields after it still land" [dict get [::reviewui::settings] var_cp] 0
 
-# mpv is applied before var_lines, so one edit that lowers both is honoured
-# rather than refused: the dialog order is the order the setter's rules need.
-::review::reset
-set why [::reviewui::applySettings \
-    [dict create mpv 2 depth 18 var_lines 5 var_cp 0 move_comment_wait 1]]
-checkEq "lowering mpv and leaving var_lines high is refused once" [llength $why] 1
-checkEq "with the mpv it was lowered to" [lindex $why 0] {var_lines cannot exceed mpv (2)}
-checkEq "so var_lines keeps the value it had" [dict get [::reviewui::settings] var_lines] 1
-
-# A field the dialog does not have is ignored rather than stored.
-checkEq "an unknown field is not a setting" \
+# A field the dialog does not have is ignored rather than stored - threads is the
+# preset's - but a setting the review really does not hold is reported, because
+# that is a caller asking for something this dialog cannot deliver.
+checkEq "an engine field is not a dialog field" \
     [::reviewui::applySettings [dict create threads 8]] {}
-
-puts "the cap's note: where an unset cap comes from"
-
-# The row's own number, or the preset's. A review value of 0 hands the cap to the
-# engine preset, and the row has to say so: a box showing 0 with no note reads as
-# "no time limit" even when the preset imposes one. The note is
-# ::review::effective's answer, so the dialog cannot promise a cap the pass would
-# not use.
-set ::engines(list) [list \
-    [list Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {} [dict create movetime 900]] \
-    [list Uncapped /x {} {} 0 0 {} 1 {} {}]]
-set cappedCfg [::enginecfg::get Stockfish]
-set plainCfg [::enginecfg::get Uncapped]
-::review::reset
-checkEq "an unset cap takes the preset's" \
-    [::reviewui::movetimeFromPreset 0 $cappedCfg] 900
-checkEq "and the row says where it comes from" \
-    [::reviewui::movetimeNote 0 $cappedCfg] {900 ms (from engine preset)}
-checkEq "a cap of the review's own needs no note" \
-    [::reviewui::movetimeNote 1500 $cappedCfg] ""
-checkEq "neither side sets one: no note" \
-    [::reviewui::movetimeNote 0 $plainCfg] ""
-::review::setValue movetime 2000
-checkEq "and a review cap silences the note straight away" \
-    [::reviewui::movetimeNote [::review::get movetime] $cappedCfg] ""
-# A cap the review still has SAVED is not the preset's, and a box reading 0 is the
-# edit that clears it. Reading ::review::effective folded the saved 200 ms into the
-# note, which then credited the preset with a number the preset never gave while
-# applying the same edit would have run at the preset's 900.
-::review::reset
-::review::setValue movetime 200
-checkEq "a saved cap does not answer for the preset" \
-    [::reviewui::movetimeFromPreset 0 $cappedCfg] 900
-checkEq "so the note still names the preset's own number" \
-    [::reviewui::movetimeNote 0 $cappedCfg] {900 ms (from engine preset)}
-checkEq "and a box with a cap of its own still needs no note" \
-    [::reviewui::movetimeNote 200 $cappedCfg] ""
-::review::reset
-set ::engines(list) {}
 
 puts "the preset's read-only line"
 
+# Lines, depth and the cap are the preset's now, so this one line is where the
+# dialog says what the pass will use.
+::review::reset
 set enginecfg {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 \
-    {{Threads 8 integer 1 1 128} {Hash 256 spin 16 1 4096} {MultiPV 1 spin 1 1 10}}}
-checkEq "threads and hash, from the preset" \
-    [::reviewui::presetLimits $enginecfg] {Threads 8, Hash 256 MB}
-checkEq "one of the two is enough" \
-    [::reviewui::presetLimits {X /x {} {} 0 0 {} 1 {{Threads 4 integer 1 1 128}}}] {Threads 4}
-checkEq "an engine that advertises neither shows nothing" \
-    [::reviewui::presetLimits {X /x {} {} 0 0 {} 1 {}}] ""
+    {{Threads 8 integer 1 1 128} {Hash 256 spin 16 1 4096} {MultiPV 3 spin 1 1 10}}}
+set capped {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {} {depth 30 movetime 900}}
+checkEq "threads, hash and the pass's numbers" \
+    [::reviewui::presetLimits $enginecfg] {Threads 8, Hash 256 MB, Lines 3, Depth 18}
+checkEq "one engine field on its own is still a line" \
+    [::reviewui::presetLimits {X /x {} {} 0 0 {} 1 {{Threads 4 integer 1 1 128}}}] \
+    {Threads 4, Lines 2, Depth 18}
+checkEq "a preset that advertises nothing still shows the pass's depth" \
+    [::reviewui::presetLimits {X /x {} {} 0 0 {} 1 {}}] {Lines 2, Depth 18}
+checkEq "a preset with Limits shows them" \
+    [::reviewui::presetLimits $capped] {Lines 2, Depth 30, Time cap (ms): 900}
 
 # The line under the dialog's own fields: the numbers, and where they come from.
 checkEq "the note says where they come from" \
-    [::reviewui::presetNote $enginecfg] {Threads 8, Hash 256 MB (from engine preset)}
-checkEq "no preset values, no note" \
-    [::reviewui::presetNote {X /x {} {} 0 0 {} 1 {}}] ""
+    [::reviewui::presetNote $enginecfg] \
+    {Threads 8, Hash 256 MB, Lines 3, Depth 18 (from engine preset)}
 # The note is what the pass will take, not what the preset reserves: a preset of
 # Threads 64 / Hash 110000 is run as 8 / 512, because the pass is a second engine
 # and the preset's full reservation would be allocated beside the window's.
 checkEq "the note shows the pass's share of a large preset" \
     [::reviewui::presetNote {X /x {} {} 0 0 {} 1 {{Threads 64} {Hash 110000}}}] \
-    {Threads 8, Hash 512 MB (from engine preset)}
+    {Threads 8, Hash 512 MB, Lines 2, Depth 18 (from engine preset)}
 
 puts "the move comment's gate"
 
@@ -472,10 +433,14 @@ checkEq "a nonsense depth is a wait, not a write" \
 ::review::setValue move_comment_wait 0
 checkEq "with the wait turned off, write whatever the engine has" \
     [dict get [::reviewui::moveCommentStatus 4] action] now
-::review::setValue depth 24
+# The depth a comment waits for is the pass's, and the pass's is the engine
+# preset's: a caller that knows the preset passes its depth in (the engine window
+# does), and one that does not gets what an unconfigured preset gets.
 ::review::setValue move_comment_wait 1
-checkEq "the depth it waits for is the review's own" \
-    [dict get [::reviewui::moveCommentStatus 20] depth] 24
+checkEq "the depth it waits for is the pass's" \
+    [dict get [::reviewui::moveCommentStatus 20 24] depth] 24
+checkEq "and with no preset it is the unconfigured depth" \
+    [dict get [::reviewui::moveCommentStatus 12] depth] 18
 
 # The status line is the driver's state, not a sentence about waiting: see
 # statusText below, which is where every press's line comes from.
@@ -501,7 +466,7 @@ checkEq "its tooltip" [::reviewui::label ReviewGameButtonTooltip] \
     {Review and label every move of the current line}
 checkEq "the Move Comment button's text" [::reviewui::label ReviewMoveButton] {Move Comment}
 checkEq "the settings dialog's title" [::reviewui::label ReviewSettings] {Review Settings}
-foreach key {mpv depth movetime var_lines var_cp move_comment_wait diagram coach verifier} {
+foreach key {var_lines var_cp move_comment_wait diagram coach verifier} {
     check "the $key row has a label" \
         [expr {[::reviewui::settingLabel $key] ne "" && [::reviewui::settingLabel $key] ne $key}]
 }
@@ -622,8 +587,8 @@ puts "the dialog's spin boxes"
 
 # A spinbox needs bounds, and they have to agree with what ::review::setValue
 # accepts: a box that offers a value the setter refuses is a dialog that cannot
-# be completed.
-foreach key {mpv depth movetime var_lines var_cp move_comment_wait diagram coach} {
+# be completed. Only the review's own settings have rows now.
+foreach key {var_lines var_cp move_comment_wait diagram coach} {
     set range [::reviewui::settingRange $key]
     check "$key has a range" [expr {[llength $range] == 2}]
     lassign $range lo hi
@@ -636,19 +601,17 @@ foreach key {mpv depth movetime var_lines var_cp move_comment_wait diagram coach
     ::review::reset
 }
 checkEq "an unknown row has no range" [::reviewui::settingRange colour] ""
+checkEq "and the engine's numbers have no row at all" \
+    [::reviewui::settingRange depth] ""
 ::review::reset
-checkEq "the mpv range stops where the setter does" \
-    [lindex [::reviewui::settingRange mpv] 1] 5
-# The dialog asks about the mpv the user is editing, not the stored one, so the
-# variation box can offer the lines a raised MultiPV allows.
-checkEq "a pending mpv raises the variation box" \
-    [lindex [::reviewui::settingRange var_lines 5] 1] 5
+# The variation box follows the preset's MultiPV, which the engine window passes
+# in; a caller with no preset gets the widest the setting itself allows.
+checkEq "the variation box follows the preset's MultiPV" \
+    [lindex [::reviewui::settingRange var_lines 3] 1] 3
 checkEq "and one line means no variations at all" \
     [lindex [::reviewui::settingRange var_lines 1] 1] 0
-checkEq "with no mpv given it reads the stored one" \
-    [lindex [::reviewui::settingRange var_lines] 1] [::review::get mpv]
-checkEq "and so does the depth range" \
-    [lindex [::reviewui::settingRange depth] 0] 6
+checkEq "with no preset given it offers the widest the review can use" \
+    [lindex [::reviewui::settingRange var_lines] 1] 5
 
 puts "\nthe engine window's guards (read, not run: this harness has no Tk)"
 
@@ -677,8 +640,10 @@ check "the status line is the driver's state, not a token" \
     [regexp {::reviewui::statusText \[::reviewdriver::status\]} $engineSrc]
 check "Cancel asks the driver, not a token it tracked" \
     [regexp {::reviewdriver::cancel} $engineSrc]
-check "the settings dialog asks about the mpv being edited" \
-    [regexp {::reviewui::settingRange var_lines \$mpv} $engineSrc]
+check "the settings dialog caps variations by the preset's MultiPV" \
+    [regexp {::reviewui::settingRange \$key \$presetMpv} $engineSrc]
+check "and reads that MultiPV from ::review::effective" \
+    [regexp {::review::effective \$::enginewin::reviewsetcfg} $engineSrc]
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

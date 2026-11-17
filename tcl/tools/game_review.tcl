@@ -23,10 +23,13 @@
 # marks that go beside them.
 
 namespace eval ::review {
+    # Lines (MultiPV), depth and the time cap are NOT in DEFAULTS: they are the
+    # engine preset's (its UCIoptions MultiPV and its Limits), one source for both
+    # the window's own searches and a review. Two copies of the same number
+    # disagreed - the preset said 30, the review's table said 18, and
+    # ::review::effective had to pick - so the table kept only what a review
+    # decides for itself.
     variable DEFAULTS {
-        mpv 3
-        depth 18
-        movetime 0
         var_lines 1
         var_cp 0
         move_comment_wait 1
@@ -43,19 +46,15 @@ namespace eval ::review {
     }
     variable S [dict create]
     variable MAX_MPV 5
-    variable MIN_DEPTH 6
-    variable MAX_DEPTH 60
+    # The depth a pass searches when the engine preset states none. Not a setting
+    # and not a second opinion: a preset with no Limits.depth would otherwise be
+    # `go infinite`, so this is what an unconfigured preset gets, and Review
+    # Settings says so on the row that shows the preset's numbers.
+    variable REVIEW_DEPTH 18
     # The old annotate dialog offered 10-20 moves for the opening-errors finder,
     # and 12 by default. A hand-edited options file is held to the same range.
     variable MIN_OPENING_WINDOW 10
     variable MAX_OPENING_WINDOW 20
-    # A pass's time ceiling is milliseconds per position, and 0 is the review
-    # saying "no ceiling of my own" - ::review::passLimits then takes the
-    # preset's. The upper bound is ::enginelimits' own ceiling for a preset's
-    # movetime, so a value the engine-layer spinbox could store is a value this
-    # one can, and neither layer can hand the pass a number the other refuses.
-    variable MIN_MOVETIME 0
-    variable MAX_MOVETIME 3600000
     # The pass is a second engine process, so every resource it is given is
     # allocated again beside the window's own engine. A preset sized for a long
     # interactive search - Threads 64 and Hash 110000 MB on a 128 GB machine -
@@ -91,10 +90,6 @@ proc ::review::reset {} {
 proc ::review::saved {} {
     variable DEFAULTS
     variable MAX_MPV
-    variable MIN_DEPTH
-    variable MAX_DEPTH
-    variable MIN_MOVETIME
-    variable MAX_MOVETIME
     variable MIN_OPENING_WINDOW
     variable MAX_OPENING_WINDOW
     set S $DEFAULTS
@@ -112,18 +107,11 @@ proc ::review::saved {} {
     set name ""
     if {[info exists ::reviewopt(verifier)]} { set name [string trim $::reviewopt(verifier)] }
     dict set S verifier $name
-    if {[dict get $S mpv] < 1} { dict set S mpv 1 }
-    if {[dict get $S mpv] > $MAX_MPV} { dict set S mpv $MAX_MPV }
-    if {[dict get $S depth] < $MIN_DEPTH} { dict set S depth $MIN_DEPTH }
-    if {[dict get $S depth] > $MAX_DEPTH} { dict set S depth $MAX_DEPTH }
-    if {[dict get $S movetime] < $MIN_MOVETIME} { dict set S movetime $MIN_MOVETIME }
-    if {[dict get $S movetime] > $MAX_MOVETIME} { dict set S movetime $MAX_MOVETIME }
+    # var_lines is capped by the engine preset's MultiPV, which is not known
+    # here (it is read at the point of use, ::review::effective), so the file can
+    # only be held to the widest value the dialog offers.
     if {[dict get $S var_lines] < 0} { dict set S var_lines 0 }
-    if {[dict get $S mpv] < 2} {
-        dict set S var_lines 0
-    } elseif {[dict get $S var_lines] > [dict get $S mpv]} {
-        dict set S var_lines [dict get $S mpv]
-    }
+    if {[dict get $S var_lines] > $MAX_MPV} { dict set S var_lines $MAX_MPV }
     if {[dict get $S var_cp] < 0} { dict set S var_cp 0 }
     if {[dict get $S opening_window] < $MIN_OPENING_WINDOW} {
         dict set S opening_window $MIN_OPENING_WINDOW
@@ -183,10 +171,6 @@ proc ::review::verifier {} {
 proc ::review::setValue {key value} {
     variable S
     variable MAX_MPV
-    variable MIN_DEPTH
-    variable MAX_DEPTH
-    variable MIN_MOVETIME
-    variable MAX_MOVETIME
     variable MIN_OPENING_WINDOW
     variable MAX_OPENING_WINDOW
     if {![dict size $S]} { reset }
@@ -211,25 +195,14 @@ proc ::review::setValue {key value} {
     if {![string is integer -strict $value]} { return "$key must be a whole number" }
     set previous [dict get $S $key]
     set value [expr {$value}]
+    # Lines, depth and the time cap are the engine preset's (its UCIoptions
+    # MultiPV and its Limits), so a review has no copy of them to set here: the
+    # dialog shows them read-only from the preset, and the engine window's own
+    # controls are where they change. An unknown key is refused below.
     switch -- $key {
-        mpv {
-            if {$value < 1 || $value > $MAX_MPV} { return "mpv must be 1..$MAX_MPV" }
-        }
-        depth {
-            if {$value < $MIN_DEPTH || $value > $MAX_DEPTH} {
-                return "depth must be $MIN_DEPTH..$MAX_DEPTH"
-            }
-        }
-        movetime {
-            if {$value < $MIN_MOVETIME || $value > $MAX_MOVETIME} {
-                return "movetime must be $MIN_MOVETIME..$MAX_MOVETIME"
-            }
-        }
         var_lines {
             if {$value < 0} { return "var_lines cannot be negative" }
-            if {$value > 0 && [dict get $S mpv] < 2} {
-                return "var_lines needs mpv of at least 2"
-            }
+            if {$value > $MAX_MPV} { return "var_lines must be 0..$MAX_MPV" }
         }
         var_cp {
             if {$value < 0} { return "var_cp cannot be negative" }
@@ -269,19 +242,11 @@ proc ::review::setValue {key value} {
         default { return "unknown setting: $key" }
     }
     dict set S $key $value
-    # var_lines is capped by mpv, and needs mpv of at least 2: lowering mpv to 1
-    # turns variations off rather than leaving a state ::review::problems would
-    # report against a setting the setter accepted.
-    if {[dict get $S mpv] < 2} {
-        dict set S var_lines 0
-    } elseif {[dict get $S var_lines] > [dict get $S mpv]} {
-        if {$key eq "mpv"} {
-            dict set S var_lines [dict get $S mpv]
-        } else {
-            dict set S $key $previous
-            return "var_lines cannot exceed mpv ([dict get $S mpv])"
-        }
-    }
+    # var_lines runs into the preset's MultiPV at the point of use
+    # (::reviewdriver's lines, which never yields more of them than the preset
+    # asks for, under ::review::selectLines): the preset can change under a saved
+    # setting, so the cap cannot be enforced against a number this table does not
+    # hold.
     ::review::save
     return ""
 }
@@ -302,62 +267,64 @@ proc ::review::engineDefaults {enginecfg} {
     return $out
 }
 
-# The limits one position of a pass is searched under, from the review's own
-# settings and from the engine preset's Limits.
+# The limits one position of a pass is searched under: the engine preset's own,
+# and nothing else.
 #
-# Depth and time point in opposite directions on purpose. The review's depth is
-# the review's: it is the number the settings dialog shows, and the one the
-# reader asked this pass to search at. A preset's Limits.depth is what the
-# preset's own searches run at (Play vs Engine, a window's limits), and taking
-# the deeper of the two silently turned a depth-12 review into the preset's
-# depth-30 one - measured on Stockfish with three lines, 0.1 s per position at
-# depth 12 against 80 s at depth 30, which reads as a review that hangs. The
-# preset's depth is therefore only the answer for a caller that states none.
+# There used to be a second copy of both numbers in Review Settings, and the two
+# disagreed: a preset carrying `Limits {depth 30}` beside a review set to 12
+# searched 30 (0.1 s a position at 12, 80 s at 30 on Stockfish with three
+# lines), and the dialog's number was a claim the pass did not keep. Lines,
+# depth and the time cap are the preset's now - one source for the window's own
+# searches and for a review - and the dialog shows them read-only.
 #
-# The time cap is a CEILING with one owner: the review's value when it has one,
-# otherwise the preset's, otherwise none - never the smaller of the two, which
-# would search shallower than either setting asked for.
-#
-# `review` and `preset` are dicts carrying `depth` and `movetime`; "" is "not
-# set", and a depth or movetime of 0 says the same. Answers {depth N movetime
-# M}, which is the shape ::enginelimits::goLimits turns into a Go message, so the
-# precedence is decided once instead of in each caller.
-proc ::review::passLimits {review preset} {
-    set depth [dict get $review depth]
-    if {![string is integer -strict $depth] || $depth <= 0} {
-        set depth ""
-        if {[dict exists $preset depth]} {
-            set presetDepth [dict get $preset depth]
-            if {[string is integer -strict $presetDepth] && $presetDepth > 0} {
-                set depth $presetDepth
-            }
+# A preset that states no depth would be `go infinite`, so ::review::REVIEW_DEPTH
+# is what an unconfigured preset gets; a preset that states no time cap gets
+# none. Answers {depth N movetime M}, the shape ::enginelimits::goLimits turns
+# into a Go message.
+proc ::review::passLimits {preset} {
+    variable REVIEW_DEPTH
+    set depth $REVIEW_DEPTH
+    if {[dict exists $preset depth]} {
+        set presetDepth [dict get $preset depth]
+        if {[string is integer -strict $presetDepth] && $presetDepth > 0} {
+            set depth $presetDepth
         }
     }
-    set movetime 0
-    if {[dict exists $review movetime]} { set movetime [dict get $review movetime] }
-    if {![string is integer -strict $movetime] || $movetime <= 0} {
-        set movetime ""
-        if {[dict exists $preset movetime]} {
-            set presetTime [dict get $preset movetime]
-            if {[string is integer -strict $presetTime] && $presetTime > 0} {
-                set movetime $presetTime
-            }
+    set movetime ""
+    if {[dict exists $preset movetime]} {
+        set presetTime [dict get $preset movetime]
+        if {[string is integer -strict $presetTime] && $presetTime > 0} {
+            set movetime $presetTime
         }
     }
     return [dict create depth $depth movetime $movetime]
 }
 
-# The settings a pass actually runs with. Threads and Hash are the engine's: the
-# preset wins whenever it advertises them, and a second place to set them is a
-# second place to get them wrong - the window's controls already write the preset.
-# An engine that advertises neither leaves them empty rather than borrowing
-# ::review's own values, because a pass can only set what the engine announced: a
-# setoption for an option the engine never sent is ignored at best. MultiPV is
-# raised to 2 regardless, because a verdict without a second line cannot tell a
-# mistake from the only move available.
+# The engine preset's Limits for this engine, or an empty dict when there is no
+# preset behind it (a harness, or a name that has since gone).
+proc ::review::presetLimits {enginecfg} {
+    if {[llength $enginecfg] < 10} { return {} }
+    if {[info commands ::enginelimits::of] eq ""} { return {} }
+    # The preset's own entry, not a lookup by name: a caller may hold the entry
+    # for an engine whose name the list no longer carries (a renamed preset, a
+    # harness), and its Limits are still what that engine was configured with.
+    set lim {}
+    catch { set lim [::enginelimits::of $enginecfg] }
+    return $lim
+}
+
+# The settings a pass actually runs with, all of them the engine preset's.
+#
+# Threads and Hash: the preset's, capped as a pass's share (MAX_PASS_THREADS /
+# MAX_PASS_HASH) because the pass is a second process beside the window's engine.
+# MultiPV: the preset's, floored at 2 - a verdict without a second line cannot
+# tell a mistake from the only move available - and capped at MAX_MPV, the widest
+# the review's own controls and variations go. Depth and time: the preset's
+# Limits, through ::review::passLimits.
 proc ::review::effective {enginecfg} {
     variable MAX_PASS_THREADS
     variable MAX_PASS_HASH
+    variable MAX_MPV
     set defaults [::review::engineDefaults $enginecfg]
     set threads [dict get $defaults threads]
     set hash [dict get $defaults hash]
@@ -367,38 +334,21 @@ proc ::review::effective {enginecfg} {
     if {$hash ne "" && $hash > $MAX_PASS_HASH} {
         set hash $MAX_PASS_HASH
     }
-    set mpv [get mpv]
-    if {[dict get $defaults mpv] ne "" && [dict get $defaults mpv] > $mpv} {
-        set mpv [dict get $defaults mpv]
-    }
-    if {$mpv < 2} {
-        set mpv 2
-    }
-    # The preset's own search limits apply here too, and ::review::passLimits is
-    # the whole precedence: the depth is a floor, the time cap a ceiling with one
-    # owner. A preset that has no Limits element falls back to the review's
-    # values, which is what an engines.dat from an older version is.
-    set preset [dict create depth {} movetime {}]
-    if {[llength $enginecfg] >= 1 && [info exists ::engines(list)] &&
-        [info commands ::enginelimits::forName] ne ""} {
-        set preset [::enginelimits::forName [lindex $enginecfg 0]]
-    }
-    set lim [::review::passLimits [all] $preset]
+    set mpv [dict get $defaults mpv]
+    if {![string is integer -strict $mpv] || $mpv < 2} { set mpv 2 }
+    if {$mpv > $MAX_MPV} { set mpv $MAX_MPV }
+    set lim [::review::passLimits [::review::presetLimits $enginecfg]]
     return [dict create threads $threads hash $hash mpv $mpv \
         depth [dict get $lim depth] movetime [dict get $lim movetime]]
 }
 
-# Cross-field problems, for a dialog that wants to show them all at once.
+# Cross-field problems, for a dialog that wants to show them all at once. The
+# review no longer holds a MultiPV of its own, so there is no second column to
+# check var_lines against: ::reviewdriver::lines only ever yields as many lines
+# as the preset's MultiPV, and var_lines is the review's own ceiling under
+# them.
 proc ::review::problems {} {
-    set s [all]
-    set out {}
-    if {[dict get $s var_lines] > [dict get $s mpv]} {
-        lappend out "var_lines ([dict get $s var_lines]) exceeds mpv ([dict get $s mpv])"
-    }
-    if {[dict get $s var_lines] > 0 && [dict get $s mpv] < 2} {
-        lappend out "var_lines needs mpv of at least 2"
-    }
-    return $out
+    return {}
 }
 
 # Position index the engine pass starts at.
@@ -1065,7 +1015,11 @@ proc ::review::marksNode {index at node} {
 proc ::review::moveCommentPlan {depth_now {depth ""}} {
     set s [all]
     set target $depth
-    if {$target eq ""} { set target [dict get $s depth] }
+    # The depth a comment has to agree with is the pass's, and the pass's is the
+    # engine preset's (::review::passLimits). A caller that knows the preset
+    # passes its depth in; one that does not gets the unconfigured depth, the same
+    # answer ::review::effective would give a preset with no Limits.
+    if {$target eq ""} { set target [dict get [::review::passLimits {}] depth] }
     if {![dict get $s move_comment_wait]} { return now }
     if {$depth_now ne "" && [string is integer -strict $depth_now] && $depth_now >= $target} {
         return now
