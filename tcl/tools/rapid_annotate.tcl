@@ -39,6 +39,10 @@ namespace eval ::rapid_annotate {
     #                   that position at that ply
     variable scores
     array set scores {}
+    # The engine preset the scores came from: the pass's numbers (Lines, depth,
+    # time cap) are that preset's, so a commit after the fact still asks the same
+    # engine that produced the labels which numbers to use.
+    variable lastEngine ""
 }
 
 # Return the identifier of the game loaded in the main board.
@@ -53,6 +57,8 @@ proc ::rapid_annotate::key {} {
 #   score: raw UCI score (centipawns, or moves to mate) from the side to move
 proc ::rapid_annotate::record {id plies depth score score_type pv} {
     variable scores
+    variable lastEngine
+    catch { set lastEngine $::enginewin_lastengine($id) }
 
     # An engine embedded in a PGN viewer analyses the game shown in that
     # window, which is not necessarily the game loaded in the main board:
@@ -312,11 +318,23 @@ proc ::rapid_annotate::commit {} {
         set plies [dict get $map plies]
         set verifier ""
         catch { set verifier [::review::verifier] }
+        # The pass's numbers are the engine preset's, exactly as a review's are:
+        # one source for both, read through the same ::review::effective. The
+        # preset is the one whose Autoscan produced these scores.
+        variable lastEngine
+        # No preset (a run that never recorded a score, a harness) gets exactly
+        # what an unconfigured preset gets: ::review::effective of nothing.
+        set eff [::review::effective {}]
+        catch {
+            if {$lastEngine ne ""} {
+                set eff [::review::effective [::enginecfg::get $lastEngine]]
+            }
+        }
         set p [dict create map $map plan [::review::plan $plies 0] \
-            plies $plies bookEnd 0 mpv [::review::get mpv] \
+            plies $plies bookEnd 0 mpv [dict get $eff mpv] \
             verifier $verifier \
-            limits [dict create depth [::review::get depth] \
-                movetime [::review::get movetime]]]
+            limits [dict create depth [dict get $eff depth] \
+                movetime [dict get $eff movetime]]]
         ::reviewdriver::verifyWrite $p [::rapid_annotate::reviewResults $evals $map] \
             [list ::rapid_annotate::writeCommit $p $gnum $ply $base]
     } err]} {

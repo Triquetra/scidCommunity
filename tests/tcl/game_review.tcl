@@ -26,13 +26,23 @@ source [file join $root tcl tools accuracy.tcl]
 source [file join $root tcl tools move_labels.tcl]
 source [file join $root tcl tools score_seed.tcl]
 source [file join $root tcl tools comment_colors.tcl]
+# The preset's Limits are part of what a pass runs on, so the layer that holds
+# them is part of the harness.
+source [file join $root tcl tools engine_limits.tcl]
 source [file join $root tcl tools game_review.tcl]
 
 puts "settings"
 
 ::review::reset
-checkEq "mpv defaults to 3" [::review::get mpv] 3
-checkEq "depth defaults to 18" [::review::get depth] 18
+# Lines, depth and the time cap are the engine preset's, not the review's: one
+# copy of each number, so the pass cannot search at a depth the dialog never
+# showed. ::review::get answers for a review setting only.
+foreach gone {mpv depth movetime} {
+    check "::$gone is not a review setting any more" \
+        [expr {[catch {::review::get $gone}] == 1}]
+    checkEq "and cannot be set as one" [::review::setValue $gone 3] \
+        "unknown setting: $gone"
+}
 checkEq "a diagram is written at mistakes and blunders by default" \
     [::review::get diagram] 1
 # The coach is an extra layer over a review that works without it, so a fresh
@@ -41,97 +51,77 @@ checkEq "coach prose is off by default" [::review::get coach] 0
 checkEq "a variation shows the better move by default" [::review::get var_lines] 1
 checkEq "no threshold by default" [::review::get var_cp] 0
 
-checkEq "mpv can be raised" [::review::setValue mpv 4] ""
-checkEq "and is remembered" [::review::get mpv] 4
-checkEq "mpv above the cap is refused" [::review::setValue mpv 9] {mpv must be 1..5}
-checkEq "and keeps the old value" [::review::get mpv] 4
-checkEq "depth can be raised" [::review::setValue depth 24] ""
-checkEq "a shallow depth is refused" [::review::setValue depth 4] {depth must be 6..60}
-checkEq "a non-number is refused" [::review::setValue depth deep] {depth must be a whole number}
+checkEq "a variation count can be raised" [::review::setValue var_lines 5] ""
+checkEq "and is remembered" [::review::get var_lines] 5
+checkEq "beyond the widest the dialog offers is refused" \
+    [::review::setValue var_lines 6] {var_lines must be 0..5}
+checkEq "and keeps the old value" [::review::get var_lines] 5
+checkEq "a negative variation count is refused" \
+    [::review::setValue var_lines -1] {var_lines cannot be negative}
+checkEq "a non-number is refused" [::review::setValue var_lines many] \
+    {var_lines must be a whole number}
 checkEq "an unknown key is refused" [::review::setValue colour red] {unknown setting: colour}
-
-# var_lines cannot exceed mpv, and lowering mpv lowers it.
-checkEq "var_lines above mpv is refused" [::review::setValue var_lines 5] {var_lines cannot exceed mpv (4)}
-::review::setValue mpv 5
-checkEq "var_lines up to mpv is accepted" [::review::setValue var_lines 5] ""
-checkEq "it is remembered" [::review::get var_lines] 5
-::review::setValue mpv 2
-checkEq "lowering mpv lowers var_lines with it" [::review::get var_lines] 2
 checkEq "no problems reported" [::review::problems] {}
+::review::reset
+checkEq "the variation count goes back with the working copy" \
+    [::review::get var_lines] 1
 
-# mpv 1 means no alternatives at all, so var_lines goes to 0 rather than to 1:
-# ::review::problems refuses that combination, and the setter must too.
-checkEq "mpv 1 is allowed" [::review::setValue mpv 1] ""
-checkEq "mpv 1 turns variations off" [::review::get var_lines] 0
-checkEq "var_lines 1 is refused while mpv is 1" \
-    [::review::setValue var_lines 1] {var_lines needs mpv of at least 2}
-checkEq "and problems agrees with the setter" [::review::problems] {}
-
-# movetime is the pass's own ceiling on one position, in milliseconds. 0 means
-# the review has no cap of its own - the preset's Limits.movetime, or no bound at
-# all, decides (::review::passLimits) - so it is a value the setter takes rather
-# than a blank field.
-checkEq "the review sets no time cap of its own by default" [::review::get movetime] 0
-checkEq "a cap can be set" [::review::setValue movetime 1500] ""
-checkEq "and is remembered" [::review::get movetime] 1500
-checkEq "a negative cap is refused" [::review::setValue movetime -1] {movetime must be 0..3600000}
-checkEq "a cap beyond the preset layer's ceiling is refused" \
-    [::review::setValue movetime 3600001] {movetime must be 0..3600000}
-checkEq "and the old value is kept" [::review::get movetime] 1500
-checkEq "a non-number is refused" [::review::setValue movetime soon] {movetime must be a whole number}
-checkEq "0 is the way back to no cap" [::review::setValue movetime 0] ""
-# A hand-edited options file must not decide that a pass never gets a search.
-set ::reviewopt(movetime) -5
+# A file written by an older version still carries the three numbers; they are
+# ignored rather than read as settings the review still has.
+set ::reviewopt(mpv) 4
+set ::reviewopt(depth) 25
+set ::reviewopt(movetime) 900
 set ::review::S [dict create]
-checkEq "a negative value in the options file reads as no cap" [::review::get movetime] 0
+check "a stale mpv in the options file is not read" \
+    [expr {[catch {::review::get mpv}] == 1}]
+unset ::reviewopt(mpv)
+unset ::reviewopt(depth)
 unset ::reviewopt(movetime)
 ::review::reset
-checkEq "and the default is back with the working copy" [::review::get movetime] 0
 
 puts "the limits a pass searches under"
 
-# Depth is the review's and time is a ceiling. The review's own depth is the
-# number the reader set for THIS pass; a preset's Limits.depth is what that
-# preset's own searches run at, so it is only the answer when the review states
-# none. (Taking the deeper of the two turned a depth-12 review into a depth-30
-# one - 0.1 s per position against 80 s on Stockfish with three lines.) The cap
-# has one owner at a time: the review's own value when it has one, otherwise the
-# preset's, otherwise none - never the smaller of the two, which would search
-# shallower than either setting asked for. ::review::passLimits is that table, so
-# every caller (Game Review, Move Comment, the batch, annotate) reads the same
-# answer.
+# The preset's Limits, and nothing else. A review used to keep its own copy of
+# both numbers and take the deeper of the two, which turned a depth-12 review
+# into the preset's depth-30 one - 0.1 s a position against 80 s on Stockfish
+# with three lines. ::review::passLimits is now the one place those two numbers
+# are resolved, so every caller (Game Review, Move Comment, the batch, annotate)
+# reads the same answer.
 ::review::reset
 set noPreset [dict create depth {} movetime {}]
-set presetOnly [dict create depth 30 movetime 900]
-set shallowPreset [dict create depth 12 movetime {}]
+set fullPreset [dict create depth 30 movetime 900]
+set depthOnly [dict create depth 12]
 
-checkEq "neither side caps: the review's depth alone" \
-    [::review::passLimits [::review::all] $noPreset] {depth 18 movetime {}}
-checkEq "a deeper preset does not deepen the review's depth" \
-    [::review::passLimits [::review::all] $presetOnly] {depth 18 movetime 900}
-checkEq "so the review's 12 is searched at 12, whatever the preset says" \
-    [dict get [::review::passLimits [dict create depth 12 movetime 0] $presetOnly] depth] 12
-checkEq "and the preset's depth is the answer only when the review states none" \
-    [::review::passLimits [dict create depth 0 movetime 0] $presetOnly] {depth 30 movetime 900}
-checkEq "with no preset depth either: no depth at all" \
-    [::review::passLimits [dict create depth 0 movetime 0] $noPreset] {depth {} movetime {}}
+checkEq "a preset with a depth and a cap: both" \
+    [::review::passLimits $fullPreset] {depth 30 movetime 900}
+checkEq "a preset with a depth only: the depth, no cap" \
+    [::review::passLimits $depthOnly] {depth 12 movetime {}}
+checkEq "a preset with nothing: the unconfigured depth" \
+    [::review::passLimits $noPreset] {depth 18 movetime {}}
+checkEq "no preset at all is the same answer" [::review::passLimits {}] \
+    {depth 18 movetime {}}
+checkEq "a depth of zero states nothing" \
+    [::review::passLimits [dict create depth 0]] {depth 18 movetime {}}
+checkEq "a negative cap is no cap" \
+    [::review::passLimits [dict create movetime -5]] {depth 18 movetime {}}
 
-::review::setValue movetime 2000
-checkEq "the review's own cap wins over the preset's" \
-    [::review::passLimits [::review::all] $presetOnly] {depth 18 movetime 2000}
-checkEq "and is not the lesser of the two" \
-    [dict get [::review::passLimits [::review::all] $presetOnly] movetime] 2000
-checkEq "the review's cap with no preset cap" \
-    [::review::passLimits [::review::all] $noPreset] {depth 18 movetime 2000}
-checkEq "a shallower preset lowers neither the depth nor the cap" \
-    [::review::passLimits [::review::all] $shallowPreset] {depth 18 movetime 2000}
-checkEq "an empty preset leaves both as the review has them" \
-    [::review::passLimits [::review::all] {}] {depth 18 movetime 2000}
-::review::setValue movetime 0
-checkEq "clearing the cap falls back to the preset's" \
-    [::review::passLimits [::review::all] $presetOnly] {depth 18 movetime 900}
-checkEq "and to none when the preset has none" \
-    [::review::passLimits [::review::all] $noPreset] {depth 18 movetime {}}
+# ::review::effective is the whole picture for a pass, all of it the preset's.
+set plain [list Plain /x {} {} 0 0 {} 1 {{MultiPV 3}} {}]
+set deep [list Deep /x {} {} 0 0 {} 1 {{MultiPV 4} {Threads 8} {Hash 256}} \
+    [dict create depth 30 movetime 900]]
+set single [list Single /x {} {} 0 0 {} 1 {{MultiPV 1}} {}]
+set wide [list Wide /x {} {} 0 0 {} 1 {{MultiPV 200}} {}]
+set ::engines(list) [list $plain $deep $single $wide]
+checkEq "a preset with no Limits: the unconfigured depth, no cap" \
+    [dict get [::review::effective $plain] depth] 18
+checkEq "and its own MultiPV" [dict get [::review::effective $plain] mpv] 3
+checkEq "a deeper preset is the pass's depth" \
+    [dict get [::review::effective $deep] depth] 30
+checkEq "with its cap" [dict get [::review::effective $deep] movetime] 900
+checkEq "its MultiPV, but no wider than the review can use" \
+    [dict get [::review::effective $wide] mpv] 5
+checkEq "and never below two: a verdict needs a second line" \
+    [dict get [::review::effective $single] mpv] 2
 ::review::reset
 
 puts "where the pass starts"
@@ -1526,35 +1516,38 @@ checkEq "the board is left on the base ply" [list [sc_pos location] [sc_var leve
 
 puts "\nsaved settings"
 # Review Settings is an ordinary preference: the values are option variables, and
-# the working copy starts from them. This is what a restart looks like.
+# the working copy starts from them. This is what a restart looks like. Lines,
+# depth and the time cap are not among them any more - a file that still carries
+# those three keys is read for the settings the review does have and the rest is
+# ignored, so an upgrade does not resurrect a second copy of the preset's numbers.
 ::review::reset
 set ::reviewopt(depth) 25
 set ::reviewopt(mpv) 2
+set ::reviewopt(movetime) 900
 set ::reviewopt(var_lines) 2
 set ::review::S [dict create]
-checkEq "a saved depth is the one in force" [::review::get depth] 25
-checkEq "and a saved mpv" [::review::get mpv] 2
-checkEq "and a saved variation count" [::review::get var_lines] 2
+checkEq "a saved variation count is the one in force" [::review::get var_lines] 2
+check "a saved depth is not a review setting any more" \
+    [expr {[catch {::review::get depth}] == 1}]
+check "nor a saved mpv" [expr {[catch {::review::get mpv}] == 1}]
+check "nor a saved cap" [expr {[catch {::review::get movetime}] == 1}]
 checkEq "the settings that were never saved keep their default" \
     [::review::get var_cp] 0
-::review::setValue depth 30
-checkEq "a change is written where the options file reads it" $::reviewopt(depth) 30
-::review::setValue depth 0
-checkEq "and a refused change is not written" $::reviewopt(depth) 30
+::review::setValue var_lines 3
+checkEq "a change is written where the options file reads it" $::reviewopt(var_lines) 3
+::review::setValue var_lines 9
+checkEq "and a refused change is not written" $::reviewopt(var_lines) 3
 # A hand-edited options file must not decide how the pass searches.
-set ::reviewopt(depth) 0
-set ::reviewopt(mpv) 99
 set ::reviewopt(var_lines) 40
 set ::review::S [dict create]
-checkEq "a saved depth below the floor is raised to it" [::review::get depth] 6
-checkEq "a saved mpv above the ceiling is lowered to it" [::review::get mpv] 5
-checkEq "and var_lines follows the mpv it was saved with" [::review::get var_lines] 5
-set ::reviewopt(mpv) 1
+checkEq "a saved variation count above the ceiling is lowered to it" \
+    [::review::get var_lines] 5
+set ::reviewopt(var_lines) -2
 set ::review::S [dict create]
-checkEq "one line means no variations at all" [::review::get var_lines] 0
-set ::reviewopt(depth) "deep"
+checkEq "and a negative one is raised to zero" [::review::get var_lines] 0
+set ::reviewopt(var_lines) nonsense
 set ::review::S [dict create]
-checkEq "a value that is not a number is ignored" [::review::get depth] 18
+checkEq "a value that is not a number is ignored" [::review::get var_lines] 1
 set ::reviewopt(move_comment_wait) 2
 set ::reviewopt(diagram) 3
 set ::review::S [dict create]

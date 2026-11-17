@@ -92,8 +92,13 @@ source [file join $root tcl tools game_review.tcl]
 
 set ::windowsOS 0
 namespace eval ::enginecfg {}
+# The preset the batch runs on. Its Limits are the pass's depth and cap now - the
+# review keeps no copy - so the harness's preset is what a test changes.
+namespace eval ::batch_annotate_test {}
+set ::batch_annotate_test::limits {}
 proc ::enginecfg::get {name} {
-    return [list $name tclsh {} {} 0 1800 {} 1 {} {} {}]
+    return [list $name tclsh {} {} 0 1800 {} 1 {} \
+        $::batch_annotate_test::limits]
 }
 
 namespace eval ::batch_annotate_test {
@@ -125,7 +130,12 @@ proc eof {chan} {
 
 proc ::batch_annotate_test::go {movetime} {
     ::review::reset
-    if {$movetime ne ""} { ::review::setValue movetime $movetime }
+    # A cap is the engine preset's Limits.movetime: there is no review-side cap to
+    # set any more, so the harness gives the preset one.
+    set ::batch_annotate_test::limits {}
+    if {$movetime ne ""} {
+        set ::batch_annotate_test::limits [dict create movetime $movetime]
+    }
     # file tempfile answers the open channel and names the path in its variable
     # argument. Using the channel as a path wrote a cwd file called "fileN" and
     # left the real temp file behind.
@@ -151,9 +161,9 @@ proc ::batch_annotate_test::go {movetime} {
     return $go
 }
 
-checkEq "no cap in Review Settings, no time in the Go" \
+checkEq "no cap on the preset, no time in the Go" \
     [::batch_annotate_test::go ""] "go depth 18"
-checkEq "a cap in Review Settings reaches the pipe" \
+checkEq "a cap on the preset reaches the pipe" \
     [::batch_annotate_test::go 400] "go depth 18 movetime 400"
 
 # A short cap can end a search before the engine reports a single scored line.

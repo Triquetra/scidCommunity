@@ -1673,6 +1673,10 @@ proc ::enginewin::reviewSettings {id} {
     # engine yet has no preset, and a note then stays empty rather than guessing.
     set ::enginewin::reviewsetcfg($id) {}
     catch { set ::enginewin::reviewsetcfg($id) [::enginecfg::get $name] }
+    # The pass's numbers are this preset's, so the dialog's one capping range and
+    # its read-only note both read the same ::review::effective.
+    set presetMpv 5
+    catch { set presetMpv [dict get [::review::effective $::enginewin::reviewsetcfg($id)] mpv] }
     toplevel $w
     # The ttk widgets inside follow the theme, but a toplevel keeps Tk's
     # classic background, and the button row does not cover the window's width:
@@ -1705,7 +1709,7 @@ proc ::enginewin::reviewSettings {id} {
                 -state readonly -width 22 \
                 -textvariable ::enginewin::reviewsetting($id,$key)
         } else {
-            lassign [::reviewui::settingRange $key] lo hi
+            lassign [::reviewui::settingRange $key $presetMpv] lo hi
             set ::enginewin::reviewsetting($id,$key) $value
             ttk::label $w.f.l$key -text "[::reviewui::settingLabel $key]:" -anchor w
             ttk::spinbox $w.f.v$key -from $lo -to $hi -increment 1 -width 6 \
@@ -1727,80 +1731,11 @@ proc ::enginewin::reviewSettings {id} {
             -sticky w -pady {6 0}
         incr row
     }
-    # var_lines is capped by mpv, so its box follows the mpv box while the user
-    # edits: opening with MultiPV 3 and raising it to 5 has to offer 4 and 5
-    # lines without closing the dialog. The range comes from ::reviewui, which
-    # also lowers a var_lines the new mpv no longer allows.
-    if {[winfo exists $w.f.vmpv] && [winfo exists $w.f.vvar_lines]} {
-        # trace add returns nothing, so the prefix itself is what has to be
-        # kept: trace remove needs the same command it was given, or the trace
-        # stays behind on a closed dialog and every reopen adds another.
-        set ::enginewin::reviewtraceptr($id) [list apply {{id w args} {
-            set mpv $::enginewin::reviewsetting($id,mpv)
-            if {![string is integer -strict $mpv]} { return }
-            set hi [lindex [::reviewui::settingRange var_lines $mpv] 1]
-            catch { $w.f.vvar_lines configure -to $hi }
-            catch {
-                if {$::enginewin::reviewsetting($id,var_lines) > $hi} {
-                    set ::enginewin::reviewsetting($id,var_lines) $hi
-                }
-            }
-        }} $id $w]
-        trace add variable ::enginewin::reviewsetting($id,mpv) write \
-            $::enginewin::reviewtraceptr($id)
-        bind $w <Destroy> [list apply {{id w} {
-            if {"%W" ne $w} { return }
-            catch {
-                trace remove variable ::enginewin::reviewsetting($id,mpv) write \
-                    $::enginewin::reviewtraceptr($id)
-            }
-            unset -nocomplain ::enginewin::reviewtraceptr($id)
-        }} $id $w]
-    }
-
-    # The time cap's note, on its own row: a review value of 0 means "no cap of my
-    # own", and the pass then runs on the engine preset's Limits.movetime. The
-    # note follows the box while the user types, exactly as the variation box
-    # follows mpv, so the dialog never claims a bound the pass would not use - and
-    # never leaves a box reading 0 while the preset imposes a cap.
-    if {[winfo exists $w.f.vmovetime]} {
-        set ::enginewin::reviewsettingnote($id) ""
-        ttk::label $w.f.nmovetime -textvariable ::enginewin::reviewsettingnote($id) \
-            -anchor w
-        grid $w.f.nmovetime -row $rowOf(movetime) -column 2 -sticky w -padx {10 0} -pady 2
-        # The prefix, not its return value (trace add answers nothing), so the
-        # trace can be removed by the same command that installed it. `args`
-        # swallows the three arguments a variable trace appends (name, element,
-        # op) - a lambda that does not take them fails at the first edit.
-        set ::enginewin::reviewnotetr($id) [list apply {{id args} {
-            set note ""
-            catch {
-                set note [::reviewui::movetimeNote \
-                    $::enginewin::reviewsetting($id,movetime) \
-                    $::enginewin::reviewsetcfg($id)]
-            }
-            set ::enginewin::reviewsettingnote($id) $note
-        }} $id]
-        trace add variable ::enginewin::reviewsetting($id,movetime) write \
-            $::enginewin::reviewnotetr($id)
-        # And once for the state the dialog opens in.
-        {*}$::enginewin::reviewnotetr($id)
-        # Appended, not replaced: the mpv row above already bound <Destroy> on
-        # this same toplevel, and Tcl's `bind` REPLACES a binding unless the
-        # script starts with "+". Replacing it left the mpv trace installed for
-        # good, and every reopen stacked another one on a dialog already gone.
-        bind $w <Destroy> +[list apply {{id w} {
-            if {"%W" ne $w} { return }
-            catch {
-                trace remove variable ::enginewin::reviewsetting($id,movetime) write \
-                    $::enginewin::reviewnotetr($id)
-            }
-            unset -nocomplain ::enginewin::reviewnotetr($id)
-            unset -nocomplain ::enginewin::reviewsettingnote($id)
-            unset -nocomplain ::enginewin::reviewsetcfg($id)
-        }} $id $w]
-    }
-
+    # The review keeps no MultiPV, depth or time cap of its own any more: they
+    # are the engine preset's, shown by the note below, and the window's own
+    # controls are where they change. Only the variation count is left to follow
+    # a number the preset holds, so its box is capped by the preset's MultiPV
+    # when the dialog opens.
     set note ""
     if {$name ne ""} {
         catch { set note [::reviewui::presetNote [::enginecfg::get $name]] }

@@ -67,10 +67,12 @@ proc ::pgn::Refresh {args} {}
 namespace eval ::win {}
 proc ::win::add {args} {}
 namespace eval ::enginecfg {}
-# What the window's preset lookup answers. "" is a window with no engine open yet;
-# a ten-element entry is a preset that carries Limits, which is what the time
-# cap's note reads.
-set ::engineCfgAnswer {}
+# What the window's preset lookup answers. The window is pointed at a preset, and
+# that preset is where the pass's Lines, Depth and time cap come from: the dialog
+# shows them read-only, so this is what those rows read.
+set ::engineCfgAnswer {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 \
+    {{MultiPV 3 spin 1 1 10}} {depth 30 movetime 900}}
+set ::enginewin_lastengine(1) Stockfish
 proc ::enginecfg::get {name} { return $::engineCfgAnswer }
 # Coach settings are the Game Comment settings dialog. It is a dialog of its own,
 # and building one is all this harness needs from it.
@@ -118,15 +120,23 @@ checkEq "and it is the window the button names" $w .engineWin1.reviewSettings
 # the buttons were not, because the body stopped compiling mid-proc.
 check "the OK button exists" [winfo exists $w.b.ok]
 check "the Cancel button exists" [winfo exists $w.b.cancel]
-foreach key {mpv depth movetime var_lines var_cp move_comment_wait diagram         opening_errors opening_window tactical_exercises coach cloud_eval} {
+foreach key {var_lines var_cp move_comment_wait diagram \
+        opening_errors opening_window tactical_exercises coach cloud_eval} {
     check "the $key row is there" [winfo exists $w.f.v$key]
 }
+# Lines, Depth and the time cap are the engine preset's now: the dialog has no row
+# for them, and the read-only note under the fields is where they appear.
+foreach gone {mpv depth movetime} {
+    check "the $gone row is gone" [expr {![winfo exists $w.f.v$gone]}]
+}
+check "the dialog says where the pass's numbers come from" \
+    [expr {[winfo exists $w.f.preset] && [$w.f.preset cget -text] ne ""}]
 # An on/off setting is a checkbox, not a number box that holds 0 or 1: the value
 # a user edits here is a switch, and a spinbox beside "Coach prose" offers "2".
 foreach key {move_comment_wait diagram opening_errors tactical_exercises coach cloud_eval} {
     checkEq "the $key row is a checkbox" [winfo class $w.f.v$key] TCheckbutton
 }
-checkEq "a number row is still a number box" [winfo class $w.f.vdepth] TSpinbox
+checkEq "a number row is still a number box" [winfo class $w.f.vvar_lines] TSpinbox
 checkEq "the coach row opens on the stored switch" \
     $::enginewin::reviewsetting(1,coach) 0
 # The cloud pre-pass is on unless the user turned it off, and the row says so.
@@ -158,10 +168,6 @@ set ::enginewin::reviewsetting(1,var_lines) 2
 set ::enginewin::reviewsetting(1,var_cp) 40
 $w.b.ok invoke
 checkEq "the dialog is gone" [winfo exists $w] 0
-# trace add returns nothing, so a prefix kept as its return value is "", the
-# removal fails silently, and every reopen leaves another trace behind.
-checkEq "and its mpv trace went with it" \
-    [llength [trace info variable ::enginewin::reviewsetting(1,mpv)]] 0
 checkEq "var_lines is stored" $::reviewopt(var_lines) 2
 checkEq "and so is var_cp" $::reviewopt(var_cp) 40
 # A fresh start reads the saved option, which is what the next session sees.
@@ -179,48 +185,26 @@ check "the reason is shown" [expr {$::enginewin::reviewwhy(1) ne ""}]
 checkEq "and the setting is not changed" [::review::get var_lines] 2
 destroy $w2
 
-# The var_lines spinbox follows mpv while the dialog is open.
-puts "\nthe variation box follows the lines box"
+# The variation box's ceiling is the preset's MultiPV, resolved when the dialog
+# opens: there is no lines box beside it any more for it to follow.
+puts "\nthe variation box follows the preset's MultiPV"
+set ::engineCfgAnswer {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {{MultiPV 4 spin 1 1 10}} {}}
 set w3 [::enginewin::reviewSettings 1]
-checkEq "reopening installs one trace, not a second" \
-    [llength [trace info variable ::enginewin::reviewsetting(1,mpv)]] 1
-set ::enginewin::reviewsetting(1,mpv) 5
-checkEq "its ceiling follows mpv" [$w3.f.vvar_lines cget -to] 5
+checkEq "its ceiling is the preset's MultiPV" [$w3.f.vvar_lines cget -to] 4
 destroy $w3
-checkEq "and closing removes it again" \
-    [llength [trace info variable ::enginewin::reviewsetting(1,mpv)]] 0
-catch { unset ::enginewin::reviewtraceptr(1) }
+set ::engineCfgAnswer {}
 
-# The time cap: one setting, two surfaces. Its row sits beside Depth, and a review
-# value of 0 means "no cap of my own" - the pass then runs on the preset's
-# Limits.movetime, so the row shows that cap rather than a bare 0 that would read
-# as "no limit at all".
-puts "\nthe time cap row"
-set ::engineCfgAnswer {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {} {movetime 900}}
+# The time cap is the preset's now, with no row of its own: the read-only note
+# under the fields is where the pass's cap (with its depth and lines) appears.
+puts "\nthe preset's numbers, read-only"
+set ::engineCfgAnswer {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {{MultiPV 3 spin 1 1 10}} {depth 30 movetime 900}}
 set w5 [::enginewin::reviewSettings 1]
-check "the movetime row is there" [winfo exists $w5.f.vmovetime]
-checkEq "with its own label" [$w5.f.lmovetime cget -text] {Time cap (ms):}
-checkEq "the box opens on the stored cap" $::enginewin::reviewsetting(1,movetime) 0
-checkEq "and the row says where an unset cap comes from" \
-    $::enginewin::reviewsettingnote(1) {900 ms (from engine preset)}
-set ::enginewin::reviewsetting(1,movetime) 2000
-checkEq "typing a cap of its own clears the note" \
-    $::enginewin::reviewsettingnote(1) ""
-set ::enginewin::reviewsetting(1,movetime) 0
-checkEq "going back to 0 brings the preset's cap back" \
-    $::enginewin::reviewsettingnote(1) {900 ms (from engine preset)}
-set ::enginewin::reviewsetting(1,movetime) 2000
-$w5.b.ok invoke
-checkEq "OK stores the cap" $::reviewopt(movetime) 2000
-checkEq "the dialog is gone" [winfo exists $w5] 0
-checkEq "and the note's trace went with it" \
-    [llength [trace info variable ::enginewin::reviewsetting(1,movetime)]] 0
-# The mpv row above bound <Destroy> on this same toplevel, and Tk's bind replaces a
-# binding unless the script starts with "+": replacing it left this trace behind
-# on every close, one more per reopen. Closing the dialog must leave neither.
-checkEq "and the mpv trace the other row installed" \
-    [llength [trace info variable ::enginewin::reviewsetting(1,mpv)]] 0
-::review::setValue movetime 0
+check "the read-only note is there" [winfo exists $w5.f.preset]
+checkEq "and names the pass's lines, depth and cap" \
+    [$w5.f.preset cget -text] \
+    {Lines 3, Depth 30, Time cap (ms): 900 (from engine preset)}
+checkEq "with no cap row to edit" [winfo exists $w5.f.vmovetime] 0
+destroy $w5
 set ::engineCfgAnswer {}
 
 # The coach row opens on what was stored, and turning it on is stored by OK like

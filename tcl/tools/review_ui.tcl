@@ -127,19 +127,15 @@ proc ::reviewui::buttons {state} {
 
 # The settings the dialog owns, in the order it applies them.
 #
-# Threads and Hash are deliberately absent: they are properties of the engine
-# preset (#382), set from the window's own controls, and a review dialog that
-# also wrote them would be a second place to get them wrong. The order matters
-# because ::review::setValue has cross-field rules - mpv caps var_lines - so a
-# single edit that lowers both must apply mpv first.
-variable ::reviewui::SETTING_KEYS {mpv depth movetime var_lines var_cp move_comment_wait diagram opening_errors opening_window tactical_exercises coach cloud_eval verifier}
+# Threads, Hash, Lines (MultiPV), Depth and the time cap are deliberately absent:
+# they are properties of the engine preset (#382, and its Limits), set from the
+# window's own controls, and a review dialog that also held them was a second
+# copy of the same number - the copy the pass then had to choose between. The
+# dialog shows them read-only from the preset, beside Threads and Hash.
+variable ::reviewui::SETTING_KEYS {var_lines var_cp move_comment_wait diagram opening_errors opening_window tactical_exercises coach cloud_eval verifier}
 
-# The review setting a dialog row edits, and the label it shows. `Lines` and
-# `Depth` are the keys the engine window already uses for the same two numbers.
+# The review setting a dialog row edits, and the label it shows.
 variable ::reviewui::SETTING_LABELS {
-    mpv               Lines
-    depth             Depth
-    movetime          ReviewMovetime
     var_lines         ReviewVarLines
     var_cp            ReviewVarCp
     move_comment_wait ReviewMoveWait
@@ -229,47 +225,28 @@ proc ::reviewui::presetLimits {enginecfg} {
     # its numbers, reduced to what a pass may take.
     set d [::review::effective $enginecfg]
     set parts {}
+    # "Threads" has no translation key of its own (no language file carries one);
+    # the other three read from the keys the dialog's own rows used, so the note
+    # is translated wherever the window is.
     if {[dict get $d threads] ne ""} { lappend parts "Threads [dict get $d threads]" }
-    if {[dict get $d hash] ne ""} { lappend parts "Hash [dict get $d hash] MB" }
+    if {[dict get $d hash] ne ""} { lappend parts "[::reviewui::tr Hash] [dict get $d hash] MB" }
+    # The three numbers a review used to keep its own copy of. They are the
+    # preset's now, so this is where the dialog says what the pass will use -
+    # and a preset that states no depth uses ::review::REVIEW_DEPTH, which the
+    # note reports as the depth it really is.
+    lappend parts "[::reviewui::tr Lines] [dict get $d mpv]"
+    lappend parts "[::reviewui::tr Depth] [dict get $d depth]"
+    set ms [dict get $d movetime]
+    if {$ms ne ""} { lappend parts "[::reviewui::tr ReviewMovetime]: $ms" }
     return [join $parts ", "]
 }
 
-# The read-only line itself. "" when the preset carries nothing to show, so the
-# dialog can leave the row out rather than showing an empty claim.
+# The read-only line itself, under ReviewFromPreset. It is never "" now that the
+# preset is the only source of Lines and Depth: there is always a number to show.
 proc ::reviewui::presetNote {enginecfg} {
     set limits [::reviewui::presetLimits $enginecfg]
     if {$limits eq ""} { return "" }
     return [format [::reviewui::tr ReviewFromPreset] $limits]
-}
-
-# The time cap a row with no cap of its own runs on: the engine preset's
-# Limits.movetime, or "" when neither side sets one. "" also when the review has
-# a cap of its own, because then the number in the box is the answer and a note
-# beside it would be noise.
-#
-# The preset's OWN limit, never ::review::effective's answer: `effective` keeps a
-# review cap that is still SAVED, and a box reading 0 is the edit that clears it.
-# With 200 ms saved beside a preset's 900 the note read "200 ms (from engine
-# preset)" - the wrong number and the wrong side - while applying the edit ran at
-# 900. `::enginelimits::forName` is the same lookup the pass makes, so the note
-# still reads what the pass would run under, just without the saved cap in it.
-proc ::reviewui::movetimeFromPreset {value enginecfg} {
-    if {[string is integer -strict $value] && $value > 0} { return "" }
-    if {[llength $enginecfg] < 1} { return "" }
-    set preset [dict create depth "" movetime ""]
-    if {[info commands ::enginelimits::forName] ne ""} {
-        set preset [::enginelimits::forName [lindex $enginecfg 0]]
-    }
-    set lim [::review::passLimits [dict create depth 0 movetime 0] $preset]
-    return [dict get $lim movetime]
-}
-
-# The note itself, beside the time box: "900 ms (from engine preset)". "" when
-# there is nothing to say.
-proc ::reviewui::movetimeNote {value enginecfg} {
-    set ms [::reviewui::movetimeFromPreset $value $enginecfg]
-    if {$ms eq ""} { return "" }
-    return [format [::reviewui::tr ReviewFromPreset] "$ms ms"]
 }
 
 # The translation table, or the key itself when there is none: a tclsh test has
@@ -408,7 +385,10 @@ proc ::reviewui::failedText {reason} {
 # answer whenever it has a number at all: that is what "write whatever the engine
 # has now" means, and re-searching it at 18 would be doing the work twice.
 proc ::reviewui::moveCommentDepth {depth_now {target ""}} {
-    if {$target eq ""} { set target [::review::get depth] }
+    # The depth a comment has to agree with is the pass's, and that is the engine
+    # preset's (::review::passLimits). A caller with no preset - a harness - gets
+    # what an unconfigured preset gets.
+    if {$target eq ""} { set target [dict get [::review::passLimits {}] depth] }
     set st [::reviewui::moveCommentStatus $depth_now $target]
     if {[dict get $st action] eq "now"} {
         set depth $target
@@ -442,9 +422,6 @@ proc ::reviewui::moveCommentPly {map here} {
 # setter; 500 is where a variation margin stops being a filter and starts being
 # "write no variations at all".
 variable ::reviewui::SETTING_RANGES {
-    mpv               {1 5}
-    depth             {6 60}
-    movetime          {0 3600000}
     var_lines         {0 5}
     var_cp            {0 500}
     move_comment_wait {0 1}
@@ -464,8 +441,11 @@ proc ::reviewui::settingRange {key {mpv ""}} {
     # number the setter refuses. mpv 1 means no alternatives at all, and then the
     # only value the setter takes is 0.
     if {$key eq "var_lines"} {
+        # The ceiling is the preset's MultiPV, which the caller passes in (the
+        # engine window resolves it from the preset it has open). A caller that
+        # passes nothing gets the widest the setting itself allows.
         if {$mpv eq "" || ![string is integer -strict $mpv]} {
-            set mpv [::review::get mpv]
+            set mpv 5
         }
         set hi [expr {$mpv < 2 ? 0 : $mpv}]
         return [list [lindex $range 0] $hi]
