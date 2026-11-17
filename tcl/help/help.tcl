@@ -2668,8 +2668,8 @@ set helpText(ReviewMoveButton) {<h1>Engine Window: Move Comment Button</h1>
   With <b>Wait for the review depth</b> on - the default, set in
   <a ReviewSettings>Review Settings</a> - the comment has to be the one a full
   review would have written, so a shallow analysis is not good enough: the pass
-  searches at the review's depth, and the status line says which depth it is
-  waiting for. Turn the setting off and the window's own analysis is used
+  searches to the engine preset's depth, the same one a review uses, and the
+  status line says which depth it is waiting for. Turn the setting off and the window's own analysis is used
   whenever it has a number at all, which is what "comment on what the engine has
   now" means, and the position is not searched twice.
   </p>
@@ -2686,14 +2686,14 @@ set helpText(ReviewSettings) {<h1>Engine Window: Review Settings</h1>
   <b>Review Settings</b> in the <a Engine>Engine</a> window holds the choices a
   review pass reads:
   </p>
+  <p>
+  <b>Lines</b>, <b>Depth</b> and the <b>time cap</b> are not among them. They are
+  the engine preset's, and the dialog shows them read-only so the numbers a pass
+  will use are visible where the rest of its settings are. Change them with the
+  engine window's MultiPV and its own depth and time controls, and they apply
+  to a review as they do to the window's own analysis.
+  </p>
   <ul>
-  <li><b>Lines</b>: how many of the engine's lines each position keeps (MultiPV),
-    from 1 to 5.</li>
-  <li><b>Depth</b>: how deep each position is searched. This is also the depth
-    <a ReviewMoveButton>Move Comment</a> waits for when
-    <b>Wait for the review depth</b> is on.</li>
-  <li><b>Time cap (ms)</b>: a ceiling for each position. Zero means no cap of
-    the review's own, and the engine preset's own limit then applies.</li>
   <li><b>Variations to write</b>: how many of the engine's lines become variations
     at each mistake, blunder and missed win, so the game shows what should have
     been played. Zero writes none, and the number cannot exceed Lines. Only the
@@ -2728,10 +2728,13 @@ set helpText(ReviewSettings) {<h1>Engine Window: Review Settings</h1>
 
   <h3>What is not in this dialog</h3>
   <p>
-  Threads and Hash belong to the engine preset, not to the review: they are set
-  from the engine window's own controls and saved with the engine. The dialog
-  shows what the pass will take from them - at most 8 threads and 512 MB of hash
-  - because the pass is a second engine running beside the window's own.
+  Lines, Depth, the time cap, Threads and Hash all belong to the engine preset,
+  not to the review: they are set from the engine window's own controls and saved
+  with the engine. The read-only note at the top of the dialog shows what the
+  pass will use - the preset's MultiPV raised to at least 2, its depth, its
+  Limits.movetime if it has one, and at most 8 threads and 512 MB of hash,
+  because the pass is a second engine running beside the window's own. An engine
+  whose preset sets no depth reviews at depth 18.
   </p>
 
   <h3>A refused value</h3>
@@ -3685,8 +3688,10 @@ set helpText(Engine) {<h1>The Engine windows</h1>
     last move - searching every position of it.</li>
   <li><a ReviewMoveButton><b>Move Comment</b></a>: Describes the move you are
     on, and nothing else.</li>
-  <li><a ReviewSettings><b>Review Settings</b></a>: Depth, lines, variations
-    and the review depth a move comment waits for.</li>
+  <li><a ReviewSettings><b>Review Settings</b></a>: Variations, diagrams,
+    coach prose, the verifier and the other choices a pass reads. Lines, depth
+    and the time cap come from the engine preset, and the dialog shows them
+    read-only.</li>
   <li><a ToolsWhatThreat><b>What's the threat?</b></a>: Asks the engine what
     the side to move is threatening. One short search on a connection of its
     own; writes the answer into the current move's comment.</li>
@@ -3704,6 +3709,12 @@ set helpText(Engine) {<h1>The Engine windows</h1>
   <li><b>CPUs</b>: Number of CPU threads for the engine.</li>
   <li><b>Hash</b>: Memory size for the engine's hash table in MB.</li>
   </ul>
+  <p>
+  A <a ReviewGameButton>Game Review</a> searches at these same Lines, Depth and
+  Time as its preset sets them - they are the only place those numbers are set -
+  and the pass is a second engine on the same preset, so the review does not
+  disturb the analysis on screen.
+  </p>
 
   <h3>Display Panels</h3>
   <ul>

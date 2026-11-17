@@ -66,8 +66,10 @@ dialog.
   sentence (*the review needs a UCI engine*), and OK was disabled the way a
   non-UCI pane's tactical checkbox is.
 - **The time spinner was `::review::movetime`**, shown in seconds: the same
-  setting Review Settings shows, so the dialog and the settings could not
-  disagree about the pass's time cap. 0 meant no cap of the review's own.
+  setting Review Settings showed, so the dialog and the settings could not
+  disagree about the pass's time cap. 0 meant no cap of the review's own. (Both
+  surfaces are gone: the cap is the engine preset's `Limits.movetime` now, and no
+  review-side copy exists — see `docs/review-ui.md`.)
 - **Every option the dialog had was kept**: all moves / blunders only, the
   blunder threshold, the book, mark tactical exercises, the Annotator tag, the
   batch range, and find opening errors.

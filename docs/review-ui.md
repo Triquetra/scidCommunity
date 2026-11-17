@@ -106,35 +106,37 @@ line is judged, and a prefix node already written `[Book]` counts as labelled.
 Move Comment ignores the book: it judges the move it was asked
 about, whichever opening it belongs to.
 
-Depth and MultiPV are **not** settings of the review dialog: they come from
-`::review::effective`, where the engine preset wins `Threads`, `Hash` and a
-higher `MultiPV`. The depth is the review's own: `Review Settings` shows the
-number, and that is the depth the pass searches. A preset's `Limits.depth` is
-what *that preset's* searches run at (Play vs Engine, an engine window), and it
-is used for a review only when the review states none — a preset set up to
-browse at depth 30 does not turn a depth-12 review into a depth-30 one. (It did,
-and a depth-12 review of a middlegame then searched 80 s a position instead of
-0.1 s.)
+**Lines, Depth and the time cap are the engine preset's, and only the preset's.**
+`::review::effective $preset` resolves every number a pass runs at out of the
+preset and nowhere else: `Threads` and `Hash` capped at 8 and 512 MB (the pass is
+a second engine beside the window's own), `MultiPV` raised to at least 2 (a
+verdict needs an alternative to compare against) and held at 5 (the most the
+dialog's variation box offers), `depth` from the preset's
+`Limits.depth`, and the cap from its `Limits.movetime`. A preset that states no
+depth gets `REVIEW_DEPTH` (18) — what an unconfigured preset runs at, not a
+setting and not a second opinion.
 
-**The time cap** is the other way round. `::review::movetime` (milliseconds, 0 =
-none) is a ceiling on one position's search, and `::review::passLimits` decides
-which cap a pass runs under: the review's own value when it has one, otherwise
-the preset's `Limits.movetime`, otherwise none — never the smaller of the two.
-So a preset's cap reaches every pass, and setting one in Review Settings replaces
-it rather than tightening or loosening it by arithmetic nobody can predict. Both
-numbers go to the engine in one `go depth N movetime M` built by
+There is no review-side copy of any of them. The review used to hold its own
+`mpv`, `depth` and `movetime` beside the preset's `MultiPV` and `Limits`, and
+`::review::passLimits` arbitrated between two dicts that disagreed; the
+arbitration was the bug (a depth-12 review of a middlegame searched 80 s a
+position because the preset said 30, and nothing on either surface said which
+number won). One source means the number in the engine window IS the number a
+review uses, and changing either changes both.
+
+Both numbers reach the engine in one `go depth N movetime M` built by
 `::enginelimits::goLimits`, the same helper the engine window's own search uses.
 
 **Under a time cap the depth is not a floor.** The engine stops at whichever
-comes first, so a capped pass can finish shallower than `::review::depth`, and a
-verdict then rests on a shallower search than the setting promised. That is the
-trade the cap asks for, and it is why the cap is off by default.
+comes first, so a capped pass can finish shallower than the preset's depth, and a
+verdict then rests on a shallower search than the preset promises. That is the
+trade the cap asks for, and it is why a preset carries no cap unless the user
+gave it one.
 
-**One setting, one surface.** The time cap is set in Review Settings — the only
-surface that sets the review's *own* cap since #437 deleted the legacy annotate
-dialog; a preset that carries `Limits.movetime` still supplies the fallback when
-no cap is set. Every pass reads `::review::passLimits`, so a cap set here reaches
-Game Review, Move Comment and Batch annotate.
+**One source, every pass.** Game Review, Move Comment, Batch annotate and rapid
+annotate all call `::review::effective`, so the preset a run names reaches all of
+them. `Review Settings` shows the resolved figures read-only — it does not offer
+them for editing, because an edit there would be the second source again.
 
 **A bound never displaces a verdict.** A capped search can report a MultiPV slot
 as `lowerbound`/`upperbound` at the depth it had reached and only then finish the
@@ -163,10 +165,9 @@ When it may start is `::review::moveCommentPlan`:
 
 - with `move_comment_wait` on (the default) the comment has to be the one a
   review would have written, so a shallower analysis is not good enough: the pass
-  searches at the review's depth instead. That depth is the *effective* one
-  (`::review::effective`): an engine preset with its own deeper limit raises it, so
-  a review and a one-move comment of the same position cannot disagree at two
-  depths;
+  searches to the preset's depth instead. It is the same number a review uses,
+  because both come from `::review::effective` and the preset is the only source,
+  so a review and a one-move comment of the same position cannot disagree;
 - with `move_comment_wait` off, whatever the window's own analysis has already
   reached is good enough and is the depth searched — the depth shown in the bar's
   depth box is the depth used.
@@ -178,7 +179,7 @@ no entry, and that is "nothing yet", not "depth 0".
 
 The wait is **depth-based even when the pass is capped**: `movetime` bounds the
 pass, not what a comment has to reach. A capped comment therefore writes the
-verdict the capped search actually produced — shallower than `::review::depth` if
+verdict the capped search actually produced — shallower than the preset's depth if
 the cap bit — instead of waiting for a depth the cap will never allow.
 
 ## What's the threat? — the position, asked of the engine
@@ -248,13 +249,12 @@ did not mean.
 
 ## Review Settings
 
-**Review Settings** opens thirteen rows:
+**Review Settings** opens ten rows, and a read-only note above them with the
+numbers a pass will use:
 
 | Row | Setting | Range |
 | --- | --- | --- |
-| Lines | `mpv` | 1–5 |
-| Depth | `depth` | 6–60 |
-| Time cap (ms) | `movetime` | 0–3600000 (0 = no cap of the review's own) |
+| (note) | preset's Lines, Depth, time cap | read-only, from `::review::effective` |
 | Variations to write | `var_lines` | 0–`mpv` (default 1) |
 | Variation margin (cp) | `var_cp` | 0–500 |
 | Wait for the review depth | `move_comment_wait` | 0–1 |
@@ -266,13 +266,16 @@ did not mean.
 | Cloud pre-pass | `cloud_eval` | 0–1 (default on) |
 | Verifier engine | `verifier` | `Off (no verification)`, or the name of an engine preset |
 
-The time cap sits beside Depth because it bounds the same thing. A value of 0
-means the review sets no cap of its own, and the row then shows the preset's, as
-`1500 ms (from engine preset)`. The note reads the preset's own
-`Limits.movetime` — never `::review::effective`, which keeps a review cap that is
-still saved: with 200 ms saved beside a preset's 900, a box at 0 is the edit that
-clears the saved cap, so the note says 900. The note disappears the moment a value
-of its own is typed.
+The note reads `Lines N, Depth N, Time cap (ms): N (from engine preset)` out of
+`::review::presetLimits`, which is `::review::effective` with the one argument
+the dialog has: the preset the window is running. It is drawn from the preset
+every time the dialog opens, so a depth changed in the engine window before the
+dialog opened is the depth the note shows. The cap clause is left out when the
+preset carries no `Limits.movetime`, because there is then no cap to name. The
+three labels are translated (`Lines`, `Depth`, `ReviewMovetime` — the keys the
+dialog's own rows used before those rows moved to the preset); `Threads` is the
+one English word in the line, because no language file carries a key for it. Its job is to answer "what will this pass actually do" where the
+pass's other settings are, without offering a second place to change it.
 
 A variation is written only where the verdict says a better move existed —
 `mistake`, `blunder` and `miss` — so the default of 1 gives a game a handful of
@@ -299,7 +302,7 @@ the edit is not lost; nothing is clamped behind the user's back. `var_lines` is
 capped by `mpv`, so its box follows `mpv` rather than offering a number the
 setter would reject.
 
-The rows are ordinary options (`::reviewopt(mpv)` and so on, registered
+The rows are ordinary options (`::reviewopt(var_lines)` and so on, registered
 with `options.store`), so they are written to the options file with the rest of
 the user's preferences and read back at the next start. A value in a hand-edited
 options file is clamped to the same range before it is used: the file must not be
@@ -415,7 +418,7 @@ What the cloud's answer is turned into before any comparison:
   engine line's is;
 - **depth**: the reply's depth is the depth of the evaluation — the primary line's,
   never the deepest of the lines;
-- **lines**: the reply must carry at least `::review::mpv` lines. `great` and
+- **lines**: the reply must carry at least the preset's `MultiPV` lines. `great` and
   `brilliant` are decided against the alternatives, so a MultiPV-1 reply is a
   different answer rather than a shortcut, and a short reply means "search
   locally".
@@ -550,12 +553,33 @@ the button stops it.
   default), and the moves are named on the pure board (`::chessboard::toSan`),
   never by pushing a copy of the game. A pass waiting for a depth now shows what
   it is waiting with instead of looking like a program that has stopped. The
-  pane repaints the block at most a few times a second, and a position change
-  drops the previous position's lines.
+  pane repaints the block at most a few times a second. A position change does
+  **not** blank the block: at depth 12 a pass moves on more often than ten times
+  a second, so clearing on every `setPosition`/`setSpec` left the block empty
+  whenever a reader looked at it. The previous position's lines stay on screen
+  until the new position's first `setLines` replaces them, which is at most one
+  search interval; `finish` clears the job.
 - **Hidden is not paused.** The job is published whether or not the tab is
   selected, and `<Map>` redraws from the current position, so a reader who comes
   back sees where the run is now. The board is built at an explicit `psize`,
   because a canvas in an unselected tab has no measured width to ask for.
+- **The board is fitted to the pane, not the other way round.** A large board
+  plus a three-line PV block is taller than a docked pane: a 40-px-square board
+  wants 330 px of grid, and the pane has ~314, so the grid clipped the board and
+  pushed the lines, the progress line, the bar and Cancel out of the window
+  entirely. `<Configure>` schedules `::reviewprogress::ui::refitSoon`, which
+  measures the pane, sums the `reqheight` of the header, lines, progress, bar and
+  Cancel, and picks the largest `::boardSizes` entry that still fits — capped at
+  40 px a square, and never smaller than the pane allows through the list's own
+  floor. `remakeBoard` rebuilds `$board` at the chosen `psize` and redraws. The
+  fit is debounced (`refitTimer`, `refitHeight`) so a drag through a chain of
+  heights remakes the board once, and it is a no-op when `::boardSizes` is
+  missing or the widgets are not built yet.
+- **Lines are truncated to the pane's width, not wrapped.** A wrapped 3-PV
+  block grew to ~100 px and was clipped by a row of 49. `$win.lines` has
+  `-wraplength 0`, and `draw` cuts each row at a character budget taken from the
+  label's own width (`(winfo width - 28) / 7`, floor 24). The job keeps the full
+  strings, so a widened pane shows more of them and nothing is lost by the cut.
 - **Closing cancels nothing; Cancel stops the run on screen.** The job carries
   its owner's stop command (`::reviewdriver::cancel` for review, Move Comment and
   annotate, `::batch_annotate::cancel`, `::enginewin::stop` for rapid annotate,
@@ -860,16 +884,16 @@ plain-text form.
 | `tcl/tools/review_prose.tcl` | `::reviewprose` — the queue: one request at a time through `::auto_comment::queryAsync`, cache-keyed, with progress, cancel and a failed request dropped. Two callers: the review's coach prompts and the threat probe's one sentence |
 | `tcl/tools/review_threat.tcl` | `::reviewthreat` — "What's the threat?": `sideName`, `san`, `threatClauses`, `forcing`, `answer`, `factsBlock`, `prompt`, `search` (one shot, connection `reviewThreat`), `block`, `stripOwn`, `write` (the move comment, cursor restored), `prose`, `spoken`, `ready`, `ask`. Writes one line into the move's comment |
 | `tcl/windows/engine.tcl` | the review icons, the status line, the settings dialog (guarded glue), and `::enginewin::threat` (the window's preset) |
-| `tests/tcl/review_settings_dialog.tcl` | 71 checks: under Tk: the dialog builds, has OK/Cancel, stores what is typed, refuses a bad value, the variation box follows `mpv`, the time cap's row shows the preset's cap and drops the note, the on/off rows are checkboxes (the cloud pre-pass among them, on when it opens), the opening finder and exercise rows are saved and the opening window is refused outside 10–20, `Coach settings…` opens a window of its own from a dialog that holds no grab, and both traces are removed when the dialog closes |
-| `tests/tcl/review_ui.tcl` | 258 checks: the call a press makes, the status line (including the coach's counts), the button states, the dialog round trip, the precedence table through the dialog, the time cap's note, the verifier row's Off word and refused preset name, which move a comment judges, the move-comment depth, the key set |
+| `tests/tcl/review_settings_dialog.tcl` | 62 checks: under Tk: the dialog builds, has OK/Cancel, stores what is typed, refuses a bad value, the ten rows are there and the Lines/Depth/Time-cap rows are not, the read-only note names the preset's lines, depth and cap, the variation box's ceiling is the preset's `MultiPV`, the on/off rows are checkboxes (the cloud pre-pass among them, on when it opens), the opening finder and exercise rows are saved and the opening window is refused outside 10–20, `Coach settings…` opens a window of its own from a dialog that holds no grab |
+| `tests/tcl/review_ui.tcl` | 233 checks: the call a press makes, the status line (including the coach's counts), the button states, the dialog round trip, the ten settings the dialog still owns, the preset's read-only note (threads and hash reduced to the pass's share, the preset's lines and depth, its cap when it has one), the verifier row's Off word and refused preset name, which move a comment judges, the move-comment depth, the key set |
 | `tests/tcl/review_marks.tcl` | 54 checks: the two marks the review writer asks for - the T flag, the difficulty ladder and the "****D" comment on a puzzle's move, the Annotator tag's opening entry at the ply the book ended, the window Review Settings asks for, a quote escaping the tag, a re-run replacing rather than stacking, and a pass that never left the book writing nothing |
 | `tests/tcl/review_toolbar.tcl` | 43 checks: the five review icons use `::icon::` names and exist in icons_light and icons_dark at 24×24, the whole engine toolbar uses `::icon::` images, the labels are tooltips rather than text, the stop icon is gridded only while a pass runs, a visible divider separates the review group from Config, the dark-theme cache matches `::icon::` names, and the threat button exists only when its command does and not in an embedded PGN viewer |
-| `tests/tcl/review_driver.tcl` | 496 checks: the pass against a stub engine, the line the cursor is on (its map, the pass over it, the node the verdict lands on, the whole-game layers staying off it, and Move Comment's index), the four Go shapes the precedence table produces, a capped run, two reviews of the same game in a row, the engine window's hand-off to it, the completion hook, the engine name on an exported variation and in the Annotator tag, and the coach: started after the write, the run held open until the answers land, not started for a single move or an annotate pass, an annotate pass leaving the coach blocks alone, not holding a run open when it cannot start, and Cancel while the model is writing |
+| `tests/tcl/review_driver.tcl` | 514 checks: the pass against a stub engine, the line the cursor is on (its map, the pass over it, the node the verdict lands on, the whole-game layers staying off it, and Move Comment's index), the Go shapes the preset's limits produce (a bare depth, a depth with a cap, and the cap alone), a capped run, two reviews of the same game in a row, the engine window's hand-off to it, the completion hook, the engine name on an exported variation and in the Annotator tag, and the coach: started after the write, the run held open until the answers land, not started for a single move or an annotate pass, an annotate pass leaving the coach blocks alone, not holding a run open when it cannot start, and Cancel while the model is writing |
 | `tests/tcl/review_cloud.tcl` | 148 checks: the comparison table (depth-only, the tie, `D > C > L`, and the strictly-deeper rule that decides when a reply may stop a search), the FEN replay a spec needs, mover-relative score and mate normalisation, the reply the verdict cannot use, a depth-only position the cloud covers with no `go` at all, a capped position where the deeper evaluation wins either way, a reply at the bound that does not cancel the search (fresh and cached) and one past it that does, a reply that never lands, a transport failure that stops the pass asking (including the empty-body shape a real outage produces) and a transport that will not start at all, the latch ending with the pass rather than the session, the engine going away with a held evaluation still naming its source, a 404 for a position Lichess holds nothing for being remembered, the no-curl fallback to the Tcl http package, the FEN-keyed cache across move counters, the toggle and the variant both leaving the pass local, and the verifier's own pass asking the cloud nothing |
 | `tests/tcl/review_verify.tcl` | 66 checks: only Brilliant and Great are jobs, book skips them but a named ply does not, the second engine agreeing or disagreeing about the move and about a Great move's gap, a correction only ever moving down to Best, a miss never becoming a candidate, fail-closed answers (nothing, an empty result, no second line, a bound), a mate score, and the callers that decide to write — `runDone`, `finalize_game` and `commit` — each reaching the seam with its verifier and bounds and writing its answer, with an all-flat run changing nothing, a cancelled batch not writing, a Rapid Annotate commit refusing another database, the verifier start waiting for the old connection to close, Cancel before that idle start dropping the run, that cancellation finishing the progress job, and an answer from a previous batch writing nothing |
 | `tests/tcl/review_verify_engine.tcl` | 56 checks: the verifier driven through the driver's own queue against a stub second engine at the pass's depth and cap, two lines asked for, the disagreement demoting both labels, the agreement correcting nothing, a silent answer correcting nothing, an engine lost mid-search writing as unverified, Cancel dropping the search, the engine closed after the reply rather than inside it, the seam handing the search the pass's own depth and cap, two callers taking turns on the one connection, the analysis engine refusing to verify itself, cancelling a queued token, and no `vwait` anywhere in the verifier path |
 | `tests/tcl/review_report.tcl` | 123 checks: accuracy as the app's own figure and the parity a phase starting on Black's move needs, Elo, key moments, the endgame rule — one material total, with the six-piece net rejected at 38 points — the opening boundary — Smyrnov met and half met, rook-less and file/rank connectivity, mixedness at 150 and 161, the material net at ten and eleven, the first-firing signal at 17/21/25, no ply floor — the performance rating line (one per side, the table's own bins, no `estimated Elo` beside it, no band, no expected-score figure, a block that cannot see a rating in the PGN: neither rating, one, both) — and the block removal, two writes deep |
-| `tests/tcl/perf_rating.tcl` | 23 checks: the table's shape, monotonicity and bin grid, the lookup's interpolation, clamping and rounding at both ends, the two games' ESL and accuracy arithmetic (95.60 for 0.40 given away, 80.39 for 0.89), the `0.05 → 0.03` case as 0.02 rather than a ratio, the ratio of sums against the mean of ratios on a set with a zero-`E_best` move, side attribution across holes and book plies, and a side with no judged move getting no estimate |
+| `tests/tcl/perf_rating.tcl` | 25 checks: the table's shape, monotonicity and bin grid, the lookup's interpolation, clamping and rounding at both ends, the two games' ESL and accuracy arithmetic (95.60 for 0.40 given away, 80.39 for 0.89), the `0.05 → 0.03` case as 0.02 rather than a ratio, the ratio of sums against the mean of ratios on a set with a zero-`E_best` move, side attribution across holes and book plies, and a side with no judged move getting no estimate |
 | `tests/tcl/comment_colors.tcl` | 14 checks: the two writer colours, the wrapper's escaping and per-line form, the empty-wrapper cleanup, and a strip that takes a wrapper with its line while a reader's note beside it stays |
 | `tests/tcl/comment_default_color_tk.tcl` | 8 checks: under Tk: unspanned text takes `::pgnColor(Comment)`, the Format menu carries the entry, and choosing a colour saves it, repaints the editor and tells the PGN window |
 | `tests/tcl/comment_facts.tcl` | 107 checks: the position core against the published perft counts, the exact block for a mating move, each rule line stated positively and negatively, the fifty-move clock stated in moves, the engine's line as SAN numbered from the position's own fullmove — one conversion per line, the five-ply clip, a setup game at move 30, a line that starts on Black, a mate score surviving it, the "no bare UCI" and "one number per move" invariants — and a punishment line that ends in mate |
