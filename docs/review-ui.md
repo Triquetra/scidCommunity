@@ -108,8 +108,13 @@ about, whichever opening it belongs to.
 
 Depth and MultiPV are **not** settings of the review dialog: they come from
 `::review::effective`, where the engine preset wins `Threads`, `Hash` and a
-higher `MultiPV`, and the review's own depth is a floor a shallower preset cannot
-lower.
+higher `MultiPV`. The depth is the review's own: `Review Settings` shows the
+number, and that is the depth the pass searches. A preset's `Limits.depth` is
+what *that preset's* searches run at (Play vs Engine, an engine window), and it
+is used for a review only when the review states none — a preset set up to
+browse at depth 30 does not turn a depth-12 review into a depth-30 one. (It did,
+and a depth-12 review of a middlegame then searched 80 s a position instead of
+0.1 s.)
 
 **The time cap** is the other way round. `::review::movetime` (milliseconds, 0 =
 none) is a ceiling on one position's search, and `::review::passLimits` decides

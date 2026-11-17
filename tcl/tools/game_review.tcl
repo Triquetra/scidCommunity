@@ -305,23 +305,32 @@ proc ::review::engineDefaults {enginecfg} {
 # The limits one position of a pass is searched under, from the review's own
 # settings and from the engine preset's Limits.
 #
-# Depth and time point in opposite directions on purpose. The preset may only
-# DEEPEN a pass: a preset set up to browse at depth 12 must not shallow out a
-# verdict, so the deeper of the two wins. The time cap is a CEILING with one
-# owner: the review's value when it has one, otherwise the preset's, otherwise
-# none - never the smaller of the two, which would search shallower than either
-# setting asked for.
+# Depth and time point in opposite directions on purpose. The review's depth is
+# the review's: it is the number the settings dialog shows, and the one the
+# reader asked this pass to search at. A preset's Limits.depth is what the
+# preset's own searches run at (Play vs Engine, a window's limits), and taking
+# the deeper of the two silently turned a depth-12 review into the preset's
+# depth-30 one - measured on Stockfish with three lines, 0.1 s per position at
+# depth 12 against 80 s at depth 30, which reads as a review that hangs. The
+# preset's depth is therefore only the answer for a caller that states none.
+#
+# The time cap is a CEILING with one owner: the review's value when it has one,
+# otherwise the preset's, otherwise none - never the smaller of the two, which
+# would search shallower than either setting asked for.
 #
 # `review` and `preset` are dicts carrying `depth` and `movetime`; "" is "not
-# set", and a review movetime of 0 says the same. Answers {depth N movetime M},
-# which is the shape ::enginelimits::goLimits turns into a Go message, so the
+# set", and a depth or movetime of 0 says the same. Answers {depth N movetime
+# M}, which is the shape ::enginelimits::goLimits turns into a Go message, so the
 # precedence is decided once instead of in each caller.
 proc ::review::passLimits {review preset} {
     set depth [dict get $review depth]
-    if {[dict exists $preset depth]} {
-        set presetDepth [dict get $preset depth]
-        if {[string is integer -strict $presetDepth] && $presetDepth > $depth} {
-            set depth $presetDepth
+    if {![string is integer -strict $depth] || $depth <= 0} {
+        set depth ""
+        if {[dict exists $preset depth]} {
+            set presetDepth [dict get $preset depth]
+            if {[string is integer -strict $presetDepth] && $presetDepth > 0} {
+                set depth $presetDepth
+            }
         }
     }
     set movetime 0
