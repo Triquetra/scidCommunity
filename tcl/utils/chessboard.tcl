@@ -452,6 +452,136 @@ proc ::chessboard::legalMoves {pos} {
     return $out
 }
 
+# The SAN of one UCI move in this position, and "" when the move cannot be
+# played here.
+#
+# This is the pure board's own writer, and it exists because the window onto a
+# run - the review progress pane - has to name the lines the engine is
+# considering without touching the game: ::ucifmt::formatPv pushes a copy of the
+# game and pops it again, which is a move the reader's board is not this pass's
+# to make while a search is running.
+#
+# It covers what a PV line contains: castling (both encodings - the king's
+# two-square move, and Chess960's king-onto-its-own-rook), captures including
+# en passant, promotion, disambiguation by file then rank, and the + and #
+# suffixes. `pos` is the position BEFORE the move.
+proc ::chessboard::toSan {pos uci} {
+    return [::chessboard::toSanOf $pos $uci [::chessboard::legalMoves $pos]]
+}
+
+# toSan with this position's legal move list already in hand: the PV walker
+# needs it for every move anyway, and generating it twice per move doubled the
+# cost of naming a line.
+proc ::chessboard::toSanOf {pos uci legal} {
+    set uci [string trim $uci]
+    if {[string length $uci] != 4 && [string length $uci] != 5} { return "" }
+    if {![regexp {^[a-h][1-8][a-h][1-8][qrbn]?$} $uci]} { return "" }
+    set board [dict get $pos board]
+    set side [dict get $pos side]
+    set from [sqIndex [string range $uci 0 1]]
+    set to [sqIndex [string range $uci 2 3]]
+    set piece [pieceAt $board $from]
+    if {$piece eq ""} { return "" }
+    if {[colorOf $piece] ne $side} { return "" }
+    # A move this position cannot play has no SAN. The engine's PV is playable
+    # here unless the line is stale or was cut, and naming a move that is not
+    # legal would be worse than ending the line.
+    if {[lsearch -exact $legal $uci] < 0} { return "" }
+    set lower [string tolower $piece]
+    set captured [lindex $board $to]
+    set ep [dict get $pos ep]
+
+    # Castling: the orthodox two-square king move, or a king that lands on a
+    # rook of its own colour (Chess960's encoding).
+    set ownRook [expr {$side eq "w" ? "R" : "r"}]
+    set castling ""
+    if {$lower eq "k"} {
+        if {$captured eq $ownRook} {
+            set castling [expr {($to % 8) > ($from % 8) ? "O-O" : "O-O-O"}]
+        } elseif {abs(($to % 8) - ($from % 8)) == 2 && ($to / 8) == ($from / 8)} {
+            set castling [expr {($to % 8) > ($from % 8) ? "O-O" : "O-O-O"}]
+        }
+    }
+    if {$castling ne ""} {
+        append castling [::chessboard::toSanSuffix $pos $uci]
+        return $castling
+    }
+
+    # A capture is a piece or a pawn on the destination, or a pawn landing on the
+    # en-passant square.
+    set isCapture [expr {$captured ne "" || ($lower eq "p" && $to == $ep && $captured eq "")}]
+
+    set out ""
+    if {$lower eq "p"} {
+        if {$isCapture} { append out "[string index [sqName $from] 0]x" }
+        append out [sqName $to]
+        if {[string length $uci] > 4} {
+            append out "=[string toupper [string index $uci 4]]"
+        }
+    } else {
+        append out [string toupper $lower]
+        # Disambiguation: another legal move of the same piece to the same
+        # square needs a file, or a rank when both share the file, or both.
+        set rivals {}
+        foreach m $legal {
+            if {$m eq $uci} { continue }
+            if {[sqIndex [string range $m 2 3]] != $to} { continue }
+            if {[string tolower [pieceAt $board [sqIndex [string range $m 0 1]]]] ne $lower} {
+                continue
+            }
+            lappend rivals [sqIndex [string range $m 0 1]]
+        }
+        if {[llength $rivals]} {
+            set sameFile 0
+            set sameRank 0
+            foreach sq $rivals {
+                if {[fileOf $sq] == [fileOf $from]} { set sameFile 1 }
+                if {[rankOf $sq] == [rankOf $from]} { set sameRank 1 }
+            }
+            if {!$sameFile} {
+                append out [string index [sqName $from] 0]
+            } elseif {!$sameRank} {
+                append out [string index [sqName $from] 1]
+            } else {
+                append out [sqName $from]
+            }
+        }
+        if {$isCapture} { append out "x" }
+        append out [sqName $to]
+    }
+    append out [::chessboard::toSanSuffix $pos $uci]
+    return $out
+}
+
+# "+" when the move gives check, "#" when it mates: the suffix SAN carries, from
+# the position AFTER the move. "" when the move cannot be played.
+proc ::chessboard::toSanSuffix {pos uci} {
+    set side [dict get $pos side]
+    if {[catch { set after [makeMove $pos $uci] }]} { return "" }
+    if {![inCheck $after [expr {$side eq "w" ? "b" : "w"}]]} { return "" }
+    if {![llength [legalMoves $after]]} { return "#" }
+    return "+"
+}
+
+# A UCI move list as SAN, space separated: the pane's rendering of one PV. A
+# move the position cannot play ends the line - the engine's PV is not always
+# playable here (a truncated or stale line), and an invented continuation is
+# worse than a short one.
+proc ::chessboard::sanLine {pos pv {limit 12}} {
+    set out {}
+    set i 0
+    foreach uci $pv {
+        if {$limit > 0 && $i >= $limit} { break }
+        set legal [::chessboard::legalMoves $pos]
+        set san [::chessboard::toSanOf $pos $uci $legal]
+        if {$san eq ""} { break }
+        lappend out $san
+        if {[catch { set pos [makeMove $pos $uci] }]} { break }
+        incr i
+    }
+    return $out
+}
+
 proc ::chessboard::material {pos} {
     variable PIECE_VALUE
     set w 0 ; set b 0

@@ -296,6 +296,37 @@ proc ::reviewdriver::collect {token msgData} {
     }
     dict set lines $multipv [list $depth $score $score_type $pv]
     dict set job($token) lines $lines
+    # The pane is decoration: a feed that raises must not take the reply path -
+    # and with it the pass - down.
+    catch { ::reviewdriver::publishLines $token }
+}
+
+# Hand the lines the pass is considering to the progress board, when there is one.
+#
+# The reader asked to see the engine's lines and their scores while a review
+# works; without them a pass that is waiting for a depth looks like a program
+# that has stopped. This is the driver's half of it: the lines it has collected
+# for the position in flight, for the board the pass already publishes against.
+# A run with no board open, a harness tree without the module, or a position the
+# pass has already left all cost one comparison and nothing else.
+proc ::reviewdriver::publishLines {token} {
+    variable job
+    variable pass
+    if {![info exists job($token)]} { return }
+    if {![dict size $pass] || [dict get $pass token] ne $token} { return }
+    if {![dict exists $pass progressToken]} { return }
+    if {[llength [info commands ::reviewprogress::setLines]] == 0} { return }
+    set positions [dict get $job($token) positions]
+    set index [dict get $job($token) index]
+    if {![string is integer -strict $index] || $index < 0 || $index >= [llength $positions]} {
+        return
+    }
+    lassign [lindex $positions $index] ply spec
+    catch {
+        ::reviewprogress::setLines [dict get $pass progressToken] $spec \
+            [dict get $job($token) lines]
+    }
+    return
 }
 
 # Is the cloud pre-pass module in this tree? A harness that drives the driver

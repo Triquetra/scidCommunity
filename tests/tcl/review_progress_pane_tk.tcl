@@ -236,6 +236,21 @@ check "the redraw is animated off" [expr {$::board::animate($canvas) == 0}]
 checkEq "the progress line counts the position" \
     [$win.progress cget -text] {Reviewing position 12 of 40}
 
+# The lines the engine is considering, under the board: one widget, one block of
+# text, written by the feed and never read back by the pane.
+checkEq "no lines before the engine has reported any" \
+    [$win.lines cget -text] ""
+::reviewprogress::setLines $token "position fen $fen" \
+    [dict create 1 {20 35 cp {e7e5 g1f3}} 2 {18 -120 cp {c7c5}}]
+::reviewprogress::paintNow
+settle
+checkEq "the pane lists the lines with their scores and their moves" \
+    [$win.lines cget -text] "1.  d20  -0.35  e5 Nf3\n2.  d18  +1.20  c5"
+check "the lines sit between the board and the progress line" \
+    [expr {[winfo manager $win.lines] eq "grid" && \
+        [winfo rooty $win.lines] >= [winfo rooty $::reviewprogress::ui::board] && \
+        [winfo rooty $win.lines] < [winfo rooty $win.progress]}]
+
 puts "== the coach's prose is a second measure =="
 
 ::reviewprogress::setProse $token 3 9

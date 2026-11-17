@@ -531,6 +531,16 @@ the button stops it.
   model, not the search, is what is still running. The coach row is hidden for a
   run with no model behind it. Autoscan's rapid job ends with its last answer or
   its commit, not at the next game.
+- **The lines it is considering.** Between the board and the progress line the
+  pane lists the engine's own lines for the position being searched — MultiPV
+  index, the depth it was reported at, its score and its moves in SAN — through
+  `::reviewprogress::setLines`. The driver publishes them as it collects them
+  (`::reviewdriver::publishLines`), the score is White's (the analysis window's
+  default), and the moves are named on the pure board (`::chessboard::toSan`),
+  never by pushing a copy of the game. A pass waiting for a depth now shows what
+  it is waiting with instead of looking like a program that has stopped. The
+  pane repaints the block at most a few times a second, and a position change
+  drops the previous position's lines.
 - **Hidden is not paused.** The job is published whether or not the tab is
   selected, and `<Map>` redraws from the current position, so a reader who comes
   back sees where the run is now. The board is built at an explicit `psize`,
