@@ -25,6 +25,16 @@ namespace eval ::reviewprogress {
     # The window's draw hook, as {*}$painter <job>. Empty in tclsh, which is
     # what makes this file sourceable without Tk.
     variable painter ""
+    # A repaint scheduled by the live-lines feed (see ::reviewprogress::setLines).
+    variable paintTimer ""
+    # The position a spec was last replayed to, so the feed that names the
+    # engine's lines does not replay twenty moves for every PV it is handed.
+    variable lastSpec ""
+    variable lastPos ""
+    # SAN renderings of lines already named, keyed by position and PV: an engine
+    # repeats the same PV at every depth it finishes.
+    variable sanMemo
+    array set sanMemo {}
 }
 
 # The position the board draws, as ::board::update wants it: 64 characters,
@@ -71,8 +81,29 @@ proc ::reviewprogress::specFen {spec} {
 # position before the moves, so the moves are replayed on the pure board rather
 # than on the game: the board the reader is looking at is not this pass's.
 proc ::reviewprogress::specToBoard {spec} {
+    set pos [::reviewprogress::specPos $spec]
+    if {$pos eq ""} { return "" }
+    set out ""
+    foreach square [dict get $pos board] {
+        if {$square eq ""} { append out "." } else { append out $square }
+    }
+    if {[string length $out] != 64} { return "" }
+    return $out
+}
+
+# The position a spec searches, as a ::chessboard position dict, or "" when the
+# spec cannot be followed.
+#
+# One-entry memo: the live-lines feed asks for the same position many times a
+# second while a search runs, and replaying a forty-move line for every PV it
+# reports is work nobody sees. A move list the pure board cannot play is not a
+# position: the FEN's own, which is still where the search started.
+proc ::reviewprogress::specPos {spec} {
+    variable lastSpec
+    variable lastPos
     set spec [string trim $spec]
     if {$spec eq ""} { return "" }
+    if {$spec eq $lastSpec} { return $lastPos }
     set words [regexp -all -inline {\S+} $spec]
     set fen ""
     set moves {}
@@ -98,20 +129,18 @@ proc ::reviewprogress::specToBoard {spec} {
     } else {
         set fen $spec
     }
-    set board [::reviewprogress::positionToBoard $fen]
-    if {$board eq "" || ![llength $moves]} { return $board }
-    # A move list the pure board cannot play is not a position: keep the FEN's,
-    # which is still the position the search started from.
-    if {[catch {
-        set pos [::chessboard::fromFen $fen]
-        foreach uci $moves { set pos [::chessboard::makeMove $pos $uci] }
-        set out ""
-        foreach square [dict get $pos board] {
-            if {$square eq ""} { append out "." } else { append out $square }
+    set pos ""
+    if {[llength $moves]} {
+        catch {
+            set p [::chessboard::fromFen $fen]
+            foreach uci $moves { set p [::chessboard::makeMove $p $uci] }
+            set pos $p
         }
-        if {[string length $out] == 64} { set board $out }
-    }]} { return $board }
-    return $board
+    }
+    if {$pos eq ""} { catch { set pos [::chessboard::fromFen $fen] } }
+    set lastSpec $spec
+    set lastPos $pos
+    return $pos
 }
 
 # The source, as a reader names it. The tokens are the runs, not the windows:
@@ -210,7 +239,7 @@ proc ::reviewprogress::begin {fields} {
         source [expr {[dict exists $fields source] ? [dict get $fields source] : ""}] \
         fields $fields cancel $cancel \
         board "" fen "" ply "" done "" total "" game $game totalGames $total \
-        coachDone "" coachTotal ""]
+        lines {} linesRaw {} coachDone "" coachTotal ""]
     ::reviewprogress::paint
     return $token
 }
@@ -263,6 +292,8 @@ proc ::reviewprogress::setPosition {token fen {done ""} {total ""} {game ""}} {
     if {![dict size $job] || [dict get $job token] ne $token} { return 0 }
     set board [::reviewprogress::positionToBoard $fen]
     if {$board eq ""} { return 0 }
+    # The lines that were on screen belong to the position that has just left.
+    ::reviewprogress::clearLines
     dict set job fen $fen
     dict set job board $board
     if {$done ne ""} { dict set job done $done }
@@ -281,6 +312,8 @@ proc ::reviewprogress::setSpec {token spec {done ""} {total ""} {game ""}} {
     if {![dict size $job] || [dict get $job token] ne $token} { return 0 }
     set board [::reviewprogress::specToBoard $spec]
     if {$board eq ""} { return 0 }
+    # The lines that were on screen belong to the position that has just left.
+    ::reviewprogress::clearLines
     dict set job fen [::reviewprogress::specFen $spec]
     dict set job board $board
     catch { dict set job spec $spec }
@@ -292,6 +325,125 @@ proc ::reviewprogress::setSpec {token spec {done ""} {total ""} {game ""}} {
     return 1
 }
 
+# The engine's own lines for the position the run is on, as the driver collects
+# them: MultiPV index -> {depth score type pv}. This is what the pass is
+# considering, not a summary of it - the reader asked to see the lines and their
+# scores while the review works, and without them a pass that is waiting for a
+# depth looks like a program that has stopped.
+#
+# The feed is called from inside the engine's own reply, once per PV line, so it
+# does the cheap part here (a comparison, the SAN of at most a few short lines)
+# and leaves the repaint to one scheduled tick. A dict that has not changed is
+# not repainted at all.
+proc ::reviewprogress::setLines {token spec lines} {
+    variable job
+    if {![dict size $job] || [dict get $job token] ne $token} { return 0 }
+    set raw [dict create]
+    catch { set raw $lines }
+    set same 0
+    catch { set same [expr {[dict get $job linesRaw] eq $raw}] }
+    if {$same} { return 0 }
+    dict set job linesRaw $raw
+    dict set job lines [::reviewprogress::formatLines \
+        [::reviewprogress::specPos $spec] $raw]
+    ::reviewprogress::paintSoon
+    return 1
+}
+
+# The lines of the position before this one are not this position's: a board
+# that moved while the lines stayed would describe two positions at once.
+proc ::reviewprogress::clearLines {} {
+    variable job
+    if {![dict size $job]} { return }
+    dict set job lines {}
+    dict set job linesRaw {}
+    return
+}
+
+# One rendered line: the MultiPV index, the depth it was reported at, its score
+# and the moves.
+#
+# The score is White's, which is what the analysis window shows with its default
+# `scoreside`; the engine reports the side to move's, so a Black-to-move position
+# flips. A mate keeps the engine's own "+M4" / "-M4" spelling. Eight plies is
+# enough to see the idea and short enough to name three lines inside one frame.
+proc ::reviewprogress::formatLines {pos lines {plies 8}} {
+    if {$pos eq ""} { return {} }
+    set keys [dict keys $lines]
+    if {![llength $keys]} { return {} }
+    set flip [expr {[dict get $pos side] eq "b"}]
+    set fen ""
+    catch { set fen [::chessboard::toFen $pos] }
+    set out {}
+    foreach idx [lsort -integer $keys] {
+        lassign [dict get $lines $idx] depth score type pv
+        set cells [list "$idx."]
+        if {[string is integer -strict $depth] && $depth > 0} {
+            lappend cells "d$depth"
+        }
+        set scoreStr [::reviewprogress::scoreText $score $type $flip]
+        if {$scoreStr ne ""} { lappend cells $scoreStr }
+        set san [::reviewprogress::sanOf $fen $pos $pv $plies]
+        if {[llength $san]} { lappend cells [join $san " "] }
+        lappend out [join $cells "  "]
+    }
+    return $out
+}
+
+# The SAN of one PV, memoised on the position it is played from.
+#
+# Naming a line costs a legal-move list per ply, and an engine reports the same
+# PV again at every depth it finishes - each iteration is a new score on the same
+# moves. The memo makes the names free after the first report; it is small and
+# thrown away whole when it grows, because there is nothing in it worth keeping
+# across a review.
+proc ::reviewprogress::sanOf {fen pos pv {plies 8}} {
+    variable sanMemo
+    set key "$fen|[join $pv { }]"
+    if {[info exists sanMemo($key)]} { return $sanMemo($key) }
+    set san [::chessboard::sanLine $pos $pv $plies]
+    if {[array size sanMemo] > 96} { catch { array unset sanMemo } }
+    set sanMemo($key) $san
+    return $san
+}
+
+# An engine score as text: centipawns to a signed two-place number, a mate as the
+# engine's own distance with its sign. "" when there is no score to show.
+proc ::reviewprogress::scoreText {score type {flip 0}} {
+    if {![string is integer -strict $score]} { return "" }
+    if {$flip} { set score [expr {-$score}] }
+    if {$type eq "mate"} {
+        if {$score >= 0} { return "+M$score" }
+        return "-M[expr {abs($score)}]"
+    }
+    return [format "%+.2f" [expr {$score / 100.0}]]
+}
+
+# The repaint the lines feed schedules. The driver calls it from inside an engine
+# reply, and a pane that redraws its board for every PV line would spend the
+# search's own time on decoration; one tick is enough for the eye.
+proc ::reviewprogress::paintSoon {} {
+    variable paintTimer
+    if {$paintTimer ne ""} { return }
+    set paintTimer [after 200 [list ::reviewprogress::paintNow]]
+    return
+}
+
+proc ::reviewprogress::paintNow {} {
+    variable paintTimer
+    set paintTimer ""
+    ::reviewprogress::paint
+    return
+}
+
+# Nothing more is coming: a queued repaint has nothing to show.
+proc ::reviewprogress::paintCancel {} {
+    variable paintTimer
+    if {$paintTimer eq ""} { return }
+    catch { after cancel $paintTimer }
+    set paintTimer ""
+    return
+}
 # The progress line under the board. A run that has not searched yet says so
 # rather than showing 0 of 0.
 proc ::reviewprogress::progressText {job} {
@@ -308,6 +460,7 @@ proc ::reviewprogress::progressText {job} {
 proc ::reviewprogress::finish {token} {
     variable job
     if {![dict size $job] || [dict get $job token] ne $token} { return 0 }
+    ::reviewprogress::paintCancel
     set job ""
     ::reviewprogress::paint
     return 1

@@ -69,6 +69,12 @@ proc ::reviewprogress::ui::build {} {
 
     ttk::label $win.header -text [::reviewprogress::ui::title] -anchor w \
         -font font_SmallBold
+    # The engine's lines for the position in flight: what the pass is
+    # considering, with the score it has for each. A label rather than a text
+    # widget: it is decoration over a run, the reader cannot edit it, and the
+    # feed writes the whole block at once.
+    ttk::label $win.lines -text "" -anchor w -justify left -font font_Small \
+        -wraplength 380
     ttk::label $win.progress -text "" -anchor w -font font_Small
 
     # The determinate bar (#422 item 3). Its value is ::reviewui::passFraction
@@ -88,11 +94,12 @@ proc ::reviewprogress::ui::build {} {
 
     grid $win.header -row 0 -column 0 -sticky we -padx 8 -pady {8 4}
     grid $board -row 1 -column 0 -sticky news -padx 8
-    grid $win.progress -row 2 -column 0 -sticky we -padx 8 -pady {6 0}
-    grid $win.bar -row 3 -column 0 -sticky we -padx 8 -pady {2 8}
-    grid $win.coach -row 4 -column 0 -sticky we -padx 8 -pady {6 0}
-    grid $win.coachbar -row 5 -column 0 -sticky we -padx 8 -pady {2 8}
-    grid $win.cancel -row 6 -column 0 -sticky e -padx 8 -pady {0 8}
+    grid $win.lines -row 2 -column 0 -sticky we -padx 8 -pady {6 0}
+    grid $win.progress -row 3 -column 0 -sticky we -padx 8 -pady {6 0}
+    grid $win.bar -row 4 -column 0 -sticky we -padx 8 -pady {2 8}
+    grid $win.coach -row 5 -column 0 -sticky we -padx 8 -pady {6 0}
+    grid $win.coachbar -row 6 -column 0 -sticky we -padx 8 -pady {2 8}
+    grid $win.cancel -row 7 -column 0 -sticky e -padx 8 -pady {0 8}
     grid remove $win.coach $win.coachbar
     # The board takes the space: a pane that does not grow with the dock is a
     # board the reader cannot see.
@@ -144,6 +151,7 @@ proc ::reviewprogress::ui::idle {} {
     catch { $win.bar configure -value 0 }
     catch { $win.coach configure -text "" }
     catch { $win.coachbar configure -value 0 }
+    catch { $win.lines configure -text "" }
     catch { grid remove $win.coach $win.coachbar }
     catch { $win.cancel configure -state disabled }
     set boardString ""
@@ -219,11 +227,19 @@ proc ::reviewprogress::ui::draw {job} {
         catch { set coachFraction [::reviewui::passFraction $coachDone $coachTotal] }
         if {$coachFraction eq ""} { set coachFraction 0 }
         catch { $win.coachbar configure -value $coachFraction }
-        catch { grid $win.coach -row 4 -column 0 -sticky we -padx 8 -pady {6 0} }
-        catch { grid $win.coachbar -row 5 -column 0 -sticky we -padx 8 -pady {2 8} }
+        catch { grid $win.coach -row 5 -column 0 -sticky we -padx 8 -pady {6 0} }
+        catch { grid $win.coachbar -row 6 -column 0 -sticky we -padx 8 -pady {2 8} }
     } else {
         catch { grid remove $win.coach $win.coachbar }
     }
+
+    # The lines the pass is considering, one per MultiPV slot: index, depth,
+    # score, moves. They are the job's own strings - the pane never names a move
+    # or reads a score itself, so a redraw after the tab was hidden shows the same
+    # lines the run published.
+    set lineText ""
+    catch { set lineText [join [dict get $job lines] "\n"] }
+    catch { $win.lines configure -text $lineText }
 
     # The pane serves every run, so Cancel belongs to the run that owns the
     # board, not to the review driver: a batch, Rapid Annotate or Finish Game

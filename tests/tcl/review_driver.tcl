@@ -3086,10 +3086,24 @@ feedEvent InfoConfig {Threads 8 Hash 256 MultiPV 3}
 checkEq "which is the line's own reference position" \
     [lindex [goSpecs] 0] [dict get $map positions 3]
 
-# The first position answered: the pass moves on to the node the variation's move
-# made, and the pane replays that spec on the pure board.
+# What the pass is considering, on the pane, while it is considering it: the
+# engine's own lines with their scores, named in SAN. The score is White's, the
+# way the analysis window shows it, so a Black-to-move position flips the
+# engine's own number; the depth is the one the line was reported at.
 feedEvent InfoPV {1 20 22 900 300 0 0 120 100 cp 0 c7c5}
+checkEq "the engine's line reaches the pane, with its score and its moves" \
+    [dict get [::reviewprogress::job] lines] {{1.  d20  -1.00  c5}}
+# A second slot is a second line, and the index orders them rather than the
+# order the engine happened to report them in.
+feedEvent InfoPV {2 18 20 800 250 0 0 110 60 cp 0 d7d5}
+checkEq "and a second MultiPV slot is its own line" \
+    [dict get [::reviewprogress::job] lines] {{1.  d20  -1.00  c5} {2.  d18  -0.60  d5}}
+# The lines belong to the position that is being searched: when the pass moves
+# on, the pane drops them rather than showing one position's lines under another
+# position's board.
 feedEvent InfoBestMove {}
+checkEq "the next position has no lines until its own arrive" \
+    [dict get [::reviewprogress::job] lines] {}
 checkEq "and follows the search into the variation" \
     [dict get [::reviewprogress::job] spec] [dict get $map positions 4]
 checkEq "the board being the position the variation's move made" \
@@ -3131,7 +3145,6 @@ feed InfoReady {}
 checkEq "the stopped position settles and the next one searches" [lindex $::sent end] \
     {send 20 Go {{position startpos moves e2e4} {{depth 18} {movetime 900}}}}
 checkEq "one position was settled" $::cprogress {{1 2}}
-
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

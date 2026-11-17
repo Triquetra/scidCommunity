@@ -404,5 +404,91 @@ checkEq "and the job moved anyway" \
 ::reviewprogress::setPainter {}
 
 puts ""
+puts "the lines the pass is considering"
+
+# The pane shows what the engine is considering, with the score it has for each
+# line: index, depth, score, moves in SAN. Nothing here reads the game - the pane
+# has none - so the moves are named on the pure board.
+#
+# SAN itself first: the writer the pane needed, and the cases a PV contains.
+set start [::chessboard::fromFen \
+    {rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1}]
+checkEq "a pawn push" [::chessboard::toSan $start e2e4] "e4"
+checkEq "a piece move keeps its letter" [::chessboard::toSan $start g1f3] "Nf3"
+set pos $start
+foreach m {e2e4 e7e5 g1f3 b8c6 f1b5 a7a6 b5a4 g8f6} {
+    set pos [::chessboard::makeMove $pos $m]
+}
+checkEq "castling comes from the king's two squares" \
+    [::chessboard::toSan $pos e1g1] "O-O"
+set pos [::chessboard::fromFen {r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1}]
+checkEq "and queenside too" [::chessboard::toSan $pos e8c8] "O-O-O"
+set pos [::chessboard::fromFen \
+    {rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3}]
+checkEq "en passant is a capture" [::chessboard::toSan $pos e5d6] "exd6"
+set pos [::chessboard::fromFen {8/1P6/8/8/8/8/8/K6k w - - 0 1}]
+checkEq "promotion says what it promotes to" [::chessboard::toSan $pos b7b8q] "b8=Q"
+set pos [::chessboard::fromFen \
+    {rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq g3 0 2}]
+checkEq "a mate takes the hash" [::chessboard::toSan $pos d8h4] "Qh4#"
+set pos [::chessboard::fromFen {4k3/8/8/8/8/8/8/4K2R w - - 0 1}]
+checkEq "a rook that gives check says so" [::chessboard::toSan $pos h1h8] "Rh8+"
+# Two pieces that can reach the square need a file, or a rank when both share
+# the file.
+set pos [::chessboard::fromFen {4k3/8/8/8/8/2N5/8/4K1N1 w - - 0 1}]
+checkEq "two knights on different files take the file" \
+    [::chessboard::toSan $pos c3e2] "Nce2"
+set pos [::chessboard::fromFen {8/8/8/R7/8/8/8/R3k2K w - - 0 1}]
+checkEq "two rooks on one file disambiguate by rank" \
+    [::chessboard::toSan $pos a1a3] "R1a3"
+checkEq "and the other rook by its own rank" \
+    [::chessboard::toSan $pos a5a3] "R5a3+"
+set pos [::chessboard::fromFen {4k3/8/8/8/8/8/8/4K3 w - - 0 1}]
+checkEq "a move the position cannot play has no name" \
+    [::chessboard::toSan $pos e1e5] ""
+checkEq "a line stops where the position stops" \
+    [::chessboard::sanLine $pos {e1d1 e8d8 zzzz}] {Kd1 Kd8}
+
+# The rendered line: index, depth, score and moves. The score is White's, which
+# is what the analysis window shows by default, so the engine's own number is
+# flipped on Black's move.
+set pos [::chessboard::fromFen \
+    {rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2}]
+set lines [dict create 1 {20 35 cp {b8c6 f1b5}} 2 {18 -120 cp {g8f6}}]
+checkEq "one line per MultiPV slot, scores from White's side" \
+    [::reviewprogress::formatLines $pos $lines] \
+    {{1.  d20  -0.35  Nc6 Bb5} {2.  d18  +1.20  Nf6}}
+
+# And on White's move the same numbers are shown as the engine gave them.
+set white [::chessboard::fromFen \
+    {rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2}]
+set wlines [dict create 1 {20 35 cp {g1f3 b8c6}} 2 {18 -120 cp {d2d4}}]
+checkEq "White to move needs no flip" \
+    [::reviewprogress::formatLines $white $wlines] \
+    {{1.  d20  +0.35  Nf3 Nc6} {2.  d18  -1.20  d4}}
+
+# The feed itself: it updates the job, ignores a run the pane has moved on from,
+# and does nothing at all when the driver reports the same lines again.
+set token [::reviewprogress::begin [dict create source review engine {E}]]
+set spec {position startpos moves e2e4 e7e5}
+check "the feed takes the lines" \
+    [expr {[::reviewprogress::setLines $token $spec $wlines] == 1}]
+checkEq "and the job holds them, named and scored" \
+    [dict get [::reviewprogress::job] lines] \
+    {{1.  d20  +0.35  Nf3 Nc6} {2.  d18  -1.20  d4}}
+check "the same lines again are not a second update" \
+    [expr {[::reviewprogress::setLines $token $spec $wlines] == 0}]
+check "a stale run's lines are dropped" \
+    [expr {[::reviewprogress::setLines stale $spec $wlines] == 0}]
+# The next position's board replaces the lines: they describe the position that
+# has just left.
+check "the pass moves on" \
+    [expr {[::reviewprogress::setSpec $token \
+        {position startpos moves e2e4 e7e5 g1f3} 2 9] == 1}]
+checkEq "and the old position's lines went with it" \
+    [dict get [::reviewprogress::job] lines] {}
+::reviewprogress::paintCancel
+
+puts ""
 puts "$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]
