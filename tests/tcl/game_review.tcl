@@ -90,12 +90,16 @@ checkEq "and the default is back with the working copy" [::review::get movetime]
 
 puts "the limits a pass searches under"
 
-# Depth is a floor and time is a ceiling. The preset may only deepen a pass, and
-# a time cap only ever shortens one. The cap has one owner at a time: the
-# review's own value when it has one, otherwise the preset's, otherwise none -
-# never the smaller of the two, which would search shallower than either setting
-# asked for. ::review::passLimits is that table, so every caller (Game Review,
-# Move Comment, the batch, annotate) reads the same answer.
+# Depth is the review's and time is a ceiling. The review's own depth is the
+# number the reader set for THIS pass; a preset's Limits.depth is what that
+# preset's own searches run at, so it is only the answer when the review states
+# none. (Taking the deeper of the two turned a depth-12 review into a depth-30
+# one - 0.1 s per position against 80 s on Stockfish with three lines.) The cap
+# has one owner at a time: the review's own value when it has one, otherwise the
+# preset's, otherwise none - never the smaller of the two, which would search
+# shallower than either setting asked for. ::review::passLimits is that table, so
+# every caller (Game Review, Move Comment, the batch, annotate) reads the same
+# answer.
 ::review::reset
 set noPreset [dict create depth {} movetime {}]
 set presetOnly [dict create depth 30 movetime 900]
@@ -103,14 +107,18 @@ set shallowPreset [dict create depth 12 movetime {}]
 
 checkEq "neither side caps: the review's depth alone" \
     [::review::passLimits [::review::all] $noPreset] {depth 18 movetime {}}
-checkEq "the preset's cap applies when the review sets none" \
-    [::review::passLimits [::review::all] $presetOnly] {depth 30 movetime 900}
-checkEq "the preset's depth is still a floor under that cap" \
-    [dict get [::review::passLimits [::review::all] $presetOnly] depth] 30
+checkEq "a deeper preset does not deepen the review's depth" \
+    [::review::passLimits [::review::all] $presetOnly] {depth 18 movetime 900}
+checkEq "so the review's 12 is searched at 12, whatever the preset says" \
+    [dict get [::review::passLimits [dict create depth 12 movetime 0] $presetOnly] depth] 12
+checkEq "and the preset's depth is the answer only when the review states none" \
+    [::review::passLimits [dict create depth 0 movetime 0] $presetOnly] {depth 30 movetime 900}
+checkEq "with no preset depth either: no depth at all" \
+    [::review::passLimits [dict create depth 0 movetime 0] $noPreset] {depth {} movetime {}}
 
 ::review::setValue movetime 2000
 checkEq "the review's own cap wins over the preset's" \
-    [::review::passLimits [::review::all] $presetOnly] {depth 30 movetime 2000}
+    [::review::passLimits [::review::all] $presetOnly] {depth 18 movetime 2000}
 checkEq "and is not the lesser of the two" \
     [dict get [::review::passLimits [::review::all] $presetOnly] movetime] 2000
 checkEq "the review's cap with no preset cap" \
@@ -121,7 +129,7 @@ checkEq "an empty preset leaves both as the review has them" \
     [::review::passLimits [::review::all] {}] {depth 18 movetime 2000}
 ::review::setValue movetime 0
 checkEq "clearing the cap falls back to the preset's" \
-    [::review::passLimits [::review::all] $presetOnly] {depth 30 movetime 900}
+    [::review::passLimits [::review::all] $presetOnly] {depth 18 movetime 900}
 checkEq "and to none when the preset has none" \
     [::review::passLimits [::review::all] $noPreset] {depth 18 movetime {}}
 ::review::reset

@@ -153,8 +153,12 @@ set ::engines(list) [list \
 ::review::reset
 checkEq "a preset with no limits leaves the review depth alone" \
     [dict get [::review::effective [::enginecfg::get Plain]] depth] 18
-checkEq "a deeper preset raises it" \
-    [dict get [::review::effective [::enginecfg::get Deep]] depth] 30
+# The review's depth is the pass's depth, whatever the preset's own search limits
+# say: the preset's Limits are what that preset's searches run at, and taking the
+# deeper of the two made a depth-12 review search at 30 (0.1 s a position against
+# 80 s on Stockfish with three lines).
+checkEq "a deeper preset does not raise it" \
+    [dict get [::review::effective [::enginecfg::get Deep]] depth] 18
 checkEq "a shallower preset does not lower it" \
     [dict get [::review::effective [::enginecfg::get Shallow]] depth] 18
 # And the time cap comes from the same place, in the other direction: a preset
@@ -167,8 +171,8 @@ checkEq "the preset's cap reaches the pass" \
 ::review::setValue movetime 2000
 checkEq "the review's own cap replaces the preset's" \
     [dict get [::review::effective [::enginecfg::get Deep]] movetime] 2000
-checkEq "and the preset's depth is still a floor under it" \
-    [dict get [::review::effective [::enginecfg::get Deep]] depth] 30
+checkEq "and the review's depth is still the pass's, cap or no cap" \
+    [dict get [::review::effective [::enginecfg::get Deep]] depth] 18
 ::review::reset
 checkEq "clearing the cap puts the preset's back" \
     [dict get [::review::effective [::enginecfg::get Deep]] movetime] 900
@@ -236,9 +240,9 @@ checkEq "the preset's cap only" \
 checkEq "the review's cap only" \
     [::enginelimits::goLimits [::review::passLimits {depth 18 movetime 2000} {depth {} movetime {}}]] \
     {{depth 18} {movetime 2000}}
-checkEq "both: the review's cap and the preset's deeper floor" \
+checkEq "both: the review's cap, and the review's depth over the preset's" \
     [::enginelimits::goLimits [::review::passLimits {depth 18 movetime 2000} {depth 30 movetime 900}]] \
-    {{depth 30} {movetime 2000}}
+    {{depth 18} {movetime 2000}}
 
 set ::sent {}
 set cappedcfg {Stockfish /usr/bin/stockfish {} {} 0 0 {} 1 {}}
@@ -3122,6 +3126,7 @@ feed InfoReady {}
 checkEq "the stopped position settles and the next one searches" [lindex $::sent end] \
     {send 20 Go {{position startpos moves e2e4} {{depth 18} {movetime 900}}}}
 checkEq "one position was settled" $::cprogress {{1 2}}
+
 
 puts "\n$checks checks, $fails failures"
 exit [expr {$fails ? 1 : 0}]

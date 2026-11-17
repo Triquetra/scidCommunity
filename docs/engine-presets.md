@@ -36,8 +36,10 @@ same engine can be browsed at `movetime 100` under one preset and searched to
 `depth 66` under another.
 
 A **review pass** reads the same two numbers, and reads them the other way round:
-the preset may only *deepen* a pass (the review's `depth` is a floor a shallower
-preset cannot lower), while its `movetime` is a *ceiling* that applies only when
+its `depth` is the review's own — `Review Settings` shows it and that is the
+depth the pass searches, so a preset set up to browse at depth 30 does not turn
+a depth-12 review into a depth-30 one. The preset's depth is the answer only for
+a caller that states none. Its `movetime` is a *ceiling* that applies only when
 `::review::movetime` is unset (0). Setting a time cap in Review Settings replaces
 the preset's rather than being combined with it. `::review::passLimits` owns that
 table for every caller, so a pass cannot run on a bound the dialog never showed.
