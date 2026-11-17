@@ -35,14 +35,18 @@ Limits belong to the preset, not to the window and not to Scid globally, so the
 same engine can be browsed at `movetime 100` under one preset and searched to
 `depth 66` under another.
 
-A **review pass** reads the same two numbers, and reads them the other way round:
-its `depth` is the review's own — `Review Settings` shows it and that is the
-depth the pass searches, so a preset set up to browse at depth 30 does not turn
-a depth-12 review into a depth-30 one. The preset's depth is the answer only for
-a caller that states none. Its `movetime` is a *ceiling* that applies only when
-`::review::movetime` is unset (0). Setting a time cap in Review Settings replaces
-the preset's rather than being combined with it. `::review::passLimits` owns that
-table for every caller, so a pass cannot run on a bound the dialog never showed.
+A **review pass** reads the same two numbers, and they are the only copy of
+them: the review keeps no depth, no MultiPV and no time cap of its own.
+`::review::effective $preset` resolves the pass's figures from the preset —
+`MultiPV` raised to at least 2, `Limits.depth`, `Limits.movetime` as a ceiling —
+and a preset that states no depth runs at `::review::REVIEW_DEPTH` (18), which is
+what an unconfigured preset gets rather than a setting anybody chose. A preset
+set up to browse at depth 30 therefore reviews at depth 30; that is what it says,
+and the pane and the status line show the depth the pass is actually at.
+`::review::passLimits` is the one place that resolves them, so every caller
+(Game Review, Move Comment, Batch annotate, rapid annotate) runs on the same
+numbers, and `Review Settings` shows them read-only instead of offering a second
+box for them.
 
 The engine window's depth and time entries read and write the limits of the
 preset it is showing. Editing them saves `engines.dat` immediately; there is no

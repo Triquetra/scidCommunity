@@ -15,7 +15,7 @@ The latest downloads are on the [Releases page](https://github.com/whelanh/scidC
 
 ## Unreleased
 
-- The review's progress pane now lists the engine's lines for the position being searched, each with its depth, its score and its moves, so a long review shows what is being considered instead of a still board. A review also searches at the depth set in **Review Settings** whatever depth limit the engine preset carries, and a mark a move has no room for is no longer reported as a failed review.
+- The review's progress pane now lists the engine's lines for the position being searched, each with its depth, its score and its moves, so a long review shows what is being considered instead of a still board, and the board above them is sized to the pane instead of being clipped by it. A review searches at the depth, lines and time cap of its engine preset, which are now the only place those numbers are set: **Review Settings** no longer offers its own copy of them and shows what the pass will use, read-only. A mark a move has no room for is no longer reported as a failed review.
 - Search > CQL... finds games by a query language: type a query such as `cql() [N]f3` — a white knight on f3 — and the game list is filtered to the games that contain it, with filters for check and mate, the side to move, moves and promotions, comments and headers, and piece counts, all explained on the help page beside the window. The query engine comes from [Scid vs. PC](https://sourceforge.net/projects/scidvspc/) and keeps its GPL-2.0 licence. — thanks to @Triquetra.
 
 ## 5.1.4.68 — 16 November 2026
