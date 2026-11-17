@@ -480,13 +480,22 @@ check "the same lines again are not a second update" \
     [expr {[::reviewprogress::setLines $token $spec $wlines] == 0}]
 check "a stale run's lines are dropped" \
     [expr {[::reviewprogress::setLines stale $spec $wlines] == 0}]
-# The next position's board replaces the lines: they describe the position that
-# has just left.
+# The next position's board does NOT blank the lines: a depth-12 pass changes
+# position more than ten times a second, and a block blanked at every change is
+# empty whenever the reader happens to look. The new position's first report
+# replaces them, and a finished run takes the whole job away.
 check "the pass moves on" \
     [expr {[::reviewprogress::setSpec $token \
         {position startpos moves e2e4 e7e5 g1f3} 2 9] == 1}]
-checkEq "and the old position's lines went with it" \
-    [dict get [::reviewprogress::job] lines] {}
+checkEq "the last lines stay up across a position change" \
+    [dict get [::reviewprogress::job] lines] \
+    {{1.  d20  +0.35  Nf3 Nc6} {2.  d18  -1.20  d4}}
+check "and the new position's own report replaces them" \
+    [expr {[::reviewprogress::setLines $token \
+        {position startpos moves e2e4 e7e5 g1f3} \
+        [dict create 1 {16 12 cp {b8c6}}]] == 1}]
+checkEq "which is what the pane then shows" \
+    [dict get [::reviewprogress::job] lines] {{1.  d16  -0.12  Nc6}}
 ::reviewprogress::paintCancel
 
 puts ""
