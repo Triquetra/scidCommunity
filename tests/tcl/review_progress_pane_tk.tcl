@@ -349,6 +349,74 @@ $win.cancel invoke
 settle
 check "Cancel asks the run to stop" [expr {$::cancelled == 1}]
 
+puts "== the board is fitted to the pane it is docked in =="
+
+# A 40-px-square board plus the rows above and below it is taller than a docked
+# pane: at a 314-px pane the grid clipped the board and pushed the lines, the
+# progress line, the bar and Cancel out of the window. The pane fits the board
+# to the height it is given - <Configure> schedules ::refitSoon, which measures
+# the rows and re-makes the board at the largest ::boardSizes entry that fits.
+set ::boardSizes {12 16 20 24 28 32 36 40}
+
+# The rule, independently of the implementation: the largest piece size whose
+# board fits the room left by the rows, the pane's 50 px of padding and the
+# board's own 9 px of chrome.
+proc expectedPsize {h} {
+    set used 0
+    foreach child {header lines progress bar cancel} {
+        if {[winfo exists .reviewProgress.$child]} {
+            incr used [winfo reqheight .reviewProgress.$child]
+        }
+    }
+    set avail [expr {$h - $used - 50}]
+    foreach size [lsort -integer -decreasing $::boardSizes] {
+        if {$size > 40} { continue }
+        if {$size * 8 + 9 <= $avail} { return $size }
+    }
+    return [lindex [lsort -integer $::boardSizes] 0]
+}
+
+set ::reviewprogress::job ""
+::reviewprogress::ui::open
+settle
+# A real resize, not a call into refit: the pane has to react to the height the
+# dock gives it, which is what a reader dragging the splitter does.
+wm geometry . 1100x900
+settle
+set tallPsize [set ::board::size($win.board)]
+checkEq "a tall pane gives the board 40 px squares" $tallPsize 40
+checkEq "which is what the room allows" $tallPsize [expectedPsize [winfo height $win]]
+
+wm geometry . 1100x420
+settle
+set shortPsize [set ::board::size($win.board)]
+check "a short pane shrinks the board" [expr {$shortPsize < $tallPsize}] \
+    "tall $tallPsize short $shortPsize"
+checkEq "to the largest size the room allows" $shortPsize [expectedPsize [winfo height $win]]
+check "and every row is inside the pane" \
+    [expr {[winfo height $win.cancel] > 0 \
+        && [winfo rooty $win.cancel] + [winfo height $win.cancel] \
+           <= [winfo rooty $win] + [winfo height $win]}]
+check "the board is a remade board, not a resized one" \
+    [expr {[winfo class $win.board] eq "Board" && [winfo exists $win.board.bd]}]
+
+# The fit changes the board and nothing else: the row that holds the run's lines
+# is still there, still empty, and still has its own height reserved.
+check "the lines block survives the fit" \
+    [expr {[winfo exists $win.lines] && [winfo height $win.lines] > 0}]
+
+wm geometry . 1100x900
+settle
+checkEq "and a tall pane again brings the 40 px board back" \
+    $::board::size($win.board) 40
+
+# A height too small to be a pane - the dock hands over 0 or 1 while the frame
+# is being created - is not a measurement and must not shrink the board.
+set before $::board::size($win.board)
+::reviewprogress::ui::refit 1
+settle
+checkEq "a height below the pane's floor is ignored" $::board::size($win.board) $before
+
 puts "== with no run in flight the board shows the current position =="
 
 set ::reviewprogress::job ""

@@ -292,8 +292,11 @@ proc ::reviewprogress::setPosition {token fen {done ""} {total ""} {game ""}} {
     if {![dict size $job] || [dict get $job token] ne $token} { return 0 }
     set board [::reviewprogress::positionToBoard $fen]
     if {$board eq ""} { return 0 }
-    # The lines that were on screen belong to the position that has just left.
-    ::reviewprogress::clearLines
+    # The lines are NOT cleared here: a pass at depth 12 changes position more
+    # than ten times a second, and a block blanked at every change is a block
+    # that is empty whenever the reader looks at it. They are replaced by the
+    # new position's first report, and ::reviewprogress::clearLines is what a
+    # finished run uses.
     dict set job fen $fen
     dict set job board $board
     if {$done ne ""} { dict set job done $done }
@@ -312,8 +315,8 @@ proc ::reviewprogress::setSpec {token spec {done ""} {total ""} {game ""}} {
     if {![dict size $job] || [dict get $job token] ne $token} { return 0 }
     set board [::reviewprogress::specToBoard $spec]
     if {$board eq ""} { return 0 }
-    # The lines that were on screen belong to the position that has just left.
-    ::reviewprogress::clearLines
+    # The lines stay until the new position reports its own (see setPosition):
+    # clearing them here blanked the block for most of a fast pass.
     dict set job fen [::reviewprogress::specFen $spec]
     dict set job board $board
     catch { dict set job spec $spec }
@@ -348,16 +351,6 @@ proc ::reviewprogress::setLines {token spec lines} {
         [::reviewprogress::specPos $spec] $raw]
     ::reviewprogress::paintSoon
     return 1
-}
-
-# The lines of the position before this one are not this position's: a board
-# that moved while the lines stayed would describe two positions at once.
-proc ::reviewprogress::clearLines {} {
-    variable job
-    if {![dict size $job]} { return }
-    dict set job lines {}
-    dict set job linesRaw {}
-    return
 }
 
 # One rendered line: the MultiPV index, the depth it was reported at, its score

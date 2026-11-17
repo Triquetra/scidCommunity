@@ -24,6 +24,9 @@ namespace eval ::reviewprogress::ui {
     # take; its canvas is $board.bd.
     variable board $win.board
     variable psize 40
+    # The pane's <Configure> debounce: one refit per settled height.
+    variable refitTimer ""
+    variable refitHeight ""
 }
 
 proc ::reviewprogress::ui::title {} {
@@ -73,8 +76,13 @@ proc ::reviewprogress::ui::build {} {
     # considering, with the score it has for each. A label rather than a text
     # widget: it is decoration over a run, the reader cannot edit it, and the
     # feed writes the whole block at once.
+    #
+    # One row per line and no wrapping: a wrapped PV takes two rows, three PVs
+    # then need a hundred pixels the docked pane does not have, and the block is
+    # clipped to its first line and a half - which reads as "the lines are not
+    # there". The draw truncates each row to the pane's width instead.
     ttk::label $win.lines -text "" -anchor w -justify left -font font_Small \
-        -wraplength 380
+        -wraplength 0
     ttk::label $win.progress -text "" -anchor w -font font_Small
 
     # The determinate bar (#422 item 3). Its value is ::reviewui::passFraction
@@ -101,8 +109,11 @@ proc ::reviewprogress::ui::build {} {
     grid $win.coachbar -row 6 -column 0 -sticky we -padx 8 -pady {2 8}
     grid $win.cancel -row 7 -column 0 -sticky e -padx 8 -pady {0 8}
     grid remove $win.coach $win.coachbar
-    # The board takes the space: a pane that does not grow with the dock is a
-    # board the reader cannot see.
+    # The board takes the height the pane has, not the height a 40-pixel board
+    # wants: the docked tab is often ~310 px tall, and a fixed board there is
+    # clipped to its middle ranks while the engine lines, the progress line and
+    # Cancel are pushed out of the pane. Resizing the pane re-fits it.
+    bind $win <Configure> { ::reviewprogress::ui::refitSoon %h }
     grid rowconfigure $win 1 -weight 1
     grid columnconfigure $win 0 -weight 1
 
@@ -138,6 +149,97 @@ proc ::reviewprogress::ui::open {} {
     catch { ::win::makeVisible $win }
     ::reviewprogress::ui::redraw
     return $win
+}
+
+# The board's size, from the height the pane actually has.
+#
+# A docked tab is often ~310 px tall. There, a 40-pixel-square board wants 330 px
+# on its own: grid clips it to its middle ranks and the engine lines, the
+# progress line and Cancel are pushed out of the pane, which is what "the
+# progress pane does not show under the board" was. The board keeps its share of
+# the pane instead, and the reader never loses the lines or the bar.
+#
+# The figures are the widgets' own requests, not a guessed constant: header,
+# lines, progress, bar and Cancel all have weight 0, so the board is exactly what
+# is left over.
+proc ::reviewprogress::ui::refit {h} {
+    variable win
+    variable psize
+    if {![::reviewprogress::ui::exists]} { return }
+    if {![string is integer -strict $h] || $h < 80} { return }
+    # A harness that stubs the board has no piece sizes to choose from; the
+    # production tree always does (::setPieceFont fills it at startup).
+    if {![info exists ::boardSizes] || ![llength $::boardSizes]} { return }
+    set used 0
+    foreach child {header lines progress bar cancel} {
+        if {[winfo exists $win.$child]} { incr used [winfo reqheight $win.$child] }
+    }
+    # The pane's own padding, from the grid calls in build.
+    incr used 50
+    set avail [expr {$h - $used}]
+    # The largest available piece size whose board fits the room left.
+    set pick ""
+    foreach size [lsort -integer -decreasing $::boardSizes] {
+        if {$size * 8 + 9 <= $avail && $size <= 40} { set pick $size ; break }
+    }
+    if {$pick eq ""} { set pick [lindex [lsort -integer $::boardSizes] 0] }
+    if {$pick == $psize} { return }
+    set psize $pick
+    if {[catch { ::reviewprogress::ui::remakeBoard } err]} {
+        puts stderr "scidCommunity: the progress board could not be resized: $err"
+    }
+    return
+}
+
+# Replace the pane's board at the current size and draw the run again. Only the
+# board is rebuilt: the labels, the bars and Cancel are not the board's.
+proc ::reviewprogress::ui::remakeBoard {} {
+    variable win
+    variable board
+    variable psize
+    if {![winfo exists $win]} { return }
+    catch { destroy $board }
+    ::board::new $board $psize
+    catch { $board.bd configure -takefocus 0 -cursor "" }
+    grid $board -row 1 -column 0 -sticky news -padx 8
+    ::reviewprogress::ui::redraw
+    return
+}
+
+# Fit the board to the height the pane has now. The dock gives the frame its
+# size while it is being created - before ::build has installed the <Configure>
+# binding - so the binding alone never fires for the height the reader actually
+# sees; every draw asks again, and refit returns at once when the size is right.
+proc ::reviewprogress::ui::fitToPane {} {
+    variable win
+    if {![::reviewprogress::ui::exists]} { return }
+    set h 0
+    catch { set h [winfo height $win] }
+    if {$h < 80} { return }
+    ::reviewprogress::ui::refit $h
+    return
+}
+
+# A resize fires <Configure> many times while the dock is dragged; one refit per
+# settled height is enough, and the last height wins.
+proc ::reviewprogress::ui::refitSoon {h} {
+    variable refitTimer
+    variable refitHeight
+    set refitHeight $h
+    if {$refitTimer ne ""} { return }
+    set refitTimer [after idle { ::reviewprogress::ui::refitNow }]
+    return
+}
+
+proc ::reviewprogress::ui::refitNow {} {
+    variable refitTimer
+    variable refitHeight
+    set refitTimer ""
+    if {$refitHeight eq ""} { return }
+    set h $refitHeight
+    set refitHeight ""
+    ::reviewprogress::ui::refit $h
+    return
 }
 
 # Nothing is running: name the state rather than leaving the last run's header
@@ -192,6 +294,7 @@ proc ::reviewprogress::ui::draw {job} {
     # where the pane falls back to saying so rather than freezing on the last
     # position of a pass that is over.
     if {![dict size $job]} { ::reviewprogress::ui::idle ; return }
+    ::reviewprogress::ui::fitToPane
     set header ""
     catch { set header [dict get $job header] }
     if {$header eq ""} { set header [::reviewprogress::ui::title] }
@@ -237,8 +340,23 @@ proc ::reviewprogress::ui::draw {job} {
     # score, moves. They are the job's own strings - the pane never names a move
     # or reads a score itself, so a redraw after the tab was hidden shows the same
     # lines the run published.
+    #
+    # Each row is cut to the pane, not wrapped: the block has to be three rows
+    # tall inside a docked tab that is often 300 px, and a wrapped row pushes the
+    # second and third line out of sight. The whole string is in the job for
+    # anything that wants it in full.
     set lineText ""
-    catch { set lineText [join [dict get $job lines] "\n"] }
+    set budget 96
+    catch {
+        set budget [expr {max(24, (([winfo width $win] - 28) / 7))}]
+    }
+    catch {
+        set rows {}
+        foreach l [dict get $job lines] {
+            lappend rows [string range $l 0 $budget]
+        }
+        set lineText [join $rows "\n"]
+    }
     catch { $win.lines configure -text $lineText }
 
     # The pane serves every run, so Cancel belongs to the run that owns the
